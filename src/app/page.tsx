@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ArrowRight, FolderPlus, Utensils, Droplets, Dumbbell, ChartNoAxesCombined, ShieldCheck } from "lucide-react";
 
 const areas = [
@@ -10,6 +11,7 @@ const areas = [
 export default function Home() {
   return (
     <>
+      <Link className="back-link" href="/entrar">Entrar na minha conta →</Link>
       <section className="welcome" aria-labelledby="welcome-title">
         <p className="eyebrow">SUA ROTINA. SUA EVOLUÇÃO.</p>
         <h1 id="welcome-title">Seu próximo passo<br />começa com você<span className="accent">.</span></h1>

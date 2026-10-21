@@ -1,18 +1,10 @@
 "use client";
 
-import { useEffect, useSyncExternalStore } from "react";
-
-function subscribe(callback: () => void) {
-  window.addEventListener("online", callback);
-  window.addEventListener("offline", callback);
-  return () => {
-    window.removeEventListener("online", callback);
-    window.removeEventListener("offline", callback);
-  };
-}
+import { useEffect } from "react";
+import { useOnline } from "@/lib/use-online";
 
 export function Pwa() {
-  const online = useSyncExternalStore(subscribe, () => navigator.onLine, () => true);
+  const online = useOnline();
 
   useEffect(() => {
     if (process.env.NODE_ENV === "production" && "serviceWorker" in navigator) {
