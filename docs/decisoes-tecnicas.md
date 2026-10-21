@@ -36,6 +36,14 @@ A decisão pelo Supabase atualiza o item de banco ainda pendente na seção 9 da
 - **Impacto:** substitui o fluxo anterior de PR por funcionalidade para `main`. O PR final e o code review continuam com o proprietário; o agente não realiza merge na `main` nem force push.
 - **Requisitos relacionados:** RNF-014; alteração do processo de desenvolvimento, sem mudança de escopo funcional.
 
+## Decisão — Primeiro incremento de autenticação — 21/10/2026
+
+- **Contexto:** continuação autorizada a partir da `develop`, já contendo a fundação aprovada.
+- **Decisão:** integração SSR do Supabase Auth com cookies, renovação via proxy e validação remota com `getUser` no painel. Usar somente URL e chave publicável; sem schema próprio de credenciais ou chave privilegiada.
+- **Motivo:** aproveitar a autenticação gerenciada e manter a proteção efetiva no servidor.
+- **Impacto:** login, logout do navegador atual, painel privado, mensagens genéricas para falha de acesso e bloqueio offline. RF-001 parcial; RNF-001, RNF-002, RNF-009 e RNF-014. Cadastro, recuperação, SMTP e teste real de renovação de sessão ficam pendentes. Não foram provisionados serviços.
+- **Verificação:** testes de navegador contra simulador HTTP local, sem dados reais. A configuração e homologação com Supabase real devem seguir o README antes do uso pessoal.
+
 ## Pendente de refinamento
 
 - Hospedagem e divisão das responsabilidades entre Next.js e serviços do Supabase.
