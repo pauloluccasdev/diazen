@@ -1,0 +1,20 @@
+# Credenciais e configurações locais
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Sistema e editor
+.DS_Store
+Thumbs.db
+*:Zone.Identifier
+.idea/
+.vscode/
+
+# Arquivos temporários e caches
+__pycache__/
+*.py[cod]
+*.log
+*.tmp
+~$*

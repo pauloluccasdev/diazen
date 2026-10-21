@@ -1,0 +1,62 @@
+{
+  "name": "Diazen — Dark Premium",
+  "version": "1.1.0",
+  "colors": {
+    "bg": "#0C0E12",
+    "surface": "#191C22",
+    "surfaceRaised": "#252A32",
+    "surfaceSunken": "#13161B",
+    "border": "#30343B",
+    "borderStrong": "#414751",
+    "text": "#F5F6F8",
+    "textMuted": "#A0A6B1",
+    "textSubtle": "#777E8A",
+    "accent": "#FF9F24",
+    "accentHover": "#FFB14A",
+    "accentPressed": "#E8890E",
+    "accentSoft": "#302514",
+    "success": "#4FD18B",
+    "warning": "#F5B942",
+    "danger": "#FF646D"
+  },
+  "radius": {
+    "sm": 10,
+    "md": 14,
+    "lg": 18,
+    "xl": 22,
+    "xxl": 28,
+    "pill": 999
+  },
+  "spacing": [
+    4,
+    8,
+    12,
+    16,
+    20,
+    24,
+    32,
+    40
+  ],
+  "shadow": {
+    "card": "0 8px 24px rgba(0,0,0,.22), 0 2px 6px rgba(0,0,0,.12)",
+    "floating": "0 16px 40px rgba(0,0,0,.38), 0 4px 12px rgba(0,0,0,.18)",
+    "accent": "0 6px 18px rgba(255,159,36,.16)"
+  },
+  "typography": {
+    "family": "Inter, Manrope, system-ui, sans-serif",
+    "bodyPx": 14,
+    "captionPx": 12,
+    "headingPx": [
+      18,
+      22,
+      28,
+      36
+    ]
+  },
+  "controlHeightPx": 48,
+  "minTapTargetPx": 44,
+  "navigation": "dashboard-centered",
+  "product": "Diazen",
+  "company": "Lucx Tech",
+  "tagline": "Sua rotina. Sua evolução."
+}
