@@ -23,4 +23,4 @@ export async function proxy(request: NextRequest) {
   return response;
 }
 
-export const config = { matcher: ["/entrar", "/painel/:path*"] };
+export const config = { matcher: ["/entrar", "/painel/:path*", "/nova-senha", "/cadastro", "/recuperar-senha"] };

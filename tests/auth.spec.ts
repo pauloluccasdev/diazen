@@ -26,9 +26,9 @@ test("login válido, painel privado e logout", async ({ page }) => {
 
 test("erros não revelam existência de conta", async ({ page }) => {
   await login(page, "teste@example.test", "senha-incorreta");
-  const error = await page.getByRole("alert").textContent();
+  const error = await page.locator("main").getByRole("alert").textContent();
   await login(page, "inexistente@example.test", "senha-incorreta");
-  await expect(page.getByRole("alert")).toHaveText(error!);
+  await expect(page.locator("main").getByRole("alert")).toHaveText(error!);
 });
 
 test("offline bloqueia envio de login", async ({ page, context }) => {
@@ -60,4 +60,38 @@ test("página privada não entra no cache da PWA e logout offline é bloqueado",
   expect(urls).not.toContain("/painel");
   await context.setOffline(true);
   await expect(page.getByRole("button", { name: "Sair da conta" })).toBeDisabled();
+});
+
+test("cadastro exige senhas iguais e informa confirmação sem enumerar conta", async ({ page }) => {
+  await page.goto("/cadastro");
+  await page.getByLabel("E-mail", { exact: true }).fill("novo@example.test");
+  await page.getByLabel("Senha", { exact: true }).fill("senha-de-teste-123");
+  await page.getByLabel("Confirme a senha").fill("outra-senha-longa");
+  await page.getByRole("button", { name: "Criar conta" }).click();
+  await expect(page.locator("main").getByRole("alert")).toContainText("precisam ser iguais");
+  await page.getByLabel("E-mail", { exact: true }).fill("novo@example.test");
+  await page.getByLabel("Senha", { exact: true }).fill("senha-de-teste-123");
+  await page.getByLabel("Confirme a senha").fill("senha-de-teste-123");
+  await page.getByRole("button", { name: "Criar conta" }).click();
+  await expect(page.getByRole("status")).toContainText("Se o cadastro puder ser concluído");
+});
+
+test("recuperação é genérica e link válido permite nova senha", async ({ page }) => {
+  await page.goto("/recuperar-senha");
+  await page.getByLabel("E-mail", { exact: true }).fill("nao-existe@example.test");
+  await page.getByRole("button", { name: "Enviar instruções" }).click();
+  await expect(page.getByRole("status")).toContainText("Se houver uma conta");
+  await page.goto("/auth/confirmar?token_hash=link-valido-de-teste&type=recovery&next=https://example.org");
+  await expect(page).toHaveURL(/\/nova-senha$/);
+  await page.getByLabel("Nova senha", { exact: true }).fill("nova-senha-longa-123");
+  await page.getByLabel("Confirme a senha").fill("nova-senha-longa-123");
+  await page.getByRole("button", { name: "Salvar nova senha" }).click();
+  await expect(page.getByRole("status")).toContainText("Senha atualizada");
+});
+
+test("link inválido e troca sem sessão são negados", async ({ page }) => {
+  await page.goto("/auth/confirmar?token_hash=invalido&type=recovery");
+  await expect(page.locator("main").getByRole("alert")).toContainText("link expirou");
+  await page.goto("/nova-senha");
+  await expect(page).toHaveURL(/\/recuperar-senha$/);
 });
