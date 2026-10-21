@@ -16,6 +16,13 @@ createServer(async (request, response) => {
       return response.end(JSON.stringify({ access_token: token, refresh_token: "refresh-de-teste", token_type: "bearer", expires_in: 3600, user }));
     }
   }
+  if (request.url?.startsWith("/auth/v1/signup") || request.url?.startsWith("/auth/v1/recover")) return response.end("{}");
+  if (request.url === "/auth/v1/verify" && request.method === "POST") {
+    let body = "";
+    for await (const chunk of request) body += chunk;
+    const data = JSON.parse(body);
+    if (data.token_hash === "link-valido-de-teste") return response.end(JSON.stringify({ access_token: token, refresh_token: "refresh-de-teste", token_type: "bearer", expires_in: 3600, user }));
+  }
   if (request.url === "/auth/v1/user" && request.headers.authorization === `Bearer ${token}`) return response.end(JSON.stringify(user));
   if (request.url?.startsWith("/auth/v1/logout") && request.method === "POST") { response.statusCode = 204; return response.end(); }
   response.statusCode = 400;

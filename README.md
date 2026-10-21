@@ -76,3 +76,12 @@ A entrega de acesso existente atende parcialmente RF-001 e aplica RNF-001/RNF-00
 Os testes automatizados usam exclusivamente um simulador HTTP local de Auth (`tests/fixtures/auth-server.mjs`), com dados fictícios. Cobrem sucesso, falhas genéricas sem indicar existência de conta, logout, rota protegida, cookie inválido, cache e offline. Não conectam ao Supabase real nem comprovam hash, força bruta, SMTP, renovação de tokens ou configuração do provedor. A validação real permanece pendente das configurações acima; RF-001 só estará completo com cadastro e recuperação. Nenhum teste depende de credenciais pessoais.
 
 Referência de implementação: [Supabase Auth para Next.js com cookies](https://supabase.com/docs/guides/auth/server-side/creating-a-client). A renovação passa pelo proxy; o painel verifica o usuário no servidor com `getUser`, sem confiar apenas no conteúdo dos cookies. Próximas rotas privadas e operações deverão repetir a validação e aplicar autorização sobre o recurso.
+
+### Cadastro e recuperação
+
+Configure também `NEXT_PUBLIC_SITE_URL` com a origem exata da aplicação (HTTPS em hospedagem). No Supabase, habilite confirmação de e-mail e configure Site URL e redirect URLs. Os templates devem usar:
+
+- Confirmação: `{{ .SiteURL }}/auth/confirmar?token_hash={{ .TokenHash }}&type=email`
+- Recuperação: `{{ .SiteURL }}/auth/confirmar?token_hash={{ .TokenHash }}&type=recovery`
+
+Configure SMTP próprio antes de uso real. O callback aceita somente os dois tipos previstos e ignora destinos externos. `/nova-senha` exige identidade validada no servidor. A política inicial de novas senhas é de 12 a 128 caracteres; configure política compatível no Supabase. Teste entrega, expiração e uso único de links em homologação. As mensagens de cadastro/recuperação não confirmam existência de conta nem garantem entrega de e-mail.

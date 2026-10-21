@@ -14,6 +14,7 @@ export default defineConfig({
       url: "http://127.0.0.1:3000",
       reuseExistingServer: false,
       env: {
+        NEXT_PUBLIC_SITE_URL: "http://127.0.0.1:3000",
         NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54329",
         NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "chave-publica-de-teste",
       },
