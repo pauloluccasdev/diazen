@@ -57,7 +57,7 @@ Para verificar a PWA, execute `npm run build` e `npm start`, acesse localhost e 
 
 ## Fluxo de desenvolvimento
 
-A `main` recebe entregas revisadas via PR. Cada funcionalidade deve partir da `main` atualizada em branch `feat/<nome>` (ou `fix/`, `docs/`, conforme a mudança). Faça commits por entrega concluída, valide e envie a branch ao remoto. A abertura do PR e o code review ficam com o proprietário; não realizar merge automático.
+A `develop` concentra a integração. Cada funcionalidade deve partir da `develop` atualizada em branch `feat/<nome>` (ou `fix/`, `docs/`, conforme a mudança). Faça commits por entrega concluída, valide e envie a branch ao remoto. O agente está autorizado a realizar merge das entregas na `develop`, validar a integração e fazer push. A próxima branch parte dessa `develop` atualizada. O proprietário realiza o PR final de `develop` para `main` e o code review; o agente não realiza merge na `main`.
 
 ## Dependências
 

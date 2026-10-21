@@ -25,8 +25,16 @@ A decisão pelo Supabase atualiza o item de banco ainda pendente na seção 9 da
 - **Motivo:** manter interface e futura lógica de servidor no mesmo projeto, com verificação de tipos e deploy compatível com Vercel.
 - **Impacto:** primeira entrega contém apenas fundação, prévia do dashboard e PWA com fallback público offline. Não inclui autenticação, persistência ou cache de dados pessoais. RF-018 e RF-022 atendidos apenas parcialmente; RNF-007, RNF-008, RNF-009 e RNF-014 orientam a base.
 - **Direção aprovada para as próximas etapas:** Supabase Auth, Storage privado e Vercel conforme proposta anterior aceita ao iniciar. Contas, configurações, schema e deploy continuam sem provisionamento e exigem refinamento operacional.
-- **Fluxo Git:** `main` como base, branches `feat/` ou prefixo adequado, commits por funcionalidade concluída, validação antes do push; PR, review e merge conduzidos pelo proprietário.
+- **Fluxo Git inicial:** substituído pela decisão de integração em `develop` abaixo.
 - **Identidade:** ícone geométrico provisório para instalação; não representa aprovação final de marca.
+
+## Decisão — Integração em develop — 21/10/2026
+
+- **Contexto:** o proprietário definiu que criará a branch `develop` para concentrar o desenvolvimento antes do PR final.
+- **Decisão:** cada funcionalidade parte da `develop` atualizada em branch própria, com commits por entrega concluída. Após validar, o agente pode fazer merge na `develop` e push, iniciando a próxima branch a partir da integração atualizada.
+- **Motivo:** permitir desenvolvimento contínuo, mantendo a revisão final concentrada no PR de `develop` para `main`.
+- **Impacto:** substitui o fluxo anterior de PR por funcionalidade para `main`. O PR final e o code review continuam com o proprietário; o agente não realiza merge na `main` nem force push.
+- **Requisitos relacionados:** RNF-014; alteração do processo de desenvolvimento, sem mudança de escopo funcional.
 
 ## Pendente de refinamento
 

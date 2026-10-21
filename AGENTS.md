@@ -37,6 +37,8 @@
 
 ## Fluxo Git
 
-- Manter a `main` como base; desenvolver funcionalidades em `feat/<nome>` ou prefixo adequado.
-- Fazer commits por funcionalidade concluída e validada, depois push da branch.
-- O proprietário abre o PR e realiza o code review; não fazer merge automático.
+- A `develop` é a base de integração. Antes de iniciar cada funcionalidade, atualizar a `develop` e criar `feat/<nome>` ou branch com prefixo adequado a partir dela.
+- Fazer commits por funcionalidade concluída, executar as verificações pertinentes e enviar a branch ao remoto.
+- O agente está autorizado a realizar merge das branches concluídas na `develop`, validar a integração e fazer push da `develop`. Não sobrescrever alterações remotas nem usar force push.
+- Iniciar a próxima branch a partir da `develop` atualizada.
+- O proprietário realiza o PR final de `develop` para `main` e o code review ao término do desenvolvimento. Não realizar merge na `main`.
