@@ -20,6 +20,11 @@ const users = [
     id: "00000000-0000-4000-8000-000000000007",
     email: "resiliencia@example.test",
   },
+  ...[8, 9].map((n) => ({
+    ...user,
+    id: `00000000-0000-4000-8000-00000000000${n}`,
+    email: `concorrencia${n}@example.test`,
+  })),
   {
     ...user,
     id: "00000000-0000-4000-8000-000000000006",
@@ -54,6 +59,7 @@ const tokens = new Map(users.map((u) => [tokenFor(u), u]));
 const files = new Map();
 const failPhotoReplies = new Set();
 const failReads = new Set();
+const closeOnProjectRead = new Set();
 const emailLinks = new Map();
 const emailTickets = new Map();
 const authCodes = new Map();
@@ -67,6 +73,10 @@ createServer(async (request, response) => {
   response.setHeader("Content-Type", "application/json");
   response.setHeader("Cache-Control", "no-store");
   if (request.url === "/health") return response.end("{}");
+  if (request.url?.startsWith("/_test/close-on-project-read/")) {
+    closeOnProjectRead.add(request.url.split("/").at(-1));
+    return response.end("{}");
+  }
   if (request.url?.startsWith("/_test/read-failure/")) {
     const path = request.url.split("/");
     if (path.at(-1) === "on") failReads.add(path.at(-2));
@@ -148,8 +158,8 @@ createServer(async (request, response) => {
       );
     }
     const uid = currentUser?.id ?? null;
-    queue = queue.then(() =>
-      rest(
+    queue = queue.then(async () => {
+      await rest(
         db,
         request,
         response,
@@ -157,8 +167,26 @@ createServer(async (request, response) => {
         uid,
         admin,
         () => failPhotoReplies.delete(uid),
-      ),
-    );
+      );
+      const url = new URL(request.url, "http://localhost");
+      if (
+        request.method === "GET" &&
+        url.pathname === "/rest/v1/projects" &&
+        !url.searchParams.has("status") &&
+        closeOnProjectRead.delete(uid)
+      ) {
+        // A committed concurrent closure between the list snapshot and the
+        // subsequent ACTIVE query. The first response contains real old data.
+        await db.exec("reset role; set role authenticated");
+        await db.query("select set_config('request.jwt.claim.sub',$1,false)", [
+          uid,
+        ]);
+        await db.query(
+          "update public.projects set status='COMPLETED' where user_id=$1 and status='ACTIVE'",
+          [uid],
+        );
+      }
+    });
     await queue;
     return;
   }

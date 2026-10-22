@@ -41,6 +41,6 @@ Não registrar senhas, códigos de e-mail, credenciais, fotos ou informações d
 
 ## Auditoria automatizada de requisitos
 
-Em 22/10/2026, a bateria com `agent-browser` passou em 25 grupos no laboratório isolado, com dados fictícios. Foram verificadas 16 telas com axe e seis larguras por tela. O roteiro reproduz falha de leitura e confirma a recuperação com os registros preservados; isso corrigiu o botão “Tentar novamente”, que antes reapresentava o erro sem uma nova leitura do servidor. Logs estruturados foram acrescentados sem copiar dados sensíveis.
+Em 22/10/2026, a bateria com `agent-browser` passou em 26 grupos no laboratório isolado, com dados fictícios. Foram verificadas 16 telas com axe e seis larguras por tela. O roteiro reproduz falha de leitura e confirma a recuperação com os registros preservados; isso corrigiu o botão “Tentar novamente”, que antes reapresentava o erro sem uma nova leitura do servidor. Logs estruturados foram acrescentados sem copiar dados sensíveis.
 
 Executar novamente: `npm run build` e `npm run test:agent-browser`. Resultados e capturas ficam em `artifacts/agent-browser/`; cobertura e limites na [matriz de requisitos](matriz-requisitos.md). Essa evidência não marca automaticamente como concluídos os itens manuais e operacionais acima.

@@ -501,19 +501,48 @@ try {
       "Signup and recovery PKCE are exercised locally; this hosted run does not send email.",
       "Physical installation, screen reader and production configuration cannot be established by desktop automation.",
     ];
+  if (!hosted)
+    await check(
+      "RF004/RB02 closure between list and ACTIVE reads never offers a stale editor",
+      async () => {
+        for (const [route, n] of [
+          ["agua", 8],
+          ["fotos", 9],
+        ]) {
+          await login(`concorrencia${n}@example.test`);
+          await project(`Concorrência ${route}`);
+          await fetch(
+            `http://127.0.0.1:54329/_test/close-on-project-read/00000000-0000-4000-8000-00000000000${n}`,
+          );
+          await goto(`/painel/${route}`);
+          await text("somente leitura.");
+          assert.equal(
+            await evaluate(
+              "[...document.querySelectorAll('button')].some(b=>['Salvar registro','Salvar foto','Confirmar exclusão','Excluir foto'].includes(b.textContent.trim()))",
+            ),
+            false,
+          );
+          await logout();
+        }
+      },
+    );
   await login("registros@example.test");
   await check(
     "RF002-005 onboarding, measurable goals and ACTIVE uniqueness",
     async () => {
       await goto("/painel/projetos");
-      await save("Criar projeto", { name: "Sem metas" }, "meta");
+      await save(
+        "Criar projeto",
+        { name: "Sem metas" },
+        "Não foi possível criar.",
+      );
       await project("Auditoria principal");
       await ab("reload");
       await text("Auditoria principal");
       await save(
         "Criar projeto",
         { name: "Segundo ativo", water_ml: 2000 },
-        "ativo",
+        "Não foi possível criar.",
       );
       await count(1);
       await audit("projetos");
@@ -592,7 +621,11 @@ try {
       await audit("agua");
       await goto("/painel/projetos");
       await clickText("Configurar meta de água", "summary");
-      await save("Salvar meta", { target_ml: 2500 }, "Meta");
+      await save(
+        "Salvar meta",
+        { target_ml: 2500 },
+        "Meta de água salva com sua data de vigência.",
+      );
       await goto("/painel/agua");
       await text("Meta de 2.500 ml");
     },
@@ -961,7 +994,9 @@ try {
       );
       await ab("check", s + " [name=confirm]");
       await clickText("Concluir projeto");
-      await text("Concluído");
+      await until(
+        "document.querySelector('article .status')?.textContent === 'Concluído'",
+      );
       await goto("/painel/agua");
       await text("Histórico somente leitura.");
       assert.equal(
