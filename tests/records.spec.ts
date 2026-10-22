@@ -1,6 +1,6 @@
 import { expect,test,type Page } from "@playwright/test";
 const form = (page:Page,button:string) => page.locator('form').filter({has:page.getByRole('button',{name:button,exact:true})});
-test('registros persistem, substituem valores únicos e preservam desconhecidos',async({page})=>{
+test('registros persistem, substituem valores únicos e preservam desconhecidos',async({page,context})=>{
   test.setTimeout(90000);
   await page.goto('/entrar');
   await page.getByLabel('E-mail',{exact:true}).fill('registros@example.test');
@@ -59,4 +59,15 @@ test('registros persistem, substituem valores únicos e preservam desconhecidos'
   await page.getByRole('article').getByRole('button',{name:'Salvar alteração'}).click();
   await expect(page.locator('.nutrition-grid').getByText('0 kcal',{exact:true})).toBeVisible();
   await expect(page.getByText('Dia ainda não confirmado.',{exact:false})).toBeVisible();
+  await page.goto('/painel');
+  await page.waitForFunction(()=>sessionStorage.getItem('diazen-dashboard')!==null);
+  await page.evaluate(async()=>{await navigator.serviceWorker.ready;});await page.reload();
+  await page.waitForFunction(()=>navigator.serviceWorker.controller!==null);
+  await context.setOffline(true);await page.goto('/pagina-nao-armazenada');
+  await expect(page.getByRole('heading',{name:'Você está sem conexão.'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Diário E2E',exact:true})).toBeVisible();
+  await expect(page.locator('#metrics').getByText('450 ml',{exact:true})).toBeVisible();
+  await page.evaluate(()=>{const data=JSON.parse(sessionStorage.getItem('diazen-dashboard')!);data.expiresAt=0;sessionStorage.setItem('diazen-dashboard',JSON.stringify(data));});await page.reload();await expect(page.locator('#summary')).toBeHidden();
+  await context.setOffline(false);await page.goto('/painel');await page.waitForFunction(()=>sessionStorage.getItem('diazen-dashboard')!==null);await page.getByRole('button',{name:'Sair da conta'}).click();await expect(page).toHaveURL(/\/entrar$/);await page.waitForFunction(()=>sessionStorage.getItem('diazen-dashboard')===null);
+
 });

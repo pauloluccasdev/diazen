@@ -1,7 +1,7 @@
 /* Cache exclusivo da página pública de indisponibilidade. Nunca armazenar
    respostas autenticadas, fotos ou requisições de escrita neste cache. */
-const CACHE_NAME = "diazen-offline-v1";
-const OFFLINE_URL = "/offline";
+const CACHE_NAME = "diazen-offline-v2";
+const OFFLINE_URL = "/offline.html";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.add(new Request(OFFLINE_URL, { cache: "reload" }))));
@@ -14,6 +14,7 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
+  if (new URL(event.request.url).pathname.startsWith('/api/')) return;
   if (event.request.method !== "GET" || event.request.mode !== "navigate" || new URL(event.request.url).origin !== self.location.origin) return;
   event.respondWith(fetch(event.request).catch(async () => {
     const fallback = await caches.match(OFFLINE_URL);

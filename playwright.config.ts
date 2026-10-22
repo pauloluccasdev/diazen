@@ -3,6 +3,7 @@ import { defineConfig } from "@playwright/test";
 export default defineConfig({
   testDir: "./tests",
   testMatch: "**/*.spec.ts",
+  workers: process.env.CI ? 2 : undefined,
   use: { baseURL: "http://127.0.0.1:3100", actionTimeout: 10000, navigationTimeout: 20000, trace: "retain-on-failure" },
   webServer: [
     {

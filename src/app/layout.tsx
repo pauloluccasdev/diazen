@@ -20,8 +20,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <a className="skip-link" href="#conteudo">Pular para o conteúdo</a>
         <div className="app-shell">
           <header className="app-header">
-            <Link className="brand" href="/" aria-label="Diazen, início">dia<span>zen.</span></Link>
-            <span className="preview-label">Prévia do aplicativo</span>
+            <Link className="brand" href="/painel" aria-label="Diazen, início">dia<span>zen.</span></Link>
+            <span className="preview-label">Seu diário pessoal</span>
           </header>
           <main id="conteudo">{children}</main>
           <footer className="app-footer"><span>Uma rotina de cada vez.</span><span>Diazen por Lucx Tech</span></footer>
