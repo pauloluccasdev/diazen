@@ -15,7 +15,8 @@
     "format:check": "prettier --check src tests scripts/*.mjs public/sw.js public/offline.html *.ts *.mjs package.json .github/workflows/ci.yml",
     "test:webkit": "playwright test --project=webkit",
     "env:check": "node scripts/check_environment.mjs",
-    "db:bundle": "node scripts/bundle_migrations.mjs"
+    "db:bundle": "node scripts/bundle_migrations.mjs",
+    "auth:configure": "node scripts/configure_supabase_auth.mjs"
   },
   "repository": {
     "type": "git",

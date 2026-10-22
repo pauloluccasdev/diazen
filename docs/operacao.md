@@ -2,7 +2,7 @@
 
 ## Estado e responsabilidade
 
-O código e os testes locais estão preparados para uso pessoal em ambiente de homologação. Credenciais, migrações no Supabase real, SMTP, hospedagem, backups e revisão legal/visual precisam ser validados na instalação. Não há produção provisionada por este desenvolvimento. As páginas de termos/privacidade são informativas, e não aprovação jurídica ou indicação de base legal definida.
+O código e os testes locais estão preparados para uso pessoal em ambiente de homologação. Credenciais, migrações no Supabase real, SMTP, hospedagem, backups e revisão legal/visual precisam ser validados na instalação. Há uma prévia protegida na Vercel, descrita em [publicacao.md](publicacao.md); o lançamento em produção segue pendente. As páginas de termos/privacidade são informativas, e não aprovação jurídica ou indicação de base legal definida.
 
 ## Preparação
 
