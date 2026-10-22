@@ -16,7 +16,8 @@
     "test:webkit": "playwright test --project=webkit",
     "env:check": "node scripts/check_environment.mjs",
     "db:bundle": "node scripts/bundle_migrations.mjs",
-    "auth:configure": "node scripts/configure_supabase_auth.mjs"
+    "auth:configure": "node scripts/configure_supabase_auth.mjs",
+    "test:restore": "node tests/manual/restore-native.mjs"
   },
   "repository": {
     "type": "git",
