@@ -140,3 +140,27 @@ export async function changeGoals(
   revalidatePath("/painel", "layout");
   return result("", "Metas atualizadas.");
 }
+
+export async function changeDraftDates(
+  _state: FormResult,
+  form: FormData,
+): Promise<FormResult> {
+  const { client } = await requireAccount();
+  const id = String(form.get("id") ?? "");
+  const start = String(form.get("starts_on") ?? "");
+  const end = String(form.get("ends_on") ?? "");
+  if (!isId(id) || !isDate(start) || (end && (!isDate(end) || end < start)))
+    return result("Confira as datas do rascunho.");
+  const { data, error } = await client
+    .from("projects")
+    .update({ starts_on: start, ends_on: end || null })
+    .eq("id", id)
+    .eq("status", "DRAFT")
+    .select("id");
+  if (error || !data?.length)
+    return result(
+      "Não foi possível alterar. Somente rascunhos aceitam novas datas, e o período deve conter as metas de água já configuradas.",
+    );
+  revalidatePath("/painel", "layout");
+  return result("", "Datas do rascunho atualizadas.");
+}

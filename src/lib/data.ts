@@ -2,7 +2,7 @@ import "server-only";
 import { redirect, notFound } from "next/navigation";
 import { createSupabaseServerClient } from "./supabase/server";
 import { isId } from "./domain";
-import type { Project, WaterGoal } from "./domain";
+import type { Project, ProjectStatus, WaterGoal } from "./domain";
 
 export async function requireAccount() {
   const client = await createSupabaseServerClient();
@@ -16,11 +16,15 @@ export async function requireAccount() {
   if (!available) redirect("/conta-excluida");
   return { client, user };
 }
-export async function projectContext(selectedId?: string, page = 1) {
+export async function projectContext(
+  selectedId?: string,
+  page = 1,
+  status?: ProjectStatus,
+) {
   const { client, user } = await requireAccount();
-  const { data, error } = await client
-    .from("projects")
-    .select("*")
+  let query = client.from("projects").select("*");
+  if (status) query = query.eq("status", status);
+  const { data, error } = await query
     .order("created_at", { ascending: false })
     .order("id", { ascending: false })
     .range((page - 1) * 20, page * 20)

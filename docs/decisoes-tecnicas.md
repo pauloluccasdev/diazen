@@ -121,3 +121,7 @@ Nos testes com `.env.local` real foi identificado que o Next.js também substitu
 ## Validações e ordem de encerramento — 22/10/2026
 
 O proprietário confirmou recebimento do e-mail padrão e definição de senha pelo fluxo de recuperação. Essa evidência valida a recuperação, sem substituir um teste específico de confirmação de cadastro. Determinou revisar o layout e executar o ensaio de restauração somente no final do projeto. Essas verificações continuam no checklist final, sem bloquear incrementos intermediários e sem alterar o banco atual durante o ensaio. Testar restauração em ambiente isolado, preservando privacidade e reaplicação das exclusões. RF-001; RNF-007/RNF-008/RNF-013/RNF-017.
+
+## Revisão de escopo — Manutenção de projetos — 22/10/2026
+
+A auditoria de RF-003/RF-004 encontrou ausência de filtro por estado e de edição das datas de rascunhos na interface, apesar de o banco já proteger essas operações. A listagem agora filtra antes de paginar e preserva o estado nos links de paginação. Datas podem ser alteradas apenas em DRAFT, com validação no servidor e no banco; o período deve conter as metas de água existentes. ACTIVE e histórico continuam sem edição de datas. Teste integrado cobre persistência após reload, rejeição de período que excluiria meta existente, filtro por estado e ativação removendo o item do filtro de rascunhos. Sem migração ou ampliação de escopo.

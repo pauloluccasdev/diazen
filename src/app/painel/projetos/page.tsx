@@ -1,25 +1,33 @@
 import Link from "next/link";
 import { projectContext } from "@/lib/data";
 import { formatDate, statusLabel, today } from "@/lib/domain";
+import type { ProjectStatus } from "@/lib/domain";
 import { ActionForm } from "@/components/forms/action-form";
 import {
   createProject,
   changeProject,
   changeWaterGoal,
   changeGoals,
+  changeDraftDates,
 } from "./actions";
 export const metadata = { title: "Projetos e metas" };
 export default async function Projects({
   searchParams,
 }: {
-  searchParams: Promise<{ pagina?: string }>;
+  searchParams: Promise<{ pagina?: string; estado?: string }>;
 }) {
   const params = await searchParams;
   const page = Math.min(
     10000,
     Math.max(1, Math.floor(Number(params.pagina)) || 1),
   );
-  const { projects, hasMore } = await projectContext(undefined, page);
+  const status =
+    params.estado && Object.hasOwn(statusLabel, params.estado)
+      ? (params.estado as ProjectStatus)
+      : undefined;
+  const { projects, hasMore } = await projectContext(undefined, page, status);
+  const pageUrl = (value: number) =>
+    `/painel/projetos?${new URLSearchParams({ pagina: String(value), ...(status ? { estado: status } : {}) })}`;
   return (
     <>
       <section className="welcome">
@@ -32,7 +40,7 @@ export default async function Projects({
       </section>
       <section className="content-card">
         <h2>
-          {projects.length
+          {projects.length || status
             ? "Novo projeto"
             : "Vamos preparar seu primeiro projeto?"}
         </h2>
@@ -119,6 +127,27 @@ export default async function Projects({
         </ActionForm>
       </section>
       <section className="records-section" aria-label="Seus projetos">
+        <form className="content-card" method="get" action="/painel/projetos">
+          <label htmlFor="project-status">Estado dos projetos</label>
+          <select id="project-status" name="estado" defaultValue={status ?? ""}>
+            <option value="">Todos os estados</option>
+            {Object.entries(statusLabel).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+          <button className="button-secondary" type="submit">
+            Filtrar projetos
+          </button>
+        </form>
+        {!projects.length && (
+          <p className="intro">
+            {status
+              ? "Nenhum projeto neste estado nesta página."
+              : "Nenhum projeto nesta página."}
+          </p>
+        )}
         {projects.map((p) => (
           <article className="content-card" key={p.id}>
             <span className="status">{statusLabel[p.status]}</span>
@@ -132,6 +161,35 @@ export default async function Projects({
             </Link>
             {(p.status === "DRAFT" || p.status === "ACTIVE") && (
               <>
+                {p.status === "DRAFT" && (
+                  <details>
+                    <summary>Editar datas do rascunho</summary>
+                    <p className="intro">
+                      O período deve incluir as metas de água já configuradas.
+                      Após ativar, as datas ficam fixas.
+                    </p>
+                    <ActionForm action={changeDraftDates} submit="Salvar datas">
+                      <input type="hidden" name="id" value={p.id} />
+                      <label>
+                        Início do rascunho
+                        <input
+                          type="date"
+                          name="starts_on"
+                          required
+                          defaultValue={p.starts_on}
+                        />
+                      </label>
+                      <label>
+                        Fim previsto do rascunho (opcional)
+                        <input
+                          type="date"
+                          name="ends_on"
+                          defaultValue={p.ends_on ?? ""}
+                        />
+                      </label>
+                    </ActionForm>
+                  </details>
+                )}
                 <details>
                   <summary>Editar nome</summary>
                   <ActionForm action={changeProject} submit="Atualizar nome">
@@ -263,14 +321,8 @@ export default async function Projects({
         ))}
       </section>
       <nav className="panel-nav" aria-label="Paginação de projetos">
-        {page > 1 && (
-          <Link href={`/painel/projetos?pagina=${page - 1}`}>Anteriores</Link>
-        )}
-        {hasMore && (
-          <Link href={`/painel/projetos?pagina=${page + 1}`}>
-            Próximos projetos
-          </Link>
-        )}
+        {page > 1 && <Link href={pageUrl(page - 1)}>Anteriores</Link>}
+        {hasMore && <Link href={pageUrl(page + 1)}>Próximos projetos</Link>}
       </nav>
     </>
   );

@@ -6,8 +6,8 @@ Os fluxos essenciais também passaram no Supabase real em 21/10/2026. Consulte [
 
 | RF | Implementação | Evidência local / limite |
 | --- | --- | --- |
-| 001 | Cadastro, login/logout, confirmação, recuperação, nova senha | `tests/auth.spec.ts`; provider HTTP simulado. Login e renovação também no Auth real; Templates padrão com callbacks PKCE; entrega de confirmação/recuperação e expiração natural pendentes. |
-| 002–005 | Projetos, onboarding, metas e estados | `tests/projects.spec.ts`, `tests/database/core.test.mjs`; criação/ativação atômicas e histórico. |
+| 001 | Cadastro, login/logout, confirmação, recuperação, nova senha | `tests/auth.spec.ts`; PKCE com verificador criptográfico no provider simulado. Login e renovação também no Auth real; proprietário confirmou recebimento e troca de senha pelo e-mail padrão. Confirmação de cadastro e expiração natural pendentes. |
+| 002–005 | Projetos, onboarding, metas e estados | `tests/projects.spec.ts`, `tests/database/core.test.mjs`; criação/ativação atômicas, filtro por estado antes da paginação, edição de datas somente em DRAFT preservando metas e histórico somente leitura. |
 | 006–007 | Diário manual e composição informada por referência | `tests/records.spec.ts`, agregações SQL; sem catálogo externo ou nutrientes inventados. |
 | 008 | Calendário de sete dias navegável e confirmação manual | Teste de confirmação e invalidação por edição; conclusão não indica aderência. |
 | 009 | Conveniências | Adiado para revisão final de backlog; prioridade Média, sem bloquear núcleo manual. |
