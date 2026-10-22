@@ -163,14 +163,23 @@ export function ProjectCreateFields({ today }: { today: string }) {
           max={15000}
           step={1}
         />
-        <ProjectInput
-          label="Sessões por semana"
-          name="sessions"
-          type="number"
-          min={1}
-          max={50}
-          step={1}
-        />
+        <div>
+          <ProjectInput
+            label="Sessões por semana"
+            name="sessions"
+            type="number"
+            min={1}
+            max={50}
+            step={1}
+            aria-describedby={`${prefix}-sessions-help`}
+          />
+          <p className="field-hint" id={`${prefix}-sessions-help`}>
+            Meta opcional de atividades físicas na semana. Cada atividade
+            registrada conta como uma sessão, independentemente da modalidade.
+            Exemplo: 3 treinos de musculação + 2 corridas = 5 sessões. Deixe em
+            branco se não quiser definir essa meta.
+          </p>
+        </div>
       </div>
       <ProjectGoalFields />
       {fieldErrors.goals && (
