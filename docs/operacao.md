@@ -2,16 +2,16 @@
 
 ## Estado e responsabilidade
 
-O código e os testes locais estão preparados para uso pessoal em ambiente de homologação. Credenciais, migrações no Supabase real, SMTP, hospedagem, backups e revisão legal/visual precisam ser validados na instalação. Há uma prévia protegida na Vercel, descrita em [publicacao.md](publicacao.md); o lançamento em produção segue pendente. As páginas de termos/privacidade são informativas, e não aprovação jurídica ou indicação de base legal definida.
+O código e os testes locais estão preparados para uso pessoal em ambiente de homologação. Credenciais, migrações no Supabase real, entrega de e-mail, hospedagem, backups e revisão legal/visual precisam ser validados na instalação. Há uma prévia protegida na Vercel, descrita em [publicacao.md](publicacao.md); o lançamento em produção segue pendente. As páginas de termos/privacidade são informativas, e não aprovação jurídica ou indicação de base legal definida.
 
 ## Preparação
 
-Atualização de 21/10/2026: o projeto Supabase do Planna foi resetado por autorização do proprietário e já recebeu as oito migrações. Configuração, fluxos essenciais, isolamento e concorrência foram testados no serviço real; veja [evidências e pendências](homologacao-supabase.md). Não reaplique o bundle neste projeto. SMTP, URLs/templates e demais gates abaixo continuam sujeitos à homologação.
+Atualização de 21/10/2026: o projeto Supabase do Planna foi resetado por autorização do proprietário e já recebeu as oito migrações. Configuração, fluxos essenciais, isolamento e concorrência foram testados no serviço real; veja [evidências e pendências](homologacao-supabase.md). Não reaplique o bundle neste projeto. Entrega de e-mail e demais gates abaixo continuam sujeitos à homologação.
 
 1. Revise `docs/modelagem.md` e o bundle gerado por `npm run db:bundle`, em `artifacts/diazen-migrations.sql`. Ele é destinado a um projeto vazio; não executa DROP/RESET e não deve ser reaplicado sobre tabelas já existentes.
 2. Aplique migrações em ordem após revisar o modelo. Confirme RLS em tabelas e policies específicas do bucket privado `body-photos`. Não exponha o schema `private` no Data API. Não configure outras policies permissivas para o mesmo bucket.
 3. Configure `.env.local` conforme `.env.example`; confira `npm run env:check -- --connect`. A origem deve corresponder ao endereço realmente acessado. `localhost` e `127.0.0.1` são origens distintas para cookies e links.
-4. Auth: confirmação de e-mail, templates por token hash, SMTP, senha mínima compatível, limites contra força bruta e enumeração. Não publique chaves privilegiadas. Segredos de servidor ficam nas variáveis do projeto de hospedagem, fora do Git.
+4. Auth: confirmação de e-mail, templates/provedor padrão do Supabase Free, callbacks PKCE `/auth/confirmar` e `/auth/recuperar`, senha mínima compatível, limites contra força bruta e enumeração. Links abertos no mesmo navegador e origem da solicitação. Não publique chaves privilegiadas. Segredos de servidor ficam nas variáveis do projeto de hospedagem, fora do Git.
 5. Vercel: projeto Next.js, Node.js 24, `npm ci`/`npm run build`, HTTPS e variáveis por ambiente. Preview e produção devem usar ambientes de dados separados ou ser explicitamente restritos. `main` só recebe o PR final do proprietário.
 6. Limites de referência consultados: Vercel Hobby é para uso pessoal/não comercial; Supabase Free tem cotas e pode pausar por baixa atividade. Confira preços e termos novamente antes de publicar ou ampliar uso. Fotos otimizadas reduzem consumo, sem prometer hospedagem gratuita permanente.
 

@@ -117,6 +117,14 @@ test("cadastro exige senhas iguais e informa confirmação sem enumerar conta", 
   await expect(page.getByRole("status")).toContainText(
     "Se o cadastro puder ser concluído",
   );
+  const { link } = await (
+    await page.request.get(
+      "http://127.0.0.1:54329/_test/email-link?email=novo%40example.test",
+    )
+  ).json();
+  expect(link).toBeTruthy();
+  await page.goto(link);
+  await expect(page).toHaveURL(/\/painel$/);
 });
 
 test("recuperação é genérica e link válido permite nova senha", async ({
@@ -128,9 +136,23 @@ test("recuperação é genérica e link válido permite nova senha", async ({
     .fill("nao-existe@example.test");
   await page.getByRole("button", { name: "Enviar instruções" }).click();
   await expect(page.getByRole("status")).toContainText("Se houver uma conta");
-  await page.goto(
-    "/auth/confirmar?token_hash=link-valido-de-teste&type=recovery&next=https://example.org",
-  );
+  await page.getByLabel("E-mail", { exact: true }).fill("teste@example.test");
+  await Promise.all([
+    page.waitForResponse(
+      (response) =>
+        response.request().method() === "POST" &&
+        new URL(response.url()).pathname === "/recuperar-senha",
+    ),
+    page.getByRole("button", { name: "Enviar instruções" }).click(),
+  ]);
+  await expect(page.getByRole("status")).toContainText("Se houver uma conta");
+  const { link } = await (
+    await page.request.get(
+      "http://127.0.0.1:54329/_test/email-link?email=teste%40example.test",
+    )
+  ).json();
+  expect(link).toBeTruthy();
+  await page.goto(link);
   await expect(page).toHaveURL(/\/nova-senha$/);
   await page
     .getByLabel("Nova senha", { exact: true })
@@ -141,10 +163,77 @@ test("recuperação é genérica e link válido permite nova senha", async ({
 });
 
 test("link inválido e troca sem sessão são negados", async ({ page }) => {
-  await page.goto("/auth/confirmar?token_hash=invalido&type=recovery");
+  await page.goto("/auth/confirmar?code=invalido&next=https://example.org");
   await expect(page.locator("main").getByRole("alert")).toContainText(
     "link expirou",
   );
   await page.goto("/nova-senha");
   await expect(page).toHaveURL(/\/recuperar-senha$/);
+});
+
+test("PKCE exige o navegador de origem e impede reutilização do código", async ({
+  page,
+  browser,
+  request,
+}) => {
+  await page.goto("/recuperar-senha");
+  await page.getByLabel("E-mail", { exact: true }).fill("teste@example.test");
+  await page.getByRole("button", { name: "Enviar instruções" }).click();
+  await expect(page.getByRole("status")).toContainText("Se houver uma conta");
+  const { link } = await (
+    await request.get(
+      "http://127.0.0.1:54329/_test/email-link?email=teste%40example.test",
+    )
+  ).json();
+  const verified = await request.get(link, { maxRedirects: 0 });
+  expect(verified.status()).toBe(302);
+  const callback = verified.headers().location + "&next=https://example.org";
+  const other = await browser.newContext();
+  const otherPage = await other.newPage();
+  await otherPage.goto(callback);
+  await expect(otherPage).toHaveURL(/\/entrar\?link=invalido$/);
+  await page.goto(callback);
+  await expect(page).toHaveURL(/\/nova-senha$/);
+  await otherPage.goto(callback);
+  await expect(otherPage).toHaveURL(/\/entrar\?link=invalido$/);
+  await other.close();
+});
+
+test("código com verificador adulterado não cria sessão", async ({
+  page,
+  context,
+}) => {
+  await page.goto("/cadastro");
+  await page
+    .getByLabel("E-mail", { exact: true })
+    .fill("adulterado@example.test");
+  await page.getByLabel("Senha", { exact: true }).fill("senha-de-teste-123");
+  await page.getByLabel("Confirme a senha").fill("senha-de-teste-123");
+  await page.getByRole("button", { name: "Criar conta" }).click();
+  await expect(page.getByRole("status")).toContainText(
+    "Se o cadastro puder ser concluído",
+  );
+  const verifiers = (await context.cookies()).filter((c) =>
+    c.name.includes("-code-verifier"),
+  );
+  expect(verifiers.length).toBeGreaterThan(0);
+  await context.addCookies(
+    verifiers.map((verifier) => ({
+      ...verifier,
+      value:
+        "base64-" +
+        Buffer.from(JSON.stringify("verificador-adulterado")).toString(
+          "base64url",
+        ),
+    })),
+  );
+  const { link } = await (
+    await page.request.get(
+      "http://127.0.0.1:54329/_test/email-link?email=adulterado%40example.test",
+    )
+  ).json();
+  await page.goto(link);
+  await expect(page).toHaveURL(/\/entrar\?link=invalido$/);
+  await page.goto("/painel");
+  await expect(page).toHaveURL(/\/entrar$/);
 });

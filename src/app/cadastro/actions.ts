@@ -46,7 +46,7 @@ export async function signUp(
   return {
     error: "",
     message:
-      "Se o cadastro puder ser concluído, você receberá um e-mail com os próximos passos. Confira também o spam.",
+      "Se o cadastro puder ser concluído, você receberá um e-mail com os próximos passos. Confira também o spam e abra o link neste mesmo navegador.",
   };
 }
 export async function recoverPassword(
@@ -61,7 +61,7 @@ export async function recoverPassword(
   if (!supabase || !origin) return unavailable;
   try {
     await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${origin}/auth/confirmar`,
+      redirectTo: `${origin}/auth/recuperar`,
     });
   } catch {
     return unavailable;
@@ -69,7 +69,7 @@ export async function recoverPassword(
   return {
     error: "",
     message:
-      "Se houver uma conta para esse e-mail, você receberá as instruções de recuperação. Confira também o spam.",
+      "Se houver uma conta para esse e-mail, você receberá as instruções de recuperação. Confira também o spam e abra o link neste mesmo navegador.",
   };
 }
 export async function updatePassword(

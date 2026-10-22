@@ -2,7 +2,7 @@ import "server-only";
 
 export function siteUrl() {
   const environment = process.env;
-  const raw = environment.NEXT_PUBLIC_SITE_URL;
+  const raw = Reflect.get(environment, "NEXT_PUBLIC_SITE_URL");
   if (!raw) return null;
   try {
     const url = new URL(raw);

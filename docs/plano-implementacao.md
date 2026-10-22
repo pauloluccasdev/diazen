@@ -14,7 +14,7 @@ Execução autorizada pelo proprietário em 21/10/2026: continuar o desenvolvime
 - [x] Fotos privadas, otimização, galeria e comparação (Storage real validado com contas sintéticas).
 - [x] Dashboard integrado, leitura offline limitada e privacidade da conta (configuração operacional real pendente).
 - [x] Testes integrados locais, acessibilidade automática e documentação operacional.
-- [ ] Homologação Supabase/SMTP/hospedagem, concorrência real, restauração externa e aprovação visual/operacional final.
+- [ ] Homologação Supabase/e-mail/hospedagem, concorrência real, restauração externa e aprovação visual/operacional final.
 
 ## Condições para declarar conclusão
 
@@ -22,4 +22,4 @@ Fluxos F-01 a F-07 persistidos; RF de prioridade Alta atendidos; autorização e
 
 ## Dependências externas observadas
 
-O Supabase anteriormente usado pelo Planna foi reutilizado e resetado por autorização do proprietário; configuração local, migrações e fluxos essenciais foram verificados no serviço real. Consulte [a evidência de homologação](homologacao-supabase.md). SMTP/URLs/templates, hospedagem, restauração isolada, dispositivos físicos e aprovação final continuam pendentes. Docker não está disponível nesta distribuição WSL.
+O Supabase anteriormente usado pelo Planna foi reutilizado e resetado por autorização do proprietário; configuração local, migrações e fluxos essenciais foram verificados no serviço real. Consulte [a evidência de homologação](homologacao-supabase.md). Entrega com templates padrão, hospedagem, restauração isolada, dispositivos físicos e aprovação final continuam pendentes. Docker não está disponível nesta distribuição WSL.
