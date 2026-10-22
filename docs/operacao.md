@@ -45,7 +45,7 @@ Os testes locais usam PostgreSQL de fato, mas não o gateway PostgREST, a implem
 
 ## Backup e restauração
 
-Política operacional proposta para o uso pessoal, a confirmar pelo proprietário: cópia lógica diária e cópia dos arquivos privados, cifradas e fora do repositório; retenção máxima de 30 dias e descarte das cópias vencidas. O ledger mínimo de exclusões deve ter cópia separada atualizada após cada solicitação/purge e permanecer protegido enquanto existir backup capaz de reintroduzir o titular. Prazo final e fundamento dessa retenção devem ser revisados antes de uso real.
+Destino aprovado em 22/10/2026: pasta local `backups/`, ignorada pelo Git, com banco e arquivos privados cifrados. A proposta de frequência diária e retenção máxima de 30 dias aguarda decisão do proprietário; os comandos já disponíveis não agendam execução nem apagam cópias automaticamente. O ledger mínimo de exclusões deve ter cópia separada atualizada após cada solicitação/purge e permanecer protegido enquanto existir backup capaz de reintroduzir o titular. Prazo final e fundamento dessa retenção devem ser revisados antes de uso real.
 
 O Supabase recomenda exportações externas para o Free; backup do banco contém metadados, **não os arquivos do Storage**. Siga os procedimentos oficiais de [backup](https://supabase.com/docs/guides/platform/backups) e [restauração por CLI](https://supabase.com/docs/guides/platform/migrating-within-supabase/backup-restore), verificando inclusão de Auth, customizações de policies, funções e histórico de migrações. Não assuma que exportar apenas `public` recupera a instalação inteira.
 
@@ -90,6 +90,40 @@ Foram comprovados: login com a senha restaurada do usuário restante; dados e ag
 O teste não lê `.env.local`, não aceita URLs remotas e só usa endpoints de loopback da stack recém-criada. Ele utiliza o superusuário `supabase_admin` do laboratório para restaurar os schemas gerenciados com seus proprietários originais. Esse privilégio não é presumido no projeto hospedado: uma recuperação em outro Supabase deve seguir o procedimento gerenciado oficial, conferir versões e permissões e ser homologada antes de liberar acesso. O ensaio atende à verificação de RNF-013 em ambiente controlado; não comprova recuperação de infraestrutura hospedada nem define sozinho frequência, cifragem externa, RPO ou retenção dos backups de produção.
 
 Referências: [runtime nativo oficial](https://supabase.com/docs/guides/local-development/docker-and-native-runtimes), [CLI e isolamento de stacks](https://supabase.com/docs/guides/local-development/running-multiple-local-projects).
+
+### Comandos de backup cifrado da instalação
+
+O proprietário definiu o destino `\\wsl.localhost\Ubuntu-22.04\home\paulo_luccas\diazen\backups`, correspondente a `/home/paulo_luccas/diazen/backups`. A pasta local no WSL é ignorada pelo Git. A conexão lê o Supabase hospedado usando TLS com CA e hostname verificados; não realiza gravações remotas. A frequência e o descarte ainda dependem da escolha operacional do proprietário. Não há agendamento ou exclusão automática implícitos.
+
+Configuração local, separada das variáveis da aplicação e nunca publicada na Vercel:
+
+```dotenv
+# .env.backup.local — chmod 600; sem valores reais no Git/chat.
+DIAZEN_BACKUP_DATABASE_URL=postgresql://USUARIO:SENHA@HOST:5432/postgres
+DIAZEN_BACKUP_CA_FILE=/caminho/privado/supabase-ca.crt
+DIAZEN_BACKUP_KEY_FILE=/caminho/privado/backup.key
+DIAZEN_BACKUP_DIR=/caminho/para/backups
+PG_BIN_DIR=/usr/lib/postgresql/17/bin
+# LD_LIBRARY_PATH, somente se as ferramentas estiverem extraídas localmente.
+```
+
+As credenciais da API continuam em `.env.local`. Banco e API devem apontar para o mesmo projeto; o comando só aceita conexão direta ou pooler de sessão (5432). O certificado deve ser obtido pela configuração de SSL oficial do Supabase e informado aos dois drivers. A URL não pode enfraquecer a verificação TLS. `pg` 8.23.1 foi adicionado somente como dependência de desenvolvimento para manter a sessão de snapshot; não é usado pelo aplicativo ou enviado ao navegador.
+
+A chave é um segredo aleatório de pelo menos 32 bytes, codificado em base64url, em arquivo privado 0600 e fora da pasta dos backups. Nesta instalação foi criada em `~/.local/share/diazen/backup.key`; seu valor não é impresso, versionado ou enviado à hospedagem. Guarde uma cópia separada dessa chave para conseguir recuperar os arquivos. Não gere outra chave sobre a existente: as cópias anteriores continuam dependendo dela.
+
+```bash
+npm run backup
+npm run backup:ledger
+npm run backup:verify -- /caminho/arquivo.tar.gpg
+```
+
+O snapshot PostgreSQL é exportado em transação de leitura e compartilhado entre `pg_dump` e a consulta das referências das fotos. Os arquivos são baixados separadamente pela API; falha ou exclusão concorrente de uma imagem cancela a cópia. O dump inclui `public`, `private`, `auth`, `storage` e `supabase_migrations`, preservando ACLs/proprietários; infraestrutura, roles globais e configurações do provedor não são recriadas automaticamente. Um manifesto registra versão, migrações, caminhos e checksums dentro do pacote cifrado.
+
+A cifragem OpenPGP usa GnuPG/AES-256 com a chave fornecida por stdin, sem colocá-la em argumentos ou logs. A ferramenta abre e verifica integralmente cada pacote antes de publicar seu nome final; arquivos parciais são removidos em falhas normais. Dados temporários ficam em diretório privado e são removidos ao terminar, junto com o agente GPG exclusivo desse trabalho. O verificador rejeita caminhos inesperados, links, conteúdo extra, hashes divergentes, chave incorreta e arquivo corrompido. Ele não executa SQL.
+
+O ledger atual é cifrado separadamente e publicado antes do snapshot. Execute `backup:ledger` após cada solicitação/purge de exclusão e preserve sua cópia mais recente enquanto houver snapshots antigos; restauração deve reaplicá-lo antes de liberar acesso. Os comandos nunca removem cópias já publicadas nem os backups anteriores do Planna. Ao restaurar, confira versões/roles e o procedimento gerenciado; a verificação criptográfica sozinha não substitui o ensaio com Auth/Storage descrito acima.
+
+Primeiro snapshot real e ledger cifrados, criados e verificados em 22/10/2026 na pasta escolhida. O primeiro arquivo real continha banco e ledger, sem fotos cadastradas naquele instante. Um segundo ensaio do próprio comando copiou uma foto sintética e sua miniatura do Storage real, abriu o pacote cifrado e comparou ambos os arquivos byte a byte e por checksum com a origem. A conta sintética foi excluída após o backup e a exclusão concluída foi confirmada em nova cópia independente do ledger. A conta do proprietário não foi alterada. A rejeição de corrupção/chave incorreta também é coberta pelo teste de empacotamento. O ensaio separado dos serviços reais comprovou restauração de imagens pela API. Relatório local: `artifacts/real-backup-photos-report.json`. Não apresentar essa evidência como teste de restauração dos dados pessoais do proprietário.
 
 ## Revisões antes do lançamento
 

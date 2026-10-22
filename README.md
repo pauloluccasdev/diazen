@@ -87,3 +87,7 @@ Cada funcionalidade sai da `develop` atualizada, em `feat/`, `fix/` ou prefixo a
 ## Biblioteca alimentar
 
 Em Alimentação, acesse **Alimentos, receitas e favoritos** para salvar composições próprias com fonte e referência. Receitas usam ingredientes da biblioteca e rendimento em porções; valores desconhecidos continuam ausentes. Ao consumir, o diário recebe uma cópia da composição, preservada mesmo após editar/remover a biblioteca. Recentes reutilizam os últimos 20 registros da conta. Copiar refeição exige confirmação, inclui todos os itens da origem e adiciona ao ACTIVE sem substituir os registros existentes.
+
+## Cópias cifradas locais
+
+`npm run backup` produz um snapshot do banco e das fotos e uma cópia independente atualizada do ledger de exclusões. `npm run backup:ledger` atualiza somente esse ledger após uma solicitação/purge. `npm run backup:verify -- /caminho/arquivo.tar.gpg` confere abertura, manifesto e checksums sem restaurar nem alterar o banco. Requer ferramentas PostgreSQL 17, GnuPG, tar e configuração privada em `.env.backup.local`; veja [operação](docs/operacao.md). A chave fica separada do destino. Nenhum desses comandos agenda execução ou remove cópias antigas automaticamente.
