@@ -6,7 +6,7 @@ O código e os testes locais estão preparados para uso pessoal em ambiente de h
 
 ## Preparação
 
-Atualização de 21/10/2026: o projeto Supabase do Planna foi resetado por autorização do proprietário e já recebeu as oito migrações. Configuração, fluxos essenciais, isolamento e concorrência foram testados no serviço real; veja [evidências e pendências](homologacao-supabase.md). Não reaplique o bundle neste projeto. Entrega de e-mail e demais gates abaixo continuam sujeitos à homologação.
+Atualização de 21/10/2026: o projeto Supabase do Planna foi resetado por autorização do proprietário e recebeu as migrações 001 a 008; em 22/10/2026 recebeu também a 009 incrementalmente, sem novo reset. Configuração, fluxos essenciais, isolamento e concorrência foram testados no serviço real; veja [evidências e pendências](homologacao-supabase.md). Não reaplique o bundle neste projeto. Entrega de e-mail e demais gates abaixo continuam sujeitos à homologação.
 
 1. Revise `docs/modelagem.md` e o bundle gerado por `npm run db:bundle`, em `artifacts/diazen-migrations.sql`. Ele é destinado a um projeto vazio; não executa DROP/RESET e não deve ser reaplicado sobre tabelas já existentes.
 2. Aplique migrações em ordem após revisar o modelo. Confirme RLS em tabelas e policies específicas do bucket privado `body-photos`. Não exponha o schema `private` no Data API. Não configure outras policies permissivas para o mesmo bucket.
@@ -76,6 +76,6 @@ Ensaio executado com sucesso em 22/10/2026 no PostgreSQL 17.11: dois projetos re
 ## Revisões antes do lançamento
 
 - Confirmar responsável e canal de contato, finalidade, base legal, operadores, retenção e direitos do titular; revisar termos e privacidade conforme a instalação. Não coletar consentimento genérico como substituto de definir fundamento adequado.
-- Aprovar visual das telas reais e selecionar definitivamente os requisitos de prioridade Média; RF-009 está adiado no refinamento atual.
+- Aprovar visual das telas reais e selecionar definitivamente os requisitos de prioridade Média; RF-009 teve inclusão aprovada em 22/10/2026.
 - Confirmar limites de upload, custos, matriz de navegadores e monitoramento; manter restrição ao uso pessoal inicial.
 - Guardar evidências de homologação e aprovação no projeto, sem dados sensíveis. O PR final fica com o proprietário.

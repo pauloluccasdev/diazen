@@ -16,6 +16,7 @@ import {
 } from "@/lib/records";
 import { ActionForm } from "@/components/forms/action-form";
 import { RecordFields } from "@/components/forms/record-fields";
+import { FoodConveniences } from "@/components/food-conveniences";
 import { WeightChart } from "@/components/weight-chart";
 import { saveRecord, deleteRecord, confirmMealDay } from "./actions";
 export async function generateMetadata({
@@ -283,6 +284,14 @@ export default async function Records({
             )}
           </section>
         </>
+      )}
+      {modulo === "alimentacao" && (
+        <FoodConveniences
+          client={client}
+          project={selected.id}
+          date={date}
+          activeName={active?.name}
+        />
       )}
       {editable && (
         <details className="content-card" open>
