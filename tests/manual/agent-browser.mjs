@@ -178,10 +178,10 @@ async function save(button, values, expected) {
   await clickText(button, "button", form(button));
   if (expected) await text(expected);
 }
-async function check(name, action) {
+async function check(name, action, controlledServerFailure = false) {
   current = name;
   await action();
-  await browserDiagnostics(name);
+  await browserDiagnostics(name, controlledServerFailure);
   report.checks.push({ name, passed: true });
   console.log(`PASS ${name}`);
 }
@@ -900,9 +900,10 @@ try {
           ),
           "Structured server failure event missing",
         );
-        // The previous navigation deliberately raised a server-render error.
-        await browserDiagnostics("deliberate read failure and recovery", true);
       },
+      // Scope expected SSR diagnostics to this entire deliberate failure scenario.
+      // Later scenarios retain strict exception checks.
+      true,
     );
   await check(
     "RF016-017 upload, private WebP, comparison and confirmed deletion",
