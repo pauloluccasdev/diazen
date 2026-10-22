@@ -2,6 +2,10 @@ import Link from "next/link";
 import { projectContext } from "@/lib/data";
 import { formatDate, statusLabel, today } from "@/lib/domain";
 import type { ProjectStatus } from "@/lib/domain";
+import {
+  ProjectCreateFields,
+  ProjectGoalFields,
+} from "@/components/project-fields";
 import { ActionForm } from "@/components/forms/action-form";
 import {
   createProject,
@@ -40,81 +44,7 @@ export default async function Projects({
         Água, peso e sessões são opcionais individualmente.
       </p>
       <ActionForm action={createProject} submit="Criar projeto">
-        <label>
-          Nome do projeto
-          <input
-            name="name"
-            required
-            maxLength={100}
-            placeholder="Ex.: Minha jornada"
-          />
-        </label>
-        <div className="form-grid">
-          <label>
-            Início
-            <input
-              type="date"
-              name="starts_on"
-              required
-              defaultValue={today()}
-            />
-          </label>
-          <label>
-            Fim previsto (opcional)
-            <input type="date" name="ends_on" />
-          </label>
-        </div>
-        <div className="form-grid">
-          <label>
-            Meta diária de água (ml)
-            <input
-              name="water_ml"
-              type="number"
-              min={100}
-              max={15000}
-              step={1}
-            />
-          </label>
-          <label>
-            Sessões por semana
-            <input name="sessions" type="number" min={1} max={50} step={1} />
-          </label>
-        </div>
-        <label>
-          Acompanhamento de peso
-          <select name="weight_mode" defaultValue="none">
-            <option value="none">Sem meta de peso</option>
-            <option value="track">Apenas acompanhar</option>
-            <option value="target">Peso alvo</option>
-            <option value="range">Faixa de peso</option>
-          </select>
-        </label>
-        <div className="form-grid">
-          <label>
-            Alvo ou mínimo (kg)
-            <input
-              name="weight_min"
-              type="number"
-              min={20}
-              max={500}
-              step="0.01"
-            />
-          </label>
-          <label>
-            Máximo da faixa (kg)
-            <input
-              name="weight_max"
-              type="number"
-              min={20}
-              max={500}
-              step="0.01"
-            />
-          </label>
-        </div>
-        <label className="checkbox-label">
-          <input type="checkbox" name="draft" />
-          Salvar como rascunho, sem ativar
-        </label>
+        <ProjectCreateFields today={today()} />
       </ActionForm>
     </section>
   );
@@ -217,39 +147,11 @@ export default async function Projects({
                   <summary>Editar metas de peso e atividades</summary>
                   <ActionForm action={changeGoals} submit="Salvar metas">
                     <input type="hidden" name="id" value={p.id} />
-                    <label>
-                      Acompanhamento de peso
-                      <select name="weight_mode" defaultValue={p.weight_mode}>
-                        <option value="none">Sem meta de peso</option>
-                        <option value="track">Apenas acompanhar</option>
-                        <option value="target">Peso alvo</option>
-                        <option value="range">Faixa de peso</option>
-                      </select>
-                    </label>
-                    <div className="form-grid">
-                      <label>
-                        Alvo ou mínimo (kg)
-                        <input
-                          type="number"
-                          name="weight_min"
-                          min={20}
-                          max={500}
-                          step="0.01"
-                          defaultValue={p.weight_min ?? ""}
-                        />
-                      </label>
-                      <label>
-                        Máximo da faixa (kg)
-                        <input
-                          type="number"
-                          name="weight_max"
-                          min={20}
-                          max={500}
-                          step="0.01"
-                          defaultValue={p.weight_max ?? ""}
-                        />
-                      </label>
-                    </div>
+                    <ProjectGoalFields
+                      mode={p.weight_mode}
+                      min={p.weight_min}
+                      max={p.weight_max}
+                    />
                     <label>
                       Sessões por semana
                       <input

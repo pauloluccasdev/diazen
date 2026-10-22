@@ -1,7 +1,22 @@
 "use client";
-import { useActionState, useEffect, useRef, startTransition } from "react";
+import {
+  useActionState,
+  useEffect,
+  useRef,
+  startTransition,
+  createContext,
+  useContext,
+} from "react";
 import { useOnline } from "@/lib/use-online";
-export type FormResult = { error: string; message: string };
+export type FormResult = {
+  error: string;
+  message: string;
+  fieldErrors?: Record<string, string>;
+};
+const FormFeedback = createContext<FormResult>({ error: "", message: "" });
+export function useFormFeedback() {
+  return useContext(FormFeedback);
+}
 export type FormAction = (
   state: FormResult,
   form: FormData,
@@ -37,12 +52,14 @@ export function ActionForm({
         startTransition(() => dispatch(form));
       }}
     >
-      <fieldset disabled={pending || !online}>
-        {children}
-        <button type="submit" className="button-primary">
-          {pending ? "Salvando…" : submit}
-        </button>
-      </fieldset>
+      <FormFeedback.Provider value={state}>
+        <fieldset disabled={pending || !online}>
+          {children}
+          <button type="submit" className="button-primary">
+            {pending ? "Salvando…" : submit}
+          </button>
+        </fieldset>
+      </FormFeedback.Provider>
       {state.error && (
         <p className="form-error" role="alert" tabIndex={-1} ref={feedback}>
           {state.error}
