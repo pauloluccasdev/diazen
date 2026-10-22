@@ -1,7 +1,8 @@
 import "server-only";
 
 export function siteUrl() {
-  const raw = process.env.NEXT_PUBLIC_SITE_URL;
+  const environment = process.env;
+  const raw = environment.NEXT_PUBLIC_SITE_URL;
   if (!raw) return null;
   try {
     const url = new URL(raw);

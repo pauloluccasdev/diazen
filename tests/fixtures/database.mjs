@@ -17,7 +17,7 @@ export async function createDatabase(users) {
   return db;
 }
 
-const tables = new Set(['projects','water_goals','water_entries','weights','measurements','activities','meal_items','meal_days','photos','photo_cleanup','account_deletions']);
+const tables = new Set(['projects','water_goals','water_entries','weights','measurements','activities','meal_items','meal_days','photos','photo_cleanup','account_deletions','deletion_ledger']);
 const commands = new Set(['create_project','save_weight','save_measurements','account_available','request_account_deletion','project_summary','food_calendar']);
 const identifier = (text) => { if (!/^[a-z_]+$/.test(text)) throw new Error('Invalid identifier'); return `"${text}"`; };
 // Adaptador REST de teste: a persistência, constraints e RLS são PostgreSQL real.
