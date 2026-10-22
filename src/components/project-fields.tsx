@@ -118,7 +118,7 @@ export function ProjectCreateFields({ today }: { today: string }) {
   const [draft, setDraft] = useState(false);
   const [start, setStart] = useState(today);
   const { fieldErrors = {} } = useFormFeedback();
-  const future = !draft && start > today;
+  const future = start > today;
   return (
     <>
       <p className="field-hint">
@@ -139,9 +139,7 @@ export function ProjectCreateFields({ today }: { today: string }) {
           name="starts_on"
           required
           defaultValue={today}
-          max={draft ? undefined : today}
           onChange={(e) => setStart(e.target.value)}
-          aria-invalid={future ? true : undefined}
           aria-describedby={`${prefix}-start-help`}
         />
         <ProjectInput
@@ -151,13 +149,10 @@ export function ProjectCreateFields({ today }: { today: string }) {
           min={start || undefined}
         />
       </div>
-      <p
-        className={future ? "form-error field-error" : "field-hint"}
-        id={`${prefix}-start-help`}
-      >
+      <p className="field-hint" id={`${prefix}-start-help`}>
         {future
-          ? "O início está no futuro. Escolha hoje ou uma data anterior para ativar, ou salve como rascunho."
-          : "A ativação exige início até hoje, pelo horário de Brasília. Para começar em uma data futura, salve como rascunho."}
+          ? "Projeto planejado: será salvo como rascunho. A partir da data de início, você poderá ativá-lo em Projetos. A ativação não é automática."
+          : "Projetos com início futuro são salvos como rascunho para você planejar com antecedência."}
       </p>
       <div className="form-grid">
         <ProjectInput

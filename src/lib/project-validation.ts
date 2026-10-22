@@ -49,13 +49,12 @@ export function validateProjectCreation(form: FormData, today: string) {
   const name = String(form.get("name") ?? "").trim();
   const start = String(form.get("starts_on") ?? "");
   const end = String(form.get("ends_on") ?? "");
-  const draft = form.get("draft") === "on";
+  const planned = isDate(start) && start > today;
+  const draft = form.get("draft") === "on" || planned;
   if (!name || name.length > 100)
     errors.name = "Informe um nome de até 100 caracteres.";
   if (!isDate(start)) errors.starts_on = "Informe uma data de início válida.";
-  else if (!draft && start > today)
-    errors.starts_on =
-      "O início está no futuro. Escolha hoje ou uma data anterior para ativar, ou salve como rascunho.";
+
   if (end && (!isDate(end) || (isDate(start) && end < start)))
     errors.ends_on = "O fim previsto deve ser igual ou posterior ao início.";
   if (
@@ -67,5 +66,5 @@ export function validateProjectCreation(form: FormData, today: string) {
   )
     errors.goals =
       "Para ativar, informe uma meta de água, sessões semanais ou peso alvo/faixa. Apenas acompanhar peso não define uma meta numérica.";
-  return { ...goals, errors, name, start, end, draft };
+  return { ...goals, errors, name, start, end, draft, planned };
 }
