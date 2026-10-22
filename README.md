@@ -4,7 +4,7 @@ PWA pessoal da **Lucx Tech** para diário alimentar, hidratação, atividades e 
 
 Stack: Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4 e Supabase (PostgreSQL, Auth e Storage privado). Hospedagem prevista na Vercel, inicialmente para uso pessoal.
 
-Uma prévia protegida da `develop` está disponível na Vercel. Veja [publicação e configuração de autenticação](docs/publicacao.md); o lançamento em produção continua pendente dos gates de homologação e review.
+Uma prévia pública da `develop` está disponível na Vercel; o painel exige login Diazen. Veja [publicação e configuração de autenticação](docs/publicacao.md); o lançamento em produção continua pendente dos gates de homologação e review.
 
 O Supabase anteriormente usado pelo Planna foi resetado por autorização do proprietário e já recebeu as migrações 001 a 009. A migração 009 das conveniências alimentares foi aplicada incrementalmente, sem novo reset. Os fluxos essenciais passaram no serviço real com contas temporárias removidas ao final. Consulte [evidências e pendências de homologação](docs/homologacao-supabase.md). **Não reaplique o bundle nesse ambiente.**
 

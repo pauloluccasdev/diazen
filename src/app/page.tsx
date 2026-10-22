@@ -34,68 +34,37 @@ const areas = [
 
 export default function Home() {
   return (
-    <>
-      <Link className="back-link" href="/entrar">
-        Entrar na minha conta →
-      </Link>
-      <section className="welcome" aria-labelledby="welcome-title">
-        <p className="eyebrow">SUA ROTINA. SUA EVOLUÇÃO.</p>
-        <h1 id="welcome-title">
-          Seu próximo passo
-          <br />
-          começa com você<span className="accent">.</span>
-        </h1>
-        <p className="intro">
-          Um espaço para acompanhar o que você faz hoje
-          <br className="desktop-break" /> e enxergar sua evolução ao longo do
-          tempo.
-        </p>
-      </section>
-      <section className="project-card" aria-labelledby="project-title">
-        <div className="project-content">
-          <span className="status">SEU DIÁRIO PESSOAL</span>
-          <h2 id="project-title">
-            Toda evolução tem
-            <br />
-            um ponto de partida.
-          </h2>
-          <p>
-            Organize suas metas em um projeto e reúna seus registros em um só
-            lugar.
-          </p>
-          <Link className="button-primary" href="/cadastro">
-            Começar minha jornada
-            <ArrowRight size={18} aria-hidden="true" />
-          </Link>
-          <br />
-          <a className="back-link" href="#primeiros-passos">
-            Conhecer os primeiros passos
-          </a>
-        </div>
-        <div className="project-art" aria-hidden="true">
-          <div className="art-orbit orbit-one" />
-          <div className="art-orbit orbit-two" />
-          <div className="art-center">
-            <ChartNoAxesCombined size={56} strokeWidth={1.25} />
+    <div className="opening-page">
+      <section className="opening-hero" aria-labelledby="welcome-title">
+        <div className="opening-content">
+          <h1 id="welcome-title" className="brand opening-brand">
+            dia<span>zen.</span>
+          </h1>
+          <p className="auth-tagline">Sua rotina. Sua evolução.</p>
+          <div className="area-grid opening-areas">
+            {areas.map(({ title, detail, icon: Icon }) => (
+              <article key={title}>
+                <span className="icon-box">
+                  <Icon size={22} strokeWidth={1.7} aria-hidden="true" />
+                </span>
+                <div>
+                  <h2>{title}</h2>
+                  <p>{detail}</p>
+                </div>
+              </article>
+            ))}
           </div>
-          <span className="art-label">UM DIA DE CADA VEZ</span>
-        </div>
-      </section>
-      <section className="areas-section" aria-labelledby="areas-title">
-        <div className="section-heading">
-          <h2 id="areas-title">Seu dia, por inteiro</h2>
-          <span>Quatro áreas. Uma jornada.</span>
-        </div>
-        <div className="area-grid">
-          {areas.map(({ title, detail, icon: Icon }) => (
-            <article className="area-card" key={title}>
-              <span className="icon-box">
-                <Icon size={22} strokeWidth={1.7} aria-hidden="true" />
-              </span>
-              <h3>{title}</h3>
-              <p>{detail}</p>
-            </article>
-          ))}
+          <div className="opening-actions">
+            <Link className="button-primary" href="/cadastro">
+              Começar minha jornada <ArrowRight size={18} aria-hidden="true" />
+            </Link>
+            <Link className="button-secondary" href="/entrar">
+              Já tenho uma conta
+            </Link>
+            <a className="back-link" href="#primeiros-passos">
+              Conhecer os primeiros passos
+            </a>
+          </div>
         </div>
       </section>
       <section
@@ -142,6 +111,6 @@ export default function Home() {
         <ShieldCheck size={18} aria-hidden="true" />
         Sua jornada é pessoal. Seus dados também.
       </p>
-    </>
+    </div>
   );
 }

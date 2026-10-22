@@ -15,7 +15,7 @@ export function LogoutButton() {
     >
       <button
         type="submit"
-        className="button-primary"
+        className="button-secondary button-logout"
         disabled={pending || !online}
       >
         {" "}

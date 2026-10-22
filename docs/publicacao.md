@@ -4,7 +4,7 @@
 
 Projeto Vercel: `diazen`, na conta do proprietário, Node.js 24 e framework Next.js. A branch de produção continua sendo `main`; o agente não realiza seu merge.
 
-Prévia estável da integração: <https://diazen-git-develop-pauloluccas-projects-58a37ef2.vercel.app>. O acesso está protegido pela autenticação da Vercel para a conta do proprietário durante a homologação. Essa proteção da hospedagem é adicional ao login do Diazen.
+Prévia estável da integração: <https://diazen-git-develop-pauloluccas-projects-58a37ef2.vercel.app>. Por solicitação do proprietário em 22/10/2026, esse domínio tem uma exceção de proteção da Vercel e abre sem conta Vercel. O painel continua exigindo login Diazen. A exceção é restrita ao alias estável da develop; os demais endereços mantêm a proteção do projeto. Produção continua aguardando aprovação e PR para main.
 
 As quatro variáveis da aplicação foram configuradas apenas para previews da branch `develop`: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_SITE_URL` e `SUPABASE_SECRET_KEY`. O segredo administrativo usa armazenamento sensível na plataforma. Outras branches não recebem automaticamente o acesso ao banco real. A prévia de integração compartilha o Supabase dedicado ao Diazen e deve usar somente contas sintéticas enquanto os gates de lançamento estiverem pendentes.
 
