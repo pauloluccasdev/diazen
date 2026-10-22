@@ -6,7 +6,7 @@ Stack: Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4 e Supabase 
 
 Uma prévia protegida da `develop` está disponível na Vercel. Veja [publicação e configuração de autenticação](docs/publicacao.md); o lançamento em produção continua pendente dos gates de homologação e review.
 
-O Supabase anteriormente usado pelo Planna foi resetado por autorização do proprietário e já está configurado localmente com as oito migrações. Os fluxos essenciais passaram no serviço real com contas temporárias removidas ao final. Consulte [evidências e pendências de homologação](docs/homologacao-supabase.md). **Não reaplique o bundle nesse ambiente.**
+O Supabase anteriormente usado pelo Planna foi resetado por autorização do proprietário e já recebeu as migrações 001 a 009. A migração 009 das conveniências alimentares foi aplicada incrementalmente, sem novo reset. Os fluxos essenciais passaram no serviço real com contas temporárias removidas ao final. Consulte [evidências e pendências de homologação](docs/homologacao-supabase.md). **Não reaplique o bundle nesse ambiente.**
 
 ## Executar
 
@@ -81,3 +81,7 @@ Veja [operação e homologação](docs/operacao.md), [rastreabilidade](docs/matr
 Antes de desenvolver, leia [AGENTS.md](AGENTS.md), os [requisitos](docs/requisitos.md), o [Design System](docs/design-system.md), os [tokens](design/Diazen_Design_Tokens_MVP_0_1_v1_1.json) e as [decisões técnicas](docs/decisoes-tecnicas.md). DOCX em `docs/originais/` são a fonte documental; atualize-os antes de regenerar cópias Markdown com `python3 scripts/extrair_documentacao.py`. O showcase é referência estética, sem ampliar escopo.
 
 Cada funcionalidade sai da `develop` atualizada, em `feat/`, `fix/` ou prefixo apropriado. O agente valida, faz commits, push e merge na `develop`, depois inicia a próxima branch pela integração atualizada. O proprietário realiza o PR final de `develop` para `main` e o code review. Não fazer merge na `main` nem force push.
+
+## Biblioteca alimentar
+
+Em Alimentação, acesse **Alimentos, receitas e favoritos** para salvar composições próprias com fonte e referência. Receitas usam ingredientes da biblioteca e rendimento em porções; valores desconhecidos continuam ausentes. Ao consumir, o diário recebe uma cópia da composição, preservada mesmo após editar/remover a biblioteca. Recentes reutilizam os últimos 20 registros da conta. Copiar refeição exige confirmação, inclui todos os itens da origem e adiciona ao ACTIVE sem substituir os registros existentes.

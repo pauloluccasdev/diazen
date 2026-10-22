@@ -21,6 +21,8 @@ export async function GET() {
     "activities",
     "meal_items",
     "meal_days",
+    "food_library",
+    "food_copy_requests",
     "photos",
   ]) {
     const all: unknown[] = [];

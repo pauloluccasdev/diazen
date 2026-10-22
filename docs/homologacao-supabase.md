@@ -8,7 +8,7 @@ Antes do reset, foi produzido um dump completo em formato custom do PostgreSQL, 
 
 O reset substituiu as 30 tabelas da aplicação Planna e aplicou as oito migrações do Diazen em uma transação. A extensão `btree_gist` foi preservada no schema `extensions`. As quatro contas antigas foram removidas pela API administrativa de Auth. Os schemas gerenciados do Supabase foram preservados. O histórico das oito versões está em `supabase_migrations.schema_migrations`.
 
-**Não reaplicar o bundle:** as migrações 001 a 008 já estão instaladas neste ambiente. Próximas alterações precisam de novas migrações incrementais.
+**Não reaplicar o bundle:** as migrações 001 a 009 já estão instaladas neste ambiente. Próximas alterações precisam de novas migrações incrementais.
 
 ## Evidências reais
 
@@ -31,8 +31,16 @@ Validação feita com build de produção do Next.js em `http://localhost:3000`,
 
 As duas contas temporárias e suas credenciais locais foram removidas ao concluir. O ledger mínimo de exclusões permanece como trilha operacional. Relatórios técnicos locais estão em `artifacts/real-homologation-report.json`, `artifacts/homologation-cleanup-report.json`, `artifacts/database-reset-report.json` e `artifacts/auth-reset-report.json`, fora do Git.
 
+## Conveniências alimentares — 22/10/2026
+
+Inclusão do RF-009 aprovada pelo proprietário. Migração 009 aplicada em transação pela Management API HTTPS com validação de certificado, conferência das oito versões anteriores e de seus SQLs, registro da nova versão e reload do PostgREST. Apenas novas tabelas/funções foram criadas; não houve reset. Contagens de contas e projetos existentes preservadas, nenhuma tabela pública sem RLS. Histórico anterior de migrações e contagens registrados localmente, sem exportar dados pessoais.
+
+Duas contas sintéticas com e-mail já confirmado exercitaram Auth/PostgREST reais: compilação de receita com nutriente desconhecido, consumo proporcional, snapshots preservados após edição/exclusão da biblioteca, favoritos, negação de leitura e de ingrediente de outra conta, reutilização de recente e cópia para a própria refeição. Duas requisições simultâneas com o mesmo UUID copiaram uma única vez, preservando registros existentes e desfazendo a conclusão manual. Isso valida concorrência multi-conexão além do teste local. Biblioteca e ledger de cópias foram removidos pela exclusão em cascade das contas sintéticas; ledger mínimo de exclusões preservado e marcado como concluído. Conta do proprietário não foi alterada.
+
+Relatórios locais: `artifacts/food-migration-report.json` e `artifacts/food-library-homologation-report.json`. Os testes de navegador locais usam o adaptador HTTP; esta validação adicional usa os serviços reais via SDK e não comprova interface hospedada do RF-009.
+
 ## Pendências de lançamento
 
-Ainda verificar templates e URLs de Auth para Diazen, SMTP e entrega real de confirmação/recuperação, expiração e reutilização de links, expiração natural da sessão, hospedagem HTTPS, instalação em dispositivos físicos, desempenho, restauração isolada de banco e arquivos, política operacional e aprovação visual/legal do proprietário. A configuração anterior de Auth pode conter URLs e templates do Planna; o reset do banco não os altera.
+Estado atualizado em 22/10/2026: provedor/templates padrão, URLs e callbacks PKCE configurados; recuperação pelo e-mail padrão confirmada pelo proprietário; prévia HTTPS protegida disponível. Os itens atuais de encerramento estão em [homologação final](homologacao-final.md), incluindo confirmação de cadastro, dispositivos físicos, desempenho, recuperação dos serviços hospedados, política operacional e aprovação visual/legal. Não há pendência de SMTP personalizado, pois o proprietário decidiu usar o provedor padrão.
 
 Este registro comprova os testes descritos; não declara o MVP integralmente homologado nem substitui o roteiro de `docs/operacao.md`.

@@ -7,10 +7,11 @@ Execução autorizada pelo proprietário em 21/10/2026: continuar o desenvolvime
 - [x] Fundação Next.js, interface inicial e manifesto PWA.
 - [x] Login, logout e painel protegido (login e renovação validados também no Supabase real).
 - [x] Cadastro, confirmação de e-mail e recuperação de senha implementados; proprietário confirmou recebimento e troca de senha pelo e-mail padrão em 22/10/2026. Confirmação de cadastro ainda requer evidência própria.
-- [x] Refinamento técnico e migrações com autorização, integridade e auditoria (oito migrações aplicadas no Supabase real após reset autorizado).
+- [x] Refinamento técnico e migrações com autorização, integridade e auditoria (001 a 008 após reset autorizado; 009 aplicada incrementalmente, sem novo reset).
 - [x] Onboarding, projetos, metas, estados e histórico, com teste integrado à persistência local.
 - [x] Hidratação, peso, medidas e atividades.
 - [x] Diário alimentar manual e composição informada, com ausência distinta de zero.
+- [x] RF-009 incluído pelo proprietário na revisão final: alimentos salvos, receitas, recentes, favoritos e cópia confirmada; homologação PostgREST real com contas sintéticas.
 - [x] Fotos privadas, otimização, galeria e comparação (Storage real validado com contas sintéticas).
 - [x] Dashboard integrado, leitura offline limitada e privacidade da conta (configuração operacional real pendente).
 - [x] Testes integrados locais, acessibilidade automática e documentação operacional.

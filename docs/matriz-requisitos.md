@@ -10,7 +10,7 @@ Os fluxos essenciais também passaram no Supabase real em 21/10/2026. Consulte [
 | 002–005 | Projetos, onboarding, metas e estados | `tests/projects.spec.ts`, `tests/database/core.test.mjs`; criação/ativação atômicas, filtro por estado antes da paginação, edição de datas somente em DRAFT preservando metas e histórico somente leitura. |
 | 006–007 | Diário manual e composição informada por referência | `tests/records.spec.ts`, agregações SQL; sem catálogo externo ou nutrientes inventados. |
 | 008 | Calendário de sete dias navegável e confirmação manual | Teste de confirmação e invalidação por edição; conclusão não indica aderência. |
-| 009 | Conveniências | Adiado para revisão final de backlog; prioridade Média, sem bloquear núcleo manual. |
+| 009 | Biblioteca privada, receitas por ingredientes, favoritos, recentes e cópia confirmada | Inclusão aprovada pelo proprietário em 22/10/2026. `tests/food-library.spec.ts` e `tests/database/food-library.test.mjs`: snapshots, ausência ≠ zero, isolamento, cópia além da paginação e replay sem duplicação. |
 | 010–011 | Hidratação e versões de meta | Soma/edição no browser e teste SQL de versão histórica imutável. |
 | 012–013 | Atividades manuais e sessões semanais | Persistência e distância requerida por modalidade no browser/banco; sessões ausentes não viram zero confirmado. |
 | 014 | Peso único e substituição auditada | Testes SQL de unicidade, substituição e valor anterior; histórico encerrado não é transferido. |

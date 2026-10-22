@@ -12,7 +12,7 @@ Capturas locais reproduzíveis:
 CAPTURE_REVIEW=1 npx playwright test tests/accessibility.spec.ts --project=chromium
 ```
 
-Requer build prévio. A configuração do teste utiliza Auth/Storage simulados e PostgreSQL embarcado, sem conexão ao Supabase remoto. Capturas em `artifacts/visual-review/chromium/` cobrem abertura, login, cadastro, recuperação, privacidade, termos, dashboard, projetos, água, peso, medidas, atividades, alimentação, fotos e perfil em 390 e 1280 px. Mostram os estados iniciais dos módulos com um projeto ativo fictício; não documentam todos os estados preenchidos, erros ou fotos reais. Os arquivos ficam ignorados pelo Git.
+Requer build prévio. A configuração do teste utiliza Auth/Storage simulados e PostgreSQL embarcado, sem conexão ao Supabase remoto. Capturas em `artifacts/visual-review/chromium/` cobrem abertura, login, cadastro, recuperação, privacidade, termos, dashboard, projetos, água, peso, medidas, atividades, alimentação, biblioteca de alimentos/receitas, fotos e perfil em 390 e 1280 px. Mostram os estados iniciais dos módulos com um projeto ativo fictício; não documentam todos os estados preenchidos, erros ou fotos reais. Os arquivos ficam ignorados pelo Git.
 
 - [ ] Proprietário aprova composição, legibilidade, identidade e navegação das telas reais.
 - [ ] Instalar e abrir a PWA no celular disponível; registrar sistema e navegador.
@@ -28,7 +28,7 @@ Requer build prévio. A configuração do teste utiliza Auth/Storage simulados e
 - [ ] Validar recuperação de Auth e arquivos pela API do Storage hospedados em ambiente isolado, conforme [operação](operacao.md). O ensaio nativo usa adaptadores e não fecha este item.
 - [ ] Aprovar frequência, armazenamento cifrado externo e retenção dos backups, incluindo cópia independente e atualizada do ledger de exclusões.
 - [ ] Confirmar responsável, contato, finalidade, retenção e textos de privacidade/termos adequados ao uso pessoal escolhido.
-- [ ] Fechar a revisão de backlog do RF-009 (conveniências alimentares), registrando inclusão ou adiamento por decisão do proprietário.
+- [x] RF-009 incluído por decisão do proprietário em 22/10/2026: alimentos salvos, receitas, favoritos, recentes e cópia confirmada de refeições.
 
 ## Publicação após review
 

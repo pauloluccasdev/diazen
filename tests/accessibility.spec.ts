@@ -67,6 +67,7 @@ test("telas essenciais acessíveis e sem overflow no mobile", async ({
     "/painel/medidas",
     "/painel/atividades",
     "/painel/alimentacao",
+    "/painel/alimentos",
     "/painel/fotos",
     "/painel/perfil",
   ]) {

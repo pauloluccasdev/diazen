@@ -30,6 +30,8 @@ const tables = new Set([
   "activities",
   "meal_items",
   "meal_days",
+  "food_library",
+  "food_copy_requests",
   "photos",
   "photo_cleanup",
   "account_deletions",
@@ -43,6 +45,9 @@ const commands = new Set([
   "request_account_deletion",
   "project_summary",
   "food_calendar",
+  "save_recipe",
+  "add_library_food",
+  "copy_meal",
 ]);
 const identifier = (text) => {
   if (!/^[a-z_]+$/.test(text)) throw new Error("Invalid identifier");
@@ -115,11 +120,11 @@ export async function rest(
     for (const [key, value] of url.searchParams) {
       if (["select", "order", "limit", "offset", "on_conflict"].includes(key))
         continue;
-      const match = /^(eq|gte|lte|gt|lt)\.(.*)$/.exec(value);
+      const match = /^(eq|gte|lte|gt|lt|ilike)\.(.*)$/.exec(value);
       if (!match) throw new Error("Unknown filter");
       values.push(match[2]);
       filters.push(
-        `${identifier(key)} ${{ eq: "=", gte: ">=", lte: "<=", gt: ">", lt: "<" }[match[1]]} $${values.length}`,
+        `${identifier(key)} ${{ eq: "=", gte: ">=", lte: "<=", gt: ">", lt: "<", ilike: "ilike" }[match[1]]} $${values.length}`,
       );
     }
     const where = filters.length ? " where " + filters.join(" and ") : "";
