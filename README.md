@@ -4,6 +4,8 @@ PWA pessoal da **Lucx Tech** para diário alimentar, hidratação, atividades e 
 
 Stack: Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4 e Supabase (PostgreSQL, Auth e Storage privado). Hospedagem prevista na Vercel, inicialmente para uso pessoal.
 
+O Supabase anteriormente usado pelo Planna foi resetado por autorização do proprietário e já está configurado localmente com as oito migrações. Os fluxos essenciais passaram no serviço real com contas temporárias removidas ao final. Consulte [evidências e pendências de homologação](docs/homologacao-supabase.md). **Não reaplique o bundle nesse ambiente.**
+
 ## Executar
 
 Use Node.js 24 (`.nvmrc`) e npm:

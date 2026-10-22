@@ -6,6 +6,8 @@ O código e os testes locais estão preparados para uso pessoal em ambiente de h
 
 ## Preparação
 
+Atualização de 21/10/2026: o projeto Supabase do Planna foi resetado por autorização do proprietário e já recebeu as oito migrações. Configuração, fluxos essenciais, isolamento e concorrência foram testados no serviço real; veja [evidências e pendências](homologacao-supabase.md). Não reaplique o bundle neste projeto. SMTP, URLs/templates e demais gates abaixo continuam sujeitos à homologação.
+
 1. Revise `docs/modelagem.md` e o bundle gerado por `npm run db:bundle`, em `artifacts/diazen-migrations.sql`. Ele é destinado a um projeto vazio; não executa DROP/RESET e não deve ser reaplicado sobre tabelas já existentes.
 2. Aplique migrações em ordem após revisar o modelo. Confirme RLS em tabelas e policies específicas do bucket privado `body-photos`. Não exponha o schema `private` no Data API. Não configure outras policies permissivas para o mesmo bucket.
 3. Configure `.env.local` conforme `.env.example`; confira `npm run env:check -- --connect`. A origem deve corresponder ao endereço realmente acessado. `localhost` e `127.0.0.1` são origens distintas para cookies e links.

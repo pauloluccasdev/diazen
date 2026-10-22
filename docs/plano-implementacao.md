@@ -5,13 +5,13 @@ Execução autorizada pelo proprietário em 21/10/2026: continuar o desenvolvime
 ## Incrementos
 
 - [x] Fundação Next.js, interface inicial e manifesto PWA.
-- [x] Login, logout e painel protegido (integração real pendente de ambiente).
+- [x] Login, logout e painel protegido (login e renovação validados também no Supabase real).
 - [x] Cadastro, confirmação de e-mail e recuperação de senha (homologação de e-mail pendente).
-- [x] Refinamento técnico e migrações com autorização, integridade e auditoria (revisão/aplicação remota pendentes).
+- [x] Refinamento técnico e migrações com autorização, integridade e auditoria (oito migrações aplicadas no Supabase real após reset autorizado).
 - [x] Onboarding, projetos, metas, estados e histórico, com teste integrado à persistência local.
 - [x] Hidratação, peso, medidas e atividades.
 - [x] Diário alimentar manual e composição informada, com ausência distinta de zero.
-- [x] Fotos privadas, otimização, galeria e comparação (Storage real pendente de homologação).
+- [x] Fotos privadas, otimização, galeria e comparação (Storage real validado com contas sintéticas).
 - [x] Dashboard integrado, leitura offline limitada e privacidade da conta (configuração operacional real pendente).
 - [x] Testes integrados locais, acessibilidade automática e documentação operacional.
 - [ ] Homologação Supabase/SMTP/hospedagem, concorrência real, restauração externa e aprovação visual/operacional final.
@@ -22,4 +22,4 @@ Fluxos F-01 a F-07 persistidos; RF de prioridade Alta atendidos; autorização e
 
 ## Dependências externas observadas
 
-Ainda não há configuração de Supabase real no workspace nem ferramentas conectadas ao serviço. Docker não está disponível nesta distribuição WSL. Prosseguir com implementação e testes locais sem provisionar serviços; manter pendências reais explícitas.
+O Supabase anteriormente usado pelo Planna foi reutilizado e resetado por autorização do proprietário; configuração local, migrações e fluxos essenciais foram verificados no serviço real. Consulte [a evidência de homologação](homologacao-supabase.md). SMTP/URLs/templates, hospedagem, restauração isolada, dispositivos físicos e aprovação final continuam pendentes. Docker não está disponível nesta distribuição WSL.
