@@ -787,3 +787,43 @@ body {
 .panel-nav a {
   gap: 8px;
 }
+.area-card .metric-empty {
+  font-size: 18px;
+  line-height: 1.4;
+  font-weight: 600;
+}
+.dashboard-hero .project-content {
+  padding: 20px;
+}
+.dashboard-hero .project-content h2 {
+  margin: 12px 0 8px;
+}
+.dashboard-hero .intro {
+  margin-top: 12px;
+}
+.dashboard-hero .back-link {
+  margin-top: 8px;
+}
+@media (max-width: 600px) {
+  .dashboard-welcome {
+    padding: 24px 0 16px;
+  }
+  .dashboard-welcome h1 {
+    font-size: 28px;
+  }
+  .dashboard-welcome .intro {
+    margin-top: 12px;
+  }
+  .dashboard-filters {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    margin: 16px 0;
+  }
+  .dashboard-filters label {
+    width: auto;
+  }
+  .dashboard-filters label:first-child {
+    grid-column: 1/-1;
+  }
+}

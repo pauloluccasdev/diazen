@@ -43,6 +43,7 @@ export default async function Panel({
         {
           label: "Alimentação",
           module: "alimentacao",
+          empty: summary.kcal === null,
           icon: Utensils,
           value:
             summary.kcal === null
@@ -58,6 +59,7 @@ export default async function Panel({
         {
           label: "Hidratação",
           module: "agua",
+          empty: summary.water_ml === null,
           icon: Droplets,
           value:
             summary.water_ml === null
@@ -71,6 +73,7 @@ export default async function Panel({
         {
           label: "Atividades",
           module: "atividades",
+          empty: summary.sessions === null,
           icon: Dumbbell,
           value:
             summary.sessions === null
@@ -84,6 +87,7 @@ export default async function Panel({
         {
           label: "Peso",
           module: "peso",
+          empty: summary.weight === null,
           icon: ChartNoAxesCombined,
           value:
             summary.weight === null
@@ -97,7 +101,7 @@ export default async function Panel({
     : [];
   return (
     <>
-      <section className="welcome">
+      <section className="welcome dashboard-welcome">
         <p className="eyebrow">SEU ESPAÇO</p>
         <h1>Bem-vindo à sua jornada.</h1>
         <p className="intro">
@@ -106,7 +110,7 @@ export default async function Panel({
       </section>
       {selected && summary ? (
         <>
-          <form className="filter-form">
+          <form className="filter-form dashboard-filters">
             <label>
               Projeto visualizado
               <select name="projeto" defaultValue={selected.id}>
@@ -169,20 +173,26 @@ export default async function Panel({
               <span>{formatDate(date)}</span>
             </div>
             <div className="area-grid">
-              {cards.map(({ label, module, icon: Icon, value, detail }) => (
-                <Link
-                  className="area-card"
-                  key={module}
-                  href={`/painel/${module}?projeto=${selected.id}&data=${date}`}
-                >
-                  <span className="icon-box">
-                    <Icon size={22} aria-hidden="true" />
-                  </span>
-                  <h3>{label} →</h3>
-                  <p className="metric-value">{value}</p>
-                  <p>{detail}</p>
-                </Link>
-              ))}
+              {cards.map(
+                ({ label, module, icon: Icon, value, detail, empty }) => (
+                  <Link
+                    className="area-card"
+                    key={module}
+                    href={`/painel/${module}?projeto=${selected.id}&data=${date}`}
+                  >
+                    <span className="icon-box">
+                      <Icon size={22} aria-hidden="true" />
+                    </span>
+                    <h3>{label} →</h3>
+                    <p
+                      className={`metric-value${empty ? " metric-empty" : ""}`}
+                    >
+                      {value}
+                    </p>
+                    <p>{detail}</p>
+                  </Link>
+                ),
+              )}
             </div>
           </section>
           <nav className="panel-nav" aria-label="Evolução corporal">

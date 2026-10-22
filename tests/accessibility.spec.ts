@@ -14,7 +14,9 @@ test("telas essenciais acessíveis e sem overflow no mobile", async ({
     "/privacidade",
     "/termos",
   ]) {
-    await page.goto(path);
+    const response = await page.goto(path);
+    expect(response?.status()).toBe(200);
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     const result = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
       .analyze();
@@ -47,7 +49,9 @@ test("telas essenciais acessíveis e sem overflow no mobile", async ({
     "/painel/fotos",
     "/painel/perfil",
   ]) {
-    await page.goto(path);
+    const response = await page.goto(path);
+    expect(response?.status()).toBe(200);
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     const result = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
       .analyze();

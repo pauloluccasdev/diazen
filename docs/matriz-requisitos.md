@@ -31,7 +31,7 @@
 | RNF-009/010, RB-09 | Cache exclusivo do fallback, resumo limitado à aba, fotos sem cache/EXIF com leitura autorizada e processamento no servidor. Sem limite arbitrário por projeto. |
 | RNF-013 | Dump/restauração local, ledger e roteiro de backup/restore externo; execução real pendente. |
 | RNF-014 | Migrações, tipagem, lint, formato, build e testes na CI; branches de funcionalidade integradas em develop. |
-| RNF-015 | Chromium local; WebKit configurado na CI. Testes em dispositivos físicos pendentes. |
+| RNF-015 | Chromium local e suíte WebKit aprovada na CI (perfil iPhone). Testes em dispositivos físicos pendentes. |
 | RB-08/11 | Sem prescrição ou metas por modalidade. Decisões registradas; sem IA, Strava, login social ou expansão ilustrativa do showcase. |
 
 ## Gate de conclusão
