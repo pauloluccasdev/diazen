@@ -90,6 +90,7 @@ test('isolamento, estados e integridade no PostgreSQL', async () => {
   await asUser(bob);
   assert.equal((await query('select * from storage.objects')).length,0,'storage isolado por proprietário');
   await asUser();
+  const backup = await db.dumpDataDir('gzip');
   await query('select request_account_deletion()');
   for (const table of ['projects','water_goals','water_entries','weights','measurements','activities','meal_items','meal_days','photos']) assert.equal((await query(`select * from ${table}`)).length,0,`tombstone: ${table}`);
   await assert.rejects(query('insert into water_entries(logged_on,volume_ml) values($1,100)',[date]),/Conta indisponível/);
@@ -99,5 +100,17 @@ test('isolamento, estados e integridade no PostgreSQL', async () => {
   // Exclusão administrativa deve funcionar mesmo para projetos encerrados.
   await query('delete from auth.users where id=$1',[alice]);
   assert.equal((await query('select * from projects where user_id=$1',[alice])).length,0);
+  assert.equal((await query('select * from deletion_ledger where user_id=$1',[alice])).length,1,'registro mínimo de exclusão sobrevive ao purge');
   await db.close();
+  // Ensaio local: restaurar snapshot anterior não pode reabrir dados excluídos.
+  const restored = new PGlite({loadDataDir:backup});
+  assert.equal((await restored.query('select * from projects where user_id=$1',[alice])).rows.length,2);
+  // Reaplicar ledger atual, mantido fora da cópia restaurada, antes de liberar acesso.
+  await restored.query('insert into deletion_ledger(user_id) values($1) on conflict do nothing',[alice]);
+  await restored.query('insert into account_deletions(user_id) values($1) on conflict do nothing',[alice]);
+  await restored.query('delete from auth.users where id=$1',[alice]);
+  await restored.exec(`set role authenticated; select set_config('request.jwt.claim.sub','${alice}',false)`);
+  assert.equal((await restored.query('select * from projects')).rows.length,0);
+  assert.equal((await restored.query('select * from storage.objects')).rows.length,0);
+  await restored.close();
 });

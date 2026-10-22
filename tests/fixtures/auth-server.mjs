@@ -25,6 +25,12 @@ createServer(async (request, response) => {
   if(request.url?.startsWith('/storage/v1/object/')) {
     const parts=decodeURIComponent(new URL(request.url,'http://localhost').pathname).split('/');
     const bucketIndex=parts.indexOf('body-photos'),path=parts.slice(bucketIndex+1).join('/');
+    if(parts.includes('list')&&request.method==='POST'&&admin) {
+      let raw='';for await(const part of request)raw+=part;const {prefix='',limit=100,offset=0}=JSON.parse(raw);
+      const entries=new Map();
+      for(const key of files.keys())if(key.startsWith(prefix+'/')){const remainder=key.slice(prefix.length+1),name=remainder.split('/')[0];entries.set(name,{name,id:remainder.includes('/')?null:key});}
+      return response.end(JSON.stringify([...entries.values()].sort((a,b)=>a.name.localeCompare(b.name)).slice(offset,offset+limit)));
+    }
     if(request.method==='POST'&&admin&&path) {
       const parts=[];for await(const part of request)parts.push(part);files.set(path,Buffer.concat(parts));
       queue=queue.then(async()=>{await db.exec('reset role');await db.query("insert into storage.objects(bucket_id,name) values('body-photos',$1)",[path]);});await queue;
@@ -41,6 +47,13 @@ createServer(async (request, response) => {
       if(allowed&&files.has(path)){response.setHeader('Content-Type','image/webp');return response.end(files.get(path));}
     }
     response.statusCode=404;return response.end('{}');
+  }
+  if(request.url?.startsWith('/auth/v1/admin/users/')&&request.method==='DELETE'&&admin) {
+    const id=request.url.split('/').at(-1);
+    queue=queue.then(async()=>{await db.exec('reset role');await db.query('delete from auth.users where id=$1',[id]);});await queue;
+    for(const [token,u]of tokens)if(u.id===id)tokens.delete(token);
+    const index=users.findIndex(u=>u.id===id);const removed=users[index];if(index>=0)users.splice(index,1);
+    return response.end(JSON.stringify({user:removed}));
   }
   if (request.url === "/auth/v1/token?grant_type=password" && request.method === "POST") {
     let body = "";
