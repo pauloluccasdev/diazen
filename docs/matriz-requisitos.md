@@ -2,9 +2,11 @@
 
 “Implementado/local” significa código presente e teste local pertinente; não significa homologação ou aprovação para produção. As dependências reais estão em `docs/operacao.md`.
 
+Os fluxos essenciais também passaram no Supabase real em 21/10/2026. Consulte [as evidências específicas](homologacao-supabase.md), incluindo concorrência, isolamento do Storage e exclusão completa; os demais gates de lançamento continuam pendentes.
+
 | RF | Implementação | Evidência local / limite |
 | --- | --- | --- |
-| 001 | Cadastro, login/logout, confirmação, recuperação, nova senha | `tests/auth.spec.ts`; provider HTTP simulado. SMTP, renovação e expiração real pendentes. |
+| 001 | Cadastro, login/logout, confirmação, recuperação, nova senha | `tests/auth.spec.ts`; provider HTTP simulado. Login e renovação também no Auth real; SMTP, confirmação/recuperação e expiração natural pendentes. |
 | 002–005 | Projetos, onboarding, metas e estados | `tests/projects.spec.ts`, `tests/database/core.test.mjs`; criação/ativação atômicas e histórico. |
 | 006–007 | Diário manual e composição informada por referência | `tests/records.spec.ts`, agregações SQL; sem catálogo externo ou nutrientes inventados. |
 | 008 | Calendário de sete dias navegável e confirmação manual | Teste de confirmação e invalidação por edição; conclusão não indica aderência. |
@@ -13,7 +15,7 @@
 | 012–013 | Atividades manuais e sessões semanais | Persistência e distância requerida por modalidade no browser/banco; sessões ausentes não viram zero confirmado. |
 | 014 | Peso único e substituição auditada | Testes SQL de unicidade, substituição e valor anterior; histórico encerrado não é transferido. |
 | 015 | Circunferências parciais e únicas | RPC transacional, teste de subconjunto inválido revertendo integralmente. |
-| 016–017 | Fotos privadas e comparação | `tests/photos.spec.ts`, `tests/database/images.test.mjs`; orientação, EXIF, thumbnail, acesso cruzado e histórico. Storage real pendente. |
+| 016–017 | Fotos privadas e comparação | `tests/photos.spec.ts`, `tests/database/images.test.mjs`; orientação, EXIF, thumbnail, acesso cruzado e histórico. Upload, leitura privada, isolamento e comparação também no Storage real. |
 | 018 | Dashboard por projeto/data | Agregações SQL e links contextuais; consulta não troca ACTIVE. Snapshot mínimo é apenas leitura. |
 | 019 | Registros retroativos | Triggers de vigência/projeto ativo e teste de datas fora de intervalo/futuras. |
 | 020 | Exportação e exclusão confirmada | `tests/privacy.spec.ts`; senha incorreta negada e purge de foto histórica. Ledger e ensaio de restauração local. Revisão operacional/legal pendente. |
@@ -24,7 +26,7 @@
 | --- | --- |
 | RNF-001/002, RB-01/02/03/10 | Auth gerenciado e validação server-side; RLS e constraints testadas entre usuários/estados; grants mínimos e negação de TRUNCATE. HTTPS/rate limits/configuração real a conferir. |
 | RNF-003/017 | Minimização, privacidade, termos, exportação e exclusão implementados; revisão jurídica, contato e retenção reais pendentes. |
-| RNF-004/016, RB-04/05/06/07 | Tipos, limites, FKs compostas, índices únicos, locks e RPCs; provas locais de rollback/unicidade/ausência ≠ zero. Concorrência multi-conexão real pendente. |
+| RNF-004/016, RB-04/05/06/07 | Tipos, limites, FKs compostas, índices únicos, locks e RPCs; provas locais de rollback/unicidade/ausência ≠ zero. No serviço real, requisições concorrentes comprovaram ACTIVE único, peso único e consistência entre encerramento e escrita. |
 | RNF-005/012 | Retry, erros genéricos, `/api/saude` e evento técnico de purge pendente; monitoramento externo/SLA inicial ainda a confirmar. |
 | RNF-006/011 | Listagens paginadas e totais no banco; índices por proprietário. Meta proposta de ~2 s e volume/dispositivo real precisam de medição. |
 | RNF-007/008 | Testes em seis larguras e axe WCAG A/AA nas telas essenciais; teclado básico testado. Leitor de tela, zoom e revisão manual complementam a verificação automática. |
