@@ -37,6 +37,9 @@ Os testes locais usam PostgreSQL de fato, mas não o gateway PostgREST, a implem
 
 ## Monitoramento e falhas
 
+- Erros de renderização, rotas e ações emitem `request_failed` com rota/módulo, tipo e instante pelo hook `src/instrumentation.ts`. Não registrar mensagem bruta do provedor, cabeçalhos ou formulários. Os logs da hospedagem permitem inspecionar ocorrências; alertas externos e objetivo de disponibilidade ainda precisam de definição operacional.
+- Após uma falha transitória, “Tentar novamente” refaz a consulta no servidor. O teste de regressão injeta falha somente no simulador local; esse controle não existe na aplicação hospedada.
+
 - `/api/saude` comprova resposta da aplicação; monitore separadamente o provedor e os fluxos autenticados.
 - Erros de carga apresentam retry. Erros de gravação não confirmam sucesso. Solicitações administrativas pendentes são consultadas nas tabelas internas com chave de servidor.
 - Logs devem guardar somente eventos técnicos, instantes e identificadores necessários; não registrar e-mails, refeições, medidas, fotos, credenciais ou corpos de requisições. O evento `privacy_purge_pending` sinaliza necessidade de reprocessamento sem incluir dados do titular.

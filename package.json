@@ -14,6 +14,8 @@
     "format": "prettier --write src tests scripts/*.mjs public/sw.js public/offline.html *.ts *.mjs package.json .github/workflows/ci.yml",
     "format:check": "prettier --check src tests scripts/*.mjs public/sw.js public/offline.html *.ts *.mjs package.json .github/workflows/ci.yml",
     "test:webkit": "playwright test --project=webkit",
+    "test:agent-browser": "node tests/manual/agent-browser.mjs",
+    "test:agent-browser:hosted": "node tests/manual/agent-browser.mjs --hosted",
     "env:check": "node scripts/check_environment.mjs",
     "db:bundle": "node scripts/bundle_migrations.mjs",
     "auth:configure": "node scripts/configure_supabase_auth.mjs",
