@@ -1,6 +1,7 @@
 import "server-only";
 import { redirect, notFound } from "next/navigation";
 import { createSupabaseServerClient } from "./supabase/server";
+import { isId } from "./domain";
 import type { Project, WaterGoal } from "./domain";
 
 export async function requireAccount() {
@@ -24,6 +25,7 @@ export async function projectContext(selectedId?: string, page = 1) {
   const active = activeProject ?? null;
   let selected: Project | null = active ?? projects[0] ?? null;
   if (selectedId) {
+    if (!isId(selectedId)) notFound();
     const { data: target, error: targetError } = await client.from("projects").select("*").eq("id",selectedId).maybeSingle<Project>();
     if (targetError) throw new Error("Não foi possível carregar o projeto.");
     selected = target;

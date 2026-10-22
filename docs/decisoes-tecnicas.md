@@ -71,3 +71,7 @@ A autorização para continuar até concluir o desenvolvimento inclui preparar o
 ## Implementação — Projetos e onboarding — 21/10/2026
 
 RF-002 a RF-005: criação transacional com meta mensurável, rascunho/ativação, edição de nome/metas, encerramento e arquivamento confirmados, seletor para histórico e listagem paginada. A UI não troca o ACTIVE ao consultar histórico. A listagem do seletor contém os 20 projetos da primeira página e o projeto selecionado; o histórico completo fica na página de projetos. O teste de navegador usa Auth simulado e PostgreSQL real embarcado para criação e fechamento, sem conexão remota.
+
+## Implementação — Registros diários — 21/10/2026
+
+RF-006 a RF-008, RF-010 a RF-015 e RF-019: registros manuais, edição/exclusão no ACTIVE, peso e medidas por RPC atômica, refeições fixas e composição proporcional informada, confirmação do dia invalidada por mudanças, meta de água vigente e sessões semanais globais. Totais são agregados no banco independentemente da paginação (20 itens); gráfico de peso mostra até 30 medições recentes. Inserções comuns usam UUID emitido no formulário para impedir duplicação pelo replay da mesma requisição. Alimentação não usa catálogo sem licença aprovada. Os fluxos são exercitados por navegador contra as migrações reais em PostgreSQL embarcado.
