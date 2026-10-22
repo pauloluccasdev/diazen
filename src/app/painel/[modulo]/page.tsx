@@ -74,39 +74,40 @@ export default async function Records({
     .order("id", { ascending: false })
     .range((page - 1) * 20, page * 20);
   if (daily || filters.data) query = query.eq("logged_on", date);
-  const { data, error } = await query.returns<Entry[]>();
-  if (error) throw new Error("Falha ao carregar registros");
-  const rows = (data ?? []).slice(0, 20),
-    hasMore = (data?.length ?? 0) > 20;
-  const { data: summaryData, error: summaryError } = await client.rpc(
-    "project_summary",
-    { p_project: selected.id, p_date: date },
-  );
-  if (summaryError) throw new Error("Falha ao carregar totais");
-  const summary = summaryData as Summary;
-  const link = (nextPage: number) =>
-    `/painel/${modulo}?projeto=${selected.id}&pagina=${nextPage}${daily || filters.data ? `&data=${date}` : ""}`;
-  let chart: Entry[] = [];
-  if (modulo === "peso") {
-    const { data, error } = await client
-      .from("weights")
-      .select("*")
-      .eq("project_id", selected.id)
-      .order("logged_on", { ascending: false })
-      .limit(30)
-      .returns<Entry[]>();
-    if (error) throw new Error("Falha no gráfico");
-    chart = data ?? [];
-  }
-  let days: { day: string; items: number; confirmed: boolean }[] = [];
-  if (modulo === "alimentacao") {
-    const { data, error } = await client.rpc("food_calendar", {
+  const [entries, totals, graph, calendar] = await Promise.all([
+    query.returns<Entry[]>(),
+    client.rpc("project_summary", {
       p_project: selected.id,
       p_date: date,
-    });
-    if (error) throw new Error("Falha no calendário");
-    days = data ?? [];
-  }
+    }),
+    modulo === "peso"
+      ? client
+          .from("weights")
+          .select("*")
+          .eq("project_id", selected.id)
+          .order("logged_on", { ascending: false })
+          .limit(30)
+          .returns<Entry[]>()
+      : Promise.resolve({ data: [] as Entry[], error: null }),
+    modulo === "alimentacao"
+      ? client.rpc("food_calendar", {
+          p_project: selected.id,
+          p_date: date,
+        })
+      : Promise.resolve({ data: [], error: null }),
+  ]);
+  if (entries.error) throw new Error("Falha ao carregar registros");
+  if (totals.error) throw new Error("Falha ao carregar totais");
+  if (graph.error) throw new Error("Falha no gráfico");
+  if (calendar.error) throw new Error("Falha no calendário");
+  const rows = (entries.data ?? []).slice(0, 20),
+    hasMore = (entries.data?.length ?? 0) > 20;
+  const summary = totals.data as Summary;
+  const link = (nextPage: number) =>
+    `/painel/${modulo}?projeto=${selected.id}&pagina=${nextPage}${daily || filters.data ? `&data=${date}` : ""}`;
+  const chart: Entry[] = graph.data ?? [];
+  const days: { day: string; items: number; confirmed: boolean }[] =
+    calendar.data ?? [];
   return (
     <>
       <section className="welcome">
