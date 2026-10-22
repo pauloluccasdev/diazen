@@ -33,3 +33,4 @@ test-results/
 artifacts/
 backups/
 *.sql.gz
+supabase/.temp/

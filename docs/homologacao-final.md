@@ -25,7 +25,7 @@ Requer build prévio. A configuração do teste utiliza Auth/Storage simulados e
 - [x] Recuperação pelo e-mail padrão recebida e senha redefinida, confirmadas pelo proprietário em 22/10/2026.
 - [ ] Confirmar cadastro pelo e-mail padrão no mesmo navegador da solicitação; a recuperação acima não comprova esse fluxo.
 - [x] Ensaio nativo isolado de banco e arquivos locais com dados sintéticos, RLS e reaplicação de exclusões: `npm run test:restore`, executado em 22/10/2026.
-- [ ] Validar recuperação de Auth e arquivos pela API do Storage hospedados em ambiente isolado, conforme [operação](operacao.md). O ensaio nativo usa adaptadores e não fecha este item.
+- [x] Ensaio controlado com Auth, PostgREST e Storage reais do Supabase local em 22/10/2026: `npm run test:restore:services`; login restaurado, arquivos por API/checksums, RLS e exclusão reaplicada. Não foi executada restauração de outro projeto hospedado; limites em [operação](operacao.md).
 - [ ] Aprovar frequência, armazenamento cifrado externo e retenção dos backups, incluindo cópia independente e atualizada do ledger de exclusões.
 - [ ] Confirmar responsável, contato, finalidade, retenção e textos de privacidade/termos adequados ao uso pessoal escolhido.
 - [x] RF-009 incluído por decisão do proprietário em 22/10/2026: alimentos salvos, receitas, favoritos, recentes e cópia confirmada de refeições.

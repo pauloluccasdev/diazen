@@ -57,7 +57,7 @@ Ensaio obrigatório em ambiente isolado:
 4. Reaplique o ledger atual: bloqueie as contas listadas, remova seus objetos pela API do Storage e remova os usuários de Auth. Não apague apenas linhas de `storage.objects`, pois isso não elimina os arquivos.
 5. Revalide RLS, bucket privado, sessão, contagens dos dados restantes, checksums de fotos e todos os fluxos essenciais. Só então habilite acesso e registre o ensaio sem credenciais/dados pessoais.
 
-O teste local faz dump/restauração do PostgreSQL embarcado e verifica a reaplicação das exclusões. A restauração real do Supabase e de objetos externos continua pendente.
+Além do teste embarcado, o ensaio controlado com os serviços reais do Supabase local foi concluído em 22/10/2026, conforme a seção abaixo. A aplicação do procedimento em um segundo projeto hospedado não foi executada.
 
 ### Ensaio reproduzível em PostgreSQL nativo
 
@@ -72,6 +72,24 @@ Se as ferramentas estiverem extraídas em um diretório local, informe também `
 O comando aplica as migrações em um banco sintético, gera fotos WebP, executa `pg_dump` e `pg_restore` em outro banco e copia os arquivos separadamente. Reaplica o ledger de exclusões posterior ao backup antes de verificar isolamento, remoção dos dados excluídos, preservação dos dados restantes, bucket privado e checksums das imagens. Ao terminar, para o servidor e remove o laboratório; guarda somente um relatório técnico em `artifacts/native-restore-report.json`, ignorado pelo Git.
 
 Ensaio executado com sucesso em 22/10/2026 no PostgreSQL 17.11: dois projetos restaurados; após reaplicar uma exclusão, um projeto e duas imagens do usuário restante preservados com checksums corretos. Auth e Storage usam schemas adaptadores; arquivos são locais. Isso valida ferramentas nativas e a estratégia do ledger, mas ainda não comprova restauração de Auth/Storage hospedados ou recuperação dos arquivos pela API do Supabase.
+
+### Ensaio com Auth e Storage reais do Supabase local
+
+Ensaio controlado concluído em 22/10/2026, com Supabase CLI 2.121.0 e PostgreSQL 17.11. O runtime nativo oficial executa os serviços reais como processos locais, sem adaptadores HTTP/SQL de teste e sem Docker. É experimental e fica restrito a esta verificação; não altera a stack de produção. Requer Linux amd64/arm64 com glibc 2.35 ou posterior, usuário comum, ferramentas PostgreSQL 17 e rede para baixar os serviços na primeira execução.
+
+```bash
+# Disponibilizar a versão fixa do CLI no cache do npm.
+npx --yes supabase@2.121.0 --version
+PG_BIN_DIR=/usr/lib/postgresql/17/bin npm run test:restore:services
+```
+
+Se as ferramentas estiverem extraídas, informe `LD_LIBRARY_PATH` como no ensaio anterior. O comando cria uma pasta temporária e uma stack nova, aplica as migrações, gera duas contas/imagens sintéticas e produz dump custom de `public`, `private`, `auth`, `storage` e `supabase_migrations`. Copia as imagens separadamente pela API do Storage. Preserva o ledger posterior ao backup, esvazia somente os dados criados no laboratório e restaura o dump atomicamente, mantendo os proprietários dos objetos. Reaplica o bloqueio e reinicia os serviços para renovar suas conexões após recriar os schemas; só então verifica acesso e reenvia os arquivos pela API. A exclusão é reaplicada com o mesmo processamento da aplicação antes de considerar a cópia disponível.
+
+Foram comprovados: login com a senha restaurada do usuário restante; dados e agregações preservados; RLS e bucket privado; negação de foto existente a outro usuário e ao titular bloqueado; negação de acesso anônimo; checksums das duas imagens restantes; remoção de Auth/dados/arquivos do usuário excluído; ledger mínimo preservado. A stack e a pasta temporária, incluindo backups e uploads sintéticos, são removidas ao terminar. O cache dos executáveis permanece em `artifacts/supabase-native-lab-home/`, protegido localmente e ignorado pelo Git. O relatório sem credenciais fica em `artifacts/supabase-services-restore-report.json`.
+
+O teste não lê `.env.local`, não aceita URLs remotas e só usa endpoints de loopback da stack recém-criada. Ele utiliza o superusuário `supabase_admin` do laboratório para restaurar os schemas gerenciados com seus proprietários originais. Esse privilégio não é presumido no projeto hospedado: uma recuperação em outro Supabase deve seguir o procedimento gerenciado oficial, conferir versões e permissões e ser homologada antes de liberar acesso. O ensaio atende à verificação de RNF-013 em ambiente controlado; não comprova recuperação de infraestrutura hospedada nem define sozinho frequência, cifragem externa, RPO ou retenção dos backups de produção.
+
+Referências: [runtime nativo oficial](https://supabase.com/docs/guides/local-development/docker-and-native-runtimes), [CLI e isolamento de stacks](https://supabase.com/docs/guides/local-development/running-multiple-local-projects).
 
 ## Revisões antes do lançamento
 

@@ -31,7 +31,7 @@ Os fluxos essenciais também passaram no Supabase real em 21/10/2026. Consulte [
 | RNF-006/011 | Listagens paginadas e totais no banco; índices por proprietário. Meta proposta de ~2 s e volume/dispositivo real precisam de medição. |
 | RNF-007/008 | Testes em seis larguras e axe WCAG A/AA nas telas essenciais; teclado básico testado. Leitor de tela, zoom e revisão manual complementam a verificação automática. |
 | RNF-009/010, RB-09 | Cache exclusivo do fallback, resumo limitado à aba, fotos sem cache/EXIF com leitura autorizada e processamento no servidor. Sem limite arbitrário por projeto. |
-| RNF-013 | Dump/restauração local, ledger e roteiro de backup/restore externo; execução real pendente. |
+| RNF-013 | Ensaio controlado com PostgreSQL nativo e serviços reais de Auth/PostgREST/Storage do Supabase local: dump/restore, senha restaurada, arquivos pela API/checksums, RLS e ledger reaplicado. `tests/manual/restore-supabase.mjs`; política de backup externo/retensão pendente de aprovação. Restauração em segundo projeto hospedado não executada. |
 | RNF-014 | Migrações, tipagem, lint, formato, build e testes na CI; branches de funcionalidade integradas em develop. |
 | RNF-015 | Chromium local e suíte WebKit aprovada na CI (perfil iPhone). Testes em dispositivos físicos pendentes. |
 | RB-08/11 | Sem prescrição ou metas por modalidade. Decisões registradas; sem IA, Strava, login social ou expansão ilustrativa do showcase. |
