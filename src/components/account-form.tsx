@@ -6,6 +6,7 @@ import {
   recoverPassword,
   updatePassword,
 } from "@/app/cadastro/actions";
+import { PasswordInput } from "@/components/password-input";
 import { useOnline } from "@/lib/use-online";
 
 export function AccountForm({
@@ -52,10 +53,10 @@ export function AccountForm({
           <label htmlFor="password">
             {mode === "update" ? "Nova senha" : "Senha"}
           </label>
-          <input
+          <PasswordInput
             id="password"
+            visibilityLabel={mode === "update" ? "nova senha" : "senha"}
             name="password"
-            type="password"
             autoComplete="new-password"
             minLength={12}
             maxLength={128}
@@ -65,10 +66,10 @@ export function AccountForm({
           />
           <p id="password-help">Use de 12 a 128 caracteres.</p>
           <label htmlFor="confirmation">Confirme a senha</label>
-          <input
+          <PasswordInput
             id="confirmation"
+            visibilityLabel="confirmação da senha"
             name="confirmation"
-            type="password"
             autoComplete="new-password"
             minLength={12}
             maxLength={128}
