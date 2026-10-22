@@ -6,7 +6,7 @@ import { createProject, changeProject, changeWaterGoal, changeGoals } from "./ac
 export const metadata = { title: "Projetos e metas" };
 export default async function Projects({ searchParams }: { searchParams: Promise<{ pagina?: string }> }) {
   const params = await searchParams;
-  const page = Math.min(10000,Math.max(1,Number(params.pagina) || 1));
+  const page = Math.min(10000,Math.max(1,Math.floor(Number(params.pagina)) || 1));
   const { projects, hasMore } = await projectContext(undefined,page);
   return <><section className="welcome"><p className="eyebrow">UMA META, UM CAMINHO</p><h1>Meus projetos.</h1><p className="intro">Só um projeto fica ativo de cada vez. Consultar o histórico não altera o destino dos seus registros.</p></section>
     <section className="content-card"><h2>{projects.length ? "Novo projeto" : "Vamos preparar seu primeiro projeto?"}</h2><p className="intro">Escolha um nome, uma data de início e pelo menos uma meta mensurável. Água, peso e sessões são opcionais individualmente.</p>

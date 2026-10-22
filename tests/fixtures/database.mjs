@@ -18,7 +18,7 @@ export async function createDatabase(users) {
 }
 
 const tables = new Set(['projects','water_goals','water_entries','weights','measurements','activities','meal_items','meal_days','photos']);
-const commands = new Set(['create_project','save_weight','save_measurements','account_available','request_account_deletion']);
+const commands = new Set(['create_project','save_weight','save_measurements','account_available','request_account_deletion','project_summary','food_calendar']);
 const identifier = (text) => { if (!/^[a-z_]+$/.test(text)) throw new Error('Invalid identifier'); return `"${text}"`; };
 // Adaptador REST de teste: a persistência, constraints e RLS são PostgreSQL real.
 export async function rest(db, request, response, url, userId) {
@@ -34,6 +34,10 @@ export async function rest(db, request, response, url, userId) {
       if (!commands.has(table)) throw new Error('Unknown RPC');
       const params = Object.entries(payload ?? {});
       const args=params.map(([key],i)=>`${identifier(key)} => $${i+1}`).join(',');
+      if(table==='food_calendar') {
+        rows=(await db.query(`select * from public.${identifier(table)}(${args})`,params.map(([,v])=>v))).rows;
+        response.end(JSON.stringify(rows.map(row=>({...row,day:row.day instanceof Date?row.day.toISOString().slice(0,10):row.day}))));return;
+      }
       rows=(await db.query(`select public.${identifier(table)}(${args}) as result`,params.map(([,v])=>typeof v==='object'&&v!==null?JSON.stringify(v):v))).rows;
       response.end(JSON.stringify(rows[0]?.result ?? null)); return;
     }

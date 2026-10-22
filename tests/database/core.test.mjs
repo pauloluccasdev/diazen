@@ -60,6 +60,11 @@ test('isolamento, estados e integridade no PostgreSQL', async () => {
   await query("insert into meal_items(logged_on,category,name,amount,unit,reference_amount,source) values($1,'lunch','Arroz',100,'g',100,'Informado pelo usuário')",[date]);
   assert.equal((await query('select confirmed from meal_days'))[0].confirmed,false);
   assert.equal((await query('select kcal from meal_items'))[0].kcal,null,'ausente não é zero');
+  await query("insert into meal_items(logged_on,category,name,amount,unit,reference_amount,source,kcal,protein) values($1,'lunch','Rótulo',50,'g',100,'Rótulo informado',100,0)",[date]);
+  const summary=(await query('select project_summary($1,$2) as value',[project,date]))[0].value;
+  assert.equal(summary.kcal,50,'porção proporcional');assert.equal(summary.missing_kcal,1,'subtotal parcial');
+  assert.equal(summary.protein,0,'zero informado é conhecido');assert.equal(summary.water_ml,250);assert.equal(summary.sessions,null);
+  await asUser(bob);assert.equal((await query('select project_summary($1,$2) as value',[project,date]))[0].value,null,'resumo não vaza dados');await asUser();
   await assert.rejects(query('select * from audit_events'), /permission denied/);
   await query("update projects set status='COMPLETED' where id=$1",[project]);
   await assert.rejects(query('update weights set kg=80'),/somente leitura/);
