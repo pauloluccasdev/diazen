@@ -19,13 +19,15 @@ function ProjectInput({ name, label, required, ...props }: ProjectInputProps) {
   return (
     <div className="project-field">
       <label htmlFor={id}>
-        <span id={`${id}-label`}>{label}</span>
-        {required && (
-          <span aria-hidden="true" className="required-mark">
-            {" "}
-            *
-          </span>
-        )}
+        <span>
+          <span id={`${id}-label`}>{label}</span>
+          {required && (
+            <span aria-hidden="true" className="required-mark">
+              {" "}
+              *
+            </span>
+          )}
+        </span>
       </label>
       <input
         {...props}
