@@ -8,7 +8,7 @@ Execução autorizada pelo proprietário em 21/10/2026: continuar o desenvolvime
 - [x] Login, logout e painel protegido (integração real pendente de ambiente).
 - [x] Cadastro, confirmação de e-mail e recuperação de senha (homologação de e-mail pendente).
 - [x] Refinamento técnico e migrações com autorização, integridade e auditoria (revisão/aplicação remota pendentes).
-- [ ] Onboarding, projetos, metas, estados e histórico.
+- [x] Onboarding, projetos, metas, estados e histórico, com teste integrado à persistência local.
 - [ ] Hidratação, peso, medidas e atividades.
 - [ ] Diário alimentar manual e composição informada, com ausência distinta de zero.
 - [ ] Fotos privadas, otimização, galeria e comparação.

@@ -1,13 +1,21 @@
 // Simulador local de Supabase Auth usado exclusivamente nos testes de navegador.
 import { createServer } from "node:http";
+import { createDatabase, rest } from "./database.mjs";
 const user = { id: "00000000-0000-4000-8000-000000000001", email: "teste@example.test", aud: "authenticated", role: "authenticated", created_at: "2026-01-01T00:00:00Z" };
 const encode = (value) => Buffer.from(JSON.stringify(value)).toString("base64url");
 const token = `${encode({ alg: "HS256", typ: "JWT" })}.${encode({ sub: user.id, exp: Math.floor(Date.now() / 1000) + 3600, aud: "authenticated" })}.assinatura-de-teste`;
 
+const db = await createDatabase([user.id]);
+let queue = Promise.resolve();
 createServer(async (request, response) => {
   response.setHeader("Content-Type", "application/json");
   response.setHeader("Cache-Control", "no-store");
   if (request.url === "/health") return response.end("{}");
+  if (request.url?.startsWith('/rest/v1/')) {
+    const uid = request.headers.authorization === `Bearer ${token}` ? user.id : null;
+    queue = queue.then(()=>rest(db,request,response,new URL(request.url,'http://localhost'),uid));
+    await queue; return;
+  }
   if (request.url === "/auth/v1/token?grant_type=password" && request.method === "POST") {
     let body = "";
     for await (const chunk of request) body += chunk;
