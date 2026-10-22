@@ -8,7 +8,15 @@ export function Pwa() {
   const online = useOnline();
 
   useEffect(() => {
-    const clearFromOtherTab = (event: StorageEvent) => { if (event.key === SESSION_EPOCH) { try { sessionStorage.removeItem(SNAPSHOT_KEY); } catch { /* Cache opcional. */ } } };
+    const clearFromOtherTab = (event: StorageEvent) => {
+      if (event.key === SESSION_EPOCH) {
+        try {
+          sessionStorage.removeItem(SNAPSHOT_KEY);
+        } catch {
+          /* Cache opcional. */
+        }
+      }
+    };
     window.addEventListener("storage", clearFromOtherTab);
     if (process.env.NODE_ENV === "production" && "serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js").catch((error: unknown) => {
@@ -19,5 +27,9 @@ export function Pwa() {
   }, []);
 
   if (online) return null;
-  return <div className="offline-notice" role="status">Sem conexão. A criação e a alteração de registros estão indisponíveis.</div>;
+  return (
+    <div className="offline-notice" role="status">
+      Sem conexão. A criação e a alteração de registros estão indisponíveis.
+    </div>
+  );
 }

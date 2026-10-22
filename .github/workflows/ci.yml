@@ -1,7 +1,7 @@
 name: Qualidade
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, "feat/**", "fix/**"]
   pull_request:
 permissions:
   contents: read
@@ -16,8 +16,10 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run test:db
+      - run: npm run format:check
       - run: npm run lint
       - run: npm run build
       - run: npm run typecheck
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install --with-deps chromium webkit
       - run: npm run test:e2e
+      - run: npm run test:webkit

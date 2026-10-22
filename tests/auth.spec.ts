@@ -1,6 +1,10 @@
 import { expect, test } from "@playwright/test";
 
-async function login(page: import("@playwright/test").Page, email: string, password: string) {
+async function login(
+  page: import("@playwright/test").Page,
+  email: string,
+  password: string,
+) {
   await page.goto("/entrar");
   await page.getByLabel("E-mail", { exact: true }).fill(email);
   await page.getByLabel("Senha", { exact: true }).fill(password);
@@ -17,7 +21,9 @@ test("login válido, painel privado e logout", async ({ page }) => {
   await expect(page).toHaveURL(/\/painel$/);
   const response = await page.reload();
   expect(response?.headers()["cache-control"]).toContain("no-store");
-  await expect(page.getByRole("heading", { name: "Bem-vindo à sua jornada." })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Bem-vindo à sua jornada." }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Sair da conta" }).click();
   await expect(page).toHaveURL(/\/entrar$/);
   await page.goto("/painel");
@@ -34,56 +40,101 @@ test("erros não revelam existência de conta", async ({ page }) => {
 test("offline bloqueia envio de login", async ({ page, context }) => {
   await page.goto("/entrar");
   await context.setOffline(true);
-  await expect(page.getByRole("button", { name: "Entrar", exact: true })).toBeDisabled();
+  await expect(
+    page.getByRole("button", { name: "Entrar", exact: true }),
+  ).toBeDisabled();
 });
 
 test("login responsivo em 320px", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 800 });
   await page.goto("/entrar");
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
 });
 
-test("cookie forjado não libera acesso ao painel", async ({ context, page }) => {
-  await context.addCookies([{ name: "sb-127-auth-token", value: "sessao-forjada", domain: "127.0.0.1", path: "/" }]);
+test("cookie forjado não libera acesso ao painel", async ({
+  context,
+  page,
+}) => {
+  await context.addCookies([
+    {
+      name: "sb-127-auth-token",
+      value: "sessao-forjada",
+      domain: "127.0.0.1",
+      path: "/",
+    },
+  ]);
   await page.goto("/painel");
   await expect(page).toHaveURL(/\/entrar$/);
 });
 
-test("página privada não entra no cache da PWA e logout offline é bloqueado", async ({ page, context }) => {
+test("página privada não entra no cache da PWA e logout offline é bloqueado", async ({
+  page,
+  context,
+}) => {
   await login(page, "teste@example.test", "senha-de-teste-123");
   await expect(page).toHaveURL(/\/painel$/);
-  await page.evaluate(async () => { await navigator.serviceWorker.ready; });
+  await page.evaluate(async () => {
+    await navigator.serviceWorker.ready;
+  });
   const urls = await page.evaluate(async () => {
     const names = await caches.keys();
-    return (await Promise.all(names.map(async (name) => (await (await caches.open(name)).keys()).map((request) => new URL(request.url).pathname)))).flat();
+    return (
+      await Promise.all(
+        names.map(async (name) =>
+          (await (await caches.open(name)).keys()).map(
+            (request) => new URL(request.url).pathname,
+          ),
+        ),
+      )
+    ).flat();
   });
   expect(urls).not.toContain("/painel");
   await context.setOffline(true);
-  await expect(page.getByRole("button", { name: "Sair da conta" })).toBeDisabled();
+  await expect(
+    page.getByRole("button", { name: "Sair da conta" }),
+  ).toBeDisabled();
 });
 
-test("cadastro exige senhas iguais e informa confirmação sem enumerar conta", async ({ page }) => {
+test("cadastro exige senhas iguais e informa confirmação sem enumerar conta", async ({
+  page,
+}) => {
   await page.goto("/cadastro");
   await page.getByLabel("E-mail", { exact: true }).fill("novo@example.test");
   await page.getByLabel("Senha", { exact: true }).fill("senha-de-teste-123");
   await page.getByLabel("Confirme a senha").fill("outra-senha-longa");
   await page.getByRole("button", { name: "Criar conta" }).click();
-  await expect(page.locator("main").getByRole("alert")).toContainText("precisam ser iguais");
+  await expect(page.locator("main").getByRole("alert")).toContainText(
+    "precisam ser iguais",
+  );
   await page.getByLabel("E-mail", { exact: true }).fill("novo@example.test");
   await page.getByLabel("Senha", { exact: true }).fill("senha-de-teste-123");
   await page.getByLabel("Confirme a senha").fill("senha-de-teste-123");
   await page.getByRole("button", { name: "Criar conta" }).click();
-  await expect(page.getByRole("status")).toContainText("Se o cadastro puder ser concluído");
+  await expect(page.getByRole("status")).toContainText(
+    "Se o cadastro puder ser concluído",
+  );
 });
 
-test("recuperação é genérica e link válido permite nova senha", async ({ page }) => {
+test("recuperação é genérica e link válido permite nova senha", async ({
+  page,
+}) => {
   await page.goto("/recuperar-senha");
-  await page.getByLabel("E-mail", { exact: true }).fill("nao-existe@example.test");
+  await page
+    .getByLabel("E-mail", { exact: true })
+    .fill("nao-existe@example.test");
   await page.getByRole("button", { name: "Enviar instruções" }).click();
   await expect(page.getByRole("status")).toContainText("Se houver uma conta");
-  await page.goto("/auth/confirmar?token_hash=link-valido-de-teste&type=recovery&next=https://example.org");
+  await page.goto(
+    "/auth/confirmar?token_hash=link-valido-de-teste&type=recovery&next=https://example.org",
+  );
   await expect(page).toHaveURL(/\/nova-senha$/);
-  await page.getByLabel("Nova senha", { exact: true }).fill("nova-senha-longa-123");
+  await page
+    .getByLabel("Nova senha", { exact: true })
+    .fill("nova-senha-longa-123");
   await page.getByLabel("Confirme a senha").fill("nova-senha-longa-123");
   await page.getByRole("button", { name: "Salvar nova senha" }).click();
   await expect(page.getByRole("status")).toContainText("Senha atualizada");
@@ -91,7 +142,9 @@ test("recuperação é genérica e link válido permite nova senha", async ({ pa
 
 test("link inválido e troca sem sessão são negados", async ({ page }) => {
   await page.goto("/auth/confirmar?token_hash=invalido&type=recovery");
-  await expect(page.locator("main").getByRole("alert")).toContainText("link expirou");
+  await expect(page.locator("main").getByRole("alert")).toContainText(
+    "link expirou",
+  );
   await page.goto("/nova-senha");
   await expect(page).toHaveURL(/\/recuperar-senha$/);
 });

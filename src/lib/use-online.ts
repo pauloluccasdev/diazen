@@ -11,5 +11,9 @@ function subscribe(callback: () => void) {
 }
 
 export function useOnline() {
-  return useSyncExternalStore(subscribe, () => navigator.onLine, () => true);
+  return useSyncExternalStore(
+    subscribe,
+    () => navigator.onLine,
+    () => true,
+  );
 }

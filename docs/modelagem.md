@@ -28,3 +28,5 @@ RLS é obrigatória em todas as tabelas. Não se concede acesso a `anon`. As pol
 ## Verificação
 
 `npm run test:db` aplica as migrações em PostgreSQL embarcado (PGlite), com roles e contexto de identidade. Testa RLS, constraints, transações, estados e trilha. Os schemas `auth`/`storage` são adaptadores locais nos testes, não substitutos dos serviços reais. Concorrência multi-conexão, Storage HTTP, restauração remota e configuração de Auth precisam de homologação real. SQL deve ser aplicado em ordem somente depois da revisão, por migrações Supabase, nunca pela aplicação em runtime.
+
+A migração 008 mantém a fila de limpeza mesmo se o usuário de Auth já tiver sido removido durante um upload. A limpeza verifica referências existentes antes de apagar bytes; uma resposta perdida após COMMIT não deve quebrar uma foto salva. Reconciliação administrativa cobre arquivos sem fila/metadados após indisponibilidade, com janela de 24 horas para uploads de contas vivas.

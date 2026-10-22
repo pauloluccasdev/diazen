@@ -14,7 +14,9 @@ export async function proxy(request: NextRequest) {
         values.forEach(({ name, value }) => request.cookies.set(name, value));
         response = NextResponse.next({ request });
         response.headers.set("Cache-Control", "private, no-store");
-        values.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+        values.forEach(({ name, value, options }) =>
+          response.cookies.set(name, value, options),
+        );
       },
     },
   });
@@ -23,4 +25,13 @@ export async function proxy(request: NextRequest) {
   return response;
 }
 
-export const config = { matcher: ["/entrar", "/painel/:path*", "/api/:path*", "/nova-senha", "/cadastro", "/recuperar-senha"] };
+export const config = {
+  matcher: [
+    "/entrar",
+    "/painel/:path*",
+    "/api/:path*",
+    "/nova-senha",
+    "/cadastro",
+    "/recuperar-senha",
+  ],
+};

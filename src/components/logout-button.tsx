@@ -6,5 +6,26 @@ import { signOut } from "@/app/entrar/actions";
 export function LogoutButton() {
   const [state, action, pending] = useActionState(signOut, { error: "" });
   const online = useOnline();
-  return <form action={action} onSubmit={(event) => { if (!navigator.onLine) event.preventDefault(); }}><button type="submit" className="button-primary" disabled={pending || !online}> {pending ? "Saindo…" : "Sair da conta"}</button>{state.error && <p role="alert" className="form-error">{state.error}</p>}</form>;
+  return (
+    <form
+      action={action}
+      onSubmit={(event) => {
+        if (!navigator.onLine) event.preventDefault();
+      }}
+    >
+      <button
+        type="submit"
+        className="button-primary"
+        disabled={pending || !online}
+      >
+        {" "}
+        {pending ? "Saindo…" : "Sair da conta"}
+      </button>
+      {state.error && (
+        <p role="alert" className="form-error">
+          {state.error}
+        </p>
+      )}
+    </form>
+  );
 }
