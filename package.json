@@ -17,7 +17,8 @@
     "env:check": "node scripts/check_environment.mjs",
     "db:bundle": "node scripts/bundle_migrations.mjs",
     "auth:configure": "node scripts/configure_supabase_auth.mjs",
-    "test:restore": "node tests/manual/restore-native.mjs"
+    "test:restore": "node tests/manual/restore-native.mjs",
+    "test:restore:services": "node tests/manual/restore-supabase.mjs"
   },
   "repository": {
     "type": "git",

@@ -16,7 +16,8 @@ Execução autorizada pelo proprietário em 21/10/2026: continuar o desenvolvime
 - [x] Dashboard integrado, leitura offline limitada e privacidade da conta (configuração operacional real pendente).
 - [x] Testes integrados locais, acessibilidade automática e documentação operacional.
 - [x] Fluxos essenciais, isolamento e concorrência no Supabase real; prévia HTTPS e CI Chromium/WebKit aprovados.
-- [ ] Etapa final: ensaio de restauração em ambiente isolado, revisão de layout pelo proprietário, instalação/uso no celular e aprovação operacional final. Restauração e layout foram explicitamente reservados para o final em 22/10/2026.
+- [x] Etapa final técnica: restauração isolada com serviços reais do Supabase local, Auth, arquivos pela API do Storage, RLS e reaplicação de exclusão.
+- [ ] Etapa final do proprietário: revisão de layout, instalação/uso no celular e aprovação operacional. Restauração e layout foram explicitamente reservados para o final em 22/10/2026; o ensaio foi concluído nesta etapa.
 
 ## Condições para declarar conclusão
 
@@ -24,4 +25,4 @@ Fluxos F-01 a F-07 persistidos; RF de prioridade Alta atendidos; autorização e
 
 ## Dependências externas observadas
 
-O Supabase anteriormente usado pelo Planna foi reutilizado e resetado por autorização do proprietário; configuração local, migrações e fluxos essenciais foram verificados no serviço real. Consulte [a evidência de homologação](homologacao-supabase.md). Recuperação por e-mail padrão confirmada pelo proprietário; prévia hospedada disponível. Confirmação de cadastro, restauração isolada, dispositivos físicos e aprovação final continuam pendentes. Docker não está disponível nesta distribuição WSL. Não tratar a revisão de layout e a restauração como bloqueios intermediários: executá-las na etapa final acordada.
+O Supabase anteriormente usado pelo Planna foi reutilizado e resetado por autorização do proprietário; configuração local, migrações e fluxos essenciais foram verificados no serviço real. Consulte [a evidência de homologação](homologacao-supabase.md). Recuperação por e-mail padrão confirmada pelo proprietário; prévia hospedada disponível. Confirmação de cadastro, dispositivos físicos e aprovação final continuam pendentes. O ensaio de restauração com os serviços reais do Supabase local passou em runtime nativo, sem Docker, conforme `docs/operacao.md`. Não tratar a revisão de layout e a restauração como bloqueios intermediários: executá-las na etapa final acordada.
