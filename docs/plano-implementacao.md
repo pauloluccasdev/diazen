@@ -12,7 +12,7 @@ Execução autorizada pelo proprietário em 21/10/2026: continuar o desenvolvime
 - [x] Hidratação, peso, medidas e atividades.
 - [x] Diário alimentar manual e composição informada, com ausência distinta de zero.
 - [x] Fotos privadas, otimização, galeria e comparação (Storage real pendente de homologação).
-- [ ] Dashboard integrado, leitura offline limitada e privacidade da conta.
+- [x] Dashboard integrado, leitura offline limitada e privacidade da conta (configuração operacional real pendente).
 - [ ] Testes integrados, acessibilidade, documentação operacional e auditoria de conclusão.
 
 ## Condições para declarar conclusão

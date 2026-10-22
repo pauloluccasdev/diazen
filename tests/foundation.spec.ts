@@ -1,11 +1,11 @@
 import { expect, test } from "@playwright/test";
 
 for (const width of [320, 375, 390, 430, 768, 1280]) {
-  test(`dashboard sem overflow em ${width}px`, async ({ page }) => {
+  test(`abertura sem overflow em ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/");
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-    await expect(page.getByText("Sem registros", { exact: true })).toHaveCount(4);
+    await expect(page.locator(".area-grid article")).toHaveCount(4);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   });
 }
@@ -41,7 +41,7 @@ test("offline avisa indisponibilidade e armazena somente fallback público", asy
     const names = await caches.keys();
     return (await Promise.all(names.map(async (name) => (await (await caches.open(name)).keys()).map((r) => new URL(r.url).pathname)))).flat();
   });
-  expect(cachedUrls).toEqual(["/offline"]);
+  expect(cachedUrls).toEqual(["/offline.html"]);
   await context.setOffline(true);
   await expect(page.getByRole("status")).toContainText("Sem conexão");
   const response = await page.goto("/nao-armazenado");

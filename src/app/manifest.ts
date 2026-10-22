@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: "Diazen",
     description: "Seu diário de alimentação, hidratação e evolução física.",
     lang: "pt-BR",
-    start_url: "/",
+    start_url: "/painel",
     scope: "/",
     display: "standalone",
     background_color: "#0C0E12",

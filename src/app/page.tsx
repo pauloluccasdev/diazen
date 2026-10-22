@@ -19,10 +19,10 @@ export default function Home() {
       </section>
       <section className="project-card" aria-labelledby="project-title">
         <div className="project-content">
-          <span className="status"><span className="status-dot" />Nenhum projeto ativo</span>
+          <span className="status">SEU DIÁRIO PESSOAL</span>
           <h2 id="project-title">Toda evolução tem<br />um ponto de partida.</h2>
           <p>Organize suas metas em um projeto e reúna seus registros em um só lugar.</p>
-          <a className="button-primary" href="#primeiros-passos">Conhecer os primeiros passos<ArrowRight size={18} aria-hidden="true" /></a>
+          <Link className="button-primary" href="/cadastro">Começar minha jornada<ArrowRight size={18} aria-hidden="true" /></Link><br /><a className="back-link" href="#primeiros-passos">Conhecer os primeiros passos</a>
         </div>
         <div className="project-art" aria-hidden="true"><div className="art-orbit orbit-one" /><div className="art-orbit orbit-two" /><div className="art-center"><ChartNoAxesCombined size={56} strokeWidth={1.25} /></div><span className="art-label">UM DIA DE CADA VEZ</span></div>
       </section>
@@ -31,14 +31,14 @@ export default function Home() {
         <div className="area-grid">{areas.map(({ title, detail, icon: Icon }) => (
           <article className="area-card" key={title}>
             <span className="icon-box"><Icon size={22} strokeWidth={1.7} aria-hidden="true" /></span>
-            <h3>{title}</h3><p>{detail}</p><span className="empty-value">Sem registros</span>
+            <h3>{title}</h3><p>{detail}</p>
           </article>
         ))}</div>
       </section>
       <section className="getting-started" id="primeiros-passos" aria-labelledby="steps-title">
         <div className="steps-heading"><FolderPlus size={24} aria-hidden="true" /><div><p className="eyebrow">SEU COMEÇO</p><h2 id="steps-title">Pequenos passos, um novo ritmo.</h2></div></div>
         <ol className="steps"><li><span>01</span><div><h3>Crie seu espaço</h3><p>Sua conta mantém sua jornada pessoal e privada.</p></div></li><li><span>02</span><div><h3>Escolha uma meta</h3><p>Comece um projeto com pelo menos uma meta mensurável.</p></div></li><li><span>03</span><div><h3>Registre o seu dia</h3><p>Acompanhe alimentação, água, atividades e evolução.</p></div></li></ol>
-        <p className="preview-note">Esta é uma prévia inicial. A criação de conta, projetos e registros ainda não está disponível.</p>
+        <p className="preview-note">Comece com uma meta e registre o que fizer sentido para você. O Diazen organiza sua rotina, sem prescrever dietas ou treinos.</p>
       </section>
       <p className="privacy-note"><ShieldCheck size={18} aria-hidden="true" />Sua jornada é pessoal. Seus dados também.</p>
     </>
