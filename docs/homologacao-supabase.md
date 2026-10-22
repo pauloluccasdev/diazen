@@ -37,7 +37,7 @@ Inclusão do RF-009 aprovada pelo proprietário. Migração 009 aplicada em tran
 
 Duas contas sintéticas com e-mail já confirmado exercitaram Auth/PostgREST reais: compilação de receita com nutriente desconhecido, consumo proporcional, snapshots preservados após edição/exclusão da biblioteca, favoritos, negação de leitura e de ingrediente de outra conta, reutilização de recente e cópia para a própria refeição. Duas requisições simultâneas com o mesmo UUID copiaram uma única vez, preservando registros existentes e desfazendo a conclusão manual. Isso valida concorrência multi-conexão além do teste local. Biblioteca e ledger de cópias foram removidos pela exclusão em cascade das contas sintéticas; ledger mínimo de exclusões preservado e marcado como concluído. Conta do proprietário não foi alterada.
 
-Relatórios locais: `artifacts/food-migration-report.json` e `artifacts/food-library-homologation-report.json`. Os testes de navegador locais usam o adaptador HTTP; esta validação adicional usa os serviços reais via SDK e não comprova interface hospedada do RF-009.
+Relatórios locais: `artifacts/food-migration-report.json` e `artifacts/food-library-homologation-report.json`. Os testes de navegador locais usam o adaptador HTTP; esta validação adicional usa os serviços reais via SDK. Posteriormente o fluxo completo do RF-009 passou também no Chromium da prévia Vercel, incluindo exportação e acessibilidade, com OIDC limitado à origem e sem alterar a proteção; conta sintética removida. Relatório local `artifacts/hosted-food-browser-report.json`.
 
 ## Pendências de lançamento
 

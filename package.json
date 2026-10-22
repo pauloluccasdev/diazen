@@ -18,7 +18,10 @@
     "db:bundle": "node scripts/bundle_migrations.mjs",
     "auth:configure": "node scripts/configure_supabase_auth.mjs",
     "test:restore": "node tests/manual/restore-native.mjs",
-    "test:restore:services": "node tests/manual/restore-supabase.mjs"
+    "test:restore:services": "node tests/manual/restore-supabase.mjs",
+    "backup": "node scripts/backup.mjs",
+    "backup:ledger": "node scripts/backup.mjs --ledger",
+    "backup:verify": "node scripts/backup.mjs --verify"
   },
   "repository": {
     "type": "git",
@@ -47,6 +50,7 @@
     "@types/react-dom": "^19.3.0",
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.4.2",
+    "pg": "8.23.1",
     "prettier": "^3.9.10",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3"
