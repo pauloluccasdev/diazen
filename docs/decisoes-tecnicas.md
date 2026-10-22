@@ -67,3 +67,7 @@ Continuação do RF-001: confirmação e recuperação por token hash validado p
 ## Refinamento — Persistência do MVP — 21/10/2026
 
 A autorização para continuar até concluir o desenvolvimento inclui preparar o refinamento técnico e as migrações necessárias ao núcleo. A modelagem está detalhada em `docs/modelagem.md`, com rastreabilidade para RF/RB/RNF, limites, vigências e resolução das divergências de distância nas atividades. O SQL fica versionado para revisão; nenhum serviço remoto foi provisionado e sua aplicação depende da revisão do modelo e homologação. RLS, constraints, triggers e RPCs são testados com roles em PostgreSQL embarcado. Credenciais permanecem em Supabase Auth; exclusão legal usa bloqueio imediato e purge administrativo. RF-009 continua adiado para revisão final de backlog; RF-008, RF-013 e RF-021 integram o núcleo implementado por reutilização dos registros.
+
+## Implementação — Projetos e onboarding — 21/10/2026
+
+RF-002 a RF-005: criação transacional com meta mensurável, rascunho/ativação, edição de nome/metas, encerramento e arquivamento confirmados, seletor para histórico e listagem paginada. A UI não troca o ACTIVE ao consultar histórico. A listagem do seletor contém os 20 projetos da primeira página e o projeto selecionado; o histórico completo fica na página de projetos. O teste de navegador usa Auth simulado e PostgreSQL real embarcado para criação e fechamento, sem conexão remota.
