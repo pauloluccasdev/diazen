@@ -27,6 +27,9 @@ test("fotos privadas: upload, comparação, exclusão e acesso a histórico", as
   })
     .png()
     .toBuffer();
+  await request.get(
+    "http://127.0.0.1:54329/_test/fail-photo-reply/00000000-0000-4000-8000-000000000003",
+  );
   for (let i = 0; i < 2; i++) {
     if (
       !(await form
@@ -44,11 +47,20 @@ test("fotos privadas: upload, comparação, exclusão e acesso a histórico", as
       .click();
     await expect(page.getByRole("article")).toHaveCount(i + 1);
   }
+  expect(
+    await (
+      await request.get(
+        "http://127.0.0.1:54329/_test/photo-reply-status/00000000-0000-4000-8000-000000000003",
+      )
+    ).json(),
+  ).toEqual({ pending: false });
   const images = page.getByRole("article").locator("img");
   const urls = await images.evaluateAll((elements) =>
     elements.map((element) => element.getAttribute("src")!),
   );
   const ids = urls.map((url) => url.split("/").at(-1)!.split("?")[0]);
+  for (const url of urls)
+    expect((await page.request.get(url)).status()).toBe(200);
   const response = await page.request.get(urls[0]);
   expect(response.status()).toBe(200);
   expect(response.headers()["cache-control"]).toContain("no-store");

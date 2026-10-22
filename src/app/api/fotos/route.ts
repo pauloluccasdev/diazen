@@ -100,14 +100,33 @@ export async function POST(request: Request) {
     });
     if (error) throw new Error("metadata");
   } catch {
-    const { error } = await bucket.remove([key, thumb]);
-    // Se a limpeza falhar, guardar chaves para retry administrativo, sem expor o arquivo.
-    if (error)
+    // A conexão pode falhar depois do COMMIT. Confirmar antes de remover bytes
+    // evita deixar um registro salvo apontando para arquivos apagados.
+    const { data: committed, error: verificationError } = await admin
+      .from("photos")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
+    if (
+      !verificationError &&
+      committed?.user_id === user.id &&
+      committed.storage_key === key &&
+      committed.thumbnail_key === thumb
+    )
+      return reply("Foto salva com privacidade.", 201);
+    if (verificationError) {
       await admin
         .from("photo_cleanup")
         .upsert({ photo_id: id, user_id: user.id, paths: [key, thumb] });
+    } else {
+      const { error } = await bucket.remove([key, thumb]);
+      if (error)
+        await admin
+          .from("photo_cleanup")
+          .upsert({ photo_id: id, user_id: user.id, paths: [key, thumb] });
+    }
     return reply(
-      "Não foi possível salvar a foto. Confira a conexão e o projeto ativo.",
+      "Não foi possível confirmar o envio. Confira a galeria antes de tentar novamente.",
       400,
     );
   }

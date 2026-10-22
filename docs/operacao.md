@@ -38,7 +38,7 @@ Os testes locais usam PostgreSQL de fato, mas não o gateway PostgREST, a implem
 - `/api/saude` comprova resposta da aplicação; monitore separadamente o provedor e os fluxos autenticados.
 - Erros de carga apresentam retry. Erros de gravação não confirmam sucesso. Solicitações administrativas pendentes são consultadas nas tabelas internas com chave de servidor.
 - Logs devem guardar somente eventos técnicos, instantes e identificadores necessários; não registrar e-mails, refeições, medidas, fotos, credenciais ou corpos de requisições. O evento `privacy_purge_pending` sinaliza necessidade de reprocessamento sem incluir dados do titular.
-- `npm run privacy:purge` remove objetos pela API do Storage, conclui contas solicitantes e limpa a fila de fotos. Execute após falha ou diariamente quando houver uso real; configure um agendamento protegido somente se necessário. Sem chave administrativa, solicitações continuam bloqueadas até o processamento.
+- `npm run privacy:purge` remove objetos pela API do Storage, conclui contas solicitantes e limpa a fila de fotos. O comando também reconcilia arquivos órfãos: preserva referências válidas e uploads recentes de contas vivas, remove arquivos sem metadados após 24 horas e remove arquivos de contas confirmadamente inexistentes em Auth. Falha/indisponibilidade não é tratada como exclusão. Execute após falha ou diariamente quando houver uso real; configure um agendamento protegido somente se necessário. Sem chave administrativa, solicitações continuam bloqueadas até o processamento.
 - Para pausar uso durante incidente, restrinja o acesso na hospedagem e preserve as evidências técnicas mínimas sem copiar dados sensíveis para issues ou logs públicos.
 
 ## Backup e restauração

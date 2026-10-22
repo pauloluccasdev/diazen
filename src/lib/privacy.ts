@@ -55,6 +55,28 @@ export async function cleanPhotoJobs(admin: SupabaseClient) {
     if (error) throw new Error("Falha ao consultar limpeza");
     if (!data?.length) break;
     for (const job of data) {
+      // Um upload pode ter sido confirmado mesmo após falha na resposta HTTP.
+      const { data: photo, error: verificationError } = await admin
+        .from("photos")
+        .select("*")
+        .eq("id", job.photo_id)
+        .maybeSingle();
+      if (verificationError)
+        throw new Error("Falha ao verificar arquivo pendente");
+      if (
+        photo &&
+        photo.user_id === job.user_id &&
+        job.paths.includes(photo.storage_key) &&
+        job.paths.includes(photo.thumbnail_key)
+      ) {
+        const { error } = await admin
+          .from("photo_cleanup")
+          .delete()
+          .eq("photo_id", job.photo_id);
+        if (error) throw new Error("Falha ao concluir verificação");
+        count++;
+        continue;
+      }
       const { error } = await admin.storage
         .from("body-photos")
         .remove(job.paths);
@@ -68,4 +90,70 @@ export async function cleanPhotoJobs(admin: SupabaseClient) {
     }
   }
   return count;
+}
+
+export async function reconcilePhotoStorage(
+  admin: SupabaseClient,
+  now = Date.now(),
+) {
+  const bucket = admin.storage.from("body-photos");
+  let removed = 0;
+  async function list(prefix: string) {
+    const all = [];
+    for (let offset = 0; ; offset += 1000) {
+      const { data, error } = await bucket.list(prefix, {
+        limit: 1000,
+        offset,
+        sortBy: { column: "name", order: "asc" },
+      });
+      if (error) throw new Error("Falha ao listar armazenamento");
+      all.push(...(data ?? []));
+      if (!data || data.length < 1000) break;
+    }
+    return all;
+  }
+  for (const folder of await list("")) {
+    if (folder.id !== null || !/^[0-9a-f-]{36}$/i.test(folder.name)) continue;
+    const { data: account, error: accountError } =
+      await admin.auth.admin.getUserById(folder.name);
+    const deleted =
+      accountError?.status === 404 && accountError?.code === "user_not_found";
+    if (accountError && !deleted)
+      throw new Error("Falha ao verificar proprietário");
+    if (!deleted && !account?.user)
+      throw new Error("Proprietário indisponível");
+    for (const project of await list(folder.name)) {
+      if (project.id !== null || !/^[0-9a-f-]{36}$/i.test(project.name))
+        continue;
+      const prefix = `${folder.name}/${project.name}`;
+      for (const file of await list(prefix)) {
+        if (!file.id) continue;
+        const id = file.name.replace(/(-thumb)?\.webp$/, "");
+        if (!/^[0-9a-f-]{36}$/i.test(id)) continue;
+        const path = `${prefix}/${file.name}`;
+        // Aguardar 24h antes de tratar uploads sem metadados de contas vivas.
+        if (!deleted) {
+          if (!file.created_at) continue;
+          const created = Date.parse(file.created_at);
+          if (!Number.isFinite(created) || now - created < 24 * 60 * 60 * 1000)
+            continue;
+          const { data: photo, error } = await admin
+            .from("photos")
+            .select("*")
+            .eq("id", id)
+            .maybeSingle();
+          if (error) throw new Error("Falha ao verificar referência");
+          if (
+            photo &&
+            (photo.storage_key === path || photo.thumbnail_key === path)
+          )
+            continue;
+        }
+        const { error } = await bucket.remove([path]);
+        if (error) throw new Error("Falha ao remover órfão");
+        removed++;
+      }
+    }
+  }
+  return removed;
 }

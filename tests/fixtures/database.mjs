@@ -49,7 +49,15 @@ const identifier = (text) => {
   return `"${text}"`;
 };
 // Adaptador REST de teste: a persistência, constraints e RLS são PostgreSQL real.
-export async function rest(db, request, response, url, userId, admin = false) {
+export async function rest(
+  db,
+  request,
+  response,
+  url,
+  userId,
+  admin = false,
+  failPhotoReply = () => false,
+) {
   let payload = null;
   if (request.method !== "GET" && request.method !== "HEAD") {
     let raw = "";
@@ -164,6 +172,16 @@ export async function rest(db, request, response, url, userId, admin = false) {
         ]),
       ),
     );
+    if (table === "photos" && request.method === "POST" && failPhotoReply()) {
+      response.statusCode = 503;
+      response.end(
+        JSON.stringify({
+          code: "TEST_REPLY_LOST",
+          message: "Resposta de teste indisponível após commit",
+        }),
+      );
+      return;
+    }
     response.setHeader(
       "Content-Range",
       `0-${Math.max(0, rows.length - 1)}/${rows.length}`,

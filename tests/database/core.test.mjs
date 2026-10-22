@@ -364,6 +364,16 @@ test("isolamento, estados e integridade no PostgreSQL", async () => {
     1,
     "registro mínimo de exclusão sobrevive ao purge",
   );
+  await query(
+    "insert into photo_cleanup(photo_id,user_id,paths) values(gen_random_uuid(),$1,$2)",
+    [alice, [`${alice}/arquivo-orfao.webp`]],
+  );
+  assert.equal(
+    (await query("select * from photo_cleanup where user_id=$1", [alice]))
+      .length,
+    1,
+    "fila precisa sobreviver à exclusão de Auth",
+  );
   await db.close();
   // Ensaio local: restaurar snapshot anterior não pode reabrir dados excluídos.
   const restored = (restoredDb = new PGlite({ loadDataDir: backup }));

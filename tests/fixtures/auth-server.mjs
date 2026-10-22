@@ -41,6 +41,7 @@ const tokenFor = (u) =>
     : `${encode({ alg: "HS256", typ: "JWT" })}.${encode({ sub: u.id, exp: Math.floor(Date.now() / 1000) + 3600, aud: "authenticated" })}.assinatura-de-teste`;
 const tokens = new Map(users.map((u) => [tokenFor(u), u]));
 const files = new Map();
+const failPhotoReplies = new Set();
 const db = await createDatabase(users.map((u) => u.id));
 let queue = Promise.resolve();
 createServer(async (request, response) => {
@@ -51,6 +52,16 @@ createServer(async (request, response) => {
   response.setHeader("Content-Type", "application/json");
   response.setHeader("Cache-Control", "no-store");
   if (request.url === "/health") return response.end("{}");
+  if (request.url?.startsWith("/_test/photo-reply-status/"))
+    return response.end(
+      JSON.stringify({
+        pending: failPhotoReplies.has(request.url.split("/").at(-1)),
+      }),
+    );
+  if (request.url?.startsWith("/_test/fail-photo-reply/")) {
+    failPhotoReplies.add(request.url.split("/").at(-1));
+    return response.end("{}");
+  }
   if (request.url?.startsWith("/rest/v1/")) {
     const uid = currentUser?.id ?? null;
     queue = queue.then(() =>
@@ -61,6 +72,7 @@ createServer(async (request, response) => {
         new URL(request.url, "http://localhost"),
         uid,
         admin,
+        () => failPhotoReplies.delete(uid),
       ),
     );
     await queue;
