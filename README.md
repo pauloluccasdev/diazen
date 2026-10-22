@@ -68,7 +68,7 @@ Para produzir capturas das telas reais para revisão visual, após o build, exec
 - PWA instalável quando suportado; escrita offline bloqueada; resumo mínimo do dashboard disponível na aba por até 24 h, apagado ao sair da conta. Fotos e respostas autenticadas ficam fora do cache do service worker.
 - Exportação de registros em JSON e solicitação de exclusão com reautenticação, bloqueio imediato e purge administrativo.
 
-Sem IA, Strava, login social, prescrição de dieta/treino ou barra inferior fixa. Receitas, favoritos, recentes e cópia de refeições (RF-009, prioridade Média) ficam para a revisão de backlog. O catálogo nutricional não foi incorporado: o núcleo usa valores e fontes informados pelo usuário.
+Sem IA, Strava, login social, prescrição de dieta/treino ou barra inferior fixa. Receitas, favoritos, recentes e cópia de refeições (RF-009) foram incluídos por aprovação do proprietário. O catálogo nutricional não foi incorporado: o núcleo usa valores e fontes informados pelo usuário.
 
 ## Operação e limites da entrega
 
@@ -87,6 +87,12 @@ Cada funcionalidade sai da `develop` atualizada, em `feat/`, `fix/` ou prefixo a
 ## Biblioteca alimentar
 
 Em Alimentação, acesse **Alimentos, receitas e favoritos** para salvar composições próprias com fonte e referência. Receitas usam ingredientes da biblioteca e rendimento em porções; valores desconhecidos continuam ausentes. Ao consumir, o diário recebe uma cópia da composição, preservada mesmo após editar/remover a biblioteca. Recentes reutilizam os últimos 20 registros da conta. Copiar refeição exige confirmação, inclui todos os itens da origem e adiciona ao ACTIVE sem substituir os registros existentes.
+
+## Auditoria com agent-browser
+
+Após `npm run build`, execute `npm run test:agent-browser`. Requer a CLI `agent-browser` 0.39.1 e Chromium disponível (`agent-browser install`). O comando recusa portas ocupadas, cria seu próprio laboratório nas portas 3100/54329, percorre os formulários, testa falhas e remove os processos ao terminar. Não usa o Supabase remoto. Relatórios e capturas ficam em `artifacts/agent-browser/`, ignorados pelo Git. A CI executa esse roteiro além das suítes Chromium e WebKit; `DIAZEN_QA_PLAYWRIGHT_BROWSER=1` permite usar o binário Chromium já instalado pelo Playwright, mantendo o controle pela CLI.
+
+O modo `test:agent-browser:hosted` é uma homologação explícita da prévia `develop`: executa gravações em contas sintéticas próprias e as exclui no final, incluindo fotos. Requer `.env.local` administrativo e token OIDC temporário, fornecido por `vercel env run -- npm run test:agent-browser:hosted`. Não aponta para produção nem altera a proteção da Vercel. Depois de concluir, atualize a cópia independente do ledger com `npm run backup:ledger`. A confirmação de entrega de e-mails, instalação em aparelho físico e revisão jurídica continuam sendo verificações separadas.
 
 ## Cópias cifradas locais
 

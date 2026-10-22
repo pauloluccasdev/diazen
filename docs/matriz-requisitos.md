@@ -27,7 +27,7 @@ Os fluxos essenciais também passaram no Supabase real em 21/10/2026. Consulte [
 | RNF-001/002, RB-01/02/03/10 | Auth gerenciado e validação server-side; RLS e constraints testadas entre usuários/estados; grants mínimos e negação de TRUNCATE. HTTPS/rate limits/configuração real a conferir. |
 | RNF-003/017 | Minimização, privacidade, termos, exportação e exclusão implementados; revisão jurídica, contato e retenção reais pendentes. |
 | RNF-004/016, RB-04/05/06/07 | Tipos, limites, FKs compostas, índices únicos, locks e RPCs; provas locais de rollback/unicidade/ausência ≠ zero. No serviço real, requisições concorrentes comprovaram ACTIVE único, peso único e consistência entre encerramento e escrita. |
-| RNF-005/012 | Retry, erros genéricos, `/api/saude` e evento técnico de purge pendente; monitoramento externo/SLA inicial ainda a confirmar. |
+| RNF-005/012 | Retry com nova leitura do servidor, erros genéricos, `/api/saude`, evento estruturado `request_failed` e evento técnico de purge pendente. Falha injetada e recuperação preservando registros cobertas por `tests/resilience.spec.ts` e `tests/manual/agent-browser.mjs`; minimização em `tests/database/observability.test.mjs`. Monitoramento externo/SLA inicial ainda a confirmar. |
 | RNF-006/011 | Listagens paginadas e totais no banco; índices por proprietário. Meta proposta de ~2 s e volume/dispositivo real precisam de medição. |
 | RNF-007/008 | Testes em seis larguras e axe WCAG A/AA nas telas essenciais; teclado básico testado. Leitor de tela, zoom e revisão manual complementam a verificação automática. |
 | RNF-009/010, RB-09 | Cache exclusivo do fallback, resumo limitado à aba, fotos sem cache/EXIF com leitura autorizada e processamento no servidor. Sem limite arbitrário por projeto. |
@@ -39,3 +39,11 @@ Os fluxos essenciais também passaram no Supabase real em 21/10/2026. Consulte [
 ## Gate de conclusão
 
 O código pode avançar no review da `develop`, mas o MVP só deve ser declarado homologado quando as evidências reais de `docs/operacao.md` estiverem preenchidas e as revisões do proprietário concluídas. Resultados automáticos não substituem esses gates.
+
+## Auditoria repetível pelo agent-browser
+
+`npm run test:agent-browser` percorre RF-001 a RF-020 e RF-022 pela interface/API autenticada do laboratório, incluindo cenários negativos, isolamento entre contas e falha recuperável. RF-021 e as constraints/RLS têm evidência complementar nos testes SQL; não são inferidos apenas pelo que a interface mostra.
+
+A execução local completa de 22/10/2026 passou em 25 grupos, com axe em 16 telas e layout em seis larguras. Inclui biblioteca/receitas com snapshots, confirmação e invalidação de refeições, meta de água histórica, peso/medidas únicos, quatro modalidades, fotos privadas, offline com servidor indisponível, expiração e limpeza de resumo, histórico, rascunho, arquivamento, exportação e exclusão. O volume atravessa páginas: 25 lançamentos de água, 13 fotos e 21 rascunhos adicionais; totais e comparação entre páginas são conferidos. Cookies adulterados, outro navegador e reutilização de código PKCE são rejeitados.
+
+Relatório e capturas: `artifacts/agent-browser/`; roteiro versionado em `tests/manual/agent-browser.mjs`. O modo hospedado é separado e registra seus limites e a remoção das contas sintéticas. Medições de Web Vitals e tempos nesse ambiente são de desktop/WSL, não comprovação da meta em celular físico. Instalação física, leitor de tela, entrega de e-mail, política de backup, revisão legal e configuração de produção permanecem nos gates correspondentes.

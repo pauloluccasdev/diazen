@@ -17,6 +17,11 @@ const users = [
   user,
   {
     ...user,
+    id: "00000000-0000-4000-8000-000000000007",
+    email: "resiliencia@example.test",
+  },
+  {
+    ...user,
     id: "00000000-0000-4000-8000-000000000006",
     email: "alimentos@example.test",
   },
@@ -48,6 +53,7 @@ const tokenFor = (u) =>
 const tokens = new Map(users.map((u) => [tokenFor(u), u]));
 const files = new Map();
 const failPhotoReplies = new Set();
+const failReads = new Set();
 const emailLinks = new Map();
 const emailTickets = new Map();
 const authCodes = new Map();
@@ -61,6 +67,12 @@ createServer(async (request, response) => {
   response.setHeader("Content-Type", "application/json");
   response.setHeader("Cache-Control", "no-store");
   if (request.url === "/health") return response.end("{}");
+  if (request.url?.startsWith("/_test/read-failure/")) {
+    const path = request.url.split("/");
+    if (path.at(-1) === "on") failReads.add(path.at(-2));
+    else failReads.delete(path.at(-2));
+    return response.end("{}");
+  }
   if (request.url?.startsWith("/_test/email-link?")) {
     const email = new URL(request.url, "http://localhost").searchParams.get(
       "email",
@@ -126,6 +138,15 @@ createServer(async (request, response) => {
     return response.end("{}");
   }
   if (request.url?.startsWith("/rest/v1/")) {
+    if (request.method === "GET" && failReads.has(currentUser?.id)) {
+      response.statusCode = 503;
+      return response.end(
+        JSON.stringify({
+          code: "TEST_UNAVAILABLE",
+          message: "Synthetic read failure",
+        }),
+      );
+    }
     const uid = currentUser?.id ?? null;
     queue = queue.then(() =>
       rest(
