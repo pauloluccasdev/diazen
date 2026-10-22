@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PasswordInput } from "@/components/password-input";
 import {
   UserRound,
   FolderOpen,
@@ -71,16 +72,15 @@ export default async function Profile() {
         <details>
           <summary>Solicitar exclusão da conta</summary>
           <ActionForm action={deleteAccount} submit="Excluir minha conta">
-            <label>
-              Senha atual
-              <input
-                type="password"
-                name="password"
-                autoComplete="current-password"
-                required
-                maxLength={1024}
-              />
-            </label>
+            <label htmlFor="deletion-password">Senha atual</label>
+            <PasswordInput
+              id="deletion-password"
+              visibilityLabel="senha atual"
+              name="password"
+              autoComplete="current-password"
+              required
+              maxLength={1024}
+            />
             <label>
               Digite EXCLUIR para confirmar
               <input

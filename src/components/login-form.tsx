@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { PasswordInput } from "@/components/password-input";
 import { useOnline } from "@/lib/use-online";
 import { signIn } from "@/app/entrar/actions";
 
@@ -27,10 +28,9 @@ export function LoginForm({ configured }: { configured: boolean }) {
         disabled={pending || unavailable}
       />
       <label htmlFor="password">Senha</label>
-      <input
+      <PasswordInput
         id="password"
         name="password"
-        type="password"
         autoComplete="current-password"
         required
         maxLength={1024}

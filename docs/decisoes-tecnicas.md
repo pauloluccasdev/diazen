@@ -191,3 +191,7 @@ Em seguida, o proprietário reabriu a aprovação visual por falta de fidelidade
 ## Correção — Dependências de navegadores na CI — 22/10/2026
 
 Na validação da revisão visual, o runner Ubuntu 24.04 gastou mais de oito minutos baixando apenas parte dos 119 MB de dependências pelo espelho Azure. A CI passa a usar `https://archive.ubuntu.com/ubuntu/` na lista de espelhos do runner quando esse arquivo existe. Repositórios assinados, pacotes e a instalação `playwright install --with-deps chromium webkit` permanecem iguais; nenhuma dependência ou verificação é omitida. Alteração restrita ao ambiente efêmero de CI, sem modificar a WSL ou a Vercel. RNF-014/015.
+
+## Melhoria — Mostrar e ocultar senhas — 22/10/2026
+
+A pedido do proprietário, os campos de login, cadastro, confirmação, nova senha e confirmação de exclusão passam a oferecer botão de mostrar/ocultar com ícone de olho, nome acessível e área de toque de 44 px. Começam ocultos, mantêm valor/autocomplete/validação e o botão não submete o formulário. O estado visual fica somente no componente; não há persistência ou logging da senha. RF-001/RF-020; RNF-001/007/008/014.
