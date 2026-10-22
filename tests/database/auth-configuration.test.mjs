@@ -87,7 +87,7 @@ test("aplicação salva backup antes da alteração, preserva SMTP e verifica re
   assert.equal(data.config.site_url, "https://diazen.example");
   assert.equal(
     data.config.uri_allow_list,
-    "https://diazen.example/auth/confirmar,http://localhost:3000/auth/confirmar",
+    "https://diazen.example/auth/confirmar,https://diazen.example/auth/recuperar,http://localhost:3000/auth/confirmar,http://localhost:3000/auth/recuperar",
   );
   assert.equal(data.config.smtp_pass, "provider-secret-do-not-log");
   assert.match(result.stdout, /"verified":true/);
@@ -111,6 +111,6 @@ test("SMTP padrão aplica URLs sem alterar templates, assuntos ou remetente", ()
   assert.equal(data.config.mailer_subjects_confirmation, undefined);
   assert.equal(data.config.mailer_subjects_recovery, undefined);
   assert.match(result.stdout, /"customSmtpConfigured":false/);
-  assert.match(result.stdout, /"customTemplatesPending":true/);
+  assert.match(result.stdout, /"emailTemplates":"provider_default"/);
   assert.match(result.stdout, /"verified":true/);
 });

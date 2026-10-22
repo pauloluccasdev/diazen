@@ -25,14 +25,12 @@ Abra http://localhost:3000. A abertura pública funciona sem credenciais; autent
 1. Use um projeto dedicado e revise [a modelagem](docs/modelagem.md) e as migrações em `supabase/migrations/`.
 2. Preencha `.env.local` com URL, chave **publicável**, origem do app e chave administrativa **somente servidor**. A chave privilegiada nunca deve usar prefixo `NEXT_PUBLIC_`. A configuração rejeita chaves secretas no campo público.
 3. Execute `npm run db:bundle`. O arquivo `artifacts/diazen-migrations.sql` reúne as migrações para revisar/aplicar, uma vez, no SQL Editor de um projeto vazio. Para ambientes existentes, use o fluxo de migrações do Supabase e controle quais versões já foram aplicadas; não execute o bundle novamente nem apague tabelas para resolver erros.
-4. Em Auth, habilite confirmação de e-mail, configure SMTP, Site URL e redirecionamentos. A origem em `NEXT_PUBLIC_SITE_URL` deve ser a URL exata do app, sem caminho; HTTPS em hospedagem.
-5. Configure os templates:
-   - Confirmação: `{{ .SiteURL }}/auth/confirmar?token_hash={{ .TokenHash }}&type=email`
-   - Recuperação: `{{ .SiteURL }}/auth/confirmar?token_hash={{ .TokenHash }}&type=recovery`
+4. Em Auth, habilite confirmação de e-mail e mantenha o provedor e os templates padrão do Supabase Free. Configure Site URL e os callbacks `/auth/confirmar` e `/auth/recuperar`. A origem em `NEXT_PUBLIC_SITE_URL` deve ser a URL exata do app, sem caminho; HTTPS em hospedagem.
+5. Use o fluxo PKCE padrão: inicie o cadastro/recuperação e abra o link de e-mail no mesmo navegador e origem. O provedor padrão tem destinatários e cota de envio restritos, adequados ao uso pessoal inicial aprovado. Veja [publicação](docs/publicacao.md).
 6. Execute `npm run env:check` para verificar presença/formato sem exibir valores; `npm run env:check -- --connect` faz consultas administrativas **somente leitura**, verifica schema/bucket e não cria usuários nem registros.
 7. Reinicie o servidor e percorra os fluxos de homologação em [docs/operacao.md](docs/operacao.md).
 
-O callback aceita somente confirmação e recuperação, sem destinos arbitrários. Novas senhas usam 12–128 caracteres; configure política compatível no Supabase. Senhas e sessões permanecem sob responsabilidade do Auth. Revise limites de autenticação e entrega de e-mail antes do uso real.
+Os callbacks usam códigos PKCE e destinos fixos para confirmação e recuperação. Novas senhas usam 12–128 caracteres; configure política compatível no Supabase. Senhas e sessões permanecem sob responsabilidade do Auth. Confirme a entrega de e-mail e os limites do provedor padrão antes do uso real.
 
 ## Verificar
 

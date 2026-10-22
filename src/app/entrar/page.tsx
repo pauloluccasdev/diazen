@@ -32,7 +32,9 @@ export default async function Login({
       <p className="intro">Entre com seu e-mail e senha.</p>
       {params.link === "invalido" && (
         <p role="alert" className="form-error">
-          O link expirou ou é inválido. Solicite novas instruções.
+          O link expirou, já foi usado ou foi aberto em outro navegador. Se você
+          confirmou o e-mail, tente entrar na conta. Para recuperar a senha,
+          solicite outro link neste navegador.
         </p>
       )}
       <LoginForm configured={Boolean(supabase)} />

@@ -1,5 +1,6 @@
 // Simulador local de Supabase Auth usado exclusivamente nos testes de navegador.
 import { createServer } from "node:http";
+import { createHash, randomUUID } from "node:crypto";
 import { createDatabase, rest } from "./database.mjs";
 const user = {
   id: "00000000-0000-4000-8000-000000000001",
@@ -42,6 +43,9 @@ const tokenFor = (u) =>
 const tokens = new Map(users.map((u) => [tokenFor(u), u]));
 const files = new Map();
 const failPhotoReplies = new Set();
+const emailLinks = new Map();
+const emailTickets = new Map();
+const authCodes = new Map();
 const db = await createDatabase(users.map((u) => u.id));
 let queue = Promise.resolve();
 createServer(async (request, response) => {
@@ -52,6 +56,60 @@ createServer(async (request, response) => {
   response.setHeader("Content-Type", "application/json");
   response.setHeader("Cache-Control", "no-store");
   if (request.url === "/health") return response.end("{}");
+  if (request.url?.startsWith("/_test/email-link?")) {
+    const email = new URL(request.url, "http://localhost").searchParams.get(
+      "email",
+    );
+    return response.end(
+      JSON.stringify({ link: emailLinks.get(email) ?? null }),
+    );
+  }
+  if (request.url?.startsWith("/auth/v1/verify?") && request.method === "GET") {
+    const ticket = new URL(request.url, "http://localhost").searchParams.get(
+      "token",
+    );
+    const pending = emailTickets.get(ticket);
+    if (pending) {
+      emailTickets.delete(ticket);
+      const code = randomUUID();
+      authCodes.set(code, pending);
+      const destination = new URL(pending.redirect);
+      destination.searchParams.set("code", code);
+      response.writeHead(302, { Location: destination.toString() });
+      return response.end();
+    }
+  }
+  if (
+    request.url === "/auth/v1/token?grant_type=pkce" &&
+    request.method === "POST"
+  ) {
+    let raw = "";
+    for await (const part of request) raw += part;
+    const body = JSON.parse(raw);
+    const pending = authCodes.get(body.auth_code);
+    const challenge = createHash("sha256")
+      .update(body.code_verifier ?? "")
+      .digest("base64url");
+    if (pending && pending.challenge === challenge) {
+      authCodes.delete(body.auth_code);
+      return response.end(
+        JSON.stringify({
+          access_token: tokenFor(pending.user),
+          refresh_token: "refresh-de-teste",
+          token_type: "bearer",
+          expires_in: 3600,
+          user: pending.user,
+        }),
+      );
+    }
+    response.statusCode = 400;
+    return response.end(
+      JSON.stringify({
+        code: "bad_code_verifier",
+        msg: "Invalid code or verifier",
+      }),
+    );
+  }
   if (request.url?.startsWith("/_test/photo-reply-status/"))
     return response.end(
       JSON.stringify({
@@ -200,22 +258,29 @@ createServer(async (request, response) => {
   if (
     request.url?.startsWith("/auth/v1/signup") ||
     request.url?.startsWith("/auth/v1/recover")
-  )
-    return response.end("{}");
-  if (request.url === "/auth/v1/verify" && request.method === "POST") {
-    let body = "";
-    for await (const chunk of request) body += chunk;
-    const data = JSON.parse(body);
-    if (data.token_hash === "link-valido-de-teste")
-      return response.end(
-        JSON.stringify({
-          access_token: token,
-          refresh_token: "refresh-de-teste",
-          token_type: "bearer",
-          expires_in: 3600,
-          user,
-        }),
+  ) {
+    let raw = "";
+    for await (const part of request) raw += part;
+    const body = JSON.parse(raw);
+    const redirect = new URL(request.url, "http://localhost").searchParams.get(
+      "redirect_to",
+    );
+    const account =
+      users.find((u) => u.email === body.email) ??
+      (request.url.startsWith("/auth/v1/signup") ? user : null);
+    if (body.code_challenge && redirect && account) {
+      const ticket = randomUUID();
+      emailTickets.set(ticket, {
+        challenge: body.code_challenge,
+        redirect,
+        user: account,
+      });
+      emailLinks.set(
+        body.email,
+        `http://127.0.0.1:54329/auth/v1/verify?token=${ticket}&type=${request.url.startsWith("/auth/v1/recover") ? "recovery" : "signup"}`,
       );
+    }
+    return response.end("{}");
   }
   if (request.url === "/auth/v1/user" && currentUser)
     return response.end(JSON.stringify(currentUser));

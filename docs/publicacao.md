@@ -12,11 +12,15 @@ A Vercel promoveu automaticamente a primeira implantação para o target de prod
 
 ## Configurar Auth
 
-Os templates versionados estão em `supabase/templates/confirmation.html` e `supabase/templates/recovery.html`. Usam token hash e o callback do servidor, sem depender de estado de sessão do navegador que iniciou o cadastro.
+Decisão do proprietário: usar o provedor de e-mail e os templates padrão do Supabase Free. SMTP próprio e templates personalizados não fazem parte da configuração atual.
 
-A ferramenta administrativa usa um token da Management API do Supabase, separado das chaves da aplicação. Configure `SUPABASE_ACCESS_TOKEN` somente no ambiente local ignorado pelo Git. Não publique esse token na Vercel.
+Cadastro e recuperação usam PKCE pelo cliente SSR do Supabase. O e-mail padrão aponta para a verificação no provedor, que devolve um código de uso único ao aplicativo. `/auth/confirmar` troca esse código por sessão e abre o painel; `/auth/recuperar` abre a troca de senha. Os destinos são fixos e as rotas não aceitam redirecionamentos arbitrários. Não é necessário editar templates nem receber `token_hash` no aplicativo.
 
-Inspecionar diferenças, sem alterar o serviço:
+O link precisa ser aberto no mesmo navegador e na mesma origem em que o fluxo foi iniciado, pois o verificador fica em cookie. O aplicativo orienta isso na confirmação de envio. Ao abrir em outro navegador, confirmar o e-mail no provedor pode concluir, mas a sessão do aplicativo não é criada; nesse caso, o usuário pode entrar com sua senha. Para recuperação, deve solicitar novo link no navegador em que deseja continuar.
+
+A ferramenta administrativa usa um token da Management API separado das chaves da aplicação. Configure `SUPABASE_ACCESS_TOKEN` apenas no ambiente local ignorado pelo Git; nunca publique esse token na Vercel.
+
+Inspecionar sem alterar o serviço:
 
 ```bash
 npm run auth:configure -- --site-url https://diazen-git-develop-pauloluccas-projects-58a37ef2.vercel.app
@@ -28,17 +32,13 @@ Aplicar a configuração autorizada:
 npm run auth:configure -- --site-url https://diazen-git-develop-pauloluccas-projects-58a37ef2.vercel.app --apply
 ```
 
-A ferramenta salva uma cópia protegida dos campos anteriores em `backups/`, ajusta a origem, mantém confirmação de e-mail obrigatória, permite somente callbacks explícitos da origem e do localhost e configura senha mínima de 12 caracteres. Quando há SMTP personalizado, aplica também os dois templates/assuntos e o nome do remetente. Preserva host, usuário, senha e endereço de remetente SMTP existentes. Confere a configuração retornada após a alteração e não exibe segredos nem respostas completas do provedor. Sem `--apply`, apenas consulta e informa diferenças.
+A ferramenta salva backup dos campos alterados em `backups/`, configura a origem, os callbacks `/auth/confirmar` e `/auth/recuperar` nessa origem e em localhost, exige confirmação de e-mail e senha mínima de 12 caracteres. Preserva templates, assuntos, remetente e credenciais do provedor. Confere a configuração retornada e não exibe segredos. Sem `--apply`, apenas consulta diferenças.
 
-Os fluxos essenciais F-01 a F-07 também passaram na prévia hospedada, incluindo processamento de fotos, acesso anônimo/cross-user negado, concorrência, exportação e purge de conta. Links reais de confirmação e recuperação foram gerados administrativamente e percorridos no navegador: confirmação, troca de senha e rejeição de reutilização passaram. Essa geração não envia e-mails e não comprova SMTP, entrega nem templates atualmente configurados no provedor. As contas sintéticas e o acesso temporário de automação foram removidos ao concluir. Evidências técnicas locais, sem valores de credenciais, em `artifacts/vercel-homologation-report.json` e `artifacts/auth-links-homologation-report.json`.
+O provedor padrão limita destinatários aos membros da organização Supabase e tem cota reduzida de envio, atualmente duas mensagens por hora. Essa limitação é aceita para o uso pessoal inicial e não depende de criar SMTP próprio. Consulte a [documentação do provedor padrão](https://supabase.com/docs/guides/auth/auth-smtp).
 
-No Supabase Free com provedor padrão, a API recusa alterações de templates, assuntos e remetente. A ferramenta informa `customTemplatesPending: true` e aplica somente os campos permitidos. A edição dos templates exige SMTP próprio; o SMTP padrão também restringe destinatários aos membros da organização e tem limite reduzido de envio. Consulte a [documentação de SMTP](https://supabase.com/docs/guides/auth/auth-smtp).
+Os fluxos de domínio e fotos já passaram na prévia hospedada. Os testes anteriores de links por token hash pertencem à implementação substituída; o novo fluxo PKCE tem validação de navegador com verificador criptográfico, negação de outro navegador, adulteração e reutilização. A entrega real precisa ser confirmada pelo proprietário, iniciando cadastro/recuperação na própria prévia e abrindo o e-mail nesse mesmo navegador. Resposta de sucesso da API não comprova recebimento. Não versionar endereço pessoal, links com código ou senhas.
 
-Estado observado em 21/10/2026: URLs, confirmação obrigatória e senha mínima de 12 caracteres aplicadas e verificadas no serviço real. Os templates personalizados continuam pendentes de SMTP. Um primeiro envio de teste foi aceito ainda com a configuração anterior, mas não comprova recebimento nem o callback do Diazen e não deve ser usado na homologação. A conta autorizada não foi excluída nem recebeu registros de saúde.
-
-Não considerar resposta de sucesso da API como comprovação de recebimento: o proprietário precisa confirmar a entrega e abrir os links na caixa de entrada autorizada após aplicar os templates do Diazen. O callback atual espera token hash; o envio com templates padrão do provedor não substitui esse gate. Não registrar endereço pessoal, links com token ou senhas nas evidências versionadas.
-
-Configuração manual equivalente: Site URL igual à prévia; Redirect URLs com `/auth/confirmar` nessa origem e em `http://localhost:3000`; assuntos e templates dos arquivos versionados; senha mínima de 12 caracteres. Manter confirmação de e-mail habilitada.
+Um primeiro e-mail foi enviado antes da configuração atual e deve ser ignorado. A conta autorizada foi preservada sem registros de saúde.
 
 ## Antes da produção
 
