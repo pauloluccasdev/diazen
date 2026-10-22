@@ -215,3 +215,7 @@ Após retestar no iPhone, o proprietário solicitou conseguir planejar um projet
 ## Melhoria — Explicação da meta semanal de sessões — 22/10/2026
 
 A pedido do proprietário, o cadastro de projetos explica junto ao campo que sessões por semana é uma meta opcional de atividades físicas, somada entre modalidades. Cada registro de atividade conta como uma sessão; o exemplo de três treinos de musculação e duas corridas resulta em cinco sessões. A orientação para deixar em branco quando não houver meta fica visível e associada ao campo por `aria-describedby`. Sem alteração da contagem ou das regras de gravação. RF-005/013; RNF-007/008.
+
+## Melhoria — Distribuição da navegação principal no mobile — 22/10/2026
+
+A pedido do proprietário, Dashboard, Projetos e Minha conta passam a dividir igualmente toda a largura disponível até 600 px. Os links mantêm ícone, texto, área mínima de toque e destaque da rota atual, com conteúdo centralizado e espaçamento adequado à largura de 320 px. RF-018; RNF-007/008. A navegação de módulos continua seguindo a composição já aprovada.

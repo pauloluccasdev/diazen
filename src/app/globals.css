@@ -1709,3 +1709,20 @@ input[type="date"]::-webkit-datetime-edit {
 .project-field > input {
   margin-top: 8px;
 }
+@media (max-width: 600px) {
+  .primary-nav {
+    width: 100%;
+    flex-wrap: nowrap;
+  }
+  .primary-nav a {
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: center;
+    gap: 6px;
+    padding-inline: 4px;
+    white-space: nowrap;
+  }
+  .primary-nav a svg {
+    flex-shrink: 0;
+  }
+}
