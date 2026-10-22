@@ -17,16 +17,16 @@ export async function createDatabase(users) {
   return db;
 }
 
-const tables = new Set(['projects','water_goals','water_entries','weights','measurements','activities','meal_items','meal_days','photos']);
+const tables = new Set(['projects','water_goals','water_entries','weights','measurements','activities','meal_items','meal_days','photos','photo_cleanup','account_deletions']);
 const commands = new Set(['create_project','save_weight','save_measurements','account_available','request_account_deletion','project_summary','food_calendar']);
 const identifier = (text) => { if (!/^[a-z_]+$/.test(text)) throw new Error('Invalid identifier'); return `"${text}"`; };
 // Adaptador REST de teste: a persistência, constraints e RLS são PostgreSQL real.
-export async function rest(db, request, response, url, userId) {
+export async function rest(db, request, response, url, userId,admin=false) {
   let payload = null;
   if (request.method !== 'GET' && request.method !== 'HEAD') { let raw=''; for await(const part of request) raw+=part; payload=raw?JSON.parse(raw):null; }
   await db.exec('reset role');
   await db.query("select set_config('request.jwt.claim.sub',$1,false)",[userId ?? '']);
-  await db.exec('set role authenticated');
+  if(!admin)await db.exec('set role authenticated');
   const table = url.pathname.split('/').at(-1);
   let rows;
   try {

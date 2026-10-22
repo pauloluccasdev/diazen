@@ -8,17 +8,39 @@ const token = `${encode({ alg: "HS256", typ: "JWT" })}.${encode({ sub: user.id, 
 const users = [user,{...user,id:"00000000-0000-4000-8000-000000000002",email:"registros@example.test"},{...user,id:"00000000-0000-4000-8000-000000000003",email:"fotos@example.test"},{...user,id:"00000000-0000-4000-8000-000000000004",email:"privacidade@example.test"}];
 const tokenFor = (u) => u.id===user.id?token:`${encode({alg:'HS256',typ:'JWT'})}.${encode({sub:u.id,exp:Math.floor(Date.now()/1000)+3600,aud:'authenticated'})}.assinatura-de-teste`;
 const tokens = new Map(users.map(u=>[tokenFor(u),u]));
+const files = new Map();
 const db = await createDatabase(users.map(u=>u.id));
 let queue = Promise.resolve();
 createServer(async (request, response) => {
+  const admin = request.headers.apikey === "chave-secreta-de-teste";
   const currentUser = tokens.get(String(request.headers.authorization).replace(/^Bearer /,""));
   response.setHeader("Content-Type", "application/json");
   response.setHeader("Cache-Control", "no-store");
   if (request.url === "/health") return response.end("{}");
   if (request.url?.startsWith('/rest/v1/')) {
     const uid = currentUser?.id ?? null;
-    queue = queue.then(()=>rest(db,request,response,new URL(request.url,'http://localhost'),uid));
+    queue = queue.then(()=>rest(db,request,response,new URL(request.url,'http://localhost'),uid,admin));
     await queue; return;
+  }
+  if(request.url?.startsWith('/storage/v1/object/')) {
+    const parts=decodeURIComponent(new URL(request.url,'http://localhost').pathname).split('/');
+    const bucketIndex=parts.indexOf('body-photos'),path=parts.slice(bucketIndex+1).join('/');
+    if(request.method==='POST'&&admin&&path) {
+      const parts=[];for await(const part of request)parts.push(part);files.set(path,Buffer.concat(parts));
+      queue=queue.then(async()=>{await db.exec('reset role');await db.query("insert into storage.objects(bucket_id,name) values('body-photos',$1)",[path]);});await queue;
+      return response.end(JSON.stringify({Key:`body-photos/${path}`,Id:crypto.randomUUID()}));
+    }
+    if(request.method==='DELETE'&&admin) {
+      let raw='';for await(const part of request)raw+=part;const {prefixes}=JSON.parse(raw);
+      queue=queue.then(async()=>{await db.exec('reset role');for(const key of prefixes){files.delete(key);await db.query('delete from storage.objects where name=$1',[key]);}});await queue;
+      return response.end(JSON.stringify(prefixes.map(name=>({name}))));
+    }
+    if(request.method==='GET'&&currentUser) {
+      let allowed=false;
+      queue=queue.then(async()=>{await db.exec('reset role');await db.query("select set_config('request.jwt.claim.sub',$1,false)",[currentUser.id]);await db.exec('set role authenticated');allowed=(await db.query('select * from storage.objects where name=$1',[path])).rows.length>0;await db.exec('reset role');});await queue;
+      if(allowed&&files.has(path)){response.setHeader('Content-Type','image/webp');return response.end(files.get(path));}
+    }
+    response.statusCode=404;return response.end('{}');
   }
   if (request.url === "/auth/v1/token?grant_type=password" && request.method === "POST") {
     let body = "";
