@@ -1644,3 +1644,68 @@ body {
 .data-form > fieldset > .password-field {
   margin-top: 8px;
 }
+/* Safari/iOS dá dimensões intrínsecas próprias ao controle nativo de data. */
+.data-form label,
+.form-grid > * {
+  min-width: 0;
+  max-width: 100%;
+}
+.data-form input[type="date"],
+.filter-form input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  box-sizing: border-box;
+  display: block;
+  min-width: 0;
+  min-inline-size: 0;
+  width: 100%;
+  inline-size: 100%;
+  max-width: 100%;
+  max-inline-size: 100%;
+}
+input[type="date"]::-webkit-date-and-time-value {
+  min-width: 0;
+  text-align: left;
+}
+input[type="date"]::-webkit-datetime-edit {
+  min-width: 0;
+  padding: 0;
+}
+.field-hint {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  margin-top: 8px;
+}
+.required-mark {
+  color: var(--color-accent);
+}
+.field-error {
+  font-size: 12px;
+}
+.data-form [aria-invalid="true"] {
+  border-color: var(--color-danger);
+}
+.primary-nav a {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+.primary-nav a[aria-current="page"] {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+  font-weight: 650;
+}
+@media (max-width: 600px) {
+  .data-form input,
+  .data-form select,
+  .data-form textarea,
+  .auth-form input,
+  .filter-form input,
+  .filter-form select {
+    font-size: 16px;
+  }
+}
+.project-field > input {
+  margin-top: 8px;
+}

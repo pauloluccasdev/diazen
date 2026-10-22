@@ -1,36 +1,27 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { requireAccount } from "@/lib/data";
-import { isDate, isId } from "@/lib/domain";
+import { isDate, isId, today } from "@/lib/domain";
 import type { FormResult } from "@/components/forms/action-form";
+import {
+  validateProjectCreation,
+  validateProjectGoals,
+} from "@/lib/project-validation";
 const result = (error = "", message = ""): FormResult => ({ error, message });
 export async function createProject(
   _state: FormResult,
   form: FormData,
 ): Promise<FormResult> {
   const { client } = await requireAccount();
-  const name = String(form.get("name") ?? "").trim();
-  const start = String(form.get("starts_on") ?? "");
-  const end = String(form.get("ends_on") ?? "");
-  const mode = String(form.get("weight_mode") ?? "none");
-  const numeric = (key: string) =>
-    form.get(key) ? Number(String(form.get(key)).replace(",", ".")) : null;
-  const water = numeric("water_ml"),
-    min = numeric("weight_min"),
-    max = numeric("weight_max"),
-    sessions = numeric("sessions");
-  if (
-    !name ||
-    name.length > 100 ||
-    !isDate(start) ||
-    (end && (!isDate(end) || end < start))
-  )
-    return result("Confira nome e datas do projeto.");
-  if (
-    !["none", "track", "target", "range"].includes(mode) ||
-    [water, min, max, sessions].some((v) => v !== null && !Number.isFinite(v))
-  )
-    return result("Confira as metas informadas.");
+  const validation = validateProjectCreation(form, today());
+  const { name, start, end, mode, min, max, water, sessions, draft, errors } =
+    validation;
+  if (Object.keys(errors).length)
+    return {
+      error: `Não foi possível criar. ${Object.values(errors)[0]}`,
+      message: "",
+      fieldErrors: errors,
+    };
   const { error } = await client.rpc("create_project", {
     p_name: name,
     p_starts_on: start,
@@ -40,12 +31,27 @@ export async function createProject(
     p_weight_min: mode === "target" || mode === "range" ? min : null,
     p_weight_max: mode === "range" ? max : null,
     p_sessions: sessions,
-    p_activate: form.get("draft") !== "on",
+    p_activate: !draft,
   });
-  if (error)
+  if (error) {
+    if (error.code === "23505" && error.message.includes("one_active_per_user"))
+      return result(
+        "Não foi possível criar. Já existe um projeto ativo. Encerre-o antes de ativar outro, ou salve o novo como rascunho.",
+      );
+    if (error.message.includes("Início futuro"))
+      return {
+        error:
+          "Não foi possível criar. O início está no futuro. Salve como rascunho ou escolha hoje ou uma data anterior.",
+        message: "",
+        fieldErrors: {
+          starts_on:
+            "O início está no futuro. Salve como rascunho ou escolha hoje ou uma data anterior.",
+        },
+      };
     return result(
-      "Não foi possível criar. Informe pelo menos uma meta mensurável para ativar, confira os valores e encerre o projeto ativo antes de ativar outro.",
+      "Não foi possível criar. Tente novamente; se o problema persistir, recarregue a página.",
     );
+  }
   revalidatePath("/painel", "layout");
   return result("", "Projeto criado. Ele já aparece na lista abaixo.");
 }
@@ -75,6 +81,10 @@ export async function changeProject(
     .update(update)
     .eq("id", id)
     .select("id");
+  if (error?.message.includes("Início futuro"))
+    return result(
+      "Não foi possível ativar. O início está no futuro. Mantenha como rascunho ou ajuste a data de início.",
+    );
   if (error || !data?.length)
     return result(
       "Não foi possível alterar. Confira o estado do projeto, a meta configurada e se já existe outro projeto ativo.",
@@ -116,20 +126,22 @@ export async function changeGoals(
   form: FormData,
 ): Promise<FormResult> {
   const { client } = await requireAccount();
-  const id = String(form.get("id")),
-    mode = String(form.get("weight_mode"));
-  const value = (key: string) =>
-    form.get(key) ? Number(String(form.get(key)).replace(",", ".")) : null;
-  if (!isId(id) || !["none", "track", "target", "range"].includes(mode))
-    return result("Confira as metas.");
+  const id = String(form.get("id"));
+  if (!isId(id)) return result("Projeto inválido.");
+  const { mode, min, max, sessions, errors } = validateProjectGoals(form);
+  if (Object.keys(errors).length)
+    return {
+      error: `Confira as metas. ${Object.values(errors)[0]}`,
+      message: "",
+      fieldErrors: errors,
+    };
   const { data, error } = await client
     .from("projects")
     .update({
       weight_mode: mode,
-      weight_min:
-        mode === "target" || mode === "range" ? value("weight_min") : null,
-      weight_max: mode === "range" ? value("weight_max") : null,
-      sessions_goal: value("sessions"),
+      weight_min: min,
+      weight_max: max,
+      sessions_goal: sessions,
     })
     .eq("id", id)
     .select("id");

@@ -195,3 +195,11 @@ Na validação da revisão visual, o runner Ubuntu 24.04 gastou mais de oito min
 ## Melhoria — Mostrar e ocultar senhas — 22/10/2026
 
 A pedido do proprietário, os campos de login, cadastro, confirmação, nova senha e confirmação de exclusão passam a oferecer botão de mostrar/ocultar com ícone de olho, nome acessível e área de toque de 44 px. Começam ocultos, mantêm valor/autocomplete/validação e o botão não submete o formulário. O estado visual fica somente no componente; não há persistência ou logging da senha. RF-001/RF-020; RNF-001/007/008/014.
+
+## Correção — Formulário de projetos no iPhone e navegação — 22/10/2026
+
+As capturas do proprietário mostraram datas ultrapassando o cartão, campos de peso sem indicação condicional e erro genérico de criação. Controles de data passam a respeitar a largura disponível, inclusive o tamanho intrínseco do WebKit; controles móveis usam fonte de 16 px para evitar zoom automático no foco. A navegação principal indica a rota atual com `aria-current`, cor e borda.
+
+Nome e início são obrigatórios. Apenas acompanhar peso não exige alvo nem faixa; esses campos aparecem e são obrigatórios somente nos modos correspondentes. Para ativar continua sendo necessária pelo menos uma meta mensurável (água, sessões ou peso alvo/faixa). A validação também acontece no servidor e ignora valores de peso que não pertencem ao modo selecionado. Erros de campos têm descrição associada e o resumo recebe foco.
+
+A primeira captura usa início em 23/10, futuro em relação ao horário de Brasília em 22/10. O banco já proibia essa ativação; agora a tela explica o motivo e orienta salvar como rascunho ou ajustar o início, inclusive ao tentar ativar um rascunho futuro. Não há alteração de schema ou flexibilização dessa regra. Testes de navegador cobrem ausência de alvo no modo acompanhar, metas condicionais, proteção do servidor contra início futuro, persistência de rascunho/ativo, navegação e contenção das datas em 320/390 px. RF-002/003/005; RNF-007/008/014/016. A validação visual no iPhone físico permanece com o proprietário.
