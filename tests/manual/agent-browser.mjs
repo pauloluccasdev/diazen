@@ -117,6 +117,7 @@ async function text(value) {
 async function goto(path) {
   const started = performance.now();
   await ab("open", origin + path);
+  await ab("wait", "--load", "load");
   await until("document.querySelector('main h1') !== null");
   report.timings.push({
     path,
@@ -172,8 +173,32 @@ async function save(button, values, expected) {
 async function check(name, action) {
   current = name;
   await action();
+  await browserDiagnostics(name);
   report.checks.push({ name, passed: true });
   console.log(`PASS ${name}`);
+}
+async function browserDiagnostics(phase, controlledServerFailure = false) {
+  await ab("wait", "--load", "load");
+  const errors = (await ab("errors")).errors;
+  if (errors.length && controlledServerFailure) {
+    // Only the deliberately interrupted SSR boundary may report React's
+    // recoverable #419 (or its sanitized server-render counterpart).
+    assert.ok(
+      errors.every((e) =>
+        /Minified React error #419\b|An error occurred in the Server Components render/.test(
+          e.text,
+        ),
+      ),
+      `Unexpected error during ${phase}: ${JSON.stringify(errors)}`,
+    );
+    (report.expectedFaultDiagnostics ??= []).push({ phase, errors });
+  } else
+    assert.deepEqual(
+      errors,
+      [],
+      `Unexpected browser exception during ${phase}`,
+    );
+  await ab("errors", "--clear");
 }
 async function count(n) {
   await until(`document.querySelectorAll('article').length === ${n}`);
@@ -860,7 +885,7 @@ try {
           "Structured server failure event missing",
         );
         // The previous navigation deliberately raised a server-render error.
-        await ab("errors", "--clear");
+        await browserDiagnostics("deliberate read failure and recovery", true);
       },
     );
   await check(
@@ -952,6 +977,7 @@ try {
         false,
       );
       if (!hosted) {
+        await browserDiagnostics("before deliberate network loss");
         await ab("set", "offline", "on");
         // Also stop this runner's own HTTP process: CDP tab-level emulation
         // does not reliably take the service worker's independent network offline.
@@ -969,6 +995,9 @@ try {
         );
         await ab("set", "offline", "off");
         app = await startApp();
+        await goto("/painel");
+        await until("sessionStorage.getItem('diazen-dashboard') !== null");
+        await browserDiagnostics("deliberate network loss and recovery", true);
       } else
         report.limitations.push(
           "Full service-worker network loss is exercised with the isolated local server stopped; hosted run verifies disabled writes and cache isolation.",
