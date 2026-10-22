@@ -53,7 +53,12 @@ export async function createProject(
     );
   }
   revalidatePath("/painel", "layout");
-  return result("", "Projeto criado. Ele já aparece na lista abaixo.");
+  return result(
+    "",
+    validation.planned
+      ? "Projeto criado como rascunho planejado. A partir da data de início, ative-o em Projetos. A ativação não é automática."
+      : "Projeto criado. Ele já aparece na lista abaixo.",
+  );
 }
 export async function changeProject(
   _state: FormResult,

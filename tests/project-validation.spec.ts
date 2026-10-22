@@ -63,16 +63,10 @@ test("projetos mostram metas condicionais, explicam início futuro e destacam na
   );
   await start.fill(tomorrow);
   await form.getByLabel("Fim previsto (opcional)").fill("2027-09-30");
-  // Contorna apenas a validação nativa para verificar a proteção real da action.
-  await form.evaluate((el) => {
-    (el as HTMLFormElement).noValidate = true;
-  });
-  await form
-    .getByRole("button", { name: "Criar projeto", exact: true })
-    .click();
-  await expect(form.getByRole("alert")).toContainText("início está no futuro");
-  await expect(start).toHaveAttribute("aria-invalid", "true");
-  await expect(page.getByRole("article")).toHaveCount(0);
+  await expect(start).not.toHaveAttribute("max");
+  await expect(
+    form.getByText(/Projeto planejado: será salvo como rascunho/),
+  ).toBeVisible();
   for (const width of [320, 390]) {
     await page.setViewportSize({ width, height: 844 });
     for (const input of await form.locator('input[type="date"]').all()) {
@@ -84,21 +78,24 @@ test("projetos mostram metas condicionais, explicam início futuro e destacam na
       expect(contained).toBe(true);
     }
   }
-  await form.getByLabel("Salvar como rascunho, sem ativar").check();
   await expect(start).not.toHaveAttribute("max");
   await form
     .getByRole("button", { name: "Criar projeto", exact: true })
     .click();
-  await expect(form.getByRole("status")).toContainText("Projeto criado");
+  await expect(form.getByRole("status")).toContainText("rascunho planejado");
   const draft = page.getByRole("article").filter({
     has: page.getByRole("heading", { name: "Projeto validado", exact: true }),
   });
+  await expect(draft.getByText("Rascunho", { exact: true })).toBeVisible();
+  await page.reload();
+  await expect(draft).toBeVisible();
+  await expect(draft.getByText("Rascunho", { exact: true })).toBeVisible();
   await draft
     .getByRole("button", { name: "Ativar projeto", exact: true })
     .click();
   await expect(draft.getByRole("alert")).toContainText("início está no futuro");
-  await form.getByLabel("Salvar como rascunho, sem ativar").uncheck();
   await start.fill(today);
+  await form.getByLabel("Meta diária de água (ml)").fill("4000");
   await form
     .getByLabel("Nome do projeto", { exact: true })
     .fill("Água e acompanhamento");
