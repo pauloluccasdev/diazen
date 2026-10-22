@@ -40,6 +40,7 @@ export default async function Photos({
         </Link>
       </section>
     );
+  const editable = selected.status === "ACTIVE" && selected.id === active?.id;
   const page = Math.min(
       10000,
       Math.max(1, Math.floor(Number(params.pagina) || 1)),
@@ -88,7 +89,7 @@ export default async function Photos({
         <h1>Suas fotografias.</h1>
         <p className="intro">Um registro visual da sua evolução, só seu.</p>
       </section>
-      {selected.status !== "ACTIVE" && (
+      {!editable && (
         <p className="readonly-note">
           Projeto somente leitura.{" "}
           {active && (
@@ -98,7 +99,7 @@ export default async function Photos({
           )}
         </p>
       )}
-      {selected.status === "ACTIVE" && (
+      {editable && (
         <details className="content-card">
           <summary>Adicionar foto</summary>
           <PhotoUploader
@@ -211,7 +212,7 @@ export default async function Photos({
                 Usar como foto 2
               </Link>
             </nav>
-            {selected.status === "ACTIVE" && (
+            {editable && (
               <details>
                 <summary>Excluir foto</summary>
                 <ActionForm action={deletePhoto} submit="Excluir foto">

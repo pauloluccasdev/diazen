@@ -64,7 +64,7 @@ export default async function Records({
         </Link>
       </section>
     );
-  const editable = selected.status === "ACTIVE";
+  const editable = selected.status === "ACTIVE" && selected.id === active?.id;
   const daily = modulo === "agua" || modulo === "alimentacao";
   let query = client
     .from(modules[modulo].table)
