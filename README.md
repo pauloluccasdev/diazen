@@ -52,6 +52,8 @@ Os testes de navegador usam Auth/Storage HTTP simulados e persistência PostgreS
 
 A CI executa a suíte em Chromium e WebKit (perfil iPhone), incluindo checagens axe de acessibilidade e layout em 320, 375, 390, 430, 768 e 1280 px. Para WebKit local, instale suas dependências com `npx playwright install --with-deps webkit` em ambiente compatível e use `npm run test:webkit`. O teste WebKit não substitui instalação e uso em Safari iOS físico.
 
+Para produzir capturas das telas reais para revisão visual, após o build, execute `CAPTURE_REVIEW=1 npx playwright test tests/accessibility.spec.ts --project=chromium`. As imagens completas em 390 e 1280 px ficam em `artifacts/visual-review/chromium/`, fora do Git, usando somente o ambiente fictício local. O roteiro de aprovação está em [homologação final](docs/homologacao-final.md).
+
 ## O que está implementado
 
 - Cadastro, confirmação, login, logout e recuperação de acesso por e-mail/senha.
