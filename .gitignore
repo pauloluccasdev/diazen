@@ -28,3 +28,8 @@ coverage/
 .vercel/
 playwright-report/
 test-results/
+
+# Artefatos locais de revisão e backup
+artifacts/
+backups/
+*.sql.gz

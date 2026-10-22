@@ -13,7 +13,8 @@ Execução autorizada pelo proprietário em 21/10/2026: continuar o desenvolvime
 - [x] Diário alimentar manual e composição informada, com ausência distinta de zero.
 - [x] Fotos privadas, otimização, galeria e comparação (Storage real pendente de homologação).
 - [x] Dashboard integrado, leitura offline limitada e privacidade da conta (configuração operacional real pendente).
-- [ ] Testes integrados, acessibilidade, documentação operacional e auditoria de conclusão.
+- [x] Testes integrados locais, acessibilidade automática e documentação operacional.
+- [ ] Homologação Supabase/SMTP/hospedagem, concorrência real, restauração externa e aprovação visual/operacional final.
 
 ## Condições para declarar conclusão
 

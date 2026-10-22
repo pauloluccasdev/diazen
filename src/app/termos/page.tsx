@@ -1,2 +1,38 @@
-export const metadata={title:'Termos de uso'};
-export default function Terms(){return <article className="content-card prose"><p className="eyebrow">DIAZEN</p><h1>Termos de uso.</h1><p>O Diazen é um diário pessoal de alimentação, hidratação, atividades e evolução corporal. Ele organiza informações registradas por você e não prescreve dieta, treino ou tratamento.</p><h2>Seus registros</h2><p>Confira datas, unidades e fontes nutricionais. Dados desconhecidos podem permanecer em branco; indicadores não atestam aderência a um plano. Você pode manter um projeto ativo por vez e consultar o histórico. Ao concluir ou arquivar um projeto, seus registros ficam somente leitura, preservados os direitos de privacidade e exclusão.</p><h2>Conta e disponibilidade</h2><p>Proteja seu e-mail e senha e encerre a sessão em dispositivos compartilhados. Sem conexão, não é possível criar ou alterar registros. A disponibilidade depende dos serviços e da configuração da instalação.</p><h2>Privacidade e direitos</h2><p>Você pode exportar seus registros e solicitar a exclusão da conta em Minha conta. Consulte a política de privacidade para entender o armazenamento e o tratamento das cópias de segurança.</p><p className="muted">Versão de uso pessoal, 21/10/2026. A publicação para terceiros exige revisão do responsável pela instalação.</p></article>;}
+export const metadata = { title: "Termos de uso" };
+export default function Terms() {
+  return (
+    <article className="content-card prose">
+      <p className="eyebrow">DIAZEN</p>
+      <h1>Termos de uso.</h1>
+      <p>
+        O Diazen é um diário pessoal de alimentação, hidratação, atividades e
+        evolução corporal. Ele organiza informações registradas por você e não
+        prescreve dieta, treino ou tratamento.
+      </p>
+      <h2>Seus registros</h2>
+      <p>
+        Confira datas, unidades e fontes nutricionais. Dados desconhecidos podem
+        permanecer em branco; indicadores não atestam aderência a um plano. Você
+        pode manter um projeto ativo por vez e consultar o histórico. Ao
+        concluir ou arquivar um projeto, seus registros ficam somente leitura,
+        preservados os direitos de privacidade e exclusão.
+      </p>
+      <h2>Conta e disponibilidade</h2>
+      <p>
+        Proteja seu e-mail e senha e encerre a sessão em dispositivos
+        compartilhados. Sem conexão, não é possível criar ou alterar registros.
+        A disponibilidade depende dos serviços e da configuração da instalação.
+      </p>
+      <h2>Privacidade e direitos</h2>
+      <p>
+        Você pode exportar seus registros e solicitar a exclusão da conta em
+        Minha conta. Consulte a política de privacidade para entender o
+        armazenamento e o tratamento das cópias de segurança.
+      </p>
+      <p className="muted">
+        Versão de uso pessoal, 21/10/2026. A publicação para terceiros exige
+        revisão do responsável pela instalação.
+      </p>
+    </article>
+  );
+}

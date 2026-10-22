@@ -8,7 +8,12 @@ export async function GET(request: NextRequest) {
   const type = request.nextUrl.searchParams.get("type");
   const client = await createSupabaseServerClient();
   let target = "/entrar?link=invalido";
-  if (client && token && token.length <= 2048 && (type === "email" || type === "recovery")) {
+  if (
+    client &&
+    token &&
+    token.length <= 2048 &&
+    (type === "email" || type === "recovery")
+  ) {
     const { error } = await client.auth.verifyOtp({ token_hash: token, type });
     if (!error) target = type === "recovery" ? "/nova-senha" : "/painel";
   }

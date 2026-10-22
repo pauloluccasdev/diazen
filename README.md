@@ -1,87 +1,77 @@
 # Diazen
 
-Aplicativo da Lucx Tech para diário, check-in, controle nutricional e evolução física.
+PWA pessoal da **Lucx Tech** para diário alimentar, hidratação, atividades e evolução física. **MVP 0.1 em desenvolvimento, com núcleo implementado e validação local; homologação real ainda pendente.**
 
-**Status:** preparação do MVP 0.1. O framework da aplicação será **Next.js**, com banco de dados no **Supabase**. Base em TypeScript, App Router e Tailwind CSS. O repositório contém a fundação da aplicação e a documentação de referência.
+Stack: Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4 e Supabase (PostgreSQL, Auth e Storage privado). Hospedagem prevista na Vercel, inicialmente para uso pessoal.
 
-## Antes de desenvolver
+## Executar
 
-Leia [AGENTS.md](AGENTS.md), os [requisitos](docs/requisitos.md), o [Design System](docs/design-system.md) e as [decisões técnicas](docs/decisoes-tecnicas.md). Consulte também os [tokens de design](design/Diazen_Design_Tokens_MVP_0_1_v1_1.json) e a [referência visual](docs/referencias/Showcase%20da%20interface%20do%20Diazen%20em%20modo%20escuro.png).
-
-## Documentação
-
-- `docs/originais/`: os dois DOCX originais, versão 1.1, preservados.
-- `docs/requisitos.md` e `docs/design-system.md`: cópias textuais com tabelas para consulta e busca pela IA.
-- `docs/referencias/`: showcase fornecido; referência estética, sem ampliar o escopo aprovado.
-- `design/`: JSON original dos tokens de design.
-- `docs/decisoes-tecnicas.md`: decisões confirmadas e questões ainda abertas.
-
-Para atualizar as cópias Markdown após alterar os DOCX, execute `python3 scripts/extrair_documentacao.py`. O script usa apenas a biblioteca padrão do Python. Imagens incorporadas e diagramação continuam disponíveis nos documentos originais.
-
-## Escopo de referência
-
-PWA mobile-first com autenticação, projetos e metas, diário alimentar manual, hidratação, atividades físicas, peso, medidas, fotografias privadas e dashboard. O MVP não inclui importação por IA, Strava, login social ou relatórios avançados.
-
-## Executar localmente
-
-Use Node.js 24 (arquivo `.nvmrc`) e npm:
+Use Node.js 24 (`.nvmrc`) e npm:
 
 ```bash
 npm ci
+cp .env.example .env.local
 npm run dev
 ```
 
-Abra http://localhost:3000. A prévia pública funciona sem variáveis. Para habilitar o login, copie `.env.example` para `.env.local` e informe a URL e a chave publicável do Supabase.
+Abra http://localhost:3000. A abertura pública funciona sem credenciais; autenticação e registros precisam do Supabase configurado. Não coloque valores reais em arquivos versionados nem envie a chave secreta pelo chat.
+
+## Configurar o Supabase
+
+1. Use um projeto dedicado e revise [a modelagem](docs/modelagem.md) e as migrações em `supabase/migrations/`.
+2. Preencha `.env.local` com URL, chave **publicável**, origem do app e chave administrativa **somente servidor**. A chave privilegiada nunca deve usar prefixo `NEXT_PUBLIC_`. A configuração rejeita chaves secretas no campo público.
+3. Execute `npm run db:bundle`. O arquivo `artifacts/diazen-migrations.sql` reúne as migrações para revisar/aplicar, uma vez, no SQL Editor de um projeto vazio. Para ambientes existentes, use o fluxo de migrações do Supabase e controle quais versões já foram aplicadas; não execute o bundle novamente nem apague tabelas para resolver erros.
+4. Em Auth, habilite confirmação de e-mail, configure SMTP, Site URL e redirecionamentos. A origem em `NEXT_PUBLIC_SITE_URL` deve ser a URL exata do app, sem caminho; HTTPS em hospedagem.
+5. Configure os templates:
+   - Confirmação: `{{ .SiteURL }}/auth/confirmar?token_hash={{ .TokenHash }}&type=email`
+   - Recuperação: `{{ .SiteURL }}/auth/confirmar?token_hash={{ .TokenHash }}&type=recovery`
+6. Execute `npm run env:check` para verificar presença/formato sem exibir valores; `npm run env:check -- --connect` faz consultas administrativas **somente leitura**, verifica schema/bucket e não cria usuários nem registros.
+7. Reinicie o servidor e percorra os fluxos de homologação em [docs/operacao.md](docs/operacao.md).
+
+O callback aceita somente confirmação e recuperação, sem destinos arbitrários. Novas senhas usam 12–128 caracteres; configure política compatível no Supabase. Senhas e sessões permanecem sob responsabilidade do Auth. Revise limites de autenticação e entrega de e-mail antes do uso real.
 
 ## Verificar
 
 ```bash
+npm run format:check
 npm run lint
 npm run build
 npm run typecheck
+npm run test:db
 npx playwright install chromium
 npm run test:e2e
 ```
 
-Os testes de navegador iniciam o servidor de produção na porta 3000; deixe-a livre. No Linux/CI, use `npx playwright install --with-deps chromium` quando necessário. A CI executa lint, build, tipagem e os testes de navegador.
+`test:db` usa PostgreSQL embarcado (PGlite), com roles, RLS, constraints e migrações reais; inclui orientação/EXIF de fotos, validação de configuração e um ensaio local de backup/restauração com reaplicação de exclusões. Os schemas de Auth/Storage são adaptadores de teste, sem conexão com serviços reais.
 
-## Estado da implementação
+Os testes de navegador usam Auth/Storage HTTP simulados e persistência PostgreSQL real embarcada, **sempre com dados fictícios** e variáveis de teste explícitas. O servidor de teste usa a porta **3100**, e o serviço local, **54329**. Deixe essas portas livres. A configuração é lida dinamicamente no servidor para não incorporar dados do `.env.local` ao build de testes.
 
-- Fundação Next.js com TypeScript, App Router, Tailwind e tokens do Diazen.
-- Prévia responsiva do dashboard, sem dados fictícios ou persistência.
-- Manifesto e ícones PWA; service worker habilitado somente em produção.
-- Offline: aviso de indisponibilidade e cache exclusivo de uma página pública de fallback. Cache de dados pessoais ainda não foi implementado. O fallback permanece legível sem CSS/JavaScript previamente carregado.
-- Login e logout com Supabase Auth, sessão em cookies e painel protegido por validação remota do usuário no servidor. Login/logout são bloqueados offline.
-- Cadastro, recuperação de senha, projetos, registros e otimização de fotos ainda não estão implementados. Não há schema SQL nem infraestrutura provisionada.
+A CI executa a suíte em Chromium e WebKit (perfil iPhone), incluindo checagens axe de acessibilidade e layout em 320, 375, 390, 430, 768 e 1280 px. Para WebKit local, instale suas dependências com `npx playwright install --with-deps webkit` em ambiente compatível e use `npm run test:webkit`. O teste WebKit não substitui instalação e uso em Safari iOS físico.
 
-Para verificar a PWA, execute `npm run build` e `npm start`, acesse localhost e confira Manifest e Service Workers nas ferramentas do navegador. Após o worker estar ativo, recarregue a página e simule offline. A instalação depende do navegador; em hospedagem, requer HTTPS.
+## O que está implementado
 
-## Fluxo de desenvolvimento
+- Cadastro, confirmação, login, logout e recuperação de acesso por e-mail/senha.
+- Onboarding por criação de projeto com meta mensurável; um ACTIVE por usuário; rascunhos, conclusão/arquivamento confirmados e histórico somente leitura.
+- Metas de água com vigência, peso alvo/faixa/acompanhamento e sessões semanais globais.
+- Água, peso, circunferências, musculação/corrida/bike/natação e alimentação manual com composição informada por referência, sem inventar nutrientes.
+- Edição/exclusão em ACTIVE, datas retroativas na vigência, unicidade global de peso/medidas, confirmação diária e auditoria interna.
+- Fotos privadas, redução e remoção de metadados, miniaturas, galeria paginada e comparação entre páginas.
+- Dashboard por projeto/data, indicadores agregados no banco, gráfico simples e navegação por cartões.
+- PWA instalável quando suportado; escrita offline bloqueada; resumo mínimo do dashboard disponível na aba por até 24 h, apagado ao sair da conta. Fotos e respostas autenticadas ficam fora do cache do service worker.
+- Exportação de registros em JSON e solicitação de exclusão com reautenticação, bloqueio imediato e purge administrativo.
 
-A `develop` concentra a integração. Cada funcionalidade deve partir da `develop` atualizada em branch `feat/<nome>` (ou `fix/`, `docs/`, conforme a mudança). Faça commits por entrega concluída, valide e envie a branch ao remoto. O agente está autorizado a realizar merge das entregas na `develop`, validar a integração e fazer push. A próxima branch parte dessa `develop` atualizada. O proprietário realiza o PR final de `develop` para `main` e o code review; o agente não realiza merge na `main`.
+Sem IA, Strava, login social, prescrição de dieta/treino ou barra inferior fixa. Receitas, favoritos, recentes e cópia de refeições (RF-009, prioridade Média) ficam para a revisão de backlog. O catálogo nutricional não foi incorporado: o núcleo usa valores e fontes informados pelo usuário.
 
-## Dependências
+## Operação e limites da entrega
 
-O lockfile fixa as versões instaladas. `npm audit --omit=dev` não apontou vulnerabilidades na fundação. A auditoria completa apontou um aviso de severidade alta em `braces <=3.0.3`, propagado pela cadeia do ESLint do Next.js (cinco entradas no relatório), sem versão corrigida disponível na instalação. Acompanhar a atualização; não aplicar downgrade automático do framework com `npm audit fix --force`.
+Veja [operação e homologação](docs/operacao.md), [rastreabilidade](docs/matriz-requisitos.md) e [plano de implementação](docs/plano-implementacao.md). A entrega local não comprova configuração do Supabase real, envio de e-mails, concorrência multi-conexão, restauração remota, desempenho em dispositivo físico ou revisão jurídica/visual do proprietário. Essas pendências devem ser resolvidas antes de declarar o MVP pronto para uso real.
 
-## Autenticação: configuração e verificação
+`npm run privacy:purge` reprocessa solicitações e limpezas pendentes usando `.env.local`; só exclui contas que já solicitaram exclusão. Mantenha o ledger mínimo de exclusões protegido e separado dos backups para não reintroduzir dados apagados em uma restauração. O endpoint `/api/saude` monitora apenas a aplicação, sem revelar dados ou configuração de serviços.
 
-A entrega de acesso existente atende parcialmente RF-001 e aplica RNF-001/RNF-002: login por e-mail/senha, logout local ao navegador, validação remota de identidade para o painel e respostas privadas sem cache. As senhas são enviadas ao Supabase Auth, sem tabela de credenciais na aplicação. O provedor é responsável por hash e limites de autenticação; revisar esses limites antes do uso real.
+`npm audit --omit=dev` não apontou vulnerabilidades de produção nas verificações locais. A auditoria completa aponta `braces <=3.0.3` na cadeia de ferramentas ESLint do Next.js (cinco entradas), sem correção disponível na instalação. Acompanhar atualização; não aplicar downgrade com `npm audit fix --force`.
 
-1. Em um projeto Supabase próprio, copie a URL e a chave **publicável** para `.env.local`. Não use `service_role` ou chave secreta. Reinicie o servidor após configurar.
-2. Nesta etapa, use uma conta de teste previamente criada no Supabase Auth; ainda não há cadastro pela interface. Teste credenciais corretas e incorretas em `/entrar`.
-3. Confirme que `/painel` redireciona para `/entrar` sem sessão, que o login permite acesso e que sair impede acesso novamente. Confira a renovação de sessão após expiração do token no projeto real.
-4. Confirme em outro navegador que a sessão não é compartilhada. Simule offline: ações ficam bloqueadas e o cache contém apenas `/offline`.
+## Documentação e fluxo Git
 
-Os testes automatizados usam exclusivamente um simulador HTTP local de Auth (`tests/fixtures/auth-server.mjs`), com dados fictícios. Cobrem sucesso, falhas genéricas sem indicar existência de conta, logout, rota protegida, cookie inválido, cache e offline. Não conectam ao Supabase real nem comprovam hash, força bruta, SMTP, renovação de tokens ou configuração do provedor. A validação real permanece pendente das configurações acima; RF-001 só estará completo com cadastro e recuperação. Nenhum teste depende de credenciais pessoais.
+Antes de desenvolver, leia [AGENTS.md](AGENTS.md), os [requisitos](docs/requisitos.md), o [Design System](docs/design-system.md), os [tokens](design/Diazen_Design_Tokens_MVP_0_1_v1_1.json) e as [decisões técnicas](docs/decisoes-tecnicas.md). DOCX em `docs/originais/` são a fonte documental; atualize-os antes de regenerar cópias Markdown com `python3 scripts/extrair_documentacao.py`. O showcase é referência estética, sem ampliar escopo.
 
-Referência de implementação: [Supabase Auth para Next.js com cookies](https://supabase.com/docs/guides/auth/server-side/creating-a-client). A renovação passa pelo proxy; o painel verifica o usuário no servidor com `getUser`, sem confiar apenas no conteúdo dos cookies. Próximas rotas privadas e operações deverão repetir a validação e aplicar autorização sobre o recurso.
-
-### Cadastro e recuperação
-
-Configure também `NEXT_PUBLIC_SITE_URL` com a origem exata da aplicação (HTTPS em hospedagem). No Supabase, habilite confirmação de e-mail e configure Site URL e redirect URLs. Os templates devem usar:
-
-- Confirmação: `{{ .SiteURL }}/auth/confirmar?token_hash={{ .TokenHash }}&type=email`
-- Recuperação: `{{ .SiteURL }}/auth/confirmar?token_hash={{ .TokenHash }}&type=recovery`
-
-Configure SMTP próprio antes de uso real. O callback aceita somente os dois tipos previstos e ignora destinos externos. `/nova-senha` exige identidade validada no servidor. A política inicial de novas senhas é de 12 a 128 caracteres; configure política compatível no Supabase. Teste entrega, expiração e uso único de links em homologação. As mensagens de cadastro/recuperação não confirmam existência de conta nem garantem entrega de e-mail.
+Cada funcionalidade sai da `develop` atualizada, em `feat/`, `fix/` ou prefixo apropriado. O agente valida, faz commits, push e merge na `develop`, depois inicia a próxima branch pela integração atualizada. O proprietário realiza o PR final de `develop` para `main` e o code review. Não fazer merge na `main` nem force push.
