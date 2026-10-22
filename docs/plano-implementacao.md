@@ -7,7 +7,7 @@ Execução autorizada pelo proprietário em 21/10/2026: continuar o desenvolvime
 - [x] Fundação Next.js, interface inicial e manifesto PWA.
 - [x] Login, logout e painel protegido (integração real pendente de ambiente).
 - [x] Cadastro, confirmação de e-mail e recuperação de senha (homologação de e-mail pendente).
-- [ ] Refinamento técnico e migrações com autorização, integridade e auditoria.
+- [x] Refinamento técnico e migrações com autorização, integridade e auditoria (revisão/aplicação remota pendentes).
 - [ ] Onboarding, projetos, metas, estados e histórico.
 - [ ] Hidratação, peso, medidas e atividades.
 - [ ] Diário alimentar manual e composição informada, com ausência distinta de zero.

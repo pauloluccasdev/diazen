@@ -63,3 +63,7 @@ Registrar data, contexto, decisão, motivo, impacto e requisitos afetados. Mudan
 ## Decisão — Cadastro e recuperação — 21/10/2026
 
 Continuação do RF-001: confirmação e recuperação por token hash validado pelo Supabase, sem redirecionamento arbitrário. Origem definida por configuração confiável, nunca pelo Host da requisição. Novas senhas de 12–128 caracteres, confirmação local e validação no servidor. Mensagens de envio genéricas para evitar enumeração. SMTP, políticas no provedor e testes de entrega/expiração ainda dependem da homologação real. Não há login social ou armazenamento próprio de senhas.
+
+## Refinamento — Persistência do MVP — 21/10/2026
+
+A autorização para continuar até concluir o desenvolvimento inclui preparar o refinamento técnico e as migrações necessárias ao núcleo. A modelagem está detalhada em `docs/modelagem.md`, com rastreabilidade para RF/RB/RNF, limites, vigências e resolução das divergências de distância nas atividades. O SQL fica versionado para revisão; nenhum serviço remoto foi provisionado e sua aplicação depende da revisão do modelo e homologação. RLS, constraints, triggers e RPCs são testados com roles em PostgreSQL embarcado. Credenciais permanecem em Supabase Auth; exclusão legal usa bloqueio imediato e purge administrativo. RF-009 continua adiado para revisão final de backlog; RF-008, RF-013 e RF-021 integram o núcleo implementado por reutilização dos registros.
