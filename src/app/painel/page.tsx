@@ -7,6 +7,7 @@ import {
   Camera,
   Ruler,
 } from "lucide-react";
+import { ProgressRing } from "@/components/progress-ring";
 import { LogoutButton } from "@/components/logout-button";
 import { OfflineSnapshot } from "@/components/offline-snapshot";
 import { projectContext } from "@/lib/data";
@@ -103,41 +104,47 @@ export default async function Panel({
     <>
       <section className="welcome dashboard-welcome">
         <p className="eyebrow">SEU ESPAÇO</p>
-        <h1>Bem-vindo à sua jornada.</h1>
-        <p className="intro">
-          Um registro de cada vez. Seu progresso começa no seu dia.
-        </p>
+        <h1>Olá, vamos cuidar de você?</h1>
+        <p className="intro">Consistência hoje para um amanhã melhor.</p>
       </section>
       {selected && summary ? (
         <>
-          <form className="filter-form dashboard-filters">
-            <label>
-              Projeto visualizado
-              <select name="projeto" defaultValue={selected.id}>
-                {!projects.some((p) => p.id === selected.id) && (
-                  <option value={selected.id}>{selected.name}</option>
-                )}
-                {projects.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name} · {statusLabel[p.status]}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Data da consulta
-              <input
-                type="date"
-                name="data"
-                defaultValue={date}
-                max={today()}
-              />
-            </label>
-            <button className="button-primary">Consultar</button>
-          </form>
+          <details className="dashboard-query">
+            <summary>Alterar projeto ou data da consulta</summary>
+            <form className="filter-form dashboard-filters">
+              <label>
+                Projeto visualizado
+                <select name="projeto" defaultValue={selected.id}>
+                  {!projects.some((p) => p.id === selected.id) && (
+                    <option value={selected.id}>{selected.name}</option>
+                  )}
+                  {projects.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} · {statusLabel[p.status]}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Data da consulta
+                <input
+                  type="date"
+                  name="data"
+                  defaultValue={date}
+                  max={today()}
+                />
+              </label>
+              <button className="button-primary">Consultar</button>
+            </form>
+          </details>
           <section className="project-card dashboard-hero">
             <div className="project-content">
-              <span className="status">{statusLabel[selected.status]}</span>
+              <span className="status">
+                <span
+                  className={`status-dot status-${selected.status.toLowerCase()}`}
+                />
+                {statusLabel[selected.status]}
+              </span>
               <h2>{selected.name}</h2>
               <p>
                 Desde {formatDate(selected.starts_on)}
@@ -167,6 +174,51 @@ export default async function Panel({
                 : "Ative um projeto para começar a registrar."}
             </p>
           )}
+          <section
+            className="daily-nutrition content-card"
+            aria-label="Resumo alimentar do dia"
+          >
+            <div className="daily-calories">
+              <span className="icon-box">
+                <Utensils size={22} aria-hidden="true" />
+              </span>
+              <div>
+                <span className="muted">Alimentação de {formatDate(date)}</span>
+                <p
+                  className={`daily-metric${summary.kcal === null ? " daily-empty" : ""}`}
+                >
+                  {summary.kcal === null
+                    ? "Não informado"
+                    : number(summary.kcal)}
+                  {summary.kcal !== null && <small> kcal</small>}
+                </p>
+                <span className="muted">
+                  {summary.missing_kcal > 0 && summary.kcal !== null
+                    ? "Subtotal parcial"
+                    : "Valores informados no diário"}
+                </span>
+              </div>
+            </div>
+            <dl className="daily-macros">
+              {(
+                [
+                  ["Proteínas", summary.protein, summary.missing_protein],
+                  ["Carboidratos", summary.carbs, summary.missing_carbs],
+                  ["Gorduras", summary.fat, summary.missing_fat],
+                ] as const
+              ).map(([label, value, missing]) => (
+                <div key={label}>
+                  <dt>{label}</dt>
+                  <dd>
+                    {value === null ? "Não informado" : `${number(value)} g`}
+                    {value !== null && missing > 0 && (
+                      <small className="muted"> · subtotal parcial</small>
+                    )}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </section>
           <section className="areas-section" aria-labelledby="daily-title">
             <div className="section-heading">
               <h2 id="daily-title">Seu dia, por inteiro</h2>
@@ -176,20 +228,34 @@ export default async function Panel({
               {cards.map(
                 ({ label, module, icon: Icon, value, detail, empty }) => (
                   <Link
-                    className="area-card"
+                    className={`area-card metric-card metric-${module}`}
                     key={module}
                     href={`/painel/${module}?projeto=${selected.id}&data=${date}`}
                   >
                     <span className="icon-box">
                       <Icon size={22} aria-hidden="true" />
                     </span>
-                    <h3>{label} →</h3>
+                    <h3>
+                      {label}
+                      <span aria-hidden="true">›</span>
+                    </h3>
                     <p
                       className={`metric-value${empty ? " metric-empty" : ""}`}
                     >
                       {value}
                     </p>
                     <p>{detail}</p>
+                    {module === "agua" &&
+                      summary.water_ml !== null &&
+                      summary.water_goal !== null && (
+                        <ProgressRing
+                          value={summary.water_ml}
+                          max={summary.water_goal}
+                          label="Progresso da meta diária de hidratação"
+                        >
+                          <Droplets size={18} aria-hidden="true" />
+                        </ProgressRing>
+                      )}
                   </Link>
                 ),
               )}

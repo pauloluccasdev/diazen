@@ -17,6 +17,8 @@ import {
 import { ActionForm } from "@/components/forms/action-form";
 import { RecordFields } from "@/components/forms/record-fields";
 import { FoodConveniences } from "@/components/food-conveniences";
+import { ProgressRing } from "@/components/progress-ring";
+import { Droplets } from "lucide-react";
 import { WeightChart } from "@/components/weight-chart";
 import { saveRecord, deleteRecord, confirmMealDay } from "./actions";
 export async function generateMetadata({
@@ -109,8 +111,8 @@ export default async function Records({
   const days: { day: string; items: number; confirmed: boolean }[] =
     calendar.data ?? [];
   return (
-    <>
-      <section className="welcome">
+    <div className={`module-page module-${modulo}`}>
+      <section className="welcome module-welcome">
         <Link className="back-link" href={`/painel?projeto=${selected.id}`}>
           ← Dashboard
         </Link>
@@ -132,6 +134,23 @@ export default async function Records({
             </Link>
           )}
         </p>
+      )}
+      {(modulo === "peso" || modulo === "medidas") && (
+        <nav className="evolution-tabs" aria-label="Evolução corporal">
+          <Link
+            aria-current={modulo === "peso" ? "page" : undefined}
+            href={`/painel/peso?projeto=${selected.id}`}
+          >
+            Peso
+          </Link>
+          <Link
+            aria-current={modulo === "medidas" ? "page" : undefined}
+            href={`/painel/medidas?projeto=${selected.id}`}
+          >
+            Medidas
+          </Link>
+          <Link href={`/painel/fotos?projeto=${selected.id}`}>Fotos</Link>
+        </nav>
       )}
       <form className="filter-form">
         <input type="hidden" name="projeto" value={selected.id} />
@@ -155,34 +174,53 @@ export default async function Records({
         )}
       </form>
       {modulo === "agua" && (
-        <section className="content-card">
-          <h2>
-            {summary.water_ml === null
-              ? "Sem registros"
-              : `${number(summary.water_ml, 0)} ml`}
-          </h2>
-          <p className="intro">
-            {summary.water_goal === null
-              ? "Meta não configurada"
-              : `Meta de ${number(summary.water_goal, 0)} ml em ${formatDate(date)}`}
-          </p>
-          {summary.water_ml !== null && summary.water_goal !== null && (
-            <>
-              <progress
-                className="water-progress"
-                value={Math.min(summary.water_ml, summary.water_goal)}
-                max={summary.water_goal}
-                aria-label="Progresso da hidratação"
-              />
-              <p>
-                {number((summary.water_ml / summary.water_goal) * 100, 0)}% da
-                meta
-              </p>
-            </>
-          )}
-          <Link className="back-link" href="/painel/projetos">
-            Configurar meta com vigência →
-          </Link>
+        <section className="content-card hydration-summary">
+          <ProgressRing
+            value={summary.water_ml}
+            max={summary.water_goal}
+            label="Progresso da hidratação na data consultada"
+          >
+            <Droplets size={24} aria-hidden="true" />
+            <strong>
+              {summary.water_ml === null
+                ? "Sem registros"
+                : `${number(summary.water_ml / 1000, 2)} L`}
+            </strong>
+            <span>
+              {summary.water_goal === null
+                ? "Sem meta"
+                : `de ${number(summary.water_goal / 1000, 2)} L`}
+            </span>
+          </ProgressRing>
+          <div className="hydration-detail">
+            <h2>
+              {summary.water_ml === null
+                ? "Sem registros"
+                : `${number(summary.water_ml, 0)} ml`}
+            </h2>
+            <p className="intro">
+              {summary.water_goal === null
+                ? "Meta não configurada"
+                : `Meta de ${number(summary.water_goal, 0)} ml em ${formatDate(date)}`}
+            </p>
+            {summary.water_ml !== null && summary.water_goal !== null && (
+              <>
+                <progress
+                  className="water-progress"
+                  value={Math.min(summary.water_ml, summary.water_goal)}
+                  max={summary.water_goal}
+                  aria-label="Progresso da hidratação"
+                />
+                <p>
+                  {number((summary.water_ml / summary.water_goal) * 100, 0)}% da
+                  meta
+                </p>
+              </>
+            )}
+            <Link className="back-link" href="/painel/projetos">
+              Configurar meta com vigência →
+            </Link>
+          </div>
         </section>
       )}
       {modulo === "peso" && (
@@ -246,7 +284,9 @@ export default async function Records({
                 return (
                   <div key={key}>
                     <span className="muted">{label}</span>
-                    <strong>
+                    <strong
+                      className={v === null ? "nutrition-empty" : undefined}
+                    >
                       {v === null
                         ? "Não informado"
                         : `${number(v)} ${key === "kcal" ? "kcal" : "g"}`}
@@ -293,41 +333,6 @@ export default async function Records({
           date={date}
           activeName={active?.name}
         />
-      )}
-      {editable && (
-        <details className="content-card" open>
-          <summary>
-            {modulo === "peso"
-              ? "Registrar ou atualizar peso"
-              : modulo === "medidas"
-                ? "Registrar medidas"
-                : "Adicionar registro"}
-          </summary>
-          <p className="intro">
-            Este registro será salvo no projeto ativo “{active?.name}”.
-          </p>
-          <ActionForm
-            action={saveRecord}
-            submit={
-              modulo === "peso"
-                ? "Salvar peso"
-                : modulo === "medidas"
-                  ? "Salvar medidas"
-                  : "Salvar registro"
-            }
-          >
-            <RecordFields
-              kind={modulo}
-              min={selected.starts_on}
-              max={
-                selected.ends_on && selected.ends_on < today()
-                  ? selected.ends_on
-                  : today()
-              }
-              date={date}
-            />
-          </ActionForm>
-        </details>
       )}
       <section className="records-section" aria-label="Histórico de registros">
         <h2>{daily ? "Registros do dia" : "Histórico"}</h2>
@@ -399,10 +404,49 @@ export default async function Records({
           </article>
         ))}
       </section>
+      {editable && (
+        <details className="content-card record-create">
+          <summary>
+            {modulo === "peso"
+              ? "Registrar ou atualizar peso"
+              : modulo === "medidas"
+                ? "Registrar medidas"
+                : modulo === "agua"
+                  ? "Adicionar consumo"
+                  : modulo === "alimentacao"
+                    ? "Adicionar alimento"
+                    : "Registrar atividade"}
+          </summary>
+          <p className="intro">
+            Este registro será salvo no projeto ativo “{active?.name}”.
+          </p>
+          <ActionForm
+            action={saveRecord}
+            submit={
+              modulo === "peso"
+                ? "Salvar peso"
+                : modulo === "medidas"
+                  ? "Salvar medidas"
+                  : "Salvar registro"
+            }
+          >
+            <RecordFields
+              kind={modulo}
+              min={selected.starts_on}
+              max={
+                selected.ends_on && selected.ends_on < today()
+                  ? selected.ends_on
+                  : today()
+              }
+              date={date}
+            />
+          </ActionForm>
+        </details>
+      )}
       <nav className="panel-nav" aria-label="Paginação">
         {page > 1 && <Link href={link(page - 1)}>Anteriores</Link>}
         {hasMore && <Link href={link(page + 1)}>Próximos</Link>}
       </nav>
-    </>
+    </div>
   );
 }

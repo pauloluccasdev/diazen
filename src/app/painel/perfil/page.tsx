@@ -1,4 +1,13 @@
 import Link from "next/link";
+import {
+  UserRound,
+  FolderOpen,
+  Target,
+  ShieldCheck,
+  FileText,
+  KeyRound,
+  ChevronRight,
+} from "lucide-react";
 import { requireAccount } from "@/lib/data";
 import { LogoutButton } from "@/components/logout-button";
 import { ActionForm } from "@/components/forms/action-form";
@@ -11,8 +20,37 @@ export default async function Profile() {
       <section className="welcome">
         <p className="eyebrow">SEU ESPAÇO PESSOAL</p>
         <h1>Conta e privacidade.</h1>
-        <p className="intro">{user.email}</p>
+        <p className="intro">Sua rotina, seus dados e suas preferências.</p>
       </section>
+      <section className="profile-identity content-card" aria-label="Sua conta">
+        <span className="profile-avatar">
+          <UserRound size={28} aria-hidden="true" />
+        </span>
+        <div>
+          <h2>Sua conta Diazen</h2>
+          <p className="muted">{user.email}</p>
+        </div>
+      </section>
+      <nav
+        className="settings-list content-card"
+        aria-label="Configurações da conta"
+      >
+        {(
+          [
+            ["/painel/projetos", "Projetos", FolderOpen],
+            ["/painel/projetos", "Metas", Target],
+            ["/privacidade", "Dados e privacidade", ShieldCheck],
+            ["/termos", "Termos de uso", FileText],
+            ["/nova-senha", "Alterar senha", KeyRound],
+          ] as const
+        ).map(([href, label, Icon]) => (
+          <Link key={label} href={href}>
+            <Icon size={20} aria-hidden="true" />
+            <span>{label}</span>
+            <ChevronRight size={16} aria-hidden="true" />
+          </Link>
+        ))}
+      </nav>
       <section className="content-card">
         <h2>Seus dados, com você.</h2>
         <p className="intro">
@@ -22,11 +60,6 @@ export default async function Profile() {
         <a className="button-primary" href="/api/exportar" download>
           Baixar meus dados
         </a>
-        <nav className="panel-nav">
-          <Link href="/privacidade">Privacidade</Link>
-          <Link href="/termos">Termos de uso</Link>
-          <Link href="/nova-senha">Alterar senha</Link>
-        </nav>
       </section>
       <section className="content-card">
         <h2>Encerrar minha conta</h2>

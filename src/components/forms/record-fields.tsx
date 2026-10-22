@@ -1,7 +1,7 @@
+import { ModalityPicker } from "@/components/modality-picker";
 import {
   categories,
   measurements,
-  modalities,
   nutrients,
   units,
   type Entry,
@@ -121,19 +121,7 @@ export function RecordFields({
         ))}
       {kind === "atividades" && (
         <>
-          <label>
-            Modalidade
-            <select
-              name="modality"
-              defaultValue={entry?.modality ?? "strength"}
-            >
-              {Object.entries(modalities).map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
+          <ModalityPicker initial={entry?.modality} />
           <div className="form-grid">
             <label>
               Duração (minutos)

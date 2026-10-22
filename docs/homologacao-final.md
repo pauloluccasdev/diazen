@@ -4,7 +4,7 @@ Esta lista reúne decisões e verificações de encerramento. Itens pendentes n�
 
 ## Layout e uso
 
-Prévia protegida: <https://diazen-git-develop-pauloluccas-projects-58a37ef2.vercel.app>. Entrar primeiro com a conta Vercel autorizada e depois com a conta Diazen. Usar dados fictícios até concluir a homologação.
+Prévia pública: <https://diazen-git-develop-pauloluccas-projects-58a37ef2.vercel.app>. Não exige conta Vercel; o painel exige login Diazen. Usar dados fictícios até concluir a homologação.
 
 Capturas locais reproduzíveis:
 
@@ -14,7 +14,7 @@ CAPTURE_REVIEW=1 npx playwright test tests/accessibility.spec.ts --project=chrom
 
 Requer build prévio. A configuração do teste utiliza Auth/Storage simulados e PostgreSQL embarcado, sem conexão ao Supabase remoto. Capturas em `artifacts/visual-review/chromium/` cobrem abertura, login, cadastro, recuperação, privacidade, termos, dashboard, projetos, água, peso, medidas, atividades, alimentação, biblioteca de alimentos/receitas, fotos e perfil em 390 e 1280 px. Mostram os estados iniciais dos módulos com um projeto ativo fictício; não documentam todos os estados preenchidos, erros ou fotos reais. Os arquivos ficam ignorados pelo Git.
 
-- [x] Proprietário aprovou o layout e a navegação em 22/10/2026.
+- [ ] Aprovação visual reaberta pelo proprietário em 22/10/2026 por divergências com o protótipo. Revisão geral e limites em [revisão visual](revisao-visual.md); validar novamente as telas publicadas.
 - [ ] Instalar e abrir a PWA no celular disponível; registrar sistema e navegador.
 - [ ] Consultar dashboard online, perder conexão e verificar leitura limitada, aviso e bloqueio de escrita; restaurar conexão e encerrar sessão.
 - [ ] Conferir zoom 200%, teclado e leitor de tela nas telas essenciais.

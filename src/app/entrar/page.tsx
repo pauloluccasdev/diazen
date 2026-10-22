@@ -23,13 +23,15 @@ export default async function Login({
   return (
     <section className="auth-card">
       <ClearOfflineData />
-      <p className="eyebrow">BEM-VINDO AO DIAZEN</p>
-      <h1>
-        Sua jornada
-        <br />
-        continua aqui.
-      </h1>
-      <p className="intro">Entre com seu e-mail e senha.</p>
+      <Link className="auth-brand brand" href="/" aria-label="Diazen, início">
+        dia<span>zen.</span>
+      </Link>
+      <p className="auth-tagline">Sua rotina. Sua evolução.</p>
+      <h1 className="auth-title">Entrar na sua conta</h1>
+      <nav className="auth-tabs" aria-label="Entrar ou criar conta">
+        <span aria-current="page">Entrar</span>
+        <Link href="/cadastro">Criar conta</Link>
+      </nav>
       {params.link === "invalido" && (
         <p role="alert" className="form-error">
           O link expirou, já foi usado ou foi aberto em outro navegador. Se você

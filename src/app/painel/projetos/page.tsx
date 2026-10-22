@@ -28,8 +28,98 @@ export default async function Projects({
   const { projects, hasMore } = await projectContext(undefined, page, status);
   const pageUrl = (value: number) =>
     `/painel/projetos?${new URLSearchParams({ pagina: String(value), ...(status ? { estado: status } : {}) })}`;
+  const createSection = (
+    <section className="content-card project-create">
+      <h2>
+        {projects.length || status
+          ? "Novo projeto"
+          : "Vamos preparar seu primeiro projeto?"}
+      </h2>
+      <p className="intro">
+        Escolha um nome, uma data de início e pelo menos uma meta mensurável.
+        Água, peso e sessões são opcionais individualmente.
+      </p>
+      <ActionForm action={createProject} submit="Criar projeto">
+        <label>
+          Nome do projeto
+          <input
+            name="name"
+            required
+            maxLength={100}
+            placeholder="Ex.: Minha jornada"
+          />
+        </label>
+        <div className="form-grid">
+          <label>
+            Início
+            <input
+              type="date"
+              name="starts_on"
+              required
+              defaultValue={today()}
+            />
+          </label>
+          <label>
+            Fim previsto (opcional)
+            <input type="date" name="ends_on" />
+          </label>
+        </div>
+        <div className="form-grid">
+          <label>
+            Meta diária de água (ml)
+            <input
+              name="water_ml"
+              type="number"
+              min={100}
+              max={15000}
+              step={1}
+            />
+          </label>
+          <label>
+            Sessões por semana
+            <input name="sessions" type="number" min={1} max={50} step={1} />
+          </label>
+        </div>
+        <label>
+          Acompanhamento de peso
+          <select name="weight_mode" defaultValue="none">
+            <option value="none">Sem meta de peso</option>
+            <option value="track">Apenas acompanhar</option>
+            <option value="target">Peso alvo</option>
+            <option value="range">Faixa de peso</option>
+          </select>
+        </label>
+        <div className="form-grid">
+          <label>
+            Alvo ou mínimo (kg)
+            <input
+              name="weight_min"
+              type="number"
+              min={20}
+              max={500}
+              step="0.01"
+            />
+          </label>
+          <label>
+            Máximo da faixa (kg)
+            <input
+              name="weight_max"
+              type="number"
+              min={20}
+              max={500}
+              step="0.01"
+            />
+          </label>
+        </div>
+        <label className="checkbox-label">
+          <input type="checkbox" name="draft" />
+          Salvar como rascunho, sem ativar
+        </label>
+      </ActionForm>
+    </section>
+  );
   return (
-    <>
+    <div className="projects-page">
       <section className="welcome">
         <p className="eyebrow">UMA META, UM CAMINHO</p>
         <h1>Meus projetos.</h1>
@@ -38,96 +128,8 @@ export default async function Projects({
           o destino dos seus registros.
         </p>
       </section>
-      <section className="content-card">
-        <h2>
-          {projects.length || status
-            ? "Novo projeto"
-            : "Vamos preparar seu primeiro projeto?"}
-        </h2>
-        <p className="intro">
-          Escolha um nome, uma data de início e pelo menos uma meta mensurável.
-          Água, peso e sessões são opcionais individualmente.
-        </p>
-        <ActionForm action={createProject} submit="Criar projeto">
-          <label>
-            Nome do projeto
-            <input
-              name="name"
-              required
-              maxLength={100}
-              placeholder="Ex.: Minha jornada"
-            />
-          </label>
-          <div className="form-grid">
-            <label>
-              Início
-              <input
-                type="date"
-                name="starts_on"
-                required
-                defaultValue={today()}
-              />
-            </label>
-            <label>
-              Fim previsto (opcional)
-              <input type="date" name="ends_on" />
-            </label>
-          </div>
-          <div className="form-grid">
-            <label>
-              Meta diária de água (ml)
-              <input
-                name="water_ml"
-                type="number"
-                min={100}
-                max={15000}
-                step={1}
-              />
-            </label>
-            <label>
-              Sessões por semana
-              <input name="sessions" type="number" min={1} max={50} step={1} />
-            </label>
-          </div>
-          <label>
-            Acompanhamento de peso
-            <select name="weight_mode" defaultValue="none">
-              <option value="none">Sem meta de peso</option>
-              <option value="track">Apenas acompanhar</option>
-              <option value="target">Peso alvo</option>
-              <option value="range">Faixa de peso</option>
-            </select>
-          </label>
-          <div className="form-grid">
-            <label>
-              Alvo ou mínimo (kg)
-              <input
-                name="weight_min"
-                type="number"
-                min={20}
-                max={500}
-                step="0.01"
-              />
-            </label>
-            <label>
-              Máximo da faixa (kg)
-              <input
-                name="weight_max"
-                type="number"
-                min={20}
-                max={500}
-                step="0.01"
-              />
-            </label>
-          </div>
-          <label className="checkbox-label">
-            <input type="checkbox" name="draft" />
-            Salvar como rascunho, sem ativar
-          </label>
-        </ActionForm>
-      </section>
       <section className="records-section" aria-label="Seus projetos">
-        <form className="content-card" method="get" action="/painel/projetos">
+        <form className="filter-form" method="get" action="/painel/projetos">
           <label htmlFor="project-status">Estado dos projetos</label>
           <select id="project-status" name="estado" defaultValue={status ?? ""}>
             <option value="">Todos os estados</option>
@@ -149,8 +151,14 @@ export default async function Projects({
           </p>
         )}
         {projects.map((p) => (
-          <article className="content-card" key={p.id}>
-            <span className="status">{statusLabel[p.status]}</span>
+          <article
+            className={`content-card project-list-card project-${p.status.toLowerCase()}`}
+            key={p.id}
+          >
+            <span className="status">
+              <span className={`status-dot status-${p.status.toLowerCase()}`} />
+              {statusLabel[p.status]}
+            </span>
             <h2>{p.name}</h2>
             <p className="intro">
               {formatDate(p.starts_on)}
@@ -324,6 +332,7 @@ export default async function Projects({
         {page > 1 && <Link href={pageUrl(page - 1)}>Anteriores</Link>}
         {hasMore && <Link href={pageUrl(page + 1)}>Próximos projetos</Link>}
       </nav>
-    </>
+      {createSection}
+    </div>
   );
 }
