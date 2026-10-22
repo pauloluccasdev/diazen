@@ -601,11 +601,18 @@ try {
         await clickText("Editar metas de peso e atividades", "summary");
         const s = await markForm("Salvar metas");
         await field("weight_mode", mode, s, "select");
+        if (mode === "target")
+          assert.equal(
+            await evaluate(
+              'document.querySelectorAll("[data-qa-form=yes] [name=weight_max]").length',
+            ),
+            0,
+          );
         await save(
           "Salvar metas",
           {
             weight_min: mode === "target" ? 75 : 70,
-            weight_max: mode === "target" ? "" : 80,
+            ...(mode === "range" ? { weight_max: 80 } : {}),
             sessions: 3,
           },
           "Metas atualizadas",
@@ -617,6 +624,7 @@ try {
         assert.equal(p.weight_mode, mode);
         assert.equal(Number(p.weight_min), mode === "target" ? 75 : 70);
         if (mode === "range") assert.equal(Number(p.weight_max), 80);
+        else assert.equal(p.weight_max, null);
       }
     },
   );
