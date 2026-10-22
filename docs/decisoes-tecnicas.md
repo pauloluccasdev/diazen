@@ -125,3 +125,7 @@ O proprietário confirmou recebimento do e-mail padrão e definição de senha p
 ## Revisão de escopo — Manutenção de projetos — 22/10/2026
 
 A auditoria de RF-003/RF-004 encontrou ausência de filtro por estado e de edição das datas de rascunhos na interface, apesar de o banco já proteger essas operações. A listagem agora filtra antes de paginar e preserva o estado nos links de paginação. Datas podem ser alteradas apenas em DRAFT, com validação no servidor e no banco; o período deve conter as metas de água existentes. ACTIVE e histórico continuam sem edição de datas. Teste integrado cobre persistência após reload, rejeição de período que excluiria meta existente, filtro por estado e ativação removendo o item do filtro de rascunhos. Sem migração ou ampliação de escopo.
+
+## Validação — Restauração nativa isolada — 22/10/2026
+
+Na etapa final técnica foi executado ensaio sintético com PostgreSQL 17.11, pg_dump/pg_restore, cópia separada de imagens e reaplicação de ledger posterior ao backup. Banco restaurado manteve RLS, bucket privado, dados do usuário restante e checksums; dados e arquivos do usuário excluído foram removidos antes de liberar a cópia. O comando `test:restore` reproduz o ensaio em cluster temporário sem TCP e remove o laboratório ao terminar. Não usa credenciais ou banco remotos. Auth/Storage são adaptadores de schema e os arquivos são locais; o resultado não é apresentado como restauração do serviço hospedado. RNF-013/RNF-017; RF-020.

@@ -46,6 +46,8 @@ npm run test:e2e
 
 `test:db` usa PostgreSQL embarcado (PGlite), com roles, RLS, constraints e migrações reais; inclui orientação/EXIF de fotos, validação de configuração e um ensaio local de backup/restauração com reaplicação de exclusões. Os schemas de Auth/Storage são adaptadores de teste, sem conexão com serviços reais.
 
+`PG_BIN_DIR=/usr/lib/postgresql/17/bin npm run test:restore` executa um ensaio adicional com PostgreSQL nativo, `pg_dump`/`pg_restore`, imagens locais e ledger de exclusões, em cluster temporário isolado. Consulte os requisitos e limites em [operação](docs/operacao.md). Não usa `.env.local` nem altera o Supabase.
+
 Os testes de navegador usam Auth/Storage HTTP simulados e persistência PostgreSQL real embarcada, **sempre com dados fictícios** e variáveis de teste explícitas. O servidor de teste usa a porta **3100**, e o serviço local, **54329**. Deixe essas portas livres. A configuração é lida dinamicamente no servidor para não incorporar dados do `.env.local` ao build de testes.
 
 A CI executa a suíte em Chromium e WebKit (perfil iPhone), incluindo checagens axe de acessibilidade e layout em 320, 375, 390, 430, 768 e 1280 px. Para WebKit local, instale suas dependências com `npx playwright install --with-deps webkit` em ambiente compatível e use `npm run test:webkit`. O teste WebKit não substitui instalação e uso em Safari iOS físico.

@@ -59,6 +59,20 @@ Ensaio obrigatório em ambiente isolado:
 
 O teste local faz dump/restauração do PostgreSQL embarcado e verifica a reaplicação das exclusões. A restauração real do Supabase e de objetos externos continua pendente.
 
+### Ensaio reproduzível em PostgreSQL nativo
+
+`npm run test:restore` cria um cluster temporário exclusivo, acessível somente por socket Unix privado, sem escutar TCP. Não lê `.env.local`, não aceita conexão remota e não altera o Supabase. Requer ferramentas PostgreSQL 17 locais e execução por usuário comum, pois `initdb` não executa como root:
+
+```bash
+PG_BIN_DIR=/usr/lib/postgresql/17/bin npm run test:restore
+```
+
+Se as ferramentas estiverem extraídas em um diretório local, informe também `PG_SHARE_DIR` com os arquivos compartilhados da mesma versão e, se necessário, `LD_LIBRARY_PATH` para suas bibliotecas. Não é necessário instalar um serviço global.
+
+O comando aplica as migrações em um banco sintético, gera fotos WebP, executa `pg_dump` e `pg_restore` em outro banco e copia os arquivos separadamente. Reaplica o ledger de exclusões posterior ao backup antes de verificar isolamento, remoção dos dados excluídos, preservação dos dados restantes, bucket privado e checksums das imagens. Ao terminar, para o servidor e remove o laboratório; guarda somente um relatório técnico em `artifacts/native-restore-report.json`, ignorado pelo Git.
+
+Ensaio executado com sucesso em 22/10/2026 no PostgreSQL 17.11: dois projetos restaurados; após reaplicar uma exclusão, um projeto e duas imagens do usuário restante preservados com checksums corretos. Auth e Storage usam schemas adaptadores; arquivos são locais. Isso valida ferramentas nativas e a estratégia do ledger, mas ainda não comprova restauração de Auth/Storage hospedados ou recuperação dos arquivos pela API do Supabase.
+
 ## Revisões antes do lançamento
 
 - Confirmar responsável e canal de contato, finalidade, base legal, operadores, retenção e direitos do titular; revisar termos e privacidade conforme a instalação. Não coletar consentimento genérico como substituto de definir fundamento adequado.
