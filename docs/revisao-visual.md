@@ -35,3 +35,5 @@ Prompt final usado na ferramenta integrada:
 Executar `npm run build` e `CAPTURE_REVIEW=1 npx playwright test --project=chromium --workers=2` para gerar capturas das 16 telas em 390/1280 px, verificar axe e seis larguras. Arquivos em `artifacts/visual-review/chromium/`, sem dados pessoais. O teste de registros abre os formulários pela ação visível, captura também cinco módulos preenchidos e verifica seleção por cartões, sincronização com o seletor de modalidades e expansão dos filtros do dashboard. A CI verifica Chromium e WebKit.
 
 A aprovação visual está pendente novamente. Conferir na prévia pública da develop, com conta Diazen; atualização visual não autoriza merge na main nem publicação em produção.
+
+Na bateria com volume, a rolagem suave do roteiro disputava o foco do controle após a paginação. O roteiro agora resolve o alvo hidratado novamente, usa rolagem instantânea e confirma foco real antes de enviar Enter. O cenário isolado com os volumes completos passou após esse ajuste, sem alterar as ações da aplicação. A checagem de foco, os 25 lançamentos/13 fotos/21 rascunhos e as verificações de isolamento permanecem obrigatórios.

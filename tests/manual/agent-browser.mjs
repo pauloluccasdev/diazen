@@ -128,14 +128,13 @@ async function goto(path) {
   });
 }
 async function clickText(value, tag = "button", scope = "document") {
-  const code = `(() => { const root=${scope}; const e=[...root.querySelectorAll(${JSON.stringify(tag)})].find(e=>e.textContent.trim()===${JSON.stringify(value)} && e.getClientRects().length && !e.matches(':disabled')); if(!e || (${JSON.stringify(tag)} === 'button' && !Object.keys(e).some(k=>k.startsWith('__reactProps'))))return false; document.querySelectorAll('[data-qa-target]').forEach(e=>e.removeAttribute('data-qa-target'));e.setAttribute('data-qa-target','yes');return true;})()`;
+  const code = `(() => { const root=${scope}; const e=[...root.querySelectorAll(${JSON.stringify(tag)})].find(e=>e.textContent.trim()===${JSON.stringify(value)} && e.getClientRects().length && !e.matches(':disabled')); if(!root || !e || (['button','summary'].includes(${JSON.stringify(tag)}) && !Object.keys(e).some(k=>k.startsWith('__reactProps'))))return false; document.querySelectorAll('[data-qa-target]').forEach(e=>e.removeAttribute('data-qa-target'));e.setAttribute('data-qa-target','yes');return true;})()`;
   await until(code);
   if (tag === "summary" || tag === "button") {
-    assert.equal(
-      await evaluate(
-        "(()=>{const e=document.querySelector('[data-qa-target=yes]');e.scrollIntoView({block:'center'});e.focus();return document.activeElement===e;})()",
-      ),
-      true,
+    // Resolve the hydrated target again after pagination. Scroll instantly so
+    // smooth scrolling cannot race keyboard focus; verify actual focus before Enter.
+    await until(
+      `(() => { if (!${code}) return false; const e=document.querySelector('[data-qa-target=yes]'); if(!e?.isConnected) return false; e.scrollIntoView({block:'center',behavior:'instant'}); e.focus({preventScroll:true}); return document.activeElement===e; })()`,
     );
     await ab("press", "Enter");
   } else await ab("click", "[data-qa-target=yes]");
