@@ -1,10 +1,30 @@
 import { expect, test } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { mkdir } from "node:fs/promises";
+import { join } from "node:path";
 
 test("telas essenciais acessíveis e sem overflow no mobile", async ({
   page,
-}) => {
+}, testInfo) => {
   test.setTimeout(120000);
+  const capture = async (path: string) => {
+    if (process.env.CAPTURE_REVIEW !== "1") return;
+    const directory = join("artifacts", "visual-review", testInfo.project.name);
+    await mkdir(directory, { recursive: true });
+    await page.evaluate(() => document.fonts.ready);
+    for (const width of [390, 1280]) {
+      await page.setViewportSize({ width, height: 844 });
+      await page.screenshot({
+        path: join(
+          directory,
+          `${path.replaceAll("/", "_") || "inicio"}-${width}.png`,
+        ),
+        fullPage: true,
+        animations: "disabled",
+      });
+    }
+    await page.setViewportSize({ width: 390, height: 844 });
+  };
   await page.setViewportSize({ width: 390, height: 844 });
   for (const path of [
     "/",
@@ -21,6 +41,7 @@ test("telas essenciais acessíveis e sem overflow no mobile", async ({
       .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
       .analyze();
     expect(result.violations, `Acessibilidade: ${path}`).toEqual([]);
+    await capture(path);
   }
   await page.goto("/entrar");
   await page
@@ -66,5 +87,6 @@ test("telas essenciais acessíveis e sem overflow no mobile", async ({
       ).toBe(true);
     }
     await page.setViewportSize({ width: 390, height: 844 });
+    await capture(path);
   }
 });
