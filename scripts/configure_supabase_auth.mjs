@@ -44,6 +44,12 @@ try {
       );
     return response.json();
   }
+  const current = await request("GET");
+  const customSmtpConfigured = !!(
+    current.smtp_host &&
+    current.smtp_user &&
+    current.smtp_admin_email
+  );
   const payload = {
     site_url: site.origin,
     mailer_autoconfirm: false,
@@ -53,20 +59,24 @@ try {
         "http://localhost:3000/auth/confirmar",
       ]),
     ].join(","),
-    mailer_subjects_confirmation: "Confirme seu e-mail no Diazen",
-    mailer_subjects_recovery: "Recupere seu acesso ao Diazen",
-    mailer_templates_confirmation_content: readFileSync(
-      new URL("../supabase/templates/confirmation.html", import.meta.url),
-      "utf8",
-    ),
-    mailer_templates_recovery_content: readFileSync(
-      new URL("../supabase/templates/recovery.html", import.meta.url),
-      "utf8",
-    ),
-    smtp_sender_name: "Diazen · Lucx Tech",
+    // O Free com provedor padrão recusa templates, assuntos e nome do remetente.
+    ...(customSmtpConfigured
+      ? {
+          mailer_subjects_confirmation: "Confirme seu e-mail no Diazen",
+          mailer_subjects_recovery: "Recupere seu acesso ao Diazen",
+          mailer_templates_confirmation_content: readFileSync(
+            new URL("../supabase/templates/confirmation.html", import.meta.url),
+            "utf8",
+          ),
+          mailer_templates_recovery_content: readFileSync(
+            new URL("../supabase/templates/recovery.html", import.meta.url),
+            "utf8",
+          ),
+          smtp_sender_name: "Diazen · Lucx Tech",
+        }
+      : {}),
     password_min_length: 12,
   };
-  const current = await request("GET");
   const changed = Object.keys(payload).filter(
     (key) => payload[key] !== current[key],
   );
@@ -76,11 +86,8 @@ try {
       mode: apply ? "apply" : "inspect",
       siteUrl: site.origin,
       changedFields: changed,
-      customSmtpConfigured: !!(
-        current.smtp_host &&
-        current.smtp_user &&
-        current.smtp_admin_email
-      ),
+      customSmtpConfigured,
+      customTemplatesPending: !customSmtpConfigured,
       emailConfirmationEnabled: !current.mailer_autoconfirm,
     }),
   );
