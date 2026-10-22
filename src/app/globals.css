@@ -143,3 +143,14 @@ summary { display: list-item; width: fit-content; padding-left: 20px; }
 .nutrition-grid strong { font-size: 22px; }
 .nutrition-grid span { font-size: 12px; }
 @media(max-width:600px) { .nutrition-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } .food-calendar { grid-template-columns: repeat(7,minmax(64px,1fr)); } }
+.photo-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; }
+.photo-grid .content-card { margin: 0; }
+.photo-grid img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: 14px; margin-bottom: 16px; }
+.comparison-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; margin-top: 24px; }
+.comparison-grid figure { margin: 0; }
+.comparison-grid img { width: 100%; height: auto; object-fit: contain; border-radius: 14px; }
+.comparison-grid figcaption { margin-top: 8px; }
+body { overflow-wrap: anywhere; }
+.readonly-note a { display: inline-flex; align-items: center; min-height: 44px; }
+@media(max-width:767px) { .photo-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media(max-width:430px) { .photo-grid { grid-template-columns: 1fr; } }
