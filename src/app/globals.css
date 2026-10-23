@@ -2014,3 +2014,30 @@ input[type="date"]::-webkit-datetime-edit {
 .food-conveniences > .muted {
   margin-top: 12px;
 }
+.app-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background: var(--color-bg);
+}
+.brand.loading-brand {
+  font-size: clamp(48px, 12vw, 64px);
+  animation: diazen-loading-fade 1.8s ease-in-out infinite;
+}
+@keyframes diazen-loading-fade {
+  0%,
+  100% {
+    opacity: 0.65;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .brand.loading-brand {
+    animation: none;
+    opacity: 1;
+  }
+}
