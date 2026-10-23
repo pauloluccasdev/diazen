@@ -229,3 +229,7 @@ Verificação local com conta fictícia: estados fechado/aberto e contenção do
 ## Melhoria — Limpar e recolher o cadastro após criar projeto — 22/10/2026
 
 A pedido do proprietário, o cadastro fica em um acordeão "Novo projeto": aberto inicialmente quando a página ainda não lista projetos e recolhido quando já há projetos. Após confirmação de criação, os campos são reiniciados, incluindo os estados de data, rascunho e acompanhamento de peso, e o acordeão é fechado. O foco retorna ao resumo; a mensagem de sucesso continua visível fora da área recolhida. Erros preservam campos e formulário aberto. O comportamento de reset é optativo no componente de formulário, habilitado somente neste cadastro, sem alterar os demais fluxos. RF-002/003; RNF-007/008/014. O teste de projetos cobre reset, expansão manual, feedback visível e preservação dos valores quando a validação reprova. O roteiro de agent-browser abre o novo acordeão por interação real antes de preencher novos projetos.
+
+## Melhoria — Acesso à consulta do projeto — 22/10/2026
+
+A pedido do proprietário, "Consultar projeto" passa de link discreto a ação secundária de largura integral no cartão, com ícone de dashboard, texto e seta. Mantém o destino de consulta já existente e o nome acessível; o estilo segue os tokens e a hierarquia do cartão, com altura mínima de 56 px. RF-003/004/018; RNF-007/008. Os testes existentes verificam o acesso ao histórico e sua condição de somente leitura.
