@@ -182,6 +182,9 @@ async function check(name, action, controlledServerFailure = false) {
 }
 async function browserDiagnostics(phase, controlledServerFailure = false) {
   await ab("wait", "--load", "load");
+  // Finish hydration of the deliberately interrupted boundary before moving on.
+  // Otherwise a late recoverable diagnostic can spill into the next scenario.
+  if (controlledServerFailure) await ab("wait", "--load", "networkidle");
   const errors = (await ab("errors")).errors;
   if (errors.length && controlledServerFailure) {
     // Only the deliberately interrupted SSR boundary may report React's

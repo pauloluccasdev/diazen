@@ -3,7 +3,7 @@ import { useState, useTransition, useSyncExternalStore } from "react";
 import { FileText, PencilLine } from "lucide-react";
 import { ActionDisclosure } from "./action-disclosure";
 import { useOnline } from "@/lib/use-online";
-import { readDietPdf } from "@/lib/read-diet-pdf";
+import { readDietPdf, DietPdfError } from "@/lib/read-diet-pdf";
 import {
   emptyComposition,
   foodComposition,
@@ -271,10 +271,9 @@ export function DietPlanEditor({
                   update(next);
                 } catch (cause) {
                   setError(
-                    cause instanceof Error &&
-                      cause.message.startsWith("Não reconhecemos")
+                    cause instanceof DietPdfError
                       ? cause.message
-                      : "Não foi possível ler. Use PDF sem senha, com texto selecionável, até 3 MB e 30 páginas. Formatos com tabelas diferentes podem não ser reconhecidos.",
+                      : "Não foi possível acessar o arquivo. Selecione novamente o PDF e tente outra vez.",
                   );
                 } finally {
                   setReading(false);
