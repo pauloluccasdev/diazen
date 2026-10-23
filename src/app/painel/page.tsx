@@ -282,14 +282,26 @@ export default async function Panel({
               )}
             </div>
           </section>
-          <nav className="panel-nav" aria-label="Evolução corporal">
-            <Link href={`/painel/medidas?projeto=${selected.id}`}>
-              <Ruler size={18} aria-hidden="true" />
-              Medidas corporais
+          <nav className="evolution-actions" aria-label="Evolução corporal">
+            <Link
+              className="button-secondary"
+              href={`/painel/medidas?projeto=${selected.id}`}
+            >
+              <span className="project-setting-icon" aria-hidden="true">
+                <Ruler size={20} />
+              </span>
+              <span>Medidas corporais</span>
+              <ArrowRight size={18} aria-hidden="true" />
             </Link>
-            <Link href={`/painel/fotos?projeto=${selected.id}`}>
-              <Camera size={18} aria-hidden="true" />
-              Fotografias privadas
+            <Link
+              className="button-secondary"
+              href={`/painel/fotos?projeto=${selected.id}`}
+            >
+              <span className="project-setting-icon" aria-hidden="true">
+                <Camera size={20} />
+              </span>
+              <span>Fotografias privadas</span>
+              <ArrowRight size={18} aria-hidden="true" />
             </Link>
           </nav>
           <OfflineSnapshot
