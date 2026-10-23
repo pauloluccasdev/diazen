@@ -22,15 +22,25 @@ async function emulateOlderPdfPlatform(page: Page) {
     });
   });
 }
-for (const compatibility of [false, true]) {
-  test(`PDF privado, revisão e cálculo · ${compatibility ? "compatibilidade Safari" : "APIs nativas"}`, async ({
+for (const mode of ["native", "compatibility", "server"] as const) {
+  const compatibility = mode === "compatibility";
+  const server = mode === "server";
+  test(`PDF privado, revisão e cálculo · ${server ? "leitor local indisponível" : compatibility ? "compatibilidade Safari" : "APIs nativas"}`, async ({
     page,
   }) => {
     if (compatibility) await emulateOlderPdfPlatform(page);
+    if (server)
+      await page.route("**/pdf/worker-*.mjs", (route) => route.abort());
     await page.goto("/entrar");
     await page
       .getByLabel("E-mail", { exact: true })
-      .fill(compatibility ? "plano-compat@example.test" : "plano@example.test");
+      .fill(
+        server
+          ? "plano-server@example.test"
+          : compatibility
+            ? "plano-compat@example.test"
+            : "plano@example.test",
+      );
     await page.getByLabel("Senha", { exact: true }).fill("senha-de-teste-123");
     await page.getByRole("button", { name: "Entrar", exact: true }).click();
     await expect(page).toHaveURL(/\/painel$/);
@@ -73,7 +83,9 @@ for (const compatibility of [false, true]) {
     await expect(
       page.getByRole("heading", { name: "Refeição 1 · opção 1", exact: true }),
     ).toBeVisible();
-    expect(requests).toEqual([]);
+    if (server)
+      expect(requests).toEqual(["http://127.0.0.1:3100/api/plano/ler"]);
+    else expect(requests).toEqual([]);
     await expect(
       page.getByRole("button", { name: "Salvar versão do plano" }),
     ).toBeDisabled();
