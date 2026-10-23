@@ -246,8 +246,9 @@ export function DietPlanEditor({
             terceiros. Revise os alimentos e as opções antes de salvar os dados.
           </p>
           <label className="plan-file">
-            Selecionar PDF
+            <span className="button-secondary">Selecionar PDF</span>
             <input
+              className="sr-only"
               type="file"
               accept="application/pdf,.pdf"
               disabled={disabled}
@@ -329,7 +330,7 @@ export function DietPlanEditor({
               inclua o pré-treino apenas no cenário desejado.
             </p>
           </section>
-          <label className="plan-title">
+          <label className="plan-title data-form">
             Nome do plano
             <input
               value={plan.title}
