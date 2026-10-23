@@ -22,6 +22,20 @@ async function emulateOlderPdfPlatform(page: Page) {
     });
   });
 }
+async function failLocalPdfRead(page: Page) {
+  await page.addInitScript(() => {
+    const original = File.prototype.arrayBuffer;
+    File.prototype.arrayBuffer = function () {
+      if (this.name !== "invalido.pdf") {
+        Reflect.set(globalThis, "diazenForcedPdfReadFailure", true);
+        return Promise.reject(
+          new DOMException("Local file reader unavailable", "NotReadableError"),
+        );
+      }
+      return original.call(this);
+    };
+  });
+}
 for (const mode of ["native", "compatibility", "server"] as const) {
   const compatibility = mode === "compatibility";
   const server = mode === "server";
@@ -29,18 +43,10 @@ for (const mode of ["native", "compatibility", "server"] as const) {
     page,
   }) => {
     if (compatibility) await emulateOlderPdfPlatform(page);
-    let blockedReader = false;
     if (server) {
-      // WebKit does not consistently route module-worker requests. Block the
-      // lazy PDF library itself, keeping the application and API fully real.
-      await page.route("**/_next/static/chunks/*.js", async (route) => {
-        const response = await route.fetch();
-        const body = await response.text();
-        if (body.includes('No "GlobalWorkerOptions.workerSrc" specified.')) {
-          blockedReader = true;
-          await route.abort();
-        } else await route.fulfill({ response, body });
-      });
+      // Reproduce a local file-reading failure without relying on WebKit's
+      // interception of module workers or cached dynamic imports.
+      await failLocalPdfRead(page);
     }
     await page.goto("/entrar");
     await page
@@ -95,7 +101,11 @@ for (const mode of ["native", "compatibility", "server"] as const) {
       page.getByRole("heading", { name: "Refeição 1 · opção 1", exact: true }),
     ).toBeVisible();
     if (server) {
-      expect(blockedReader).toBe(true);
+      expect(
+        await page.evaluate(() =>
+          Reflect.get(globalThis, "diazenForcedPdfReadFailure"),
+        ),
+      ).toBe(true);
       expect(requests).toEqual(["http://127.0.0.1:3100/api/plano/ler"]);
     } else expect(requests).toEqual([]);
     await expect(
@@ -155,6 +165,8 @@ test("amostras privadas locais preservam refeições e variantes", async ({
     "Amostras pessoais não são versionadas nem usadas na CI",
   );
   await emulateOlderPdfPlatform(page);
+  // Personal PDFs are processed only by this isolated localhost test server.
+  await failLocalPdfRead(page);
   await page.goto("/entrar");
   await page.getByLabel("E-mail", { exact: true }).fill("plano@example.test");
   await page.getByLabel("Senha", { exact: true }).fill("senha-de-teste-123");

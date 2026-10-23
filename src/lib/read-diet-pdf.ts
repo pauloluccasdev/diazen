@@ -92,7 +92,7 @@ export async function readDietPdf(
   try {
     return await readLocalDietPdf(file);
   } catch (error) {
-    if (!(error instanceof DietPdfError) || !error.serverFallback) throw error;
+    if (error instanceof DietPdfError && !error.serverFallback) throw error;
     onServerFallback?.();
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 30000);
