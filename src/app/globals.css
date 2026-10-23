@@ -2220,3 +2220,13 @@ input[type="date"]::-webkit-datetime-edit {
   padding: 0;
   border: 0;
 }
+
+@media (max-width: 600px) {
+  .plan-filter {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .plan-filter button {
+    width: 100%;
+  }
+}

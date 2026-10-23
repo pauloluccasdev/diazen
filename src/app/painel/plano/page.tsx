@@ -70,7 +70,7 @@ export default async function PlanPage({
         </p>
       </section>
       {!editable && <p className="readonly-note">Projeto somente leitura.</p>}
-      <form className="filter-form">
+      <form className="filter-form plan-filter">
         <input type="hidden" name="projeto" value={selected.id} />
         <label>
           Data do consumo para comparar
