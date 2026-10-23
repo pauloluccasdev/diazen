@@ -249,3 +249,7 @@ A pedido do proprietário, retornos ao dashboard, alimentação, início e login
 ## Melhoria — Acordeões de registros, fotos e alimentação — 22/10/2026
 
 A pedido do proprietário, as ações marcadas na homologação (excluir registro, adicionar foto, alimentos recentes, copiar refeição e cadastros de alimento/receita) passam ao padrão de linhas expansíveis com ícone, título e seta. A apresentação é compartilhada com os ajustes de projeto; ações de edição, exclusão e uso dos mesmos cartões seguem o padrão para manter consistência. Ações destrutivas têm ícone vermelho, preservando confirmações explícitas. O acesso à biblioteca ganha ícone e seta, com largura integral. Não há mudança nas operações, na composição nutricional, no destino dos registros ou na privacidade das fotos. RF-007/009/014/015/016/017; RNF-007/008/014.
+
+## Melhoria — Ações de registro no início dos módulos — 22/10/2026
+
+O proprietário solicitou evitar a rolagem até o final para adicionar registros no mobile. O cadastro de alimento, água, atividade, peso e medidas passa para depois do cabeçalho/abas e antes dos filtros, indicadores e histórico. A posição é a mesma na ordem do documento e na apresentação, preservando navegação por teclado e leitores de tela; a organização também vale em telas maiores. O cadastro continua recolhido até interação e disponível somente no projeto ativo editável. Adicionar foto já ocupa essa posição e agora usa o acordeão compacto da revisão anterior. RF-007/010/012/014/015/016/018; RNF-007/008/014.
