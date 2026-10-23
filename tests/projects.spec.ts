@@ -35,6 +35,7 @@ test("onboarding cria projeto, mantém histórico e exige confirmação de encer
     page.getByText("Histórico somente leitura.", { exact: false }),
   ).toBeVisible();
   await page.goto("/painel/projetos");
+  await page.locator(".form-disclosure > summary").click();
   await page
     .getByLabel("Nome do projeto", { exact: true })
     .fill("Rascunho ajustável");

@@ -26,9 +26,8 @@ test("projetos mostram metas condicionais, explicam início futuro e destacam na
       .getByRole("link", { name: "Dashboard", exact: true })
       .evaluate((el) => getComputedStyle(el).color),
   );
-  const form = page.locator("form").filter({
-    has: page.getByRole("button", { name: "Criar projeto", exact: true }),
-  });
+  const form = page.locator(".project-create form");
+  const disclosure = form.locator("details.form-disclosure");
   const start = form.getByLabel("Início", { exact: true });
   const today = await start.inputValue();
   const next = new Date(today + "T12:00:00Z");
@@ -47,6 +46,11 @@ test("projetos mostram metas condicionais, explicam início futuro e destacam na
   await expect(form.getByRole("alert")).toContainText(
     "Apenas acompanhar peso não define uma meta numérica",
   );
+  await expect(disclosure).toHaveAttribute("open", "");
+  await expect(form.getByLabel("Nome do projeto", { exact: true })).toHaveValue(
+    "Projeto validado",
+  );
+  await expect(form.getByLabel("Acompanhamento de peso")).toHaveValue("track");
   await form.getByLabel("Meta diária de água (ml)").fill("4000");
   await form.getByLabel("Acompanhamento de peso").selectOption("target");
   await expect(form.getByLabel("Alvo ou mínimo (kg)")).toHaveAttribute(
@@ -83,6 +87,21 @@ test("projetos mostram metas condicionais, explicam início futuro e destacam na
     .getByRole("button", { name: "Criar projeto", exact: true })
     .click();
   await expect(form.getByRole("status")).toContainText("rascunho planejado");
+  await expect(disclosure).not.toHaveAttribute("open");
+  await expect(disclosure.locator("summary")).toBeFocused();
+  await expect(form.getByLabel("Nome do projeto", { exact: true })).toHaveValue(
+    "",
+  );
+  await expect(start).toHaveValue(today);
+  await expect(form.getByLabel("Fim previsto (opcional)")).toHaveValue("");
+  await expect(form.getByLabel("Meta diária de água (ml)")).toHaveValue("");
+  await expect(form.getByLabel("Acompanhamento de peso")).toHaveValue("none");
+  await expect(
+    form.locator('[name="weight_min"], [name="weight_max"]'),
+  ).toHaveCount(0);
+  await expect(
+    form.getByLabel("Salvar como rascunho, sem ativar"),
+  ).not.toBeChecked();
   const draft = page.getByRole("article").filter({
     has: page.getByRole("heading", { name: "Projeto validado", exact: true }),
   });
@@ -94,6 +113,7 @@ test("projetos mostram metas condicionais, explicam início futuro e destacam na
     .getByRole("button", { name: "Ativar projeto", exact: true })
     .click();
   await expect(draft.getByRole("alert")).toContainText("início está no futuro");
+  await disclosure.locator("summary").click();
   await start.fill(today);
   await form.getByLabel("Meta diária de água (ml)").fill("4000");
   await form
@@ -104,6 +124,12 @@ test("projetos mostram metas condicionais, explicam início futuro e destacam na
     .getByRole("button", { name: "Criar projeto", exact: true })
     .click();
   await expect(form.getByRole("status")).toContainText("Projeto criado");
+  await expect(disclosure).not.toHaveAttribute("open");
+  await disclosure.locator("summary").click();
+  await expect(form.getByLabel("Nome do projeto", { exact: true })).toHaveValue(
+    "",
+  );
+  await expect(form.getByLabel("Acompanhamento de peso")).toHaveValue("none");
   const activeCard = page.getByRole("article").filter({
     has: page.getByRole("heading", {
       name: "Água e acompanhamento",

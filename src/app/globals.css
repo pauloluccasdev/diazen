@@ -1814,3 +1814,42 @@ input[type="date"]::-webkit-datetime-edit {
 .records-section .project-setting > summary:hover {
   background: var(--color-surface-raised);
 }
+.project-create > .data-form {
+  margin: 0;
+}
+.form-disclosure {
+  margin: 0;
+}
+.form-disclosure > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  min-height: 48px;
+  padding: 8px 0;
+  background: transparent;
+  color: var(--color-text);
+  font-size: 16px;
+  font-weight: 650;
+  list-style: none;
+}
+.form-disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+.form-disclosure > summary::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  margin-right: 4px;
+  flex-shrink: 0;
+  border-right: 2px solid var(--color-accent);
+  border-bottom: 2px solid var(--color-accent);
+  transform: rotate(45deg);
+}
+.form-disclosure[open] > summary::after {
+  transform: rotate(225deg);
+}
+.form-disclosure > fieldset {
+  margin-top: 16px;
+}
