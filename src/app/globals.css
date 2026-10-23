@@ -2069,3 +2069,49 @@ input[type="date"]::-webkit-datetime-edit {
 .taco-lookup input[type="search"] {
   margin-top: 8px;
 }
+
+.plan-workspace {
+  display: grid;
+  gap: 24px;
+}
+.plan-workspace .content-card {
+  margin: 0;
+}
+.plan-file,
+.plan-title {
+  display: grid;
+  gap: 12px;
+}
+.plan-entry {
+  margin-block: 0 24px;
+  width: 100%;
+}
+.plan-food {
+  display: grid;
+  gap: 12px;
+  border-top: 1px solid var(--border);
+  padding-block: 20px;
+  min-width: 0;
+}
+.plan-food select,
+.plan-food input,
+.plan-title input,
+.plan-file input {
+  max-width: 100%;
+  min-width: 0;
+  width: 100%;
+}
+.plan-food input[type="checkbox"] {
+  width: auto;
+}
+.plan-search-results {
+  display: grid;
+  gap: 8px;
+}
+.plan-search-results button {
+  white-space: normal;
+  text-align: left;
+}
+.plan-workspace .project-setting-title {
+  overflow-wrap: anywhere;
+}

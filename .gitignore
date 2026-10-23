@@ -34,3 +34,6 @@ artifacts/
 backups/
 *.sql.gz
 supabase/.temp/
+
+# Worker reproduzido da dependência fixada durante build/dev
+/public/pdf/

@@ -155,6 +155,14 @@ export default async function Records({
           <Link href={`/painel/fotos?projeto=${selected.id}`}>Fotos</Link>
         </nav>
       )}
+      {modulo === "alimentacao" && (
+        <Link
+          className="button-secondary plan-entry"
+          href={`/painel/plano?projeto=${selected.id}&data=${date}`}
+        >
+          Meu plano alimentar · importar PDF e calcular calorias →
+        </Link>
+      )}
       {editable && (
         <details className="content-card record-create">
           <summary>
