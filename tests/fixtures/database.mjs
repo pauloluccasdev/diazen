@@ -31,6 +31,7 @@ const tables = new Set([
   "meal_items",
   "meal_days",
   "food_library",
+  "diet_plans",
   "food_copy_requests",
   "photos",
   "photo_cleanup",

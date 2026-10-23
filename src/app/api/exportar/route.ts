@@ -22,6 +22,7 @@ export async function GET() {
     "meal_items",
     "meal_days",
     "food_library",
+    "diet_plans",
     "food_copy_requests",
     "photos",
   ]) {

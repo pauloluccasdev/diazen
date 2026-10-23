@@ -16,5 +16,6 @@ export default defineConfig([
     "test-results/**",
     "playwright-report/**",
     "coverage/**",
+    "public/pdf/**",
   ]),
 ]);
