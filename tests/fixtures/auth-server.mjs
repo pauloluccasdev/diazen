@@ -17,6 +17,11 @@ const users = [
   user,
   {
     ...user,
+    id: "00000000-0000-4000-8000-000000000011",
+    email: "taco@example.test",
+  },
+  {
+    ...user,
     id: "00000000-0000-4000-8000-000000000010",
     email: "projetos-validacao@example.test",
   },
