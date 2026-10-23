@@ -1,5 +1,5 @@
 import { ActionDisclosure } from "@/components/action-disclosure";
-import { PencilLine, Trash2 } from "lucide-react";
+import { PencilLine, Trash2, FileUp, ChevronRight } from "lucide-react";
 import { ReturnLink } from "@/components/return-link";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -157,10 +157,21 @@ export default async function Records({
       )}
       {modulo === "alimentacao" && (
         <Link
-          className="button-secondary plan-entry"
+          className="plan-entry"
           href={`/painel/plano?projeto=${selected.id}&data=${date}`}
         >
-          Meu plano alimentar · importar PDF e calcular calorias →
+          <span className="plan-entry-icon" aria-hidden="true">
+            <FileUp size={24} />
+          </span>
+          <span className="plan-entry-content">
+            <strong>Meu plano alimentar</strong>
+            <span>Importe seu PDF e confira calorias e nutrientes.</span>
+          </span>
+          <ChevronRight
+            className="plan-entry-chevron"
+            size={20}
+            aria-hidden="true"
+          />
         </Link>
       )}
       {editable && (
