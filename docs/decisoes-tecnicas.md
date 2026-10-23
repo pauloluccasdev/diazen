@@ -245,3 +245,7 @@ A pedido do proprietário, os atalhos de medidas e fotografias deixam de usar a 
 ## Melhoria — Padronização dos botões de retorno — 22/10/2026
 
 A pedido do proprietário, retornos ao dashboard, alimentação, início e login usam um componente comum com seta à esquerda, fundo, borda e área mínima de toque de 48 px. No mobile ocupam a largura disponível. Inclui cadastro, recuperação, exclusão registrada e página não encontrada; links de criação, consulta e filtros permanecem com sua função visual própria. Destinos explícitos são preservados, inclusive o projeto consultado no retorno dos módulos/fotos. Ícone decorativo fica fora do nome acessível; o texto identifica o destino. RF-001/004/018; RNF-007/008/014. Sem depender do histórico do navegador, que pode levar a outra origem.
+
+## Melhoria — Acordeões de registros, fotos e alimentação — 22/10/2026
+
+A pedido do proprietário, as ações marcadas na homologação (excluir registro, adicionar foto, alimentos recentes, copiar refeição e cadastros de alimento/receita) passam ao padrão de linhas expansíveis com ícone, título e seta. A apresentação é compartilhada com os ajustes de projeto; ações de edição, exclusão e uso dos mesmos cartões seguem o padrão para manter consistência. Ações destrutivas têm ícone vermelho, preservando confirmações explícitas. O acesso à biblioteca ganha ícone e seta, com largura integral. Não há mudança nas operações, na composição nutricional, no destino dos registros ou na privacidade das fotos. RF-007/009/014/015/016/017; RNF-007/008/014.

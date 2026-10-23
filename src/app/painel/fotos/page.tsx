@@ -1,3 +1,5 @@
+import { ActionDisclosure } from "@/components/action-disclosure";
+import { Camera, Trash2 } from "lucide-react";
 import { ReturnLink } from "@/components/return-link";
 import Image from "next/image";
 import Link from "next/link";
@@ -101,8 +103,11 @@ export default async function Photos({
         </p>
       )}
       {editable && (
-        <details className="content-card">
-          <summary>Adicionar foto</summary>
+        <ActionDisclosure
+          title="Adicionar foto"
+          icon={Camera}
+          className="standalone-disclosure"
+        >
           <PhotoUploader
             min={selected.starts_on}
             max={
@@ -111,7 +116,7 @@ export default async function Photos({
                 : today()
             }
           />
-        </details>
+        </ActionDisclosure>
       )}
       <form className="filter-form">
         <input type="hidden" name="projeto" value={selected.id} />
@@ -214,8 +219,11 @@ export default async function Photos({
               </Link>
             </nav>
             {editable && (
-              <details>
-                <summary>Excluir foto</summary>
+              <ActionDisclosure
+                title="Excluir foto"
+                icon={Trash2}
+                className="record-action destructive-action"
+              >
                 <ActionForm action={deletePhoto} submit="Excluir foto">
                   <input type="hidden" name="id" value={photo.id} />
                   <label className="checkbox-label">
@@ -223,7 +231,7 @@ export default async function Photos({
                     Confirmo a exclusão desta foto.
                   </label>
                 </ActionForm>
-              </details>
+              </ActionDisclosure>
             )}
           </article>
         ))}
