@@ -253,3 +253,9 @@ A pedido do proprietário, as ações marcadas na homologação (excluir registr
 ## Melhoria — Ações de registro no início dos módulos — 22/10/2026
 
 O proprietário solicitou evitar a rolagem até o final para adicionar registros no mobile. O cadastro de alimento, água, atividade, peso e medidas passa para depois do cabeçalho/abas e antes dos filtros, indicadores e histórico. A posição é a mesma na ordem do documento e na apresentação, preservando navegação por teclado e leitores de tela; a organização também vale em telas maiores. O cadastro continua recolhido até interação e disponível somente no projeto ativo editável. Adicionar foto já ocupa essa posição e agora usa o acordeão compacto da revisão anterior. RF-007/010/012/014/015/016/018; RNF-007/008/014.
+
+## Melhoria — Carregamento com a marca Diazen — 22/10/2026
+
+A pedido do proprietário, o fallback de carregamento do painel passa a uma sobreposição com fundo opaco e a marca Diazen centralizada, variando suavemente a opacidade enquanto o conteúdo carrega. A sobreposição desaparece assim que a navegação conclui, sem atraso artificial. O status textual permanece disponível a leitores de tela. A preferência `prefers-reduced-motion` desativa a animação e mantém a marca visível. Não há nova imagem, chamada externa ou mudança nas regras de sessão. RNF-007/008/011/014.
+
+A auditoria do roteiro capturou a fase mais apagada da marca e identificou contraste insuficiente. A animação passa a variar entre 65% e 100% de opacidade, mantendo leitura durante o efeito. A apresentação isolada do fallback compilado foi conferida em 320/390/1280 px, incluindo fundo opaco, status e desativação por movimento reduzido, em `artifacts/loading-review/`. Essa prévia não substitui a navegação real, exercitada separadamente pelas suítes.
