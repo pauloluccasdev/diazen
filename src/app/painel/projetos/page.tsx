@@ -5,6 +5,8 @@ import {
   Target,
   Droplets,
   Archive,
+  LayoutDashboard,
+  ArrowRight,
 } from "lucide-react";
 import { ProjectSetting } from "@/components/project-setting";
 import { projectContext } from "@/lib/data";
@@ -106,8 +108,13 @@ export default async function Projects({
               {formatDate(p.starts_on)}
               {p.ends_on && ` até ${formatDate(p.ends_on)}`}
             </p>
-            <Link className="back-link" href={`/painel?projeto=${p.id}`}>
-              Consultar projeto →
+            <Link
+              className="button-secondary project-consult"
+              href={`/painel?projeto=${p.id}`}
+            >
+              <LayoutDashboard size={20} aria-hidden="true" />
+              <span>Consultar projeto</span>
+              <ArrowRight size={18} aria-hidden="true" />
             </Link>
             {(p.status === "DRAFT" || p.status === "ACTIVE") && (
               <>
