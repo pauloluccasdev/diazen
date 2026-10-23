@@ -1,3 +1,12 @@
+import { ActionDisclosure } from "@/components/action-disclosure";
+import {
+  BookOpen,
+  CookingPot,
+  List,
+  PencilLine,
+  Trash2,
+  Utensils,
+} from "lucide-react";
 import { ReturnLink } from "@/components/return-link";
 import Link from "next/link";
 import { requireAccount } from "@/lib/data";
@@ -70,14 +79,20 @@ export default async function Foods({
           preservam os registros anteriores e as receitas já salvas.
         </p>
       </section>
-      <details className="content-card">
-        <summary>Cadastrar alimento próprio</summary>
+      <ActionDisclosure
+        title="Cadastrar alimento próprio"
+        icon={Utensils}
+        className="standalone-disclosure"
+      >
         <ActionForm action={saveFood} submit="Salvar alimento">
           <LibraryFoodFields />
         </ActionForm>
-      </details>
-      <details className="content-card">
-        <summary>Criar receita</summary>
+      </ActionDisclosure>
+      <ActionDisclosure
+        title="Criar receita"
+        icon={CookingPot}
+        className="standalone-disclosure"
+      >
         <p className="intro">
           Escolha alimentos próprios e suas quantidades. O rendimento define
           quantas porções a receita completa produz. Nutriente desconhecido em
@@ -104,7 +119,7 @@ export default async function Foods({
           </label>
           <RecipeIngredients />
         </ActionForm>
-      </details>
+      </ActionDisclosure>
       <form className="filter-form">
         <label>
           Buscar na biblioteca
@@ -146,8 +161,11 @@ export default async function Foods({
                 .join(" · ")}
             </p>
             {food.ingredients && (
-              <details>
-                <summary>Ingredientes da receita</summary>
+              <ActionDisclosure
+                title="Ingredientes da receita"
+                icon={List}
+                className="record-action"
+              >
                 <ul>
                   {food.ingredients.map((i, index) => (
                     <li key={index}>
@@ -156,7 +174,7 @@ export default async function Foods({
                     </li>
                   ))}
                 </ul>
-              </details>
+              </ActionDisclosure>
             )}
             <ActionForm
               action={changeLibraryFood}
@@ -171,8 +189,11 @@ export default async function Foods({
               />
             </ActionForm>
             {active.data && (
-              <details>
-                <summary>Usar no diário</summary>
+              <ActionDisclosure
+                title="Usar no diário"
+                icon={BookOpen}
+                className="record-action"
+              >
                 <p className="muted">
                   Destino: projeto ativo “{active.data.name}”. Uma cópia da
                   composição será salva.
@@ -187,18 +208,24 @@ export default async function Foods({
                     amount={food.kind === "recipe" ? 1 : food.reference_amount}
                   />
                 </ActionForm>
-              </details>
+              </ActionDisclosure>
             )}
             {food.kind === "food" && (
-              <details>
-                <summary>Editar alimento</summary>
+              <ActionDisclosure
+                title="Editar alimento"
+                icon={PencilLine}
+                className="record-action"
+              >
                 <ActionForm action={saveFood} submit="Atualizar alimento">
                   <LibraryFoodFields food={food} />
                 </ActionForm>
-              </details>
+              </ActionDisclosure>
             )}
-            <details>
-              <summary>Remover da biblioteca</summary>
+            <ActionDisclosure
+              title="Remover da biblioteca"
+              icon={Trash2}
+              className="record-action destructive-action"
+            >
               <ActionForm
                 action={changeLibraryFood}
                 submit="Excluir da biblioteca"
@@ -211,7 +238,7 @@ export default async function Foods({
                   preservados.
                 </label>
               </ActionForm>
-            </details>
+            </ActionDisclosure>
           </article>
         ))}
       </section>

@@ -1,3 +1,5 @@
+import { ActionDisclosure } from "@/components/action-disclosure";
+import { Copy, History, BookOpen, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { formatDate, number, today } from "@/lib/domain";
@@ -25,11 +27,19 @@ export async function FoodConveniences({
     .returns<Entry[]>();
   if (error) throw new Error("Falha ao carregar alimentos recentes");
   return (
-    <section className="content-card" aria-label="Conveniências alimentares">
+    <section
+      className="content-card food-conveniences"
+      aria-label="Conveniências alimentares"
+    >
       <h2>Reutilize seus alimentos</h2>
       <p>
-        <Link className="button-secondary" href="/painel/alimentos">
-          Alimentos, receitas e favoritos →
+        <Link
+          className="button-secondary project-consult"
+          href="/painel/alimentos"
+        >
+          <BookOpen size={20} aria-hidden="true" />
+          <span>Alimentos, receitas e favoritos</span>
+          <ArrowRight size={18} aria-hidden="true" />
         </Link>
       </p>
       {activeName && (
@@ -38,8 +48,11 @@ export async function FoodConveniences({
             Novos registros serão adicionados ao projeto ativo “{activeName}”. O
             histórico consultado permanece preservado.
           </p>
-          <details>
-            <summary>Alimentos recentes</summary>
+          <ActionDisclosure
+            title="Alimentos recentes"
+            icon={History}
+            className="standalone-disclosure"
+          >
             <p className="muted">
               Os últimos 20 registros da sua conta, incluindo o histórico.
               Reutilizar salva uma nova cópia.
@@ -68,9 +81,12 @@ export async function FoodConveniences({
                 </ActionForm>
               </details>
             ))}
-          </details>
-          <details>
-            <summary>Copiar refeição</summary>
+          </ActionDisclosure>
+          <ActionDisclosure
+            title="Copiar refeição"
+            icon={Copy}
+            className="standalone-disclosure"
+          >
             <p className="intro">
               Origem: projeto consultado. Copia todos os alimentos da categoria
               e data escolhidas, inclusive além da página atual. O destino é o
@@ -130,7 +146,7 @@ export async function FoodConveniences({
                 preservando os registros existentes.
               </label>
             </ActionForm>
-          </details>
+          </ActionDisclosure>
         </>
       )}
     </section>

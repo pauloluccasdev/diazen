@@ -852,16 +852,16 @@ body {
   margin-bottom: 6px;
   color: var(--color-text-muted);
 }
-.records-section details {
+.records-section details:not(.project-setting) {
   display: inline-block;
   vertical-align: top;
   margin-right: 8px;
   max-width: 100%;
 }
-.records-section details[open] {
+.records-section details:not(.project-setting)[open] {
   display: block;
 }
-.records-section details summary {
+.records-section details:not(.project-setting) > summary {
   font-size: 12px;
   border: 1px solid var(--color-border);
   background: var(--color-surface-sunken);
@@ -1731,7 +1731,7 @@ input[type="date"]::-webkit-datetime-edit {
   gap: 10px;
   margin-top: 24px;
 }
-.records-section .project-setting {
+.project-setting {
   display: block;
   width: 100%;
   margin: 0;
@@ -1739,7 +1739,7 @@ input[type="date"]::-webkit-datetime-edit {
   border-radius: 16px;
   background: var(--color-surface-sunken);
 }
-.records-section .project-setting > summary {
+.project-setting > summary {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -1799,7 +1799,7 @@ input[type="date"]::-webkit-datetime-edit {
   margin-top: 16px;
 }
 @media (max-width: 600px) {
-  .records-section .project-setting > summary {
+  .project-setting > summary {
     padding: 12px;
     gap: 10px;
     font-size: 13px;
@@ -1811,7 +1811,7 @@ input[type="date"]::-webkit-datetime-edit {
     width: 100%;
   }
 }
-.records-section .project-setting > summary:hover {
+.project-setting > summary:hover {
   background: var(--color-surface-raised);
 }
 .project-create > .data-form {
@@ -1991,4 +1991,26 @@ input[type="date"]::-webkit-datetime-edit {
     width: 100%;
     justify-content: flex-start;
   }
+}
+.project-setting.record-action {
+  margin-top: 12px;
+}
+.project-setting.standalone-disclosure {
+  margin-top: 16px;
+}
+.destructive-action > summary .project-setting-icon {
+  color: var(--color-danger);
+  background: color-mix(
+    in srgb,
+    var(--color-danger) 12%,
+    var(--color-surface-sunken)
+  );
+}
+.project-setting-body > p,
+.project-setting-body > ul {
+  margin-top: 16px;
+  font-size: 12px;
+}
+.food-conveniences > .muted {
+  margin-top: 12px;
 }

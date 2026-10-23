@@ -1,3 +1,5 @@
+import { ActionDisclosure } from "@/components/action-disclosure";
+import { PencilLine, Trash2 } from "lucide-react";
 import { ReturnLink } from "@/components/return-link";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -373,8 +375,11 @@ export default async function Records({
             {editable && (
               <>
                 {modulo !== "peso" && (
-                  <details>
-                    <summary>Editar registro</summary>
+                  <ActionDisclosure
+                    title="Editar registro"
+                    icon={PencilLine}
+                    className="record-action"
+                  >
                     <ActionForm action={saveRecord} submit="Salvar alteração">
                       <RecordFields
                         kind={modulo}
@@ -387,10 +392,13 @@ export default async function Records({
                         }
                       />
                     </ActionForm>
-                  </details>
+                  </ActionDisclosure>
                 )}
-                <details>
-                  <summary>Excluir registro</summary>
+                <ActionDisclosure
+                  title="Excluir registro"
+                  icon={Trash2}
+                  className="record-action destructive-action"
+                >
                   <ActionForm action={deleteRecord} submit="Confirmar exclusão">
                     <input type="hidden" name="module" value={modulo} />
                     <input type="hidden" name="id" value={row.id} />
@@ -399,7 +407,7 @@ export default async function Records({
                       Confirmo a exclusão deste registro.
                     </label>
                   </ActionForm>
-                </details>
+                </ActionDisclosure>
               </>
             )}
           </article>
