@@ -237,3 +237,7 @@ A pedido do proprietário, "Consultar projeto" passa de link discreto a ação s
 ## Melhoria — Ações de consulta e gestão no dashboard — 22/10/2026
 
 A pedido do proprietário, o seletor de projeto/data no dashboard adota a composição de acordeão dos ajustes: ícone, título e seta, com formulário integrado ao contorno quando aberto. "Gerenciar projetos" torna-se uma ação secundária com fundo opaco, ícone e seta, ocupando a largura do conteúdo no mobile para manter legibilidade sobre a fotografia. Títulos, destinos, formulário GET e regras de consulta permanecem iguais. RF-003/004/018; RNF-007/008. Os testes de registros exercitam alteração de projeto/data, destino das gravações e consulta histórica; o axe cobre o dashboard.
+
+## Melhoria — Atalhos de evolução corporal no dashboard — 22/10/2026
+
+A pedido do proprietário, os atalhos de medidas e fotografias deixam de usar a navegação discreta e passam a ações secundárias com fundo, borda, ícone destacado e seta. No mobile, cada ação ocupa uma linha completa; em telas maiores, dividem duas colunas iguais. Altura mínima de 68 px e rótulos/destinos preservados, inclusive o projeto consultado. RF-015/016/018; RNF-007/008. Sem alteração no acesso aos dados ou nas regras de privacidade das fotos.
