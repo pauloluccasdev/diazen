@@ -1,3 +1,4 @@
+import { ReturnLink } from "@/components/return-link";
 import Image from "next/image";
 import Link from "next/link";
 import { projectContext } from "@/lib/data";
@@ -82,9 +83,9 @@ export default async function Photos({
   return (
     <>
       <section className="welcome">
-        <Link className="back-link" href={`/painel?projeto=${selected.id}`}>
-          ← Dashboard
-        </Link>
+        <ReturnLink href={`/painel?projeto=${selected.id}`}>
+          Voltar ao dashboard
+        </ReturnLink>
         <p className="eyebrow">{selected.name}</p>
         <h1>Suas fotografias.</h1>
         <p className="intro">Um registro visual da sua evolução, só seu.</p>

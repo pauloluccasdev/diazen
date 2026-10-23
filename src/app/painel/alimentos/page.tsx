@@ -1,3 +1,4 @@
+import { ReturnLink } from "@/components/return-link";
 import Link from "next/link";
 import { requireAccount } from "@/lib/data";
 import { number } from "@/lib/domain";
@@ -59,9 +60,7 @@ export default async function Foods({
   return (
     <>
       <section className="welcome">
-        <Link className="back-link" href="/painel/alimentacao">
-          ← Alimentação
-        </Link>
+        <ReturnLink href="/painel/alimentacao">Voltar à alimentação</ReturnLink>
         <p className="eyebrow">Sua biblioteca privada</p>
         <h1>
           Alimentos e receitas<span className="accent">.</span>

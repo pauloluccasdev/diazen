@@ -1,5 +1,5 @@
+import { ReturnLink } from "@/components/return-link";
 import { ClearOfflineData } from "@/components/offline-snapshot";
-import Link from "next/link";
 export const metadata = { title: "Solicitação registrada" };
 export default function Deleted() {
   return (
@@ -11,9 +11,7 @@ export default function Deleted() {
         processada com segurança, incluindo o tratamento das cópias de segurança
         conforme a política de privacidade.
       </p>
-      <Link className="button-primary" href="/">
-        Voltar ao início
-      </Link>
+      <ReturnLink href="/">Voltar ao início</ReturnLink>
     </section>
   );
 }

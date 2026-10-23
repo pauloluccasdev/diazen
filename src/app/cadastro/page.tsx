@@ -1,3 +1,4 @@
+import { ReturnLink } from "@/components/return-link";
 import Link from "next/link";
 import { AccountForm } from "@/components/account-form";
 import { getSupabaseConfig } from "@/lib/supabase/config";
@@ -27,9 +28,7 @@ export default function Signup() {
         Conheça os <Link href="/termos">termos de uso</Link> e a{" "}
         <Link href="/privacidade">política de privacidade</Link>.
       </p>
-      <Link className="back-link" href="/entrar">
-        Já tenho conta
-      </Link>
+      <ReturnLink href="/entrar">Já tenho conta</ReturnLink>
     </section>
   );
 }

@@ -1,3 +1,4 @@
+import { ReturnLink } from "@/components/return-link";
 import { ClearOfflineData } from "@/components/offline-snapshot";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -49,9 +50,7 @@ export default async function Login({
           Criar minha conta
         </Link>
       </nav>
-      <Link className="back-link" href="/">
-        Voltar ao início
-      </Link>
+      <ReturnLink href="/">Voltar ao início</ReturnLink>
     </section>
   );
 }
