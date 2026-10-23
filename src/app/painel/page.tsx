@@ -6,6 +6,10 @@ import {
   ChartNoAxesCombined,
   Camera,
   Ruler,
+  SlidersHorizontal,
+  ChevronDown,
+  FolderOpen,
+  ArrowRight,
 } from "lucide-react";
 import { ProgressRing } from "@/components/progress-ring";
 import { LogoutButton } from "@/components/logout-button";
@@ -110,7 +114,19 @@ export default async function Panel({
       {selected && summary ? (
         <>
           <details className="dashboard-query">
-            <summary>Alterar projeto ou data da consulta</summary>
+            <summary>
+              <span className="project-setting-icon" aria-hidden="true">
+                <SlidersHorizontal size={20} />
+              </span>
+              <span className="project-setting-title">
+                Alterar projeto ou data da consulta
+              </span>
+              <ChevronDown
+                className="project-setting-chevron"
+                size={18}
+                aria-hidden="true"
+              />
+            </summary>
             <form className="filter-form dashboard-filters">
               <label>
                 Projeto visualizado
@@ -159,8 +175,13 @@ export default async function Panel({
                       ? "Peso em acompanhamento, sem alvo numérico."
                       : "Meta de peso não configurada."}
               </p>
-              <Link className="back-link" href="/painel/projetos">
-                Gerenciar projetos →
+              <Link
+                className="button-secondary dashboard-manage"
+                href="/painel/projetos"
+              >
+                <FolderOpen size={20} aria-hidden="true" />
+                <span>Gerenciar projetos</span>
+                <ArrowRight size={18} aria-hidden="true" />
               </Link>
             </div>
           </section>

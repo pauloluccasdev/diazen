@@ -233,3 +233,7 @@ A pedido do proprietário, o cadastro fica em um acordeão "Novo projeto": abert
 ## Melhoria — Acesso à consulta do projeto — 22/10/2026
 
 A pedido do proprietário, "Consultar projeto" passa de link discreto a ação secundária de largura integral no cartão, com ícone de dashboard, texto e seta. Mantém o destino de consulta já existente e o nome acessível; o estilo segue os tokens e a hierarquia do cartão, com altura mínima de 56 px. RF-003/004/018; RNF-007/008. Os testes existentes verificam o acesso ao histórico e sua condição de somente leitura.
+
+## Melhoria — Ações de consulta e gestão no dashboard — 22/10/2026
+
+A pedido do proprietário, o seletor de projeto/data no dashboard adota a composição de acordeão dos ajustes: ícone, título e seta, com formulário integrado ao contorno quando aberto. "Gerenciar projetos" torna-se uma ação secundária com fundo opaco, ícone e seta, ocupando a largura do conteúdo no mobile para manter legibilidade sobre a fotografia. Títulos, destinos, formulário GET e regras de consulta permanecem iguais. RF-003/004/018; RNF-007/008. Os testes de registros exercitam alteração de projeto/data, destino das gravações e consulta histórica; o axe cobre o dashboard.
