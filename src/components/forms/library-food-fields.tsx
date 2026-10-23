@@ -1,3 +1,4 @@
+import { TacoPicker } from "./taco-picker";
 import { nutrients, units } from "@/lib/records";
 import type { LibraryFood } from "@/lib/food-library";
 export function LibraryFoodFields({ food }: { food?: LibraryFood }) {
@@ -9,6 +10,7 @@ export function LibraryFoodFields({ food }: { food?: LibraryFood }) {
         value={food?.id ?? crypto.randomUUID()}
       />
       <input type="hidden" name="editing" value={String(!!food)} />
+      <TacoPicker />
       <label>
         Nome do alimento
         <input

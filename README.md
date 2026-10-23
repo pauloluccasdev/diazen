@@ -68,7 +68,23 @@ Para produzir capturas das telas reais para revisão visual, após o build, exec
 - PWA instalável quando suportado; escrita offline bloqueada; resumo mínimo do dashboard disponível na aba por até 24 h, apagado ao sair da conta. Fotos e respostas autenticadas ficam fora do cache do service worker.
 - Exportação de registros em JSON e solicitação de exclusão com reautenticação, bloqueio imediato e purge administrativo.
 
-Sem IA, Strava, login social, prescrição de dieta/treino ou barra inferior fixa. Receitas, favoritos, recentes e cópia de refeições (RF-009) foram incluídos por aprovação do proprietário. O catálogo nutricional não foi incorporado: o núcleo usa valores e fontes informados pelo usuário.
+Sem IA, Strava, login social, prescrição de dieta/treino ou barra inferior fixa. Receitas, favoritos, recentes e cópia de refeições (RF-009) foram incluídos por aprovação do proprietário. A pedido do proprietário, foi incorporada a consulta local à TACO (NEPA/UNICAMP, 4ª edição revisada e ampliada, 2011), com 597 alimentos e referência por 100 g. Em Alimentação → Alimentos, receitas e favoritos → Cadastrar alimento próprio, abra “Consultar tabela TACO”, selecione o alimento/preparo e revise antes de salvar. Itens não encontrados, marcas e versões light continuam usando valores informados com fonte identificada. A importação de planos em PDF permanece em desenvolvimento, separada desta consulta.
+
+## Fonte nutricional TACO
+
+Fonte: **NEPA – Universidade Estadual de Campinas. Tabela Brasileira de Composição de Alimentos – TACO. 4ª edição revisada e ampliada. Campinas: NEPA/UNICAMP, 2011.** A publicação permite reprodução parcial ou total com citação da fonte (páginas iniciais ii/iii).
+
+O catálogo versionado em `src/data/taco-4.json` contém calorias, proteínas, carboidratos e lipídeos por **100 g de parte comestível**, com número do alimento e páginas de origem. `Tr` (traço), `NA`, células sem análise e `*` (reavaliação) permanecem distintos de zero. Porções em ml não são convertidas em gramas automaticamente. Selecionar um item preenche o formulário; salvar alimento e registrar consumo continuam exigindo ações explícitas. Os registros anteriores mantêm seus snapshots.
+
+Para reproduzir a extração usando o PDF da mesma edição fornecido pelo proprietário, execute em ambiente local com Python/PyMuPDF (não são dependências da aplicação hospedada):
+
+```bash
+uv run --with pymupdf==1.28.2 scripts/extract_taco.py /caminho/para/taco_4_edicao_ampliada_e_revisada.pdf
+npx prettier --write src/data/taco-4.json
+npm run test:db
+```
+
+O extrator espera o layout desta edição, valida os IDs 1 a 597 e conserva marcadores não numéricos. O hash do PDF fica nos metadados do catálogo; PDFs de dieta pessoais não são versionados nem enviados a serviços de extração externos.
 
 ## Operação e limites da entrega
 
