@@ -94,7 +94,7 @@ export default async function PlanPage({
         <button className="button-secondary">Consultar plano</button>
       </form>
       <DietPlanEditor
-        key={`${id ?? "new"}-${date}`}
+        key={`${selected.id}-${filters.versao ?? "current"}-${date}`}
         project={selected.id}
         initial={initial}
         editable={editable}

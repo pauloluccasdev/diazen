@@ -2089,7 +2089,7 @@ input[type="date"]::-webkit-datetime-edit {
 .plan-food {
   display: grid;
   gap: 12px;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--color-border);
   padding-block: 20px;
   min-width: 0;
 }
@@ -2114,4 +2114,56 @@ input[type="date"]::-webkit-datetime-edit {
 }
 .plan-workspace .project-setting-title {
   overflow-wrap: anywhere;
+}
+
+.plan-workspace .checkbox-label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  margin-block: 12px;
+  font-weight: 400;
+}
+.plan-food > label:not(.checkbox-label) {
+  display: grid;
+  gap: 8px;
+}
+.plan-food > label select {
+  min-height: 48px;
+  padding: 12px;
+  background: var(--color-surface-sunken);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  color: var(--color-text);
+  font: inherit;
+}
+.plan-file > span {
+  width: 100%;
+  cursor: pointer;
+}
+.plan-file:focus-within > span {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+.plan-file:has(input:disabled) > span {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+@media (max-width: 600px) {
+  .plan-title input,
+  .plan-food > label select {
+    font-size: 16px;
+  }
+}
+.plan-file {
+  position: relative;
+}
+.plan-file input.sr-only {
+  width: 1px;
+  max-width: 1px;
+  height: 1px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
 }

@@ -44,3 +44,11 @@ Relatórios locais: `artifacts/food-migration-report.json` e `artifacts/food-lib
 Estado atualizado em 22/10/2026: provedor/templates padrão, URLs e callbacks PKCE configurados; recuperação pelo e-mail padrão confirmada pelo proprietário; prévia HTTPS protegida disponível. Os itens atuais de encerramento estão em [homologação final](homologacao-final.md), incluindo confirmação de cadastro, dispositivos físicos, desempenho, recuperação dos serviços hospedados, política operacional e aprovação visual/legal. Não há pendência de SMTP personalizado, pois o proprietário decidiu usar o provedor padrão.
 
 Este registro comprova os testes descritos; não declara o MVP integralmente homologado nem substitui o roteiro de `docs/operacao.md`.
+
+## Plano alimentar — 23/10/2026
+
+A migração `202610230010_diet_plans.sql` foi aplicada incrementalmente após backup cifrado verificado, sem reset. Verificação confirmou RLS habilitada e ausência de privilégios UPDATE/DELETE para contas autenticadas nas versões imutáveis.
+
+A homologação na prévia pública `develop`, com conta sintética própria, percorreu seleção de PDF fictício no navegador, revisão TACO, cálculo de 125 g de arroz cozido (160 kcal), salvamento, recarga e exportação. O diário permaneceu sem consumo adicionado. Uma segunda conta não acessou o plano da primeira. O layout não apresentou overflow em 320 px. As contas temporárias e seus planos foram removidos pelo fluxo de exclusão, e o ledger independente foi atualizado. Nenhuma conta do proprietário nem seu PDF pessoal foram alterados/enviados ao servidor. Evidências locais ignoradas pelo Git: `artifacts/plan-review/hosted-report.json` e captura correspondente.
+
+Os dois PDFs pessoais foram lidos apenas no laboratório local. A extração preservou, no formato sem composição, 10 variantes em cinco grupos de refeição, 51 alimentos-base e 115 substituições; no formato com composição, quatro refeições, 15 alimentos-base e 32 substituições, com soma de 1453 kcal igual à informada no documento. Isso valida esses layouts, sem prometer reconhecer qualquer PDF ou uma composição completa para itens fora da TACO.
