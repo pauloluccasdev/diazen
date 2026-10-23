@@ -157,15 +157,10 @@ async function field(name, value, scope = "", type = "fill") {
 const form = (button) =>
   `[...document.querySelectorAll('form')].find(f=>!f.closest('details:not([open])') && f.getClientRects().length && [...f.querySelectorAll('button')].some(b=>b.textContent.trim()===${JSON.stringify(button)}))`;
 async function markForm(button) {
-  const closedCreate = await evaluate(
-    `(() => { const d=document.querySelector('details.record-create:not([open])'); return Boolean(d && [...d.querySelectorAll('button')].some(b=>b.textContent.trim()===${JSON.stringify(button)})); })()`,
+  const closedCreateTitle = await evaluate(
+    `(() => { const d=[...document.querySelectorAll('details.record-create:not([open]), details.form-disclosure:not([open])')].find(d=>[...d.querySelectorAll('button')].some(b=>b.textContent.trim()===${JSON.stringify(button)})); return d?.querySelector(':scope > summary')?.textContent.trim() ?? null; })()`,
   );
-  if (closedCreate) {
-    const title = await evaluate(
-      "document.querySelector('details.record-create > summary').textContent.trim()",
-    );
-    await clickText(title, "summary");
-  }
+  if (closedCreateTitle) await clickText(closedCreateTitle, "summary");
   await until(
     `(() => { const f=${form(button)}; if(!f || !Object.keys(f).some(k=>k.startsWith('__reactProps')))return false;document.querySelectorAll('[data-qa-form]').forEach(e=>e.removeAttribute('data-qa-form'));f.setAttribute('data-qa-form','yes');return true;})()`,
   );

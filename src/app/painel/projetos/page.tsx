@@ -42,16 +42,20 @@ export default async function Projects({
     `/painel/projetos?${new URLSearchParams({ pagina: String(value), ...(status ? { estado: status } : {}) })}`;
   const createSection = (
     <section className="content-card project-create">
-      <h2>
-        {projects.length || status
-          ? "Novo projeto"
-          : "Vamos preparar seu primeiro projeto?"}
-      </h2>
-      <p className="intro">
-        Escolha um nome, uma data de início e pelo menos uma meta mensurável.
-        Água, peso e sessões são opcionais individualmente.
-      </p>
-      <ActionForm action={createProject} submit="Criar projeto">
+      <ActionForm
+        action={createProject}
+        submit="Criar projeto"
+        resetOnSuccess
+        disclosureTitle="Novo projeto"
+        initiallyOpen={!projects.length && !status}
+      >
+        {!projects.length && !status && (
+          <h2>Vamos preparar seu primeiro projeto?</h2>
+        )}
+        <p className="intro">
+          Escolha um nome e uma data de início. Para ativar, configure pelo
+          menos uma meta mensurável de água, peso ou sessões semanais.
+        </p>
         <ProjectCreateFields today={today()} />
       </ActionForm>
     </section>
