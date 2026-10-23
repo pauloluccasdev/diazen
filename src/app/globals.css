@@ -1726,3 +1726,91 @@ input[type="date"]::-webkit-datetime-edit {
     flex-shrink: 0;
   }
 }
+.project-settings {
+  display: grid;
+  gap: 10px;
+  margin-top: 24px;
+}
+.records-section .project-setting {
+  display: block;
+  width: 100%;
+  margin: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface-sunken);
+}
+.records-section .project-setting > summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 68px;
+  padding: 12px 16px;
+  border: 0;
+  border-radius: 16px;
+  background: transparent;
+  list-style: none;
+  font-size: 14px;
+}
+.project-setting > summary::-webkit-details-marker {
+  display: none;
+}
+.project-setting > summary::marker {
+  content: "";
+}
+.project-setting-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+.project-setting-title {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.project-setting-chevron {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+}
+.project-setting[open] > summary .project-setting-chevron {
+  transform: rotate(180deg);
+}
+.project-setting[open] > summary {
+  border-radius: 16px 16px 0 0;
+}
+.project-setting-body {
+  padding: 0 16px 20px;
+  border-top: 1px solid var(--color-border);
+}
+.project-setting-body > .intro {
+  margin-top: 16px;
+  font-size: 12px;
+}
+.project-setting-body > .data-form {
+  margin: 0;
+}
+.project-list-card > .project-setting {
+  margin-top: 16px;
+}
+@media (max-width: 600px) {
+  .records-section .project-setting > summary {
+    padding: 12px;
+    gap: 10px;
+    font-size: 13px;
+  }
+  .project-setting-body {
+    padding-inline: 12px;
+  }
+  .project-setting-body .button-primary {
+    width: 100%;
+  }
+}
+.records-section .project-setting > summary:hover {
+  background: var(--color-surface-raised);
+}

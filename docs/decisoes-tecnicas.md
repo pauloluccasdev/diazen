@@ -219,3 +219,9 @@ A pedido do proprietário, o cadastro de projetos explica junto ao campo que ses
 ## Melhoria — Distribuição da navegação principal no mobile — 22/10/2026
 
 A pedido do proprietário, Dashboard, Projetos e Minha conta passam a dividir igualmente toda a largura disponível até 600 px. Os links mantêm ícone, texto, área mínima de toque e destaque da rota atual, com conteúdo centralizado e espaçamento adequado à largura de 320 px. RF-018; RNF-007/008. A navegação de módulos continua seguindo a composição já aprovada.
+
+## Melhoria — Ajustes do projeto em acordeão — 22/10/2026
+
+O proprietário rejeitou os ajustes exibidos como botões avulsos e forneceu duas referências de listas expansíveis. Datas do rascunho, nome, metas de peso/atividades e meta de água passam a formar linhas de largura integral, com ícone, título e seta de expansão. O formulário aberto integra o mesmo contorno, com separador, espaçamento e botão de salvar de largura integral no mobile. Arquivamento usa a mesma apresentação, separado da lista de edição pela ação principal. Mantêm-se o tema Diazen, os títulos, as confirmações e as regras de negócio existentes. `details`/`summary` preservam interação nativa por teclado e estado expandido, sem novo JavaScript cliente. RF-003/005; RNF-007/008/014.
+
+Verificação local com conta fictícia: estados fechado/aberto e contenção dos controles em 320, 390, 600 e 1280 px, com alvos visíveis de pelo menos 44 px. Capturas e medidas em `artifacts/project-settings/` (não versionadas). A suíte existente de projetos verifica edição/persistência e o axe verifica as telas essenciais; a conferência no iPhone físico permanece com o proprietário.

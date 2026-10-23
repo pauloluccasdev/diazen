@@ -1,4 +1,12 @@
 import Link from "next/link";
+import {
+  CalendarDays,
+  PencilLine,
+  Target,
+  Droplets,
+  Archive,
+} from "lucide-react";
+import { ProjectSetting } from "@/components/project-setting";
 import { projectContext } from "@/lib/data";
 import { formatDate, statusLabel, today } from "@/lib/domain";
 import type { ProjectStatus } from "@/lib/domain";
@@ -99,99 +107,109 @@ export default async function Projects({
             </Link>
             {(p.status === "DRAFT" || p.status === "ACTIVE") && (
               <>
-                {p.status === "DRAFT" && (
-                  <details>
-                    <summary>Editar datas do rascunho</summary>
-                    <p className="intro">
-                      O período deve incluir as metas de água já configuradas.
-                      Após ativar, as datas ficam fixas.
-                    </p>
-                    <ActionForm action={changeDraftDates} submit="Salvar datas">
+                <div className="project-settings">
+                  {p.status === "DRAFT" && (
+                    <ProjectSetting
+                      title="Editar datas do rascunho"
+                      icon={CalendarDays}
+                    >
+                      <p className="intro">
+                        O período deve incluir as metas de água já configuradas.
+                        Após ativar, as datas ficam fixas.
+                      </p>
+                      <ActionForm
+                        action={changeDraftDates}
+                        submit="Salvar datas"
+                      >
+                        <input type="hidden" name="id" value={p.id} />
+                        <label>
+                          Início do rascunho
+                          <input
+                            type="date"
+                            name="starts_on"
+                            required
+                            defaultValue={p.starts_on}
+                          />
+                        </label>
+                        <label>
+                          Fim previsto do rascunho (opcional)
+                          <input
+                            type="date"
+                            name="ends_on"
+                            defaultValue={p.ends_on ?? ""}
+                          />
+                        </label>
+                      </ActionForm>
+                    </ProjectSetting>
+                  )}
+                  <ProjectSetting title="Editar nome" icon={PencilLine}>
+                    <ActionForm action={changeProject} submit="Atualizar nome">
                       <input type="hidden" name="id" value={p.id} />
                       <label>
-                        Início do rascunho
+                        Nome
                         <input
-                          type="date"
-                          name="starts_on"
+                          name="name"
                           required
-                          defaultValue={p.starts_on}
-                        />
-                      </label>
-                      <label>
-                        Fim previsto do rascunho (opcional)
-                        <input
-                          type="date"
-                          name="ends_on"
-                          defaultValue={p.ends_on ?? ""}
+                          maxLength={100}
+                          defaultValue={p.name}
                         />
                       </label>
                     </ActionForm>
-                  </details>
-                )}
-                <details>
-                  <summary>Editar nome</summary>
-                  <ActionForm action={changeProject} submit="Atualizar nome">
-                    <input type="hidden" name="id" value={p.id} />
-                    <label>
-                      Nome
-                      <input
-                        name="name"
-                        required
-                        maxLength={100}
-                        defaultValue={p.name}
+                  </ProjectSetting>
+                  <ProjectSetting
+                    title="Editar metas de peso e atividades"
+                    icon={Target}
+                  >
+                    <ActionForm action={changeGoals} submit="Salvar metas">
+                      <input type="hidden" name="id" value={p.id} />
+                      <ProjectGoalFields
+                        mode={p.weight_mode}
+                        min={p.weight_min}
+                        max={p.weight_max}
                       />
-                    </label>
-                  </ActionForm>
-                </details>
-                <details>
-                  <summary>Editar metas de peso e atividades</summary>
-                  <ActionForm action={changeGoals} submit="Salvar metas">
-                    <input type="hidden" name="id" value={p.id} />
-                    <ProjectGoalFields
-                      mode={p.weight_mode}
-                      min={p.weight_min}
-                      max={p.weight_max}
-                    />
-                    <label>
-                      Sessões por semana
-                      <input
-                        type="number"
-                        name="sessions"
-                        min={1}
-                        max={50}
-                        defaultValue={p.sessions_goal ?? ""}
-                      />
-                    </label>
-                  </ActionForm>
-                </details>
-                <details>
-                  <summary>Configurar meta de água</summary>
-                  <ActionForm action={changeWaterGoal} submit="Salvar meta">
-                    <input type="hidden" name="project_id" value={p.id} />
-                    <label>
-                      Vigente a partir de
-                      <input
-                        type="date"
-                        name="effective_from"
-                        required
-                        min={p.status === "ACTIVE" ? today() : p.starts_on}
-                        defaultValue={
-                          p.status === "DRAFT" ? p.starts_on : today()
-                        }
-                      />
-                    </label>
-                    <label>
-                      Meta (ml)
-                      <input
-                        name="target_ml"
-                        type="number"
-                        required
-                        min={100}
-                        max={15000}
-                      />
-                    </label>
-                  </ActionForm>
-                </details>
+                      <label>
+                        Sessões por semana
+                        <input
+                          type="number"
+                          name="sessions"
+                          min={1}
+                          max={50}
+                          defaultValue={p.sessions_goal ?? ""}
+                        />
+                      </label>
+                    </ActionForm>
+                  </ProjectSetting>
+                  <ProjectSetting
+                    title="Configurar meta de água"
+                    icon={Droplets}
+                  >
+                    <ActionForm action={changeWaterGoal} submit="Salvar meta">
+                      <input type="hidden" name="project_id" value={p.id} />
+                      <label>
+                        Vigente a partir de
+                        <input
+                          type="date"
+                          name="effective_from"
+                          required
+                          min={p.status === "ACTIVE" ? today() : p.starts_on}
+                          defaultValue={
+                            p.status === "DRAFT" ? p.starts_on : today()
+                          }
+                        />
+                      </label>
+                      <label>
+                        Meta (ml)
+                        <input
+                          name="target_ml"
+                          type="number"
+                          required
+                          min={100}
+                          max={15000}
+                        />
+                      </label>
+                    </ActionForm>
+                  </ProjectSetting>
+                </div>
                 <ActionForm
                   action={changeProject}
                   submit={
@@ -211,8 +229,7 @@ export default async function Projects({
                     </label>
                   )}
                 </ActionForm>
-                <details>
-                  <summary>Arquivar projeto</summary>
+                <ProjectSetting title="Arquivar projeto" icon={Archive}>
                   <ActionForm
                     action={changeProject}
                     submit="Confirmar arquivamento"
@@ -224,7 +241,7 @@ export default async function Projects({
                       Entendo que o projeto ficará somente leitura.
                     </label>
                   </ActionForm>
-                </details>
+                </ProjectSetting>
               </>
             )}
           </article>
