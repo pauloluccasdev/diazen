@@ -241,3 +241,7 @@ A pedido do proprietário, o seletor de projeto/data no dashboard adota a compos
 ## Melhoria — Atalhos de evolução corporal no dashboard — 22/10/2026
 
 A pedido do proprietário, os atalhos de medidas e fotografias deixam de usar a navegação discreta e passam a ações secundárias com fundo, borda, ícone destacado e seta. No mobile, cada ação ocupa uma linha completa; em telas maiores, dividem duas colunas iguais. Altura mínima de 68 px e rótulos/destinos preservados, inclusive o projeto consultado. RF-015/016/018; RNF-007/008. Sem alteração no acesso aos dados ou nas regras de privacidade das fotos.
+
+## Melhoria — Padronização dos botões de retorno — 22/10/2026
+
+A pedido do proprietário, retornos ao dashboard, alimentação, início e login usam um componente comum com seta à esquerda, fundo, borda e área mínima de toque de 48 px. No mobile ocupam a largura disponível. Inclui cadastro, recuperação, exclusão registrada e página não encontrada; links de criação, consulta e filtros permanecem com sua função visual própria. Destinos explícitos são preservados, inclusive o projeto consultado no retorno dos módulos/fotos. Ícone decorativo fica fora do nome acessível; o texto identifica o destino. RF-001/004/018; RNF-007/008/014. Sem depender do histórico do navegador, que pode levar a outra origem.

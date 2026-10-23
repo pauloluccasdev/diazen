@@ -1,3 +1,4 @@
+import { ReturnLink } from "@/components/return-link";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { projectContext } from "@/lib/data";
@@ -113,9 +114,9 @@ export default async function Records({
   return (
     <div className={`module-page module-${modulo}`}>
       <section className="welcome module-welcome">
-        <Link className="back-link" href={`/painel?projeto=${selected.id}`}>
-          ← Dashboard
-        </Link>
+        <ReturnLink href={`/painel?projeto=${selected.id}`}>
+          Voltar ao dashboard
+        </ReturnLink>
         <p className="eyebrow">{selected.name}</p>
         <h1>
           {modules[modulo].title}

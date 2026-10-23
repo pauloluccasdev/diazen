@@ -1968,3 +1968,27 @@ input[type="date"]::-webkit-datetime-edit {
     padding-inline: 12px;
   }
 }
+.return-link {
+  gap: 10px;
+  min-height: 48px;
+  margin-top: 20px;
+  font-size: 14px;
+}
+.return-link > svg {
+  flex-shrink: 0;
+  color: var(--color-accent);
+}
+.return-link > span {
+  min-width: 0;
+}
+.welcome > .return-link:first-child {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+@media (max-width: 600px) {
+  .return-link {
+    display: flex;
+    width: 100%;
+    justify-content: flex-start;
+  }
+}

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { ReturnLink } from "@/components/return-link";
 export default function NotFound() {
   return (
     <section className="welcome">
@@ -7,9 +7,7 @@ export default function NotFound() {
       <p className="intro">
         Esta página não existe ou não está disponível para você.
       </p>
-      <Link className="button-primary" href="/painel">
-        Voltar ao dashboard
-      </Link>
+      <ReturnLink href="/painel">Voltar ao dashboard</ReturnLink>
     </section>
   );
 }
