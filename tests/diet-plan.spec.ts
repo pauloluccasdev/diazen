@@ -29,8 +29,19 @@ for (const mode of ["native", "compatibility", "server"] as const) {
     page,
   }) => {
     if (compatibility) await emulateOlderPdfPlatform(page);
-    if (server)
-      await page.route("**/pdf/worker-*.mjs", (route) => route.abort());
+    let blockedReader = false;
+    if (server) {
+      // WebKit does not consistently route module-worker requests. Block the
+      // lazy PDF library itself, keeping the application and API fully real.
+      await page.route("**/_next/static/chunks/*.js", async (route) => {
+        const response = await route.fetch();
+        const body = await response.text();
+        if (body.includes('No "GlobalWorkerOptions.workerSrc" specified.')) {
+          blockedReader = true;
+          await route.abort();
+        } else await route.fulfill({ response, body });
+      });
+    }
     await page.goto("/entrar");
     await page
       .getByLabel("E-mail", { exact: true })
@@ -83,9 +94,10 @@ for (const mode of ["native", "compatibility", "server"] as const) {
     await expect(
       page.getByRole("heading", { name: "Refeição 1 · opção 1", exact: true }),
     ).toBeVisible();
-    if (server)
+    if (server) {
+      expect(blockedReader).toBe(true);
       expect(requests).toEqual(["http://127.0.0.1:3100/api/plano/ler"]);
-    else expect(requests).toEqual([]);
+    } else expect(requests).toEqual([]);
     await expect(
       page.getByRole("button", { name: "Salvar versão do plano" }),
     ).toBeDisabled();
