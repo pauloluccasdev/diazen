@@ -218,6 +218,7 @@ export function DietPlanEditor({
     [message, setMessage] = useState(""),
     [error, setError] = useState(""),
     [reading, setReading] = useState(false),
+    [serverReading, setServerReading] = useState(false),
     [reviewed, setReviewed] = useState(false),
     [requestId, setRequestId] = useState("");
   const [pending, startTransition] = useTransition();
@@ -241,9 +242,10 @@ export function DietPlanEditor({
         <section className="content-card">
           <h2>Importar plano em PDF</h2>
           <p className="intro">
-            Até 3 MB e 30 páginas, com texto selecionável. A leitura acontece
-            neste navegador; o PDF original não é armazenado nem enviado a
-            terceiros. Revise os alimentos e as opções antes de salvar os dados.
+            Até 3 MB e 30 páginas, com texto selecionável. A leitura começa
+            neste navegador. Se ela falhar, o Diazen tenta uma leitura
+            temporária no servidor, sem armazenar o PDF nem enviá-lo a serviços
+            externos. Revise os alimentos e as opções antes de salvar os dados.
           </p>
           <label className="plan-file">
             <span className="button-secondary">Selecionar PDF</span>
@@ -264,10 +266,13 @@ export function DietPlanEditor({
                 )
                   return;
                 setReading(true);
+                setServerReading(false);
                 setError("");
                 setMessage("");
                 try {
-                  const next = await readDietPdf(file);
+                  const next = await readDietPdf(file, () =>
+                    setServerReading(true),
+                  );
                   update(next);
                 } catch (cause) {
                   setError(
@@ -281,7 +286,13 @@ export function DietPlanEditor({
               }}
             />
           </label>
-          {reading && <p role="status">Lendo as refeições do PDF…</p>}
+          {reading && (
+            <p role="status">
+              {serverReading
+                ? "Lendo o PDF temporariamente no servidor…"
+                : "Lendo as refeições do PDF…"}
+            </p>
+          )}
         </section>
       )}
       {!online && (

@@ -2,6 +2,15 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  serverExternalPackages: ["pdfjs-dist", "@napi-rs/canvas"],
+  outputFileTracingIncludes: {
+    "/api/plano/ler": [
+      "./src/workers/diet-pdf.mjs",
+      "./src/lib/pdf-text.mjs",
+      "./node_modules/pdfjs-dist/legacy/build/pdf*.mjs",
+      "./node_modules/@napi-rs/canvas*/**/*",
+    ],
+  },
   async headers() {
     return [
       {

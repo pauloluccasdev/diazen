@@ -23,6 +23,14 @@ export default function Privacy() {
         metadados sensíveis removidos antes do armazenamento. Não há publicidade
         nem envio de seus registros para ferramentas de IA.
       </p>
+      <h2>Importação de plano alimentar</h2>
+      <p>
+        A leitura do PDF começa no navegador. Se o leitor local falhar, o
+        arquivo pode ser processado temporariamente na hospedagem do Diazen, em
+        memória, para extrair as refeições. O PDF original não é salvo no banco,
+        no Storage ou nos backups e não é enviado a ferramentas de IA. Apenas os
+        dados revisados e confirmados por você são salvos como versões privadas.
+      </p>
       <h2>Dispositivo e conexão</h2>
       <p>
         A instalação usa cookies de sessão. A leitura offline pode mostrar um
