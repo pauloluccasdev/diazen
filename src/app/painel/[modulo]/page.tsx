@@ -155,6 +155,45 @@ export default async function Records({
           <Link href={`/painel/fotos?projeto=${selected.id}`}>Fotos</Link>
         </nav>
       )}
+      {editable && (
+        <details className="content-card record-create">
+          <summary>
+            {modulo === "peso"
+              ? "Registrar ou atualizar peso"
+              : modulo === "medidas"
+                ? "Registrar medidas"
+                : modulo === "agua"
+                  ? "Adicionar consumo"
+                  : modulo === "alimentacao"
+                    ? "Adicionar alimento"
+                    : "Registrar atividade"}
+          </summary>
+          <p className="intro">
+            Este registro será salvo no projeto ativo “{active?.name}”.
+          </p>
+          <ActionForm
+            action={saveRecord}
+            submit={
+              modulo === "peso"
+                ? "Salvar peso"
+                : modulo === "medidas"
+                  ? "Salvar medidas"
+                  : "Salvar registro"
+            }
+          >
+            <RecordFields
+              kind={modulo}
+              min={selected.starts_on}
+              max={
+                selected.ends_on && selected.ends_on < today()
+                  ? selected.ends_on
+                  : today()
+              }
+              date={date}
+            />
+          </ActionForm>
+        </details>
+      )}
       <form className="filter-form">
         <input type="hidden" name="projeto" value={selected.id} />
         <label>
@@ -413,45 +452,6 @@ export default async function Records({
           </article>
         ))}
       </section>
-      {editable && (
-        <details className="content-card record-create">
-          <summary>
-            {modulo === "peso"
-              ? "Registrar ou atualizar peso"
-              : modulo === "medidas"
-                ? "Registrar medidas"
-                : modulo === "agua"
-                  ? "Adicionar consumo"
-                  : modulo === "alimentacao"
-                    ? "Adicionar alimento"
-                    : "Registrar atividade"}
-          </summary>
-          <p className="intro">
-            Este registro será salvo no projeto ativo “{active?.name}”.
-          </p>
-          <ActionForm
-            action={saveRecord}
-            submit={
-              modulo === "peso"
-                ? "Salvar peso"
-                : modulo === "medidas"
-                  ? "Salvar medidas"
-                  : "Salvar registro"
-            }
-          >
-            <RecordFields
-              kind={modulo}
-              min={selected.starts_on}
-              max={
-                selected.ends_on && selected.ends_on < today()
-                  ? selected.ends_on
-                  : today()
-              }
-              date={date}
-            />
-          </ActionForm>
-        </details>
-      )}
       <nav className="panel-nav" aria-label="Paginação">
         {page > 1 && <Link href={link(page - 1)}>Anteriores</Link>}
         {hasMore && <Link href={link(page + 1)}>Próximos</Link>}
