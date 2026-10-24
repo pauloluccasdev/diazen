@@ -154,6 +154,14 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
   ).toBeVisible();
   await capture("alimentacao");
   await page.goto("/painel");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.locator(".dashboard-query")).toBeHidden();
+  await expect(
+    page.getByRole("link", { name: "Gerenciar projetos" }),
+  ).toBeHidden();
+  await expect(page.locator(".dashboard-hero")).toBeVisible();
+  await expect(page.locator(".area-card.metric-agua")).toBeVisible();
+  await page.setViewportSize({ width: 1280, height: 844 });
   await expect(page.getByLabel("Projeto visualizado")).toBeHidden();
   await page
     .getByText("Alterar projeto ou data da consulta", { exact: true })
@@ -187,6 +195,14 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
   await expect(page.locator("#summary")).toBeHidden();
   await context.setOffline(false);
   await page.goto("/painel");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.locator(".dashboard-query")).toBeHidden();
+  await expect(
+    page.getByRole("link", { name: "Gerenciar projetos" }),
+  ).toBeHidden();
+  await expect(page.locator(".dashboard-hero")).toBeVisible();
+  await expect(page.locator(".area-card.metric-agua")).toBeVisible();
+  await page.setViewportSize({ width: 1280, height: 844 });
   await expect(page.getByLabel("Projeto visualizado")).toBeHidden();
   await page
     .getByText("Alterar projeto ou data da consulta", { exact: true })
