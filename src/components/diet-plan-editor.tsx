@@ -276,12 +276,19 @@ export function DietPlanEditor({
       {editable && (
         <section className="content-card">
           <h2>Importar plano em PDF</h2>
-          <p className="intro">
-            Até 3 MB e 30 páginas, com texto selecionável. A leitura começa
-            neste navegador. Se ela falhar, o Diazen tenta uma leitura
-            temporária no servidor, sem armazenar o PDF nem enviá-lo a serviços
-            externos. Revise os alimentos e as opções antes de salvar os dados.
-          </p>
+          <div className="plan-import-copy">
+            <p className="intro">
+              Até 3 MB e 30 páginas, com texto selecionável.
+            </p>
+            <p className="intro">
+              A leitura começa neste navegador. Se ela falhar, o Diazen tenta
+              uma leitura temporária no servidor, sem armazenar o PDF nem
+              enviá-lo a serviços externos.
+            </p>
+            <p className="intro">
+              Revise os alimentos e as opções antes de salvar os dados.
+            </p>
+          </div>
           <label className="plan-file">
             <span className="button-secondary">Selecionar PDF</span>
             <input
