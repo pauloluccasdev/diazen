@@ -6,7 +6,7 @@ Stack: Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4 e Supabase 
 
 Uma prévia pública da `develop` está disponível na Vercel; o painel exige login Diazen. Veja [publicação e configuração de autenticação](docs/publicacao.md); o lançamento em produção continua pendente dos gates de homologação e review.
 
-O Supabase anteriormente usado pelo Planna foi resetado por autorização do proprietário e já recebeu as migrações 001 a 010. As migrações 009 (conveniências alimentares) e 010 (planos) foram aplicadas incrementalmente, sem novo reset. Os fluxos essenciais passaram no serviço real com contas temporárias removidas ao final. Consulte [evidências e pendências de homologação](docs/homologacao-supabase.md). **Não reaplique o bundle nesse ambiente.**
+O Supabase anteriormente usado pelo Planna foi resetado por autorização do proprietário e já recebeu as migrações 001 a 011. As migrações 009 (conveniências alimentares), 010 (planos) e 011 (registro de refeições) foram aplicadas incrementalmente, sem novo reset. Os fluxos essenciais passaram no serviço real com contas temporárias removidas ao final. Consulte [evidências e pendências de homologação](docs/homologacao-supabase.md). **Não reaplique o bundle nesse ambiente.**
 
 ## Executar
 
@@ -121,3 +121,7 @@ Na revisão do plano, cada alimento tem resumo de porção e calorias, ações p
 As refeições do plano podem ser recolhidas pelo cabeçalho, que mantém o subtotal visível. Alimentos comuns usam referências aproximadas identificadas (por exemplo, arroz cozido e peito de frango grelhado da TACO), editáveis para ajustar preparo/porção. Saladas sem peso usam o mínimo indicado no PDF ou uma porção de referência de 100 g, explicitamente estimada. Chia (TBCA), psyllium e requeijão light (rótulos de referência) têm fontes conferidas disponíveis localmente. Dados revisados não são sobrescritos. A consulta dos demais alimentos repete falhas temporárias até três vezes e permite tentar novamente.
 
 Salvar uma versão do plano apresenta confirmação em modal e mantém feedback na página. O dashboard compara calorias do plano e do diário, além das refeições planejadas e categorias com registros na data. Usa a última versão salva até aquela data, preserva ausência distinta de zero e não interpreta um lançamento como confirmação de refeição completa.
+
+Com plano salvo, Alimentação exibe as refeições incluídas e permite **Registrar conforme o plano** ou **Ajustar porções**. Escolha a categoria do diário e confirme; apenas essa ação registra consumo. Porções consumidas não alteram o planejamento. A ação **Registrar refeição** monta um lote manual com vários alimentos e prévia calórica, referências TACO/padrão e consulta online opcional. Nutrientes e fontes podem ser conferidos na seção de composição. Repetições da mesma solicitação não duplicam registros; a refeição do plano já registrada na data é identificada.
+
+A migração incremental `202610240011_plan_meal_records.sql` adiciona origem do planejamento aos itens e a RPC transacional de registro. Deve ser aplicada antes da atualização da aplicação; preserva os registros existentes e não exige reset. A exportação inclui a origem nos itens; os backups completos preservam a versão e as referências.

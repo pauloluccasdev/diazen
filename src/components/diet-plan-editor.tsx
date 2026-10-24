@@ -309,68 +309,77 @@ export function DietPlanEditor({
         }}
       />
       {editable && (
-        <section className="content-card">
-          <h2>Importar plano em PDF</h2>
-          <div className="plan-import-copy">
-            <p className="intro">
-              Até 3 MB e 30 páginas, com texto selecionável.
-            </p>
-            <p className="intro">
-              A leitura começa neste navegador. Se ela falhar, o Diazen tenta
-              uma leitura temporária no servidor, sem armazenar o PDF nem
-              enviá-lo a serviços externos.
-            </p>
-            <p className="intro">
-              Revise os alimentos e as opções antes de salvar os dados.
-            </p>
-          </div>
-          <label className="plan-file">
-            <span className="button-secondary">Selecionar PDF</span>
-            <input
-              className="sr-only"
-              type="file"
-              accept="application/pdf,.pdf"
-              disabled={disabled}
-              onChange={async (e) => {
-                const file = e.target.files?.[0];
-                e.target.value = "";
-                if (!file) return;
-                if (
-                  plan &&
-                  !window.confirm(
-                    "Substituir a revisão em tela pelo novo PDF? As versões já salvas permanecem preservadas.",
+        <details className="content-card plan-import" open={!plan}>
+          <summary>
+            <h2>
+              {plan
+                ? "Importar outra versão do plano"
+                : "Importar plano em PDF"}
+            </h2>
+            <ChevronDown size={20} aria-hidden="true" />
+          </summary>
+          <div className="plan-import-body">
+            <div className="plan-import-copy">
+              <p className="intro">
+                Até 3 MB e 30 páginas, com texto selecionável.
+              </p>
+              <p className="intro">
+                A leitura começa neste navegador. Se ela falhar, o Diazen tenta
+                uma leitura temporária no servidor, sem armazenar o PDF nem
+                enviá-lo a serviços externos.
+              </p>
+              <p className="intro">
+                Revise os alimentos e as opções antes de salvar os dados.
+              </p>
+            </div>
+            <label className="plan-file">
+              <span className="button-secondary">Selecionar PDF</span>
+              <input
+                className="sr-only"
+                type="file"
+                accept="application/pdf,.pdf"
+                disabled={disabled}
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  e.target.value = "";
+                  if (!file) return;
+                  if (
+                    plan &&
+                    !window.confirm(
+                      "Substituir a revisão em tela pelo novo PDF? As versões já salvas permanecem preservadas.",
+                    )
                   )
-                )
-                  return;
-                setReading(true);
-                setServerReading(false);
-                setError("");
-                setMessage("");
-                try {
-                  const next = await readDietPdf(file, () =>
-                    setServerReading(true),
-                  );
-                  update(next);
-                } catch (cause) {
-                  setError(
-                    cause instanceof DietPdfError
-                      ? cause.message
-                      : "Não foi possível acessar o arquivo. Selecione novamente o PDF e tente outra vez.",
-                  );
-                } finally {
-                  setReading(false);
-                }
-              }}
-            />
-          </label>
-          {reading && (
-            <p role="status">
-              {serverReading
-                ? "Lendo o PDF temporariamente no servidor…"
-                : "Lendo as refeições do PDF…"}
-            </p>
-          )}
-        </section>
+                    return;
+                  setReading(true);
+                  setServerReading(false);
+                  setError("");
+                  setMessage("");
+                  try {
+                    const next = await readDietPdf(file, () =>
+                      setServerReading(true),
+                    );
+                    update(next);
+                  } catch (cause) {
+                    setError(
+                      cause instanceof DietPdfError
+                        ? cause.message
+                        : "Não foi possível acessar o arquivo. Selecione novamente o PDF e tente outra vez.",
+                    );
+                  } finally {
+                    setReading(false);
+                  }
+                }}
+              />
+            </label>
+            {reading && (
+              <p role="status">
+                {serverReading
+                  ? "Lendo o PDF temporariamente no servidor…"
+                  : "Lendo as refeições do PDF…"}
+              </p>
+            )}
+          </div>
+        </details>
       )}
       {!online && (
         <p className="readonly-note">

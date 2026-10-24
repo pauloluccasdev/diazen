@@ -14,31 +14,84 @@ export function RecordFields({
   min,
   max,
   date,
+  foodOnly = false,
+  prefix = "",
 }: {
   kind: Module;
   entry?: Entry;
   min?: string;
   max?: string;
   date?: string;
+  foodOnly?: boolean;
+  prefix?: string;
 }) {
-  return (
+  const compositionFields = (
     <>
-      <input type="hidden" name="module" value={kind} />
-      {entry && <input type="hidden" name="id" value={entry.id} />}
-      {!entry && (
-        <input type="hidden" name="entry_id" value={crypto.randomUUID()} />
-      )}
       <label>
-        Data
+        Quantidade de referência na mesma unidade
         <input
-          name="logged_on"
-          type="date"
+          name={prefix + "reference_amount"}
+          type="number"
+          min="0.001"
+          max={100000}
+          step="0.001"
           required
-          defaultValue={entry?.logged_on ?? date ?? today()}
-          min={min}
-          max={max ?? today()}
+          defaultValue={entry?.reference_amount ?? 100}
         />
       </label>
+      <p className="muted">
+        Informe abaixo os nutrientes da quantidade de referência. Ex.: valores
+        do rótulo para 100 g. Deixe em branco o que não souber; zero indica
+        valor conhecido.
+      </p>
+      <div className="form-grid">
+        {Object.entries(nutrients).map(([key, label]) => (
+          <label key={key}>
+            {label} ({key === "kcal" ? "kcal" : "g"})
+            <input
+              type="number"
+              name={prefix + key}
+              min={0}
+              max={100000}
+              step="0.001"
+              defaultValue={(entry?.[key as keyof Entry] as number) ?? ""}
+            />
+          </label>
+        ))}
+      </div>
+      <label>
+        Fonte dos valores
+        <input
+          name={prefix + "source"}
+          maxLength={200}
+          required
+          defaultValue={entry?.source ?? "Informado pelo usuário"}
+        />
+      </label>
+    </>
+  );
+  return (
+    <>
+      {!foodOnly && (
+        <>
+          <input type="hidden" name="module" value={kind} />
+          {entry && <input type="hidden" name="id" value={entry.id} />}
+          {!entry && (
+            <input type="hidden" name="entry_id" value={crypto.randomUUID()} />
+          )}
+          <label>
+            Data
+            <input
+              name="logged_on"
+              type="date"
+              required
+              defaultValue={entry?.logged_on ?? date ?? today()}
+              min={min}
+              max={max ?? today()}
+            />
+          </label>
+        </>
+      )}
       {kind === "agua" && (
         <>
           <div className="form-grid">
@@ -163,23 +216,25 @@ export function RecordFields({
       )}
       {kind === "alimentacao" && (
         <>
-          <label>
-            Refeição
-            <select
-              name="category"
-              defaultValue={entry?.category ?? "breakfast"}
-            >
-              {Object.entries(categories).map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
+          {!foodOnly && (
+            <label>
+              Refeição
+              <select
+                name="category"
+                defaultValue={entry?.category ?? "breakfast"}
+              >
+                {Object.entries(categories).map(([key, label]) => (
+                  <option key={key} value={key}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
           <label>
             Alimento
             <input
-              name="name"
+              name={prefix + "name"}
               maxLength={120}
               required
               defaultValue={entry?.name ?? ""}
@@ -189,7 +244,7 @@ export function RecordFields({
             <label>
               Quantidade consumida
               <input
-                name="amount"
+                name={prefix + "amount"}
                 type="number"
                 min="0.001"
                 max={100000}
@@ -200,7 +255,7 @@ export function RecordFields({
             </label>
             <label>
               Unidade
-              <select name="unit" defaultValue={entry?.unit ?? "g"}>
+              <select name={prefix + "unit"} defaultValue={entry?.unit ?? "g"}>
                 {Object.entries(units).map(([key, label]) => (
                   <option key={key} value={key}>
                     {label}
@@ -209,47 +264,14 @@ export function RecordFields({
               </select>
             </label>
           </div>
-          <label>
-            Quantidade de referência na mesma unidade
-            <input
-              name="reference_amount"
-              type="number"
-              min="0.001"
-              max={100000}
-              step="0.001"
-              required
-              defaultValue={entry?.reference_amount ?? 100}
-            />
-          </label>
-          <p className="muted">
-            Informe abaixo os nutrientes da quantidade de referência. Ex.:
-            valores do rótulo para 100 g. Deixe em branco o que não souber; zero
-            indica valor conhecido.
-          </p>
-          <div className="form-grid">
-            {Object.entries(nutrients).map(([key, label]) => (
-              <label key={key}>
-                {label} ({key === "kcal" ? "kcal" : "g"})
-                <input
-                  type="number"
-                  name={key}
-                  min={0}
-                  max={100000}
-                  step="0.001"
-                  defaultValue={(entry?.[key as keyof Entry] as number) ?? ""}
-                />
-              </label>
-            ))}
-          </div>
-          <label>
-            Fonte dos valores
-            <input
-              name="source"
-              maxLength={200}
-              required
-              defaultValue={entry?.source ?? "Informado pelo usuário"}
-            />
-          </label>
+          {foodOnly ? (
+            <details className="manual-food-details">
+              <summary>Conferir composição e fonte</summary>
+              {compositionFields}
+            </details>
+          ) : (
+            compositionFields
+          )}
         </>
       )}
     </>

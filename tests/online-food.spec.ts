@@ -242,6 +242,9 @@ test("alimento tem resumo, troca explícita e referência online automática e e
     await form
       .getByRole("combobox", { name: "Refeição", exact: true })
       .selectOption(category);
+    const composition = form.locator(".manual-food-details");
+    if (!(await composition.evaluate((e) => (e as HTMLDetailsElement).open)))
+      await composition.locator(":scope > summary").click();
     await form.getByLabel("Calorias (kcal)", { exact: true }).fill("0");
     await form
       .getByRole("button", { name: "Salvar registro", exact: true })
@@ -249,7 +252,7 @@ test("alimento tem resumo, troca explícita e referência online automática e e
     await expect(page.getByRole("article")).toHaveCount(index + 1);
     await expect(
       form.getByRole("button", { name: "Salvar registro", exact: true }),
-    ).toBeEnabled();
+    ).toBeDisabled();
   }
   await page.goto("/painel");
   await expect(
