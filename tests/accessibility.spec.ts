@@ -61,6 +61,7 @@ test("telas essenciais acessíveis e sem overflow no mobile", async ({
   await expect(page.getByRole("status")).toContainText("Projeto criado");
   for (const path of [
     "/painel",
+    "/painel/historico",
     "/painel/projetos",
     "/painel/agua",
     "/painel/peso",

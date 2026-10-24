@@ -14,6 +14,8 @@ async function login(
 test("sem sessão, painel redireciona para login", async ({ page }) => {
   await page.goto("/painel");
   await expect(page).toHaveURL(/\/entrar$/);
+  await page.goto("/painel/historico");
+  await expect(page).toHaveURL(/\/entrar$/);
 });
 
 test("login válido, painel privado e logout", async ({ page }) => {
