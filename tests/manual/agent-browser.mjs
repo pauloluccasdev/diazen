@@ -754,8 +754,15 @@ try {
       );
       await clickText("Marcar dia como concluído");
       await text("Dia concluído manualmente.");
-      await ab("click", ".meal-record-group > summary");
-      await ab("click", "article .food-record-details > summary");
+      for (const selector of [
+        ".meal-record-group > summary",
+        "article .food-record-details > summary",
+      ]) {
+        await until(
+          `(() => { const e=document.querySelector(${JSON.stringify(selector)});if(!e)return false;e.scrollIntoView({block:'center',behavior:'instant'});e.focus({preventScroll:true});return document.activeElement===e; })()`,
+        );
+        await ab("press", "Enter");
+      }
       await clickText(
         "Editar registro",
         "summary",
