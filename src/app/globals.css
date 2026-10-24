@@ -2365,3 +2365,71 @@ input[type="date"]::-webkit-datetime-edit {
   outline-offset: 8px;
   border-radius: 10px;
 }
+
+.module-page > .filter-form.plan-filter {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+.module-page > .filter-form.plan-filter > label,
+.module-page > .filter-form.plan-filter input,
+.module-page > .filter-form.plan-filter select,
+.module-page > .filter-form.plan-filter button {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+.plan-saved-dialog {
+  margin: auto;
+  width: min(440px, calc(100% - 32px));
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  padding: 24px;
+  border: 1px solid var(--color-border);
+  border-radius: 22px;
+  color: var(--color-text);
+  background: var(--color-surface);
+}
+.plan-saved-dialog::backdrop {
+  background: rgb(0 0 0 / 70%);
+}
+.plan-saved-dialog h2 {
+  font-size: 22px;
+  margin: 0 0 16px;
+}
+.plan-saved-dialog p {
+  line-height: 1.6;
+  margin: 0 0 16px;
+}
+.plan-saved-dialog button {
+  width: 100%;
+}
+.dashboard-diet-comparison {
+  grid-column: 1/-1;
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.dashboard-diet-comparison h3,
+.dashboard-diet-comparison p {
+  margin: 0;
+}
+.dashboard-diet-comparison a {
+  text-decoration: underline;
+}
+.diet-comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin: 0;
+}
+.diet-comparison-grid dt {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.diet-comparison-grid dd {
+  margin: 6px 0 0;
+  font-size: 20px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
