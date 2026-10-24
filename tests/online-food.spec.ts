@@ -249,7 +249,9 @@ test("alimento tem resumo, troca explícita e referência online automática e e
     await form
       .getByRole("button", { name: "Salvar registro", exact: true })
       .click();
-    await expect(page.getByRole("article")).toHaveCount(index + 1);
+    await expect(
+      page.getByRole("article", { includeHidden: true }),
+    ).toHaveCount(index + 1);
     await expect(
       form.getByRole("button", { name: "Salvar registro", exact: true }),
     ).toBeDisabled();

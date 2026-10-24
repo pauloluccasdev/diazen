@@ -381,3 +381,8 @@ Por solicitação do proprietário, em larguras de até 767 px o dashboard ocult
 ## Decisão — Refeições e diário alimentar compactos — 24/10/2026
 
 O proprietário solicitou reduzir a extensão da página alimentar. As refeições planejadas passam a iniciar recolhidas, com nome, estado de registro e calorias planejadas no resumo. A orientação distingue o ajuste de porções consumidas e a inclusão manual de alimentos da versão preservada do plano. Os registros do dia exibem alimento, porção, categoria e calorias em resumos expansíveis; composição, fonte e ações ficam dentro de cada registro. Fontes permanecem disponíveis integralmente. Os acessos ao plano no dashboard e aos registros na refeição usam botões com ícones e área de toque. Apresentação relativa a RF-007/009/018 e RNF-004/007/008; nenhuma mudança em composição, autorização ou gravação.
+
+
+## Decisão — Agrupar registros do dia por refeição — 24/10/2026
+
+A pedido do proprietário, o diário alimentar passa a agrupar alimentos nas categorias já existentes (café da manhã, lanches, almoço, jantar e ceia), em ordem de refeição. Cada grupo começa recolhido e informa quantidade de alimentos e soma das calorias conhecidas. Itens internos usam linhas sem cartões ou bordas duplicadas; composição e edição continuam expansíveis por alimento. Paginação permanece preservada: em consultas paginadas a quantidade indica “nesta página” e a soma é identificada como subtotal parcial, assim como quando há nutrientes ausentes. Ausência de calorias não vira zero. Ajuste de apresentação de RF-007/009 e RNF-004/007/008/011, sem alteração de persistência.
