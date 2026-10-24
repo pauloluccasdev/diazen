@@ -6,13 +6,20 @@ import { useOnline } from "@/lib/use-online";
 import { readDietPdf, DietPdfError } from "@/lib/read-diet-pdf";
 import {
   emptyComposition,
+  analyzeDietPlan,
+  applyPlanReference,
   foodComposition,
   planTotals,
   planNutrients,
   type DietPlan,
   type PlanFood,
 } from "@/lib/diet-plan";
-import { searchTacoFoods, tacoSource } from "@/lib/taco";
+import {
+  searchTacoFoods,
+  tacoSource,
+  suggestTacoFoods,
+  tacoName,
+} from "@/lib/taco";
 import { nutrients } from "@/lib/records";
 import { number } from "@/lib/domain";
 import { saveDietPlan } from "@/app/painel/plano/actions";
@@ -21,12 +28,19 @@ function FoodReview({
   food,
   onChange,
   disabled,
+  onApplyReference,
 }: {
   food: PlanFood;
   onChange: (food: PlanFood) => void;
   disabled: boolean;
+  onApplyReference?: () => void;
 }) {
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState<string | null>(null);
+  const query = search ?? (food.tacoId === null ? tacoName(food.name) : "");
+  const candidates =
+    search === null
+      ? suggestTacoFoods(food.name)
+      : searchTacoFoods(tacoName(query), 5);
   const values = foodComposition(food);
   return (
     <ActionDisclosure
@@ -44,7 +58,15 @@ function FoodReview({
             value={food.name}
             maxLength={200}
             disabled={disabled}
-            onChange={(e) => onChange({ ...food, name: e.target.value })}
+            onChange={(e) =>
+              onChange({
+                ...food,
+                name: e.target.value,
+                tacoId: null,
+                source: "",
+                values: emptyComposition(),
+              })
+            }
           />
         </label>
         <label>
@@ -90,15 +112,15 @@ function FoodReview({
         <label>
           Buscar correspondência na TACO
           <input
-            value={search}
+            value={query}
             maxLength={120}
             disabled={disabled}
             onChange={(e) => setSearch(e.target.value)}
           />
         </label>
-        {search.length >= 2 && (
+        {query.length >= 2 && (
           <div className="plan-search-results">
-            {searchTacoFoods(search, 5).map((t) => (
+            {candidates.map((t) => (
               <button
                 key={t.id}
                 type="button"
@@ -117,7 +139,7 @@ function FoodReview({
                 {t.name} · item {t.id}
               </button>
             ))}
-            {!searchTacoFoods(search, 5).length && (
+            {!candidates.length && (
               <p>
                 Nenhum alimento encontrado. Use os valores do rótulo com a fonte
                 identificada.
@@ -127,7 +149,17 @@ function FoodReview({
         )}
         {food.tacoId !== null && (
           <>
-            <p>{food.source}</p>
+            <p>Referência identificada: {food.source}</p>
+            {onApplyReference && (
+              <button
+                type="button"
+                className="button-secondary"
+                disabled={disabled}
+                onClick={onApplyReference}
+              >
+                Aplicar aos itens pendentes com este nome
+              </button>
+            )}
             {food.unit !== "g" && (
               <p className="form-error">
                 A TACO exige a porção em gramas. Informe o peso medido; ml não é
@@ -151,46 +183,49 @@ function FoodReview({
             </button>
           </>
         )}
-        {food.tacoId === null && (
-          <>
-            <p className="intro">
-              Valores para a porção acima. Ao alterar a quantidade, informe
-              novamente a composição dessa porção.
-            </p>
-            <label>
-              Fonte dos valores
+        <>
+          <p className="intro">
+            {food.tacoId !== null
+              ? "Valores calculados pela TACO para a porção acima. Confira o alimento e o preparo identificados."
+              : "Valores para a porção acima. Ao alterar a quantidade, informe novamente a composição dessa porção."}
+          </p>
+          <label>
+            Fonte dos valores
+            <input
+              value={food.source}
+              readOnly={food.tacoId !== null}
+              maxLength={300}
+              disabled={disabled}
+              onChange={(e) => onChange({ ...food, source: e.target.value })}
+            />
+          </label>
+          {planNutrients.map((k) => (
+            <label key={k}>
+              {nutrients[k]} ({k === "kcal" ? "kcal" : "g"})
               <input
-                value={food.source}
-                maxLength={300}
+                type="number"
+                min="0"
+                max="100000"
+                step="0.001"
+                value={
+                  (food.tacoId !== null ? values[k] : food.values[k]) ?? ""
+                }
+                readOnly={food.tacoId !== null}
                 disabled={disabled}
-                onChange={(e) => onChange({ ...food, source: e.target.value })}
+                onChange={(e) =>
+                  onChange({
+                    ...food,
+                    values: {
+                      ...food.values,
+                      [k]:
+                        e.target.value === "" ? null : Number(e.target.value),
+                    },
+                  })
+                }
               />
             </label>
-            {planNutrients.map((k) => (
-              <label key={k}>
-                {nutrients[k]} ({k === "kcal" ? "kcal" : "g"})
-                <input
-                  type="number"
-                  min="0"
-                  max="100000"
-                  step="0.001"
-                  value={food.values[k] ?? ""}
-                  disabled={disabled}
-                  onChange={(e) =>
-                    onChange({
-                      ...food,
-                      values: {
-                        ...food.values,
-                        [k]:
-                          e.target.value === "" ? null : Number(e.target.value),
-                      },
-                    })
-                  }
-                />
-              </label>
-            ))}
-          </>
-        )}
+          ))}
+        </>
         <p className="intro">
           {planNutrients
             .map(
@@ -310,6 +345,22 @@ export function DietPlanEditor({
         <>
           <section className="content-card">
             <h2>Plano e consumo registrado</h2>
+            <p className="intro">
+              As correspondências seguras já são preenchidas pela TACO. Nomes
+              genéricos, marcas, porções sem peso e itens fora da tabela
+              precisam de revisão; os totais ficam parciais até completar esses
+              dados.
+            </p>
+            {editable && (
+              <button
+                type="button"
+                className="button-secondary"
+                disabled={disabled}
+                onClick={() => update(analyzeDietPlan(plan))}
+              >
+                Analisar itens pendentes com TACO
+              </button>
+            )}
             <div className="nutrition-grid">
               {planNutrients.map((k) => (
                 <div key={k}>
@@ -446,6 +497,33 @@ export function DietPlanEditor({
                           <FoodReview
                             food={food}
                             disabled={disabled}
+                            onApplyReference={
+                              plan.meals.some((m) =>
+                                m.groups.some((g) =>
+                                  g.choices.some(
+                                    (f) =>
+                                      f.tacoId === null &&
+                                      !f.source &&
+                                      tacoName(f.name) ===
+                                        tacoName(food.name) &&
+                                      planNutrients.every(
+                                        (k) => f.values[k] === null,
+                                      ),
+                                  ),
+                                ),
+                              )
+                                ? () => {
+                                    if (food.tacoId !== null)
+                                      update(
+                                        applyPlanReference(
+                                          plan,
+                                          food.name,
+                                          food.tacoId,
+                                        ),
+                                      );
+                                  }
+                                : undefined
+                            }
                             onChange={(next) =>
                               patchGroup({
                                 choices: group.choices.map((f, i) =>

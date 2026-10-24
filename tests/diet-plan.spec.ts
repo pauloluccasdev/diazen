@@ -111,9 +111,14 @@ for (const mode of ["native", "compatibility", "server"] as const) {
     await expect(
       page.getByRole("button", { name: "Salvar versão do plano" }),
     ).toBeDisabled();
-    await page
-      .getByText("Pão francês · calorias pendentes", { exact: true })
-      .click();
+    await page.getByText("Pão francês · 150 kcal", { exact: true }).click();
+    await expect(
+      page.getByLabel("Calorias (kcal)", { exact: true }),
+    ).toHaveValue("150");
+    await expect(
+      page.getByLabel("Calorias (kcal)", { exact: true }),
+    ).toHaveAttribute("readonly", "");
+    await expect(page.getByLabel("Fonte dos valores")).toHaveValue(/TACO/);
     await page.getByLabel("Buscar correspondência na TACO").fill("pao frances");
     await page
       .getByRole("button", {
