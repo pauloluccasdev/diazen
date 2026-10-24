@@ -277,6 +277,10 @@ export default async function Panel({
                     <dt>Refeições com registros</dt>
                     <dd>{diet.recordedMeals}</dd>
                   </div>
+                  <div>
+                    <dt>Refeições do plano registradas</dt>
+                    <dd>{diet.registeredMeals.length}</dd>
+                  </div>
                 </dl>
                 {diet.totals.kcal.value !== null &&
                   summary.kcal !== null &&

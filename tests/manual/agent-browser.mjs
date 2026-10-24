@@ -141,6 +141,16 @@ async function clickText(value, tag = "button", scope = "document") {
 }
 async function field(name, value, scope = "", type = "fill") {
   const selector = `${scope} [name="${name}"]`.trim();
+  const closed = await evaluate(
+    `document.querySelector(${JSON.stringify(selector)})?.closest('details:not([open])')?.querySelector(':scope > summary')?.textContent.trim() ?? null`,
+  );
+  if (closed)
+    await clickText(
+      closed,
+      "summary",
+      `document.querySelector(${JSON.stringify(selector)}).closest('details:not([open])')`,
+    );
+
   // Server actions can replace the filter after its result count is visible.
   // Resolve a hydrated, visible control before taking accessibility references.
   if (type === "select") await ab("wait", "--load", "networkidle");

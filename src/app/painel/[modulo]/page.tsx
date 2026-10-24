@@ -1,5 +1,14 @@
+import { dashboardPlan } from "@/lib/dashboard-plan";
+import { ManualMealRecorder } from "@/components/manual-meal-recorder";
+import { PlanMealRecorder } from "@/components/plan-meal-recorder";
 import { ActionDisclosure } from "@/components/action-disclosure";
-import { PencilLine, Trash2, FileUp, ChevronRight } from "lucide-react";
+import {
+  PencilLine,
+  Trash2,
+  FileUp,
+  FileText,
+  ChevronRight,
+} from "lucide-react";
 import { ReturnLink } from "@/components/return-link";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -79,7 +88,7 @@ export default async function Records({
     .order("id", { ascending: false })
     .range((page - 1) * 20, page * 20);
   if (daily || filters.data) query = query.eq("logged_on", date);
-  const [entries, totals, graph, calendar] = await Promise.all([
+  const [entries, totals, graph, calendar, diet] = await Promise.all([
     query.returns<Entry[]>(),
     client.rpc("project_summary", {
       p_project: selected.id,
@@ -100,6 +109,9 @@ export default async function Records({
           p_date: date,
         })
       : Promise.resolve({ data: [], error: null }),
+    modulo === "alimentacao"
+      ? dashboardPlan(client, selected.id, date)
+      : Promise.resolve(null),
   ]);
   if (entries.error) throw new Error("Falha ao carregar registros");
   if (totals.error) throw new Error("Falha ao carregar totais");
@@ -161,11 +173,15 @@ export default async function Records({
           href={`/painel/plano?projeto=${selected.id}&data=${date}`}
         >
           <span className="plan-entry-icon" aria-hidden="true">
-            <FileUp size={24} />
+            {diet ? <FileText size={24} /> : <FileUp size={24} />}
           </span>
           <span className="plan-entry-content">
             <strong>Meu plano alimentar</strong>
-            <span>Importe seu PDF e confira calorias e nutrientes.</span>
+            <span>
+              {diet
+                ? "Plano salvo · consulte as refeições ou revise o planejamento."
+                : "Importe seu PDF e confira calorias e nutrientes."}
+            </span>
           </span>
           <ChevronRight
             className="plan-entry-chevron"
@@ -174,7 +190,18 @@ export default async function Records({
           />
         </Link>
       )}
-      {editable && (
+      {editable && modulo === "alimentacao" && (
+        <ManualMealRecorder
+          date={date}
+          min={selected.starts_on}
+          max={
+            selected.ends_on && selected.ends_on < today()
+              ? selected.ends_on
+              : today()
+          }
+        />
+      )}
+      {editable && modulo !== "alimentacao" && (
         <details className="content-card record-create">
           <summary>
             {modulo === "peso"
@@ -183,9 +210,7 @@ export default async function Records({
                 ? "Registrar medidas"
                 : modulo === "agua"
                   ? "Adicionar consumo"
-                  : modulo === "alimentacao"
-                    ? "Adicionar alimento"
-                    : "Registrar atividade"}
+                  : "Registrar atividade"}
           </summary>
           <p className="intro">
             Este registro será salvo no projeto ativo “{active?.name}”.
@@ -234,6 +259,36 @@ export default async function Records({
           </Link>
         )}
       </form>
+      {modulo === "alimentacao" && diet && (
+        <section className="planned-meals" aria-label="Refeições do plano">
+          <h2>Suas refeições planejadas</h2>
+          <p className="intro">
+            Data consultada: {formatDate(date)}. Registre o que consumiu com as
+            porções do plano ou ajuste as quantidades.
+          </p>
+          {diet.document.meals.map(
+            (meal, index) =>
+              meal.enabled && (
+                <PlanMealRecorder
+                  key={`${diet.id}-${index}-${date}`}
+                  plan={diet.id}
+                  index={index}
+                  meal={meal}
+                  date={date}
+                  min={selected.starts_on}
+                  max={
+                    selected.ends_on && selected.ends_on < today()
+                      ? selected.ends_on
+                      : today()
+                  }
+                  registered={diet.registeredMeals.includes(index)}
+                  actual={diet.mealActuals[index]}
+                  editable={editable}
+                />
+              ),
+          )}
+        </section>
+      )}
       {modulo === "agua" && (
         <section className="content-card hydration-summary">
           <ProgressRing
@@ -395,7 +450,11 @@ export default async function Records({
           activeName={active?.name}
         />
       )}
-      <section className="records-section" aria-label="Histórico de registros">
+      <section
+        id="registros-do-dia"
+        className="records-section"
+        aria-label="Histórico de registros"
+      >
         <h2>{daily ? "Registros do dia" : "Histórico"}</h2>
         {!rows.length && (
           <p className="intro">Sem registros para esta consulta.</p>

@@ -39,6 +39,7 @@ const tables = new Set([
   "deletion_ledger",
 ]);
 const commands = new Set([
+  "register_meal",
   "create_project",
   "save_weight",
   "save_measurements",

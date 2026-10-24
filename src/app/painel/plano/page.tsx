@@ -65,8 +65,9 @@ export default async function PlanPage({
           Meu plano alimentar<span className="accent">.</span>
         </h1>
         <p className="intro">
-          Importe o plano da sua nutricionista, revise a base TACO e veja as
-          calorias das opções escolhidas.
+          {initial
+            ? "Consulte seu planejamento salvo, revise as refeições e salve ajustes em uma nova versão."
+            : "Importe o plano da sua nutricionista, revise a base TACO e veja as calorias das opções escolhidas."}
         </p>
       </section>
       {!editable && <p className="readonly-note">Projeto somente leitura.</p>}
