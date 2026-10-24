@@ -1927,15 +1927,10 @@ input[type="date"]::-webkit-datetime-edit {
 .dashboard-manage > span {
   flex: 1;
 }
-@media (max-width: 600px) {
-  .dashboard-query > summary {
-    gap: 10px;
-    padding: 12px;
-    font-size: 13px;
-  }
+@media (max-width: 767px) {
+  .dashboard-query,
   .dashboard-manage {
-    width: 100%;
-    padding-inline: 16px;
+    display: none;
   }
 }
 .evolution-actions {
