@@ -374,7 +374,7 @@ export default async function Records({
       ) : (
         <Link
           className="button-secondary meal-record-link"
-          href={`/painel/historico?projeto=${selected.id}&tipo=${modulo}`}
+          href="/painel/historico"
         >
           <History size={20} aria-hidden="true" />
           <span>Consultar histórico geral</span>

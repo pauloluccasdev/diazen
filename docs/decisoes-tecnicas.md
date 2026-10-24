@@ -402,3 +402,10 @@ O proprietário solicitou uma entrada geral no dashboard para centralizar os his
 A paginação combina deterministicamente as fontes por data, ID e tipo, em páginas de 20 itens; busca os prefixos necessários de cada fonte em lotes de até 1000 para evitar truncamento pelo limite do servidor. Projetos também são lidos em lotes. Datas ou tipo inválidos apresentam erro sem uma busca ampla silenciosa. Filtros são preservados ao paginar e reiniciam a página ao consultar. Nenhuma migração ou serviço adicional.
 
 Peso, medidas e atividades passam a encaminhar a escolha de período ao histórico geral, mantendo seus formulários de registro. Consultas por links com data continuam suportadas. No peso, o gráfico é limitado à data consultada e a ausência de registro no dia exato é diferenciada do último peso conhecido mostrado no resumo. Os filtros diários de alimentação/água permanecem necessários à consulta do diário e ao registro retroativo. RF-014/015/018/019; RNF-002/004/007/008/011.
+
+
+## Decisão — Calendário diário do projeto ativo no histórico — 24/10/2026
+
+O proprietário substituiu os filtros gerais de projeto/tipo/período por um calendário mensal aberto, limitado ao projeto ativo. A seleção de dia exibe um accordion da data (aberto ao selecionar), com subgrupos recolhidos por refeição e por hidratação, atividades, peso, medidas e fotos. A mesma refeição deixa de aparecer intercalada com outras áreas. O usuário pode navegar entre meses, voltar a hoje e recolher os detalhes. Datas futuras não são selecionáveis.
+
+O servidor resolve o ACTIVE da conta e restringe todas as consultas a esse projeto e à data selecionada; parâmetros antigos de projeto/tipo/período não selecionam outra fonte. Sem ACTIVE, a página orienta a visitar Projetos. Consultar projetos encerrados continua disponível por Projetos e não muda o destino das gravações. Paginação de 20 itens preserva data/mês e identifica contagens limitadas à página. Nenhuma alteração de dados ou migração. RF-018/019; RB de ACTIVE único e isolamento por proprietário; RNF-002/004/007/008/011. Esta decisão substitui a seleção de todos os projetos na versão anterior do histórico central.

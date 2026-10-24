@@ -1161,7 +1161,7 @@ try {
         false,
       );
       await goto(`/painel/historico?projeto=${own.projects[0].id}`);
-      await text("Vamos voltar ao seu dia?");
+      await text("Nenhum projeto ativo");
       await goto("/painel/historico");
       assert.equal(
         await evaluate(
@@ -1204,21 +1204,18 @@ try {
       await clickText("Próximos", "a");
       await count(5);
       await text("25 ml");
-      const historyProject = await evaluate(
-        "new URL(location.href).searchParams.get('projeto')",
-      );
-      await goto(`/painel/historico?projeto=${historyProject}&tipo=agua`);
+      const historyDate = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/Sao_Paulo",
+      }).format(new Date());
+      await goto(`/painel/historico?data=${historyDate}`);
       await until("document.querySelectorAll('.history-day li').length === 20");
       await clickText("Próximos", "a");
       await until("document.querySelectorAll('.history-day li').length === 5");
       assert.equal(
-        await evaluate("new URL(location.href).searchParams.get('tipo')"),
-        "agua",
+        await evaluate("new URL(location.href).searchParams.get('data')"),
+        historyDate,
       );
-      assert.equal(
-        await evaluate("new URL(location.href).searchParams.get('projeto')"),
-        historyProject,
-      );
+      await text("Volume QA");
       const png = (await readFile(new URL("fixture.png", output))).toString(
         "base64",
       );
