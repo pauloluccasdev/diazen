@@ -5,6 +5,7 @@ test.use({ serviceWorkers: "block" });
 test("alimento tem resumo, troca explícita e referência online automática e editável por porção", async ({
   page,
 }) => {
+  test.setTimeout(90000);
   await page.goto("/entrar");
   await page
     .getByLabel("E-mail", { exact: true })
@@ -174,6 +175,97 @@ test("alimento tem resumo, troca explícita e referência online automática e e
   });
   await summary.click();
   await expect(row.getByText("≈ 45 kcal", { exact: true })).toBeVisible();
+  await page.getByLabel("Revisei a extração", { exact: false }).check();
+  await page
+    .getByRole("button", { name: "Salvar versão do plano", exact: true })
+    .click();
+  const dialog = page.getByRole("dialog", { name: "Plano salvo com sucesso" });
+  await expect(dialog).toBeVisible();
+  await dialog.screenshot({
+    path: "artifacts/online-food-review/save-success-320.png",
+  });
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await dialog.getByRole("button", { name: "Entendi", exact: true }).click();
+  await expect(dialog).not.toBeVisible();
+  await expect(page.getByRole("status")).toContainText("Plano salvo");
+  await expect(
+    page.getByLabel("Versões salvas", { exact: false }),
+  ).toBeVisible();
+  for (const width of [320, 390, 430, 768]) {
+    await page.setViewportSize({ width, height: 844 });
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    expect(
+      await page
+        .getByLabel("Data do consumo para comparar")
+        .evaluate((e) => e.getBoundingClientRect().width),
+    ).toBeGreaterThan(200);
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page
+    .locator(".plan-filter")
+    .screenshot({ path: "artifacts/online-food-review/saved-filter-390.png" });
+  await page.goto("/painel");
+  const comparison = page.locator(".dashboard-diet-comparison");
+  await expect(comparison).toContainText("503,5 kcal");
+  await expect(
+    comparison
+      .locator("div")
+      .filter({
+        has: page.locator("dt", { hasText: "Refeições com registros" }),
+      })
+      .locator("dd"),
+  ).toHaveText("0");
+  await expect(comparison).toContainText("Não informadas");
+  await page.goto("/painel/alimentacao");
+  for (const [index, category] of [
+    "breakfast",
+    "breakfast",
+    "lunch",
+  ].entries()) {
+    if (
+      !(await page
+        .locator(".record-create")
+        .evaluate((e) => (e as HTMLDetailsElement).open))
+    )
+      await page.locator(".record-create > summary").click();
+    const form = page.locator("form").filter({
+      has: page.getByRole("button", { name: "Salvar registro", exact: true }),
+    });
+    await form
+      .getByLabel("Alimento", { exact: true })
+      .fill(`Alimento QA ${index}`);
+    await form.getByLabel("Quantidade consumida", { exact: true }).fill("100");
+    await form
+      .getByRole("combobox", { name: "Refeição", exact: true })
+      .selectOption(category);
+    await form.getByLabel("Calorias (kcal)", { exact: true }).fill("0");
+    await form
+      .getByRole("button", { name: "Salvar registro", exact: true })
+      .click();
+    await expect(page.getByRole("article")).toHaveCount(index + 1);
+    await expect(
+      form.getByRole("button", { name: "Salvar registro", exact: true }),
+    ).toBeEnabled();
+  }
+  await page.goto("/painel");
+  await expect(
+    comparison
+      .locator("div")
+      .filter({
+        has: page.locator("dt", { hasText: "Refeições com registros" }),
+      })
+      .locator("dd"),
+  ).toHaveText("2");
+  await expect(comparison).toContainText("0 kcal");
+  await expect(comparison).toContainText("-503,5 kcal");
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await comparison.screenshot({
+    path: "artifacts/online-food-review/dashboard-comparison-390.png",
+  });
 });
 
 test("consulta online bloqueia visitante e origem externa sem consultar o provedor", async ({

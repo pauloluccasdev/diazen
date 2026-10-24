@@ -1,5 +1,5 @@
 "use client";
-import { useState, useTransition, useSyncExternalStore } from "react";
+import { useState, useTransition, useSyncExternalStore, useRef } from "react";
 import {
   FileText,
   PencilLine,
@@ -30,6 +30,7 @@ import {
 import { nutrients } from "@/lib/records";
 import { number } from "@/lib/domain";
 import { saveDietPlan } from "@/app/painel/plano/actions";
+import { PlanSavedDialog } from "./plan-saved-dialog";
 import { OnlineFoodSearch } from "./online-food-search";
 
 const subscribeReady = () => () => {};
@@ -276,11 +277,13 @@ export function DietPlanEditor({
       initial && editable ? analyzeDietPlan(initial) : initial,
     ),
     [message, setMessage] = useState(""),
+    [saved, setSaved] = useState(false),
     [error, setError] = useState(""),
     [reading, setReading] = useState(false),
     [serverReading, setServerReading] = useState(false),
     [reviewed, setReviewed] = useState(false),
     [requestId, setRequestId] = useState("");
+  const successRef = useRef<HTMLParagraphElement>(null);
   const [pending, startTransition] = useTransition();
   const online = useOnline();
   const ready = useSyncExternalStore(
@@ -298,6 +301,13 @@ export function DietPlanEditor({
   }
   return (
     <div className="plan-workspace">
+      <PlanSavedDialog
+        open={saved}
+        onClose={() => {
+          setSaved(false);
+          successRef.current?.focus();
+        }}
+      />
       {editable && (
         <section className="content-card">
           <h2>Importar plano em PDF</h2>
@@ -372,7 +382,11 @@ export function DietPlanEditor({
           {error}
         </p>
       )}
-      {message && <p role="status">{message}</p>}
+      {message && (
+        <p role="status" tabIndex={-1} ref={successRef}>
+          {message}
+        </p>
+      )}
       {plan && totals && (
         <>
           <section className="content-card">
@@ -809,6 +823,7 @@ export function DietPlanEditor({
                       if (result.error) setError(result.error);
                       else {
                         setMessage(result.message!);
+                        setSaved(true);
                         setReviewed(false);
                         setRequestId("");
                       }

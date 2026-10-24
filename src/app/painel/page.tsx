@@ -14,6 +14,7 @@ import {
 import { ProgressRing } from "@/components/progress-ring";
 import { LogoutButton } from "@/components/logout-button";
 import { OfflineSnapshot } from "@/components/offline-snapshot";
+import { dashboardPlan } from "@/lib/dashboard-plan";
 import { projectContext } from "@/lib/data";
 import type { Summary } from "@/lib/records";
 import { statusLabel, formatDate, today, isDate, number } from "@/lib/domain";
@@ -35,11 +36,14 @@ export default async function Panel({
         ? selected.ends_on
         : today();
   let summary: Summary | null = null;
+  let diet: Awaited<ReturnType<typeof dashboardPlan>> = null;
   if (selected) {
-    const { data, error } = await client.rpc("project_summary", {
-      p_project: selected.id,
-      p_date: date,
-    });
+    const [result, comparison] = await Promise.all([
+      client.rpc("project_summary", { p_project: selected.id, p_date: date }),
+      dashboardPlan(client, selected.id, date),
+    ]);
+    const { data, error } = result;
+    diet = comparison;
     if (error) throw new Error("Falha ao carregar indicadores");
     summary = data as Summary;
   }
@@ -239,6 +243,62 @@ export default async function Panel({
                 </div>
               ))}
             </dl>
+            {diet && (
+              <div className="dashboard-diet-comparison">
+                <h3>Plano e consumo do dia</h3>
+                <dl className="diet-comparison-grid">
+                  <div>
+                    <dt>Calorias planejadas</dt>
+                    <dd>
+                      {diet.totals.kcal.value === null
+                        ? "Não informadas"
+                        : `${number(diet.totals.kcal.value)} kcal`}
+                      {diet.totals.kcal.missing > 0 && (
+                        <small> · parcial</small>
+                      )}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Calorias registradas</dt>
+                    <dd>
+                      {summary.kcal === null
+                        ? "Não informadas"
+                        : `${number(summary.kcal)} kcal`}
+                      {summary.missing_kcal > 0 && summary.kcal !== null && (
+                        <small> · parcial</small>
+                      )}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Refeições planejadas</dt>
+                    <dd>{diet.plannedMeals}</dd>
+                  </div>
+                  <div>
+                    <dt>Refeições com registros</dt>
+                    <dd>{diet.recordedMeals}</dd>
+                  </div>
+                </dl>
+                {diet.totals.kcal.value !== null &&
+                  summary.kcal !== null &&
+                  !diet.totals.kcal.missing &&
+                  !summary.missing_kcal && (
+                    <p>
+                      Diferença registrada em relação ao plano:{" "}
+                      {number(summary.kcal - diet.totals.kcal.value)} kcal.
+                    </p>
+                  )}
+                <p className="field-hint">
+                  Refeições com registros contam as categorias do diário na
+                  data. Um registro não confirma que a refeição inteira foi
+                  consumida.
+                </p>
+                <Link
+                  href={`/painel/plano?projeto=${selected.id}&data=${date}`}
+                >
+                  Consultar plano alimentar →
+                </Link>
+              </div>
+            )}
           </section>
           <section className="areas-section" aria-labelledby="daily-title">
             <div className="section-heading">
