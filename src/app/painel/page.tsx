@@ -11,6 +11,7 @@ import {
   ChevronDown,
   FolderOpen,
   ArrowRight,
+  History,
 } from "lucide-react";
 import { ProgressRing } from "@/components/progress-ring";
 import { LogoutButton } from "@/components/logout-button";
@@ -116,6 +117,17 @@ export default async function Panel({
         <h1>Olá, vamos cuidar de você?</h1>
         <p className="intro">Consistência hoje para um amanhã melhor.</p>
       </section>
+      <Link
+        className="button-secondary meal-record-link dashboard-history"
+        href="/painel/historico"
+      >
+        <History size={20} aria-hidden="true" />
+        <span>
+          <strong>Histórico geral</strong>
+          <small>Consulte seus registros por projeto e período</small>
+        </span>
+        <ArrowRight size={18} aria-hidden="true" />
+      </Link>
       {selected && summary ? (
         <>
           <details className="dashboard-query">

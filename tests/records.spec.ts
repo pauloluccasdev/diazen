@@ -168,6 +168,50 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
   ).toBeVisible();
   await capture("alimentacao");
   await page.goto("/painel");
+  await page
+    .getByRole("link", { name: "Histórico geral", exact: false })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Histórico geral." }),
+  ).toBeVisible();
+  await expect(page.locator(".history-day")).toContainText("89,5 kg");
+  await expect(page.locator(".history-day")).toContainText("450 ml");
+  await expect(page.locator(".history-day")).toContainText("Cintura");
+  await page
+    .getByRole("combobox", { name: "Tipo de registro", exact: true })
+    .selectOption("peso");
+  await page
+    .getByRole("button", { name: "Consultar histórico", exact: true })
+    .click();
+  await expect(page.locator(".history-day li")).toHaveCount(1);
+  await expect(page.locator(".history-day")).toContainText("89,5 kg");
+  await expect(page.locator(".history-day")).not.toContainText("450 ml");
+  await expect(
+    page.getByRole("button", { name: "Salvar registro", exact: true }),
+  ).toHaveCount(0);
+  await page.getByLabel("De (opcional)").fill("2020-01-02");
+  await page.getByLabel("Até (opcional)").fill("2020-01-01");
+  await page
+    .getByRole("button", { name: "Consultar histórico", exact: true })
+    .click();
+  await expect(page.locator(".history-page").getByRole("alert")).toContainText(
+    "Confira o tipo e as datas",
+  );
+  await expect(page.locator(".history-day")).toHaveCount(0);
+  await page.getByRole("link", { name: "Limpar filtros", exact: true }).click();
+  await expect(
+    page.getByRole("combobox", { name: "Tipo de registro", exact: true }),
+  ).toHaveValue("todos");
+  await expect(page.locator(".history-day")).toContainText("89,5 kg");
+  await page.setViewportSize({ width: 320, height: 844 });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await capture("historico-geral");
+
+  await page.goto("/painel");
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.locator(".dashboard-query")).toBeHidden();
   await expect(

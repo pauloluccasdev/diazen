@@ -1160,6 +1160,15 @@ try {
         ),
         false,
       );
+      await goto(`/painel/historico?projeto=${own.projects[0].id}`);
+      await text("Vamos voltar ao seu dia?");
+      await goto("/painel/historico");
+      assert.equal(
+        await evaluate(
+          "document.body.innerText.includes('Auditoria principal')",
+        ),
+        false,
+      );
       assert.equal(
         await evaluate(
           `fetch(${JSON.stringify(remainingPhotoUrl)}).then(r=>r.status)`,
@@ -1195,6 +1204,21 @@ try {
       await clickText("Próximos", "a");
       await count(5);
       await text("25 ml");
+      const historyProject = await evaluate(
+        "new URL(location.href).searchParams.get('projeto')",
+      );
+      await goto(`/painel/historico?projeto=${historyProject}&tipo=agua`);
+      await until("document.querySelectorAll('.history-day li').length === 20");
+      await clickText("Próximos", "a");
+      await until("document.querySelectorAll('.history-day li').length === 5");
+      assert.equal(
+        await evaluate("new URL(location.href).searchParams.get('tipo')"),
+        "agua",
+      );
+      assert.equal(
+        await evaluate("new URL(location.href).searchParams.get('projeto')"),
+        historyProject,
+      );
       const png = (await readFile(new URL("fixture.png", output))).toString(
         "base64",
       );

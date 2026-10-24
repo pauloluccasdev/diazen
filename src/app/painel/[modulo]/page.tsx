@@ -10,6 +10,7 @@ import {
   FileText,
   ChevronRight,
   ChevronDown,
+  History,
 } from "lucide-react";
 import { ReturnLink } from "@/components/return-link";
 import Link from "next/link";
@@ -135,6 +136,7 @@ export default async function Records({
           .from("weights")
           .select("*")
           .eq("project_id", selected.id)
+          .lte("logged_on", date)
           .order("logged_on", { ascending: false })
           .limit(30)
           .returns<Entry[]>()
@@ -355,27 +357,31 @@ export default async function Records({
           </ActionForm>
         </details>
       )}
-      <form className="filter-form">
-        <input type="hidden" name="projeto" value={selected.id} />
-        <label>
-          {daily ? "Data" : "Filtrar por data (opcional)"}
-          <input
-            type="date"
-            name="data"
-            defaultValue={daily || filters.data ? date : ""}
-            max={today()}
-          />
-        </label>
-        <button className="button-primary">Consultar</button>
-        {!daily && filters.data && (
-          <Link
-            className="back-link"
-            href={`/painel/${modulo}?projeto=${selected.id}`}
-          >
-            Ver todo o histórico
-          </Link>
-        )}
-      </form>
+      {daily ? (
+        <form className="filter-form">
+          <input type="hidden" name="projeto" value={selected.id} />
+          <label>
+            Data
+            <input
+              type="date"
+              name="data"
+              defaultValue={daily || filters.data ? date : ""}
+              max={today()}
+            />
+          </label>
+          <button className="button-primary">Consultar</button>
+        </form>
+      ) : (
+        <Link
+          className="button-secondary meal-record-link"
+          href={`/painel/historico?projeto=${selected.id}&tipo=${modulo}`}
+        >
+          <History size={20} aria-hidden="true" />
+          <span>Consultar histórico geral</span>
+          <ChevronRight size={18} aria-hidden="true" />
+        </Link>
+      )}
+
       {modulo === "alimentacao" && diet && (
         <section className="planned-meals" aria-label="Refeições do plano">
           <h2>Suas refeições planejadas</h2>
@@ -561,9 +567,13 @@ export default async function Records({
         className="records-section"
         aria-label="Histórico de registros"
       >
-        <h2>{daily ? "Registros do dia" : "Histórico"}</h2>
+        <h2>{daily || filters.data ? "Registros do dia" : "Histórico"}</h2>
         {!rows.length && (
-          <p className="intro">Sem registros para esta consulta.</p>
+          <p className="intro">
+            {!daily && filters.data
+              ? `Nenhum registro em ${formatDate(date)}. O resumo pode mostrar o último registro anterior a essa data. Consulte outras datas no histórico geral.`
+              : "Sem registros para esta consulta."}
+          </p>
         )}
         {modulo === "alimentacao" && (
           <p className="intro">
