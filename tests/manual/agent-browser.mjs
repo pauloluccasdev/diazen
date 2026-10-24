@@ -754,6 +754,7 @@ try {
       );
       await clickText("Marcar dia como concluído");
       await text("Dia concluído manualmente.");
+      await ab("click", "article .food-record-details > summary");
       await clickText(
         "Editar registro",
         "summary",

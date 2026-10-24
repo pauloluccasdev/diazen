@@ -2535,3 +2535,96 @@ input[type="date"]::-webkit-datetime-edit {
   display: grid;
   gap: 16px;
 }
+
+/* Refeições e registros compactos, com detalhes sob demanda. */
+.planned-meal > .planned-meal-summary,
+.records-section .food-record-details > summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0;
+  min-height: 56px;
+  border: 0;
+  background: transparent;
+  list-style: none;
+  font-size: 14px;
+}
+.planned-meal-summary::-webkit-details-marker,
+.food-record-details > summary::-webkit-details-marker {
+  display: none;
+}
+.planned-meal-summary > span,
+.food-record-details > summary > span:first-child {
+  flex: 1;
+  min-width: 0;
+}
+.planned-meal-summary strong,
+.planned-meal-summary small,
+.food-record-details strong,
+.food-record-details small {
+  display: block;
+}
+.planned-meal-summary strong {
+  font-size: 18px;
+}
+.planned-meal-summary small,
+.food-record-details small {
+  margin-top: 8px;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+.planned-meal-summary > svg,
+.food-record-details > summary > svg {
+  flex-shrink: 0;
+  color: var(--color-accent);
+}
+.planned-meal[open] > summary > svg,
+.food-record-details[open] > summary > svg {
+  transform: rotate(180deg);
+}
+.planned-meal-body,
+.food-record-body {
+  display: grid;
+  gap: 16px;
+  padding-top: 20px;
+  margin-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+.records-section .food-record {
+  padding: 16px;
+}
+.records-section .food-record-details {
+  display: block;
+  margin: 0;
+  width: 100%;
+}
+.food-record-calories {
+  max-width: 30%;
+  color: var(--color-accent);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: right;
+}
+.food-record-body .intro {
+  overflow-wrap: anywhere;
+}
+.meal-record-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  text-align: left;
+}
+.meal-record-link > span {
+  flex: 1;
+  min-width: 0;
+}
+.meal-record-link > svg {
+  flex-shrink: 0;
+}
+.meal-record-link > svg:first-child {
+  color: var(--color-accent);
+}

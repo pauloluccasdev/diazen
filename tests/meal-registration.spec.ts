@@ -65,6 +65,8 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
   await expect(page.locator(".planned-meal")).toHaveCount(2);
   await expect(page.getByRole("article")).toHaveCount(0);
   const first = page.locator(".planned-meal").first();
+  await expect(first).not.toHaveAttribute("open", "");
+  await first.locator(":scope > summary").click();
   await first
     .getByRole("combobox", { name: "Refeição no diário" })
     .selectOption("breakfast");
@@ -91,6 +93,7 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
     first.getByRole("button", { name: "Registrar conforme o plano" }),
   ).toHaveCount(0);
   const second = page.locator(".planned-meal").nth(1);
+  await second.locator(":scope > summary").click();
   await second
     .getByRole("combobox", { name: "Refeição no diário" })
     .selectOption("lunch");
@@ -124,6 +127,19 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
   expect(
     exported.diet_plans[0].document.meals[0].groups[0].choices[0].amount,
   ).toBe(125);
+  const record = page.getByRole("article").first();
+  await expect(record.locator(".food-record-details")).not.toHaveAttribute(
+    "open",
+    "",
+  );
+  await expect(
+    record.getByText("Editar registro", { exact: true }),
+  ).toBeHidden();
+  await record.locator(".food-record-details > summary").click();
+  await expect(
+    record.getByText("Editar registro", { exact: true }),
+  ).toBeVisible();
+  await record.locator(".food-record-details > summary").click();
   await page.setViewportSize({ width: 320, height: 844 });
   expect(
     await page.evaluate(

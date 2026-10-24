@@ -102,7 +102,7 @@ test("alimentos próprios, receitas, favoritos, recentes e cópia preservam o di
   ).toHaveCount(3);
   await page.getByText("Alimentos recentes", { exact: true }).click();
   await page
-    .locator("summary")
+    .locator(".food-conveniences summary")
     .filter({ hasText: /Minha receita · 1 porção/ })
     .click();
   await page.getByRole("button", { name: "Reutilizar alimento" }).click();
