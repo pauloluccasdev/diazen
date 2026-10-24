@@ -1,6 +1,6 @@
 "use client";
 import { useState, useTransition, useSyncExternalStore } from "react";
-import { FileText, PencilLine, Globe, ArrowLeftRight } from "lucide-react";
+import { FileText, PencilLine, ArrowLeftRight } from "lucide-react";
 import { ActionDisclosure } from "./action-disclosure";
 import { useOnline } from "@/lib/use-online";
 import { readDietPdf, DietPdfError } from "@/lib/read-diet-pdf";
@@ -25,20 +25,19 @@ import { nutrients } from "@/lib/records";
 import { number } from "@/lib/domain";
 import { saveDietPlan } from "@/app/painel/plano/actions";
 import { OnlineFoodSearch } from "./online-food-search";
-import type { OnlineFoodReference } from "@/lib/online-food";
+import { onlineFoodUrl } from "@/lib/online-food";
+
 const subscribeReady = () => () => {};
 function FoodReview({
   food,
   onChange,
   disabled,
   onApplyReference,
-  onUseOnline,
 }: {
   food: PlanFood;
   onChange: (food: PlanFood) => void;
   disabled: boolean;
   onApplyReference?: () => void;
-  onUseOnline: (reference: OnlineFoodReference) => void;
 }) {
   const [search, setSearch] = useState<string | null>(null);
   const query = search ?? (food.tacoId === null ? tacoName(food.name) : "");
@@ -150,8 +149,8 @@ function FoodReview({
             ))}
             {!candidates.length && (
               <p>
-                Nenhum alimento encontrado. Use os valores do rótulo com a fonte
-                identificada.
+                Sem correspondência na TACO. Você pode revisar a referência
+                online ou informar os valores abaixo.
               </p>
             )}
           </div>
@@ -191,18 +190,6 @@ function FoodReview({
               Usar valores informados
             </button>
           </>
-        )}
-        {food.tacoId === null && (
-          <ActionDisclosure title="Consultar na internet" icon={Globe}>
-            <OnlineFoodSearch
-              key={food.name}
-              name={food.name}
-              amount={food.amount}
-              unit={food.unit}
-              disabled={disabled}
-              onUse={onUseOnline}
-            />
-          </ActionDisclosure>
         )}
         <>
           <p className="intro">
@@ -374,10 +361,20 @@ export function DietPlanEditor({
           <section className="content-card">
             <h2>Plano e consumo registrado</h2>
             <p className="intro">
-              As correspondências seguras já são preenchidas pela TACO. Nomes
-              genéricos, marcas, porções sem peso e itens fora da tabela
-              precisam de revisão; os totais ficam parciais até completar esses
-              dados.
+              A TACO preenche os alimentos reconhecidos. Para os demais,
+              buscamos automaticamente a primeira composição disponível no Open
+              Food Facts. A referência padrão pode variar por marca; você pode
+              editar os valores. Porções sem peso e dados não encontrados
+              continuam pendentes. Apenas o nome do alimento é enviado à fonte
+              colaborativa (
+              <a
+                href="https://opendatacommons.org/licenses/odbl/1-0/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                ODbL
+              </a>
+              ).
             </p>
             {editable && (
               <button
@@ -532,16 +529,52 @@ export function DietPlanEditor({
                                 : `${food.source.startsWith("Referência padrão") ? "≈ " : ""}${number(foodComposition(food).kcal!)} kcal`}
                           </strong>
                         </div>
+                        {food.source.startsWith("Referência padrão") && (
+                          <p className="plan-food-source">
+                            Referência padrão ·{" "}
+                            <a
+                              href={onlineFoodUrl(
+                                food.source.match(/product\/(\d+)/)?.[1] ?? "",
+                              )}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              Open Food Facts
+                            </a>
+                            . Você pode editar os valores.
+                          </p>
+                        )}
+                        {group.included &&
+                          food.tacoId === null &&
+                          !food.source &&
+                          planNutrients.every(
+                            (k) => food.values[k] === null,
+                          ) && (
+                            <OnlineFoodSearch
+                              name={food.name}
+                              amount={food.amount}
+                              unit={food.unit}
+                              disabled={disabled}
+                              onUse={(reference) => {
+                                setPlan((current) =>
+                                  current
+                                    ? applyOnlinePlanReference(
+                                        current,
+                                        food,
+                                        reference,
+                                      )
+                                    : current,
+                                );
+                                setReviewed(false);
+                                setRequestId("");
+                              }}
+                            />
+                          )}
                         {group.included && (
                           <FoodReview
                             key={group.selected}
                             food={food}
                             disabled={disabled}
-                            onUseOnline={(reference) =>
-                              update(
-                                applyOnlinePlanReference(plan, food, reference),
-                              )
-                            }
                             onApplyReference={
                               plan.meals.some((m) =>
                                 m.groups.some((g) =>

@@ -33,12 +33,13 @@ export default function Privacy() {
       </p>
       <h2>Consulta nutricional online</h2>
       <p>
-        A consulta ao Open Food Facts é opcional e iniciada por você. Enviamos
-        apenas o nome pesquisado ou código de barras do produto; não enviamos
-        seu PDF, conta, refeições completas ou fotografias. A fonte é
-        colaborativa e deve ser conferida. Ao usar uma referência padrão, a
-        composição e sua origem ficam registradas no seu plano, e os valores
-        podem variar conforme a marca consumida.
+        Ao importar ou revisar um plano, os alimentos sem composição na TACO são
+        consultados automaticamente no Open Food Facts. Enviamos apenas o nome
+        do alimento e o código do produto encontrado; não enviamos seu PDF,
+        conta, refeições completas ou fotografias. A fonte é colaborativa e deve
+        ser conferida. Ao usar uma referência padrão, a composição e sua origem
+        ficam registradas no seu plano, e os valores podem variar conforme a
+        marca consumida.
       </p>
       <h2>Dispositivo e conexão</h2>
       <p>
