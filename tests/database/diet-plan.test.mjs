@@ -32,7 +32,7 @@ test("plano preserva opções, substituições, porções e ausências sem somar
   assert.equal(p.meals[0].groups[1].choices[0].unit, "ml");
   assert.equal(p.meals[0].groups[1].included, false);
   assert.equal(p.meals[1].groups[0].choices[0].amount, null);
-  assert.equal(planTotals(p.meals).kcal.value, null);
+  assert.equal(planTotals(p.meals).kcal.value, 150);
   const f = p.meals[0].groups[0].choices[0];
   f.tacoId = 53;
   f.values.kcal = 9999;

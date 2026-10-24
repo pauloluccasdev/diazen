@@ -2,6 +2,8 @@ import {
   tacoFoods,
   tacoPortion,
   tacoSource,
+  matchTacoFood,
+  tacoName,
   type TacoNutrient,
 } from "./taco.ts";
 export const planNutrients = ["kcal", "protein", "carbs", "fat"] as const;
@@ -167,7 +169,55 @@ export function parseDietPages(pages: string[]): DietPlan {
     throw new Error(
       "Não reconhecemos as tabelas deste PDF. Use um PDF com texto selecionável nos formatos de plano suportados.",
     );
-  return { version: 1, title: "Meu plano alimentar", meals };
+  return analyzeDietPlan({ version: 1, title: "Meu plano alimentar", meals });
+}
+export function analyzeDietPlan(plan: DietPlan): DietPlan {
+  return {
+    ...plan,
+    meals: plan.meals.map((meal) => ({
+      ...meal,
+      groups: meal.groups.map((group) => ({
+        ...group,
+        choices: group.choices.map((food) => {
+          if (
+            food.tacoId !== null ||
+            food.source ||
+            planNutrients.some((key) => food.values[key] !== null)
+          )
+            return food;
+          const match = matchTacoFood(food.name);
+          return match
+            ? { ...food, tacoId: match.id, source: tacoSource(match) }
+            : food;
+        }),
+      })),
+    })),
+  };
+}
+export function applyPlanReference(
+  plan: DietPlan,
+  name: string,
+  tacoId: number,
+): DietPlan {
+  const taco = tacoFoods.find((food) => food.id === tacoId);
+  if (!taco) return plan;
+  return {
+    ...plan,
+    meals: plan.meals.map((meal) => ({
+      ...meal,
+      groups: meal.groups.map((group) => ({
+        ...group,
+        choices: group.choices.map((food) =>
+          tacoName(food.name) === tacoName(name) &&
+          food.tacoId === null &&
+          !food.source &&
+          planNutrients.every((key) => food.values[key] === null)
+            ? { ...food, tacoId: taco.id, source: tacoSource(taco) }
+            : food,
+        ),
+      })),
+    })),
+  };
 }
 export function foodComposition(food: PlanFood): Composition {
   if (food.amount === null || food.unit === null) return emptyComposition();

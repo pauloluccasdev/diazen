@@ -59,3 +59,34 @@ export function tacoPortion(
     fat: portion(food.fat),
   };
 }
+
+// These are spelling/name equivalents only, never cooking or brand assumptions.
+export function tacoName(value: string): string {
+  return normalize(value.normalize("NFKC").replace(/\*opci\S*/gi, ""))
+    .replace(/\b(mucarela|mussarela)\b/g, "mozarela")
+    .split(/\s+/)
+    .filter((word) => !["de", "da", "do", "das", "dos"].includes(word))
+    .join(" ");
+}
+const tacoNames = tacoFoods.map((food) => ({
+  food,
+  name: tacoName(food.name),
+}));
+const equivalentNames: Readonly<Record<string, number>> = { "pao frances": 53 };
+export function matchTacoFood(name: string): TacoFood | null {
+  const key = tacoName(name);
+  const alias = equivalentNames[key];
+  if (alias) return tacoFoods.find((food) => food.id === alias) ?? null;
+  const exact = tacoNames.filter((item) => item.name === key);
+  return exact.length === 1 ? exact[0].food : null;
+}
+export function suggestTacoFoods(name: string, limit = 5): TacoFood[] {
+  const words = tacoName(name).split(/\s+/).filter(Boolean);
+  if (!words.length) return [];
+  return tacoNames
+    .filter((item) =>
+      words.every((word) => item.name.split(" ").includes(word)),
+    )
+    .slice(0, Math.min(20, Math.max(1, limit)))
+    .map((item) => item.food);
+}
