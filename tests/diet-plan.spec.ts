@@ -183,10 +183,21 @@ test("amostras privadas locais preservam refeições e variantes", async ({
   // Personal PDFs are processed only by this isolated localhost test server.
   await failLocalPdfRead(page);
   await page.goto("/entrar");
-  await page.getByLabel("E-mail", { exact: true }).fill("plano@example.test");
+  await page
+    .getByLabel("E-mail", { exact: true })
+    .fill("plano-private@example.test");
   await page.getByLabel("Senha", { exact: true }).fill("senha-de-teste-123");
   await page.getByRole("button", { name: "Entrar", exact: true }).click();
   await expect(page).toHaveURL(/\/painel$/);
+  await page.goto("/painel/projetos");
+  await page
+    .getByLabel("Nome do projeto", { exact: true })
+    .fill("Amostras locais QA");
+  await page.getByLabel("Meta diária de água (ml)").fill("2000");
+  await page
+    .getByRole("button", { name: "Criar projeto", exact: true })
+    .click();
+  await expect(page.getByRole("status")).toContainText("Projeto criado");
   await page.goto("/painel/plano");
   page.on("dialog", (d) => d.accept());
   for (const [file, count] of [
@@ -196,12 +207,14 @@ test("amostras privadas locais preservam refeições e variantes", async ({
     await expect(page.getByLabel("Selecionar PDF")).toBeEnabled();
     await page.getByLabel("Selecionar PDF").setInputFiles(file);
     await expect(
-      page.locator(".plan-workspace section").filter({
+      page.locator(".plan-workspace .plan-meal").filter({
         has: page.getByLabel("Incluir esta opção no cálculo", {
           exact: false,
         }),
       }),
     ).toHaveCount(count);
+    if (count === 10)
+      await expect(page.locator(".plan-food-pending")).toHaveCount(0);
     if (count === 4)
       await expect(
         page.getByText("1.453 kcal", { exact: true }).first(),

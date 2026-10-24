@@ -1,3 +1,4 @@
+import { standardPlanReference } from "./standard-plan-reference.ts";
 import { type OnlineFoodReference, onlineFoodSource } from "./online-food.ts";
 import {
   tacoFoods,
@@ -172,6 +173,34 @@ export function parseDietPages(pages: string[]): DietPlan {
     );
   return analyzeDietPlan({ version: 1, title: "Meu plano alimentar", meals });
 }
+export function analyzePlanFood(food: PlanFood): PlanFood {
+  if (
+    food.tacoId !== null ||
+    food.source ||
+    planNutrients.some((key) => food.values[key] !== null)
+  )
+    return food;
+  const match = matchTacoFood(food.name);
+  if (match) return { ...food, tacoId: match.id, source: tacoSource(match) };
+  const standard = standardPlanReference(food.name);
+  const amount = food.amount ?? standard?.defaultAmount ?? null;
+  const unit = food.unit ?? (standard?.defaultAmount ? "g" : null);
+  if (!standard || amount === null || unit !== "g") return food;
+  return {
+    ...food,
+    amount,
+    unit,
+    source: standard.source,
+    values: Object.fromEntries(
+      planNutrients.map((k) => [
+        k,
+        standard.values[k] === null
+          ? null
+          : Number(((standard.values[k]! * amount) / 100).toFixed(3)),
+      ]),
+    ) as Composition,
+  };
+}
 export function analyzeDietPlan(plan: DietPlan): DietPlan {
   return {
     ...plan,
@@ -179,18 +208,7 @@ export function analyzeDietPlan(plan: DietPlan): DietPlan {
       ...meal,
       groups: meal.groups.map((group) => ({
         ...group,
-        choices: group.choices.map((food) => {
-          if (
-            food.tacoId !== null ||
-            food.source ||
-            planNutrients.some((key) => food.values[key] !== null)
-          )
-            return food;
-          const match = matchTacoFood(food.name);
-          return match
-            ? { ...food, tacoId: match.id, source: tacoSource(match) }
-            : food;
-        }),
+        choices: group.choices.map(analyzePlanFood),
       })),
     })),
   };

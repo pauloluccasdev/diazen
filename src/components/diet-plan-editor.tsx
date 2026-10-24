@@ -1,12 +1,18 @@
 "use client";
 import { useState, useTransition, useSyncExternalStore } from "react";
-import { FileText, PencilLine, ArrowLeftRight } from "lucide-react";
+import {
+  FileText,
+  PencilLine,
+  ArrowLeftRight,
+  ChevronDown,
+} from "lucide-react";
 import { ActionDisclosure } from "./action-disclosure";
 import { useOnline } from "@/lib/use-online";
 import { readDietPdf, DietPdfError } from "@/lib/read-diet-pdf";
 import {
   emptyComposition,
   analyzeDietPlan,
+  analyzePlanFood,
   applyPlanReference,
   applyOnlinePlanReference,
   foodComposition,
@@ -25,12 +31,11 @@ import { nutrients } from "@/lib/records";
 import { number } from "@/lib/domain";
 import { saveDietPlan } from "@/app/painel/plano/actions";
 import { OnlineFoodSearch } from "./online-food-search";
-import { onlineFoodUrl } from "@/lib/online-food";
 
 const subscribeReady = () => () => {};
 function FoodReview({
   food,
-  onChange,
+  onChange: applyChange,
   disabled,
   onApplyReference,
 }: {
@@ -39,6 +44,16 @@ function FoodReview({
   disabled: boolean;
   onApplyReference?: () => void;
 }) {
+  function onChange(next: PlanFood) {
+    applyChange(
+      next.amount !== null &&
+        (next.amount !== food.amount ||
+          next.unit !== food.unit ||
+          next.name !== food.name)
+        ? analyzePlanFood(next)
+        : next,
+    );
+  }
   const [search, setSearch] = useState<string | null>(null);
   const query = search ?? (food.tacoId === null ? tacoName(food.name) : "");
   const candidates =
@@ -257,7 +272,9 @@ export function DietPlanEditor({
   editable: boolean;
   consumed: { kcal: number | null; missing: number; date: string };
 }) {
-  const [plan, setPlan] = useState<DietPlan | null>(initial),
+  const [plan, setPlan] = useState<DietPlan | null>(() =>
+      initial && editable ? analyzeDietPlan(initial) : initial,
+    ),
     [message, setMessage] = useState(""),
     [error, setError] = useState(""),
     [reading, setReading] = useState(false),
@@ -361,11 +378,10 @@ export function DietPlanEditor({
           <section className="content-card">
             <h2>Plano e consumo registrado</h2>
             <p className="intro">
-              A TACO preenche os alimentos reconhecidos. Para os demais,
-              buscamos automaticamente a primeira composição disponível no Open
-              Food Facts. A referência padrão pode variar por marca; você pode
-              editar os valores. Porções sem peso e dados não encontrados
-              continuam pendentes. Apenas o nome do alimento é enviado à fonte
+              A TACO e as referências padrão preenchem os alimentos conhecidos.
+              Para os demais, buscamos automaticamente uma composição online.
+              Preparos, marcas e porções estimadas ficam identificados e podem
+              ser editados. Apenas o nome do alimento é enviado à fonte
               colaborativa (
               <a
                 href="https://opendatacommons.org/licenses/odbl/1-0/"
@@ -383,7 +399,7 @@ export function DietPlanEditor({
                 disabled={disabled}
                 onClick={() => update(analyzeDietPlan(plan))}
               >
-                Analisar itens pendentes com TACO
+                Completar itens pendentes
               </button>
             )}
             <div className="nutrition-grid">
@@ -423,7 +439,7 @@ export function DietPlanEditor({
             ) && (
               <p className="intro">
                 Os totais incluem referências padrão e podem variar conforme a
-                marca e o produto consumido.
+                marca, o preparo e a porção estimada.
               </p>
             )}
             <p className="intro">
@@ -442,16 +458,29 @@ export function DietPlanEditor({
             />
           </label>
           {plan.meals.map((meal, mi) => (
-            <section
-              className="content-card"
+            <details
+              className="content-card plan-meal"
               key={`${meal.name}-${meal.option}`}
+              open
             >
-              <h2>
-                {meal.name}
-                {plan.meals.filter((m) => m.name === meal.name).length > 1
-                  ? ` · opção ${meal.option}`
-                  : ""}
-              </h2>
+              <summary>
+                <h2>
+                  {meal.name}
+                  {plan.meals.filter((m) => m.name === meal.name).length > 1
+                    ? ` · opção ${meal.option}`
+                    : ""}
+                </h2>
+                <span className="plan-meal-summary">
+                  {!meal.enabled ? "Fora do cálculo · " : ""}
+                  {(() => {
+                    const total = planTotals([{ ...meal, enabled: true }]).kcal;
+                    return total.value === null
+                      ? "Calculando calorias"
+                      : `${number(total.value)} kcal${total.missing ? " · parcial" : ""}`;
+                  })()}
+                </span>
+                <ChevronDown size={20} aria-hidden="true" />
+              </summary>
               <label className="checkbox-label">
                 <input
                   type="checkbox"
@@ -531,17 +560,24 @@ export function DietPlanEditor({
                         </div>
                         {food.source.startsWith("Referência padrão") && (
                           <p className="plan-food-source">
-                            Referência padrão ·{" "}
-                            <a
-                              href={onlineFoodUrl(
-                                food.source.match(/product\/(\d+)/)?.[1] ?? "",
-                              )}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              Open Food Facts
-                            </a>
-                            . Você pode editar os valores.
+                            {food.source.split(";")[0]}. Você pode editar os
+                            valores.
+                            {food.source.includes("porção estimada") && (
+                              <span>
+                                {" "}
+                                Porção de referência estimada: {food.amount} g.
+                              </span>
+                            )}
+                            {food.source.match(/https:\/\/\S+/)?.[0] && (
+                              <a
+                                href={food.source.match(/https:\/\/\S+/)![0]}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                {" "}
+                                Conferir fonte
+                              </a>
+                            )}
                           </p>
                         )}
                         {group.included &&
@@ -698,7 +734,7 @@ export function DietPlanEditor({
                   )}
                 </>
               )}
-            </section>
+            </details>
           ))}
           {editable && (
             <button

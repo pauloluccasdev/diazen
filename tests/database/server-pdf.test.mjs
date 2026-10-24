@@ -19,7 +19,7 @@ test("leitura temporária isolada extrai tabelas e encerra o worker", async () =
   const plan = await readServerDietPdf(new Uint8Array(bytes));
   assert.equal(plan.meals.length, 1);
   assert.equal(plan.meals[0].groups[0].choices[0].amount, 125);
-  assert.equal(plan.meals[0].groups[0].choices[0].values.kcal, null);
+  assert.equal(plan.meals[0].groups[0].choices[0].values.kcal, 160);
   await assert.rejects(
     () => readServerDietPdf(new Uint8Array(Buffer.from("%PDF-invalid"))),
     ServerDietPdfError,

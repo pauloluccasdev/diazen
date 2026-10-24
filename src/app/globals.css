@@ -2325,3 +2325,43 @@ input[type="date"]::-webkit-datetime-edit {
 .plan-food-source a {
   text-decoration: underline;
 }
+
+.plan-meal > summary {
+  width: 100%;
+  padding: 0;
+  background: transparent;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px 16px;
+  min-height: 48px;
+  list-style: none;
+  cursor: pointer;
+}
+.plan-meal > summary::-webkit-details-marker {
+  display: none;
+}
+.plan-meal > summary h2 {
+  margin: 0;
+}
+.plan-meal-summary {
+  grid-column: 1;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+.plan-meal > summary > svg {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  color: var(--color-accent);
+}
+.plan-meal[open] > summary > svg {
+  transform: rotate(180deg);
+}
+.plan-meal:not([open]) {
+  display: block;
+}
+.plan-meal > summary:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 8px;
+  border-radius: 10px;
+}
