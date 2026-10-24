@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { dashboardPlan } from "@/lib/dashboard-plan";
 import { ManualMealRecorder } from "@/components/manual-meal-recorder";
 import { PlanMealRecorder } from "@/components/plan-meal-recorder";
@@ -8,6 +9,7 @@ import {
   FileUp,
   FileText,
   ChevronRight,
+  ChevronDown,
 } from "lucide-react";
 import { ReturnLink } from "@/components/return-link";
 import Link from "next/link";
@@ -33,6 +35,40 @@ import { ProgressRing } from "@/components/progress-ring";
 import { Droplets } from "lucide-react";
 import { WeightChart } from "@/components/weight-chart";
 import { saveRecord, deleteRecord, confirmMealDay } from "./actions";
+function RecordPresentation({
+  kind,
+  row,
+  children,
+}: {
+  kind: Module;
+  row: Entry;
+  children: ReactNode;
+}) {
+  if (kind !== "alimentacao") return <>{children}</>;
+  const kcal =
+    row.kcal == null
+      ? null
+      : (Number(row.kcal) * Number(row.amount)) / Number(row.reference_amount);
+  return (
+    <details className="food-record-details">
+      <summary>
+        <span>
+          <strong role="heading" aria-level={3}>
+            {entryText(kind, row)}
+          </strong>
+          <small>
+            {formatDate(row.logged_on)} · {categories[row.category!]}
+          </small>
+        </span>
+        <span className="food-record-calories">
+          {kcal === null ? "Sem calorias informadas" : `${number(kcal)} kcal`}
+        </span>
+        <ChevronDown size={18} aria-hidden="true" />
+      </summary>
+      <div className="food-record-body">{children}</div>
+    </details>
+  );
+}
 export async function generateMetadata({
   params,
 }: {
@@ -263,8 +299,10 @@ export default async function Records({
         <section className="planned-meals" aria-label="Refeições do plano">
           <h2>Suas refeições planejadas</h2>
           <p className="intro">
-            Data consultada: {formatDate(date)}. Registre o que consumiu com as
-            porções do plano ou ajuste as quantidades.
+            Data consultada: {formatDate(date)}. Abra uma refeição do plano para
+            registrar o que consumiu ou ajustar as porções. Para incluir outros
+            alimentos, use “Registrar refeição”. Esses ajustes alteram apenas
+            seu diário; o plano da nutricionista fica preservado.
           </p>
           {diet.document.meals.map(
             (meal, index) =>
@@ -461,72 +499,80 @@ export default async function Records({
         )}
         {modulo === "alimentacao" && (
           <p className="intro">
-            Refeições fixas: {Object.values(categories).join(" · ")}.{" "}
-            {summary.food_count} alimentos neste dia.
+            {summary.food_count} alimentos neste dia. Abra um registro para
+            conferir a composição, editar ou excluir.
           </p>
         )}
         {rows.map((row) => (
-          <article key={row.id} className="content-card">
-            <p className="eyebrow">
-              {formatDate(row.logged_on)}
-              {row.category && ` · ${categories[row.category]}`}
-            </p>
-            <h3>{entryText(modulo, row)}</h3>
-            {row.notes && <p className="intro">{row.notes}</p>}
-            {modulo === "alimentacao" && (
-              <>
-                <p className="intro">
-                  Referência: {number(row.reference_amount!, 3)}{" "}
-                  {units[row.unit!]}. Fonte: {row.source}
-                </p>
-                <p>
-                  {Object.entries(nutrients)
-                    .map(([key, label]) => {
-                      const value = row[key as keyof Entry];
-                      return `${label}: ${value == null ? "não informado" : `${number((Number(value) * Number(row.amount)) / Number(row.reference_amount))} ${key === "kcal" ? "kcal" : "g"}`}`;
-                    })
-                    .join(" · ")}
-                </p>
-              </>
-            )}
-            {editable && (
-              <>
-                {modulo !== "peso" && (
+          <article
+            key={row.id}
+            className={`content-card${modulo === "alimentacao" ? " food-record" : ""}`}
+          >
+            <RecordPresentation kind={modulo} row={row}>
+              <p className="eyebrow">
+                {formatDate(row.logged_on)}
+                {row.category && ` · ${categories[row.category]}`}
+              </p>
+              {modulo !== "alimentacao" && <h3>{entryText(modulo, row)}</h3>}
+              {row.notes && <p className="intro">{row.notes}</p>}
+              {modulo === "alimentacao" && (
+                <>
+                  <p className="intro">
+                    Referência: {number(row.reference_amount!, 3)}{" "}
+                    {units[row.unit!]}. Fonte: {row.source}
+                  </p>
+                  <p>
+                    {Object.entries(nutrients)
+                      .map(([key, label]) => {
+                        const value = row[key as keyof Entry];
+                        return `${label}: ${value == null ? "não informado" : `${number((Number(value) * Number(row.amount)) / Number(row.reference_amount))} ${key === "kcal" ? "kcal" : "g"}`}`;
+                      })
+                      .join(" · ")}
+                  </p>
+                </>
+              )}
+              {editable && (
+                <>
+                  {modulo !== "peso" && (
+                    <ActionDisclosure
+                      title="Editar registro"
+                      icon={PencilLine}
+                      className="record-action"
+                    >
+                      <ActionForm action={saveRecord} submit="Salvar alteração">
+                        <RecordFields
+                          kind={modulo}
+                          entry={row}
+                          min={selected.starts_on}
+                          max={
+                            selected.ends_on && selected.ends_on < today()
+                              ? selected.ends_on
+                              : today()
+                          }
+                        />
+                      </ActionForm>
+                    </ActionDisclosure>
+                  )}
                   <ActionDisclosure
-                    title="Editar registro"
-                    icon={PencilLine}
-                    className="record-action"
+                    title="Excluir registro"
+                    icon={Trash2}
+                    className="record-action destructive-action"
                   >
-                    <ActionForm action={saveRecord} submit="Salvar alteração">
-                      <RecordFields
-                        kind={modulo}
-                        entry={row}
-                        min={selected.starts_on}
-                        max={
-                          selected.ends_on && selected.ends_on < today()
-                            ? selected.ends_on
-                            : today()
-                        }
-                      />
+                    <ActionForm
+                      action={deleteRecord}
+                      submit="Confirmar exclusão"
+                    >
+                      <input type="hidden" name="module" value={modulo} />
+                      <input type="hidden" name="id" value={row.id} />
+                      <label className="checkbox-label">
+                        <input name="confirm" type="checkbox" required />
+                        Confirmo a exclusão deste registro.
+                      </label>
                     </ActionForm>
                   </ActionDisclosure>
-                )}
-                <ActionDisclosure
-                  title="Excluir registro"
-                  icon={Trash2}
-                  className="record-action destructive-action"
-                >
-                  <ActionForm action={deleteRecord} submit="Confirmar exclusão">
-                    <input type="hidden" name="module" value={modulo} />
-                    <input type="hidden" name="id" value={row.id} />
-                    <label className="checkbox-label">
-                      <input name="confirm" type="checkbox" required />
-                      Confirmo a exclusão deste registro.
-                    </label>
-                  </ActionForm>
-                </ActionDisclosure>
-              </>
-            )}
+                </>
+              )}
+            </RecordPresentation>
           </article>
         ))}
       </section>

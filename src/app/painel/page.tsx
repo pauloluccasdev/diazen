@@ -297,9 +297,12 @@ export default async function Panel({
                   consumida.
                 </p>
                 <Link
+                  className="button-secondary meal-record-link"
                   href={`/painel/plano?projeto=${selected.id}&data=${date}`}
                 >
-                  Consultar plano alimentar →
+                  <Utensils size={20} aria-hidden="true" />
+                  <span>Consultar plano alimentar</span>
+                  <ArrowRight size={18} aria-hidden="true" />
                 </Link>
               </div>
             )}

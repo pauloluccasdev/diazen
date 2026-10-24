@@ -87,5 +87,7 @@ test("TACO exige escolha e confirmação, preserva a fonte e calcula o consumo",
   expect(Number(data.meal_items[0].amount)).toBe(125);
   expect(Number(data.meal_items[0].reference_amount)).toBe(100);
   await page.goto("/painel/alimentacao");
-  await expect(page.getByText("160 kcal", { exact: true })).toBeVisible();
+  await expect(
+    page.locator(".nutrition-grid").getByText("160 kcal", { exact: true }),
+  ).toBeVisible();
 });

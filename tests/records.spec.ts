@@ -136,6 +136,10 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
   ).toBeVisible();
   await page
     .getByRole("article")
+    .locator(".food-record-details > summary")
+    .click();
+  await page
+    .getByRole("article")
     .getByText("Editar registro", { exact: true })
     .click();
   await page

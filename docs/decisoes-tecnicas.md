@@ -376,3 +376,8 @@ O registro manual aceita vários alimentos por refeição e mostra o total antes
 ## Decisão — Dashboard mobile focado no dia — 24/10/2026
 
 Por solicitação do proprietário, em larguras de até 767 px o dashboard oculta o controle “Alterar projeto ou data da consulta” e o link “Gerenciar projetos”. Mantém o resumo do projeto visualizado, os indicadores do dia e os atalhos de alimentação, hidratação, atividades e evolução corporal; a navegação principal continua oferecendo Projetos. Consultas de histórico por links existentes preservam a identificação e o estado somente leitura. Os controles permanecem disponíveis no desktop. Ajuste de apresentação relativo a RF-018 e RNF-004/007/008, sem alteração de dados ou regras de gravação.
+
+
+## Decisão — Refeições e diário alimentar compactos — 24/10/2026
+
+O proprietário solicitou reduzir a extensão da página alimentar. As refeições planejadas passam a iniciar recolhidas, com nome, estado de registro e calorias planejadas no resumo. A orientação distingue o ajuste de porções consumidas e a inclusão manual de alimentos da versão preservada do plano. Os registros do dia exibem alimento, porção, categoria e calorias em resumos expansíveis; composição, fonte e ações ficam dentro de cada registro. Fontes permanecem disponíveis integralmente. Os acessos ao plano no dashboard e aos registros na refeição usam botões com ícones e área de toque. Apresentação relativa a RF-007/009/018 e RNF-004/007/008; nenhuma mudança em composição, autorização ou gravação.
