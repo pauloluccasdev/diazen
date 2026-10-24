@@ -881,6 +881,12 @@ try {
         await text("Hidratação.");
         await text("300 ml");
         await count(1);
+        // Retire the interrupted React root inside this fault scenario. A retry
+        // can defer its recoverable SSR diagnostic until the next navigation.
+        // Verify persistence again in a fresh document before checking errors.
+        await goto("/painel/agua");
+        await text("300 ml");
+        await count(1);
         report.serverErrorEvents = app.log
           .join("")
           .split("\n")
