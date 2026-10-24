@@ -31,6 +31,15 @@ export default function Privacy() {
         no Storage ou nos backups e não é enviado a ferramentas de IA. Apenas os
         dados revisados e confirmados por você são salvos como versões privadas.
       </p>
+      <h2>Consulta nutricional online</h2>
+      <p>
+        A consulta ao Open Food Facts é opcional e iniciada por você. Enviamos
+        apenas o nome pesquisado ou código de barras do produto; não enviamos
+        seu PDF, conta, refeições completas ou fotografias. A fonte é
+        colaborativa e deve ser conferida. Ao usar uma referência padrão, a
+        composição e sua origem ficam registradas no seu plano, e os valores
+        podem variar conforme a marca consumida.
+      </p>
       <h2>Dispositivo e conexão</h2>
       <p>
         A instalação usa cookies de sessão. A leitura offline pode mostrar um
