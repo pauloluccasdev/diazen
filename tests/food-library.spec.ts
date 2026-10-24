@@ -43,8 +43,10 @@ test("alimentos próprios, receitas, favoritos, recentes e cópia preservam o di
   await create
     .getByRole("button", { name: "Salvar alimento", exact: true })
     .click();
-  await expect(page.getByRole("article")).toHaveCount(2);
-  const oats = page.getByRole("article").filter({
+  await expect(page.getByRole("article", { includeHidden: true })).toHaveCount(
+    2,
+  );
+  const oats = page.getByRole("article", { includeHidden: true }).filter({
     has: page.getByRole("heading", { name: "Aveia própria", exact: true }),
   });
   await oats.getByRole("button", { name: "Favoritar", exact: true }).click();
@@ -55,7 +57,9 @@ test("alimentos próprios, receitas, favoritos, recentes e cópia preservam o di
     .getByRole("combobox", { name: "Mostrar", exact: true })
     .selectOption("favorite");
   await page.getByRole("button", { name: "Filtrar biblioteca" }).click();
-  await expect(page.getByRole("article")).toHaveCount(1);
+  await expect(page.getByRole("article", { includeHidden: true })).toHaveCount(
+    1,
+  );
   await page
     .getByRole("combobox", { name: "Mostrar", exact: true })
     .selectOption("");
@@ -82,9 +86,11 @@ test("alimentos próprios, receitas, favoritos, recentes e cópia preservam o di
   await expect(
     recipe.getByRole("status").filter({ hasText: "Receita salva" }),
   ).toContainText("Receita salva");
-  const savedRecipe = page.getByRole("article").filter({
-    has: page.getByRole("heading", { name: "Minha receita", exact: true }),
-  });
+  const savedRecipe = page
+    .getByRole("article", { includeHidden: true })
+    .filter({
+      has: page.getByRole("heading", { name: "Minha receita", exact: true }),
+    });
   await expect(savedRecipe).toContainText("Calorias: não informado");
   await expect(savedRecipe).toContainText("Proteínas: 10 g");
   await savedRecipe.getByText("Usar no diário", { exact: true }).click();
@@ -95,7 +101,9 @@ test("alimentos próprios, receitas, favoritos, recentes e cópia preservam o di
     "Alimento adicionado",
   );
   await page.goto("/painel/alimentacao");
-  await expect(page.getByRole("article")).toHaveCount(1);
+  await expect(page.getByRole("article", { includeHidden: true })).toHaveCount(
+    1,
+  );
   await expect(page.locator(".nutrition-grid")).toContainText("5 g");
   await expect(
     page.locator(".nutrition-grid").getByText("Não informado", { exact: true }),
@@ -106,7 +114,9 @@ test("alimentos próprios, receitas, favoritos, recentes e cópia preservam o di
     .filter({ hasText: /Minha receita · 1 porção/ })
     .click();
   await page.getByRole("button", { name: "Reutilizar alimento" }).click();
-  await expect(page.getByRole("article")).toHaveCount(2);
+  await expect(page.getByRole("article", { includeHidden: true })).toHaveCount(
+    2,
+  );
   await page.getByRole("button", { name: "Marcar dia como concluído" }).click();
   await expect(
     page.getByText("Dia concluído manualmente.", { exact: false }),
@@ -119,18 +129,24 @@ test("alimentos próprios, receitas, favoritos, recentes e cópia preservam o di
   await copy
     .getByRole("button", { name: "Confirmar cópia da refeição" })
     .click();
-  await expect(page.getByRole("article")).toHaveCount(2);
+  await expect(page.getByRole("article", { includeHidden: true })).toHaveCount(
+    2,
+  );
   await copy.getByRole("checkbox").check();
   await copy
     .getByRole("button", { name: "Confirmar cópia da refeição" })
     .click();
   await expect(copy.getByRole("status")).toContainText("2 itens");
-  await expect(page.getByRole("article")).toHaveCount(4);
+  await expect(page.getByRole("article", { includeHidden: true })).toHaveCount(
+    4,
+  );
   await expect(
     page.getByText("Dia ainda não confirmado.", { exact: false }),
   ).toBeVisible();
   await page.reload();
-  await expect(page.getByRole("article")).toHaveCount(4);
+  await expect(page.getByRole("article", { includeHidden: true })).toHaveCount(
+    4,
+  );
   await page.goto("/painel/alimentos");
   await oats.getByText("Editar alimento", { exact: true }).click();
   await oats.getByLabel("Proteínas (g)").fill("99");

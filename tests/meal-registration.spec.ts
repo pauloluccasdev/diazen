@@ -63,7 +63,9 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
     "Importe seu PDF",
   );
   await expect(page.locator(".planned-meal")).toHaveCount(2);
-  await expect(page.getByRole("article")).toHaveCount(0);
+  await expect(page.getByRole("article", { includeHidden: true })).toHaveCount(
+    0,
+  );
   const first = page.locator(".planned-meal").first();
   await expect(first).not.toHaveAttribute("open", "");
   await first.locator(":scope > summary").click();
@@ -84,7 +86,9 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
     .getByRole("button", { name: "Confirmar porções e registrar" })
     .click();
   await expect(first).toContainText("Refeição registrada");
-  await expect(page.getByRole("article")).toHaveCount(2);
+  await expect(page.getByRole("article", { includeHidden: true })).toHaveCount(
+    2,
+  );
   await page.reload();
   await expect(first).toContainText("já registrada");
   await expect(first).toContainText("Planejado: 398,5 kcal");
@@ -100,7 +104,9 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
   await second
     .getByRole("button", { name: "Registrar conforme o plano" })
     .click();
-  await expect(page.getByRole("article")).toHaveCount(3);
+  await expect(page.getByRole("article", { includeHidden: true })).toHaveCount(
+    3,
+  );
   const manual = page.locator(".manual-meal-recorder");
   await manual.locator(":scope > summary").click();
   let food = manual.locator(".meal-food-editor").first();
@@ -119,7 +125,9 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
   await manual
     .getByRole("button", { name: "Salvar registro", exact: true })
     .click();
-  await expect(page.getByRole("article")).toHaveCount(5);
+  await expect(page.getByRole("article", { includeHidden: true })).toHaveCount(
+    5,
+  );
   const exported = await (await page.request.get("/api/exportar")).json();
   expect(
     exported.meal_items.filter((r: { plan_id: string | null }) => r.plan_id),
@@ -127,7 +135,18 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
   expect(
     exported.diet_plans[0].document.meals[0].groups[0].choices[0].amount,
   ).toBe(125);
-  const record = page.getByRole("article").first();
+  await expect(page.locator(".meal-record-group")).toHaveCount(3);
+  await expect(
+    page.locator(".meal-record-group > summary").first(),
+  ).toContainText("Café da manhã");
+  await expect(
+    page.locator(".meal-record-group > summary").first(),
+  ).toContainText("2 alimentos");
+  await expect(
+    page.locator(".meal-record-group > summary").first(),
+  ).toContainText("247,3 kcal");
+  await page.locator(".meal-record-group > summary").first().click();
+  const record = page.getByRole("article", { includeHidden: true }).first();
   await expect(record.locator(".food-record-details")).not.toHaveAttribute(
     "open",
     "",

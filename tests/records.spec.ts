@@ -52,7 +52,7 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
   await expect(
     page.getByRole("heading", { name: "300 ml", exact: true, level: 2 }),
   ).toBeVisible();
-  const item = page.getByRole("article").filter({
+  const item = page.getByRole("article", { includeHidden: true }).filter({
     has: page.getByRole("heading", { name: "300 ml", exact: true }),
   });
   await item.getByText("Editar registro", { exact: true }).click();
@@ -76,7 +76,9 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
   await weight
     .getByRole("button", { name: "Salvar peso", exact: true })
     .click();
-  await expect(page.getByRole("article")).toHaveCount(1);
+  await expect(page.getByRole("article", { includeHidden: true })).toHaveCount(
+    1,
+  );
   await expect(
     page.getByRole("heading", { name: "89,5 kg", exact: true }).first(),
   ).toBeVisible();
@@ -88,7 +90,9 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
   await measure
     .getByRole("button", { name: "Salvar medidas", exact: true })
     .click();
-  await expect(page.getByRole("article")).toHaveCount(1);
+  await expect(page.getByRole("article", { includeHidden: true })).toHaveCount(
+    1,
+  );
   await capture("medidas");
   await page.goto("/painel/atividades");
   await page.locator(".record-create > summary").click();
@@ -126,7 +130,9 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
   await meal
     .getByRole("button", { name: "Salvar registro", exact: true })
     .click();
-  await expect(page.getByRole("article")).toHaveCount(1);
+  await expect(page.getByRole("article", { includeHidden: true })).toHaveCount(
+    1,
+  );
   await expect(
     page.locator(".nutrition-grid").getByText("Não informado", { exact: true }),
   ).toHaveCount(4);
@@ -134,20 +140,21 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
   await expect(
     page.getByText("Dia concluído manualmente.", { exact: false }),
   ).toBeVisible();
+  await page.locator(".meal-record-group > summary").click();
   await page
-    .getByRole("article")
+    .getByRole("article", { includeHidden: true })
     .locator(".food-record-details > summary")
     .click();
   await page
-    .getByRole("article")
+    .getByRole("article", { includeHidden: true })
     .getByText("Editar registro", { exact: true })
     .click();
   await page
-    .getByRole("article")
+    .getByRole("article", { includeHidden: true })
     .getByLabel("Calorias (kcal)", { exact: true })
     .fill("0");
   await page
-    .getByRole("article")
+    .getByRole("article", { includeHidden: true })
     .getByRole("button", { name: "Salvar alteração" })
     .click();
   await expect(

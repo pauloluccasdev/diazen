@@ -161,6 +161,75 @@ export default async function Records({
   const chart: Entry[] = graph.data ?? [];
   const days: { day: string; items: number; confirmed: boolean }[] =
     calendar.data ?? [];
+  const renderRecord = (row: Entry) => (
+    <article
+      key={row.id}
+      className={`content-card${modulo === "alimentacao" ? " food-record" : ""}`}
+    >
+      <RecordPresentation kind={modulo} row={row}>
+        <p className="eyebrow">
+          {formatDate(row.logged_on)}
+          {row.category && ` · ${categories[row.category]}`}
+        </p>
+        {modulo !== "alimentacao" && <h3>{entryText(modulo, row)}</h3>}
+        {row.notes && <p className="intro">{row.notes}</p>}
+        {modulo === "alimentacao" && (
+          <>
+            <p className="intro">
+              Referência: {number(row.reference_amount!, 3)} {units[row.unit!]}.
+              Fonte: {row.source}
+            </p>
+            <p>
+              {Object.entries(nutrients)
+                .map(([key, label]) => {
+                  const value = row[key as keyof Entry];
+                  return `${label}: ${value == null ? "não informado" : `${number((Number(value) * Number(row.amount)) / Number(row.reference_amount))} ${key === "kcal" ? "kcal" : "g"}`}`;
+                })
+                .join(" · ")}
+            </p>
+          </>
+        )}
+        {editable && (
+          <>
+            {modulo !== "peso" && (
+              <ActionDisclosure
+                title="Editar registro"
+                icon={PencilLine}
+                className="record-action"
+              >
+                <ActionForm action={saveRecord} submit="Salvar alteração">
+                  <RecordFields
+                    kind={modulo}
+                    entry={row}
+                    min={selected.starts_on}
+                    max={
+                      selected.ends_on && selected.ends_on < today()
+                        ? selected.ends_on
+                        : today()
+                    }
+                  />
+                </ActionForm>
+              </ActionDisclosure>
+            )}
+            <ActionDisclosure
+              title="Excluir registro"
+              icon={Trash2}
+              className="record-action destructive-action"
+            >
+              <ActionForm action={deleteRecord} submit="Confirmar exclusão">
+                <input type="hidden" name="module" value={modulo} />
+                <input type="hidden" name="id" value={row.id} />
+                <label className="checkbox-label">
+                  <input name="confirm" type="checkbox" required />
+                  Confirmo a exclusão deste registro.
+                </label>
+              </ActionForm>
+            </ActionDisclosure>
+          </>
+        )}
+      </RecordPresentation>
+    </article>
+  );
   return (
     <div className={`module-page module-${modulo}`}>
       <section className="welcome module-welcome">
@@ -499,82 +568,56 @@ export default async function Records({
         )}
         {modulo === "alimentacao" && (
           <p className="intro">
-            {summary.food_count} alimentos neste dia. Abra um registro para
-            conferir a composição, editar ou excluir.
+            {summary.food_count} alimentos neste dia. Abra uma refeição para ver
+            os alimentos. Selecione um alimento para conferir a composição,
+            editar ou excluir.
           </p>
         )}
-        {rows.map((row) => (
-          <article
-            key={row.id}
-            className={`content-card${modulo === "alimentacao" ? " food-record" : ""}`}
-          >
-            <RecordPresentation kind={modulo} row={row}>
-              <p className="eyebrow">
-                {formatDate(row.logged_on)}
-                {row.category && ` · ${categories[row.category]}`}
-              </p>
-              {modulo !== "alimentacao" && <h3>{entryText(modulo, row)}</h3>}
-              {row.notes && <p className="intro">{row.notes}</p>}
-              {modulo === "alimentacao" && (
-                <>
-                  <p className="intro">
-                    Referência: {number(row.reference_amount!, 3)}{" "}
-                    {units[row.unit!]}. Fonte: {row.source}
-                  </p>
-                  <p>
-                    {Object.entries(nutrients)
-                      .map(([key, label]) => {
-                        const value = row[key as keyof Entry];
-                        return `${label}: ${value == null ? "não informado" : `${number((Number(value) * Number(row.amount)) / Number(row.reference_amount))} ${key === "kcal" ? "kcal" : "g"}`}`;
-                      })
-                      .join(" · ")}
-                  </p>
-                </>
-              )}
-              {editable && (
-                <>
-                  {modulo !== "peso" && (
-                    <ActionDisclosure
-                      title="Editar registro"
-                      icon={PencilLine}
-                      className="record-action"
-                    >
-                      <ActionForm action={saveRecord} submit="Salvar alteração">
-                        <RecordFields
-                          kind={modulo}
-                          entry={row}
-                          min={selected.starts_on}
-                          max={
-                            selected.ends_on && selected.ends_on < today()
-                              ? selected.ends_on
-                              : today()
-                          }
-                        />
-                      </ActionForm>
-                    </ActionDisclosure>
-                  )}
-                  <ActionDisclosure
-                    title="Excluir registro"
-                    icon={Trash2}
-                    className="record-action destructive-action"
-                  >
-                    <ActionForm
-                      action={deleteRecord}
-                      submit="Confirmar exclusão"
-                    >
-                      <input type="hidden" name="module" value={modulo} />
-                      <input type="hidden" name="id" value={row.id} />
-                      <label className="checkbox-label">
-                        <input name="confirm" type="checkbox" required />
-                        Confirmo a exclusão deste registro.
-                      </label>
-                    </ActionForm>
-                  </ActionDisclosure>
-                </>
-              )}
-            </RecordPresentation>
-          </article>
-        ))}
+        {modulo === "alimentacao"
+          ? Object.entries(categories).map(([category, label]) => {
+              const items = rows.filter((row) => row.category === category);
+              if (!items.length) return null;
+              const known = items.filter((row) => row.kcal != null);
+              const kcal = known.reduce(
+                (sum, row) =>
+                  sum +
+                  (Number(row.kcal) * Number(row.amount)) /
+                    Number(row.reference_amount),
+                0,
+              );
+              const partial =
+                known.length !== items.length || hasMore || page > 1;
+              return (
+                <details
+                  key={category}
+                  className="content-card meal-record-group"
+                >
+                  <summary>
+                    <span>
+                      <strong>{label}</strong>
+                      <small>
+                        {items.length}{" "}
+                        {items.length === 1 ? "alimento" : "alimentos"}
+                        {hasMore || page > 1 ? " nesta página" : ""}
+                      </small>
+                    </span>
+                    <span className="food-record-calories">
+                      {known.length
+                        ? `${number(kcal)} kcal`
+                        : "Calorias não informadas"}
+                      {partial && known.length > 0 && (
+                        <small>Subtotal parcial</small>
+                      )}
+                    </span>
+                    <ChevronDown size={20} aria-hidden="true" />
+                  </summary>
+                  <div className="meal-record-items">
+                    {items.map(renderRecord)}
+                  </div>
+                </details>
+              );
+            })
+          : rows.map(renderRecord)}
       </section>
       <nav className="panel-nav" aria-label="Paginação">
         {page > 1 && <Link href={link(page - 1)}>Anteriores</Link>}

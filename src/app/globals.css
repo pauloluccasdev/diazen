@@ -2538,7 +2538,7 @@ input[type="date"]::-webkit-datetime-edit {
 
 /* Refeições e registros compactos, com detalhes sob demanda. */
 .planned-meal > .planned-meal-summary,
-.records-section .food-record-details > summary {
+.records-section details.food-record-details > summary {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -2595,7 +2595,7 @@ input[type="date"]::-webkit-datetime-edit {
 .records-section .food-record {
   padding: 16px;
 }
-.records-section .food-record-details {
+.records-section details.food-record-details {
   display: block;
   margin: 0;
   width: 100%;
@@ -2627,4 +2627,63 @@ input[type="date"]::-webkit-datetime-edit {
 }
 .meal-record-link > svg:first-child {
   color: var(--color-accent);
+}
+
+.records-section details.meal-record-group {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 16px;
+}
+.records-section details.meal-record-group > summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  list-style: none;
+  font-size: 16px;
+}
+.meal-record-group > summary::-webkit-details-marker {
+  display: none;
+}
+.meal-record-group > summary > span:first-child {
+  flex: 1;
+  min-width: 0;
+}
+.meal-record-group > summary strong,
+.meal-record-group > summary small {
+  display: block;
+}
+.meal-record-group > summary small {
+  margin-top: 6px;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+.meal-record-group > summary > svg {
+  flex-shrink: 0;
+  color: var(--color-accent);
+}
+.meal-record-group[open] > summary > svg {
+  transform: rotate(180deg);
+}
+.meal-record-items {
+  margin-top: 16px;
+}
+.records-section .meal-record-items .food-record {
+  padding: 12px 0;
+  margin: 0;
+  border: 0;
+  border-top: 1px solid var(--color-border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.records-section details.food-record-details > summary {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
