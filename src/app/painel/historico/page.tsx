@@ -1,18 +1,15 @@
 import Link from "next/link";
-import { History, ArrowRight } from "lucide-react";
+import {
+  ArrowRight,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { ReturnLink } from "@/components/return-link";
 import { projectContext } from "@/lib/data";
-import {
-  formatDate,
-  isDate,
-  number,
-  statusLabel,
-  today,
-  type Project,
-} from "@/lib/domain";
+import { formatDate, isDate, number, today } from "@/lib/domain";
 import {
   modules,
-  isModule,
   categories,
   measurements,
   modalities,
@@ -42,50 +39,46 @@ export default async function HistoryPage({
   searchParams,
 }: {
   searchParams: Promise<{
-    projeto?: string;
-    tipo?: string;
-    de?: string;
-    ate?: string;
+    data?: string;
+    mes?: string;
     pagina?: string;
   }>;
 }) {
   const params = await searchParams;
-  const project =
-    params.projeto && params.projeto !== "todos" ? params.projeto : undefined;
-  const { client } = await projectContext(project);
-  const projects: Project[] = [];
-  for (let offset = 0; ; offset += 1000) {
-    const result = await client
-      .from("projects")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .order("id")
-      .range(offset, offset + 999)
-      .returns<Project[]>();
-    if (result.error)
-      throw Error("Não foi possível carregar os projetos do histórico.");
-    projects.push(...(result.data ?? []));
-    if ((result.data?.length ?? 0) < 1000) break;
-  }
-  const validType =
-    !params.tipo ||
-    params.tipo === "todos" ||
-    isModule(params.tipo) ||
-    params.tipo === "fotos";
-  const invalid =
-    !validType ||
-    (params.de && (!isDate(params.de) || params.de > today())) ||
-    (params.ate && (!isDate(params.ate) || params.ate > today())) ||
-    (params.de && params.ate && params.de > params.ate);
+  const { client, active } = await projectContext();
+  const date =
+    params.data && isDate(params.data) && params.data <= today()
+      ? params.data
+      : today();
+  const month =
+    params.mes &&
+    /^\d{4}-\d{2}$/.test(params.mes) &&
+    isDate(`${params.mes}-01`) &&
+    params.mes <= today().slice(0, 7)
+      ? params.mes
+      : date.slice(0, 7);
+  const monthStart = new Date(`${month}-01T12:00:00Z`);
+  const monthLabel = new Intl.DateTimeFormat("pt-BR", {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(monthStart);
+  const shiftMonth = (offset: number) => {
+    const d = new Date(monthStart);
+    d.setUTCMonth(d.getUTCMonth() + offset);
+    return d.toISOString().slice(0, 7);
+  };
+  const length = new Date(
+    Date.UTC(monthStart.getUTCFullYear(), monthStart.getUTCMonth() + 1, 0),
+  ).getUTCDate();
+  const firstWeekday = monthStart.getUTCDay();
   const page = Math.min(
     1000,
     Math.max(1, Math.floor(Number(params.pagina) || 1)),
   );
   const needed = page * 20 + 1;
-  const selectedKinds = Object.keys(kinds).filter(
-    (kind) => !params.tipo || params.tipo === "todos" || kind === params.tipo,
-  ) as Kind[];
-  const batches = invalid
+  const selectedKinds = Object.keys(kinds) as Kind[];
+  const batches = !active
     ? []
     : await Promise.all(
         selectedKinds.map(async (kind) => {
@@ -97,9 +90,7 @@ export default async function HistoryPage({
               .order("logged_on", { ascending: false })
               .order("id", { ascending: false })
               .range(offset, Math.min(offset + 999, needed - 1));
-            if (project) query = query.eq("project_id", project);
-            if (params.de) query = query.gte("logged_on", params.de);
-            if (params.ate) query = query.lte("logged_on", params.ate);
+            query = query.eq("project_id", active!.id).eq("logged_on", date);
             const result = await query.returns<Entry[]>();
             if (result.error)
               throw Error(
@@ -121,14 +112,24 @@ export default async function HistoryPage({
         a.kind.localeCompare(b.kind),
     );
   const rows = all.slice((page - 1) * 20, page * 20);
-  const dates = [...new Set(rows.map((row) => row.logged_on))];
-  const href = (next: number) => {
-    const search = new URLSearchParams();
-    for (const key of ["projeto", "tipo", "de", "ate"] as const)
-      if (params[key]) search.set(key, params[key]);
-    search.set("pagina", String(next));
-    return `/painel/historico?${search}`;
-  };
+  const groups = [
+    ...Object.entries(categories).map(([category, title]) => ({
+      key: category,
+      title,
+      items: rows.filter(
+        (r) => r.kind === "alimentacao" && r.category === category,
+      ),
+    })),
+    ...selectedKinds
+      .filter((kind) => kind !== "alimentacao")
+      .map((kind) => ({
+        key: kind,
+        title: kinds[kind].title,
+        items: rows.filter((r) => r.kind === kind),
+      })),
+  ].filter((group) => group.items.length);
+  const href = (next: number) =>
+    `/painel/historico?data=${date}&mes=${month}&pagina=${next}`;
   return (
     <div className="module-page history-page">
       <section className="welcome">
@@ -138,121 +139,130 @@ export default async function HistoryPage({
           Histórico geral<span className="accent">.</span>
         </h1>
         <p className="intro">
-          Consulte alimentação, hidratação, atividades, peso, medidas e fotos em
-          um só lugar.
+          Selecione um dia para consultar os registros do seu projeto ativo.
         </p>
       </section>
-      <form
-        className="filter-form history-filters"
-        key={[
-          project ?? "todos",
-          params.tipo ?? "todos",
-          params.de ?? "",
-          params.ate ?? "",
-          page,
-        ].join("|")}
-      >
-        <label>
-          Projeto
-          <select name="projeto" defaultValue={project ?? "todos"}>
-            <option value="todos">Todos os projetos</option>
-            {projects.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name} · {statusLabel[p.status]}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Tipo de registro
-          <select
-            name="tipo"
-            defaultValue={validType ? (params.tipo ?? "todos") : "todos"}
-          >
-            <option value="todos">Todos os registros</option>
-            {Object.entries(kinds).map(([kind, config]) => (
-              <option key={kind} value={kind}>
-                {config.title}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          De (opcional)
-          <input
-            type="date"
-            name="de"
-            defaultValue={isDate(params.de ?? "") ? params.de : ""}
-            max={today()}
-          />
-        </label>
-        <label>
-          Até (opcional)
-          <input
-            type="date"
-            name="ate"
-            defaultValue={isDate(params.ate ?? "") ? params.ate : ""}
-            max={today()}
-          />
-        </label>
-        <button className="button-primary">Consultar histórico</button>
-        <Link className="button-secondary" href="/painel/historico">
-          Limpar filtros
-        </Link>
-      </form>
-      {invalid ? (
-        <p className="form-error" role="alert">
-          Confira o tipo e as datas. O início deve ser anterior ou igual ao fim
-          e não pode haver datas futuras.
-        </p>
+      {!active ? (
+        <section className="content-card">
+          <h2>Nenhum projeto ativo</h2>
+          <p>
+            Ative um projeto para consultar seu histórico diário. Os projetos
+            anteriores continuam disponíveis em Projetos.
+          </p>
+          <Link className="button-secondary" href="/painel/projetos">
+            Ver projetos
+          </Link>
+        </section>
       ) : (
         <>
-          <p className="field-hint">
-            Consulta do histórico. Os registros novos continuam destinados ao
-            projeto ativo. As fotos permanecem privadas e abrem na galeria.
-          </p>
-          {!rows.length && (
-            <section className="content-card">
-              <History size={24} aria-hidden="true" />
-              <h2>Nenhum registro encontrado</h2>
-              <p>Experimente outro período, projeto ou tipo de registro.</p>
-            </section>
-          )}
-          {dates.map((date) => (
-            <section
-              className="history-day content-card"
-              key={date}
-              aria-label={`Registros de ${formatDate(date)}`}
-            >
-              <h2>{formatDate(date)}</h2>
-              <ul>
-                {rows
-                  .filter((row) => row.logged_on === date)
-                  .map((row) => (
-                    <li key={`${row.kind}-${row.id}`}>
-                      <Link
-                        href={`/painel/${row.kind}?projeto=${row.project_id}${row.kind === "fotos" ? "" : `&data=${row.logged_on}`}`}
-                      >
-                        <span>
-                          <small>
-                            {kinds[row.kind].title} ·{" "}
-                            {
-                              projects.find((p) => p.id === row.project_id)
-                                ?.name
-                            }
-                            {row.kind === "alimentacao" && row.category
-                              ? ` · ${categories[row.category]}`
-                              : ""}
-                          </small>
-                          <strong>{description(row)}</strong>
-                        </span>
-                        <ArrowRight size={18} aria-hidden="true" />
-                      </Link>
-                    </li>
-                  ))}
-              </ul>
-            </section>
-          ))}
+          <p className="eyebrow">{active.name}</p>
+          <section
+            className="content-card history-calendar"
+            aria-label="Calendário do histórico"
+          >
+            <header>
+              <Link
+                className="calendar-month"
+                href={`/painel/historico?data=${date}&mes=${shiftMonth(-1)}`}
+                aria-label="Mês anterior"
+              >
+                <ChevronLeft size={20} aria-hidden="true" />
+              </Link>
+              <h2>{monthLabel}</h2>
+              {month < today().slice(0, 7) ? (
+                <Link
+                  className="calendar-month"
+                  href={`/painel/historico?data=${date}&mes=${shiftMonth(1)}`}
+                  aria-label="Próximo mês"
+                >
+                  <ChevronRight size={20} aria-hidden="true" />
+                </Link>
+              ) : (
+                <span className="calendar-month" aria-hidden="true" />
+              )}
+            </header>
+            <div className="history-calendar-grid">
+              {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((d) => (
+                <span className="calendar-weekday" key={d}>
+                  {d}
+                </span>
+              ))}
+              {Array.from({ length: firstWeekday }, (_, i) => (
+                <span key={`empty-${i}`} aria-hidden="true" />
+              ))}
+              {Array.from({ length }, (_, i) => {
+                const day = `${month}-${String(i + 1).padStart(2, "0")}`;
+                return day > today() ? (
+                  <span className="calendar-future" key={day}>
+                    {i + 1}
+                  </span>
+                ) : (
+                  <Link
+                    key={day}
+                    href={`/painel/historico?data=${day}&mes=${month}`}
+                    aria-label={`Consultar dia ${i + 1} de ${monthLabel}`}
+                    aria-current={day === date ? "date" : undefined}
+                  >
+                    {i + 1}
+                  </Link>
+                );
+              })}
+            </div>
+            <Link className="button-secondary" href="/painel/historico">
+              Hoje
+            </Link>
+          </section>
+          <details
+            className="content-card history-selected-day"
+            key={`${date}-${page}`}
+            open
+          >
+            <summary>
+              <span>
+                <strong>{formatDate(date)}</strong>
+                <small>
+                  {rows.length} registros
+                  {all.length > 20 ? " nesta página" : ""}
+                </small>
+              </span>
+              <ChevronDown size={20} aria-hidden="true" />
+            </summary>
+            <div className="history-day">
+              {!rows.length && (
+                <p className="intro">
+                  Nenhum registro neste dia. Selecione outra data no calendário.
+                </p>
+              )}
+              {groups.map((group) => (
+                <details className="history-group" key={group.key}>
+                  <summary>
+                    <span>
+                      <strong>{group.title}</strong>
+                      <small>
+                        {group.items.length}{" "}
+                        {group.items.length === 1 ? "registro" : "registros"}
+                      </small>
+                    </span>
+                    <ChevronDown size={18} aria-hidden="true" />
+                  </summary>
+                  <ul>
+                    {group.items.map((row) => (
+                      <li key={`${row.kind}-${row.id}`}>
+                        <Link
+                          href={`/painel/${row.kind}?projeto=${active.id}${row.kind === "fotos" ? "" : `&data=${date}`}`}
+                        >
+                          <span>
+                            <strong>{description(row)}</strong>
+                          </span>
+                          <ArrowRight size={18} aria-hidden="true" />
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              ))}
+            </div>
+          </details>
           <nav className="panel-nav" aria-label="Paginação do histórico">
             {page > 1 && <Link href={href(page - 1)}>Anteriores</Link>}
             {all.length > page * 20 && (

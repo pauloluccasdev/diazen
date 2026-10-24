@@ -177,32 +177,34 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
   await expect(page.locator(".history-day")).toContainText("89,5 kg");
   await expect(page.locator(".history-day")).toContainText("450 ml");
   await expect(page.locator(".history-day")).toContainText("Cintura");
-  await page
-    .getByRole("combobox", { name: "Tipo de registro", exact: true })
-    .selectOption("peso");
-  await page
-    .getByRole("button", { name: "Consultar histórico", exact: true })
-    .click();
-  await expect(page.locator(".history-day li")).toHaveCount(1);
-  await expect(page.locator(".history-day")).toContainText("89,5 kg");
-  await expect(page.locator(".history-day")).not.toContainText("450 ml");
   await expect(
-    page.getByRole("button", { name: "Salvar registro", exact: true }),
-  ).toHaveCount(0);
-  await page.getByLabel("De (opcional)").fill("2020-01-02");
-  await page.getByLabel("Até (opcional)").fill("2020-01-01");
-  await page
-    .getByRole("button", { name: "Consultar histórico", exact: true })
-    .click();
-  await expect(page.locator(".history-page").getByRole("alert")).toContainText(
-    "Confira o tipo e as datas",
+    page.getByRole("region", { name: "Calendário do histórico" }),
+  ).toBeVisible();
+  await expect(page.getByRole("combobox")).toHaveCount(0);
+  await expect(page.locator(".history-selected-day")).toHaveAttribute(
+    "open",
+    "",
   );
-  await expect(page.locator(".history-day")).toHaveCount(0);
-  await page.getByRole("link", { name: "Limpar filtros", exact: true }).click();
+  await page
+    .locator(".history-group > summary")
+    .filter({ hasText: "Peso" })
+    .click();
   await expect(
-    page.getByRole("combobox", { name: "Tipo de registro", exact: true }),
-  ).toHaveValue("todos");
+    page
+      .locator(".history-group")
+      .filter({ has: page.locator("summary", { hasText: "Peso" }) })
+      .getByText("89,5 kg", { exact: true }),
+  ).toBeVisible();
+  await page.getByRole("link", { name: "Mês anterior", exact: true }).click();
+  await page.locator(".history-calendar-grid a").first().click();
+  await expect(page.locator(".history-day")).toContainText(
+    "Nenhum registro neste dia",
+  );
+  await page.getByRole("link", { name: "Hoje", exact: true }).click();
   await expect(page.locator(".history-day")).toContainText("89,5 kg");
+  await expect(
+    page.locator('.history-calendar-grid [aria-current="date"]'),
+  ).toHaveCount(1);
   await page.setViewportSize({ width: 320, height: 844 });
   expect(
     await page.evaluate(

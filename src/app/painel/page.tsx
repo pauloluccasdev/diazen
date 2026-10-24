@@ -124,7 +124,7 @@ export default async function Panel({
         <History size={20} aria-hidden="true" />
         <span>
           <strong>Histórico geral</strong>
-          <small>Consulte seus registros por projeto e período</small>
+          <small>Veja os registros do seu projeto ativo por dia</small>
         </span>
         <ArrowRight size={18} aria-hidden="true" />
       </Link>
