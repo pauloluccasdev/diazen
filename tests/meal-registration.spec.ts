@@ -96,6 +96,9 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
   await expect(
     first.getByRole("button", { name: "Registrar conforme o plano" }),
   ).toHaveCount(0);
+  await expect(
+    page.getByText("Parcial: o diário", { exact: false }),
+  ).toBeVisible();
   const second = page.locator(".planned-meal").nth(1);
   await second.locator(":scope > summary").click();
   await second
@@ -107,6 +110,12 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
   await expect(page.getByRole("article", { includeHidden: true })).toHaveCount(
     3,
   );
+  await expect(
+    page.getByText("Completo: todas as refeições do plano foram registradas."),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Marcar dia como concluído" }),
+  ).toHaveCount(0);
   const manual = page.locator(".manual-meal-recorder");
   await manual.locator(":scope > summary").click();
   let food = manual.locator(".meal-food-editor").first();
@@ -186,4 +195,26 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
       })
       .locator("dd"),
   ).toHaveText("2");
+  await page.goto("/painel/alimentacao");
+  await expect(
+    page.locator('.food-calendar [aria-current="date"]'),
+  ).toContainText("Completo");
+  await page.locator(".meal-record-group > summary").first().click();
+  const registeredFood = page
+    .getByRole("article", { includeHidden: true })
+    .first();
+  await registeredFood.locator(".food-record-details > summary").click();
+  await registeredFood.getByText("Excluir registro", { exact: true }).click();
+  await registeredFood
+    .getByLabel("Confirmo a exclusão deste registro.")
+    .check();
+  await registeredFood
+    .getByRole("button", { name: "Confirmar exclusão", exact: true })
+    .click();
+  await expect(
+    page.getByText("Parcial: o diário", { exact: false }),
+  ).toBeVisible();
+  await expect(
+    page.locator('.food-calendar [aria-current="date"]'),
+  ).toContainText("Parcial");
 });

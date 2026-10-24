@@ -1,3 +1,4 @@
+import { CalorieBalance } from "@/components/calorie-balance";
 import Link from "next/link";
 import {
   Droplets,
@@ -246,29 +247,14 @@ export default async function Panel({
             {diet && (
               <div className="dashboard-diet-comparison">
                 <h3>Plano e consumo do dia</h3>
+                <CalorieBalance
+                  consumed={summary.kcal}
+                  planned={diet.totals.kcal.value}
+                  partial={
+                    diet.totals.kcal.missing > 0 || summary.missing_kcal > 0
+                  }
+                />
                 <dl className="diet-comparison-grid">
-                  <div>
-                    <dt>Calorias planejadas</dt>
-                    <dd>
-                      {diet.totals.kcal.value === null
-                        ? "Não informadas"
-                        : `${number(diet.totals.kcal.value)} kcal`}
-                      {diet.totals.kcal.missing > 0 && (
-                        <small> · parcial</small>
-                      )}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>Calorias registradas</dt>
-                    <dd>
-                      {summary.kcal === null
-                        ? "Não informadas"
-                        : `${number(summary.kcal)} kcal`}
-                      {summary.missing_kcal > 0 && summary.kcal !== null && (
-                        <small> · parcial</small>
-                      )}
-                    </dd>
-                  </div>
                   <div>
                     <dt>Refeições planejadas</dt>
                     <dd>{diet.plannedMeals}</dd>
@@ -282,20 +268,6 @@ export default async function Panel({
                     <dd>{diet.registeredMeals.length}</dd>
                   </div>
                 </dl>
-                {diet.totals.kcal.value !== null &&
-                  summary.kcal !== null &&
-                  !diet.totals.kcal.missing &&
-                  !summary.missing_kcal && (
-                    <p>
-                      Diferença registrada em relação ao plano:{" "}
-                      {number(summary.kcal - diet.totals.kcal.value)} kcal.
-                    </p>
-                  )}
-                <p className="field-hint">
-                  Refeições com registros contam as categorias do diário na
-                  data. Um registro não confirma que a refeição inteira foi
-                  consumida.
-                </p>
                 <Link
                   className="button-secondary meal-record-link"
                   href={`/painel/plano?projeto=${selected.id}&data=${date}`}

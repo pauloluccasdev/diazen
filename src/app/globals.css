@@ -2687,3 +2687,80 @@ input[type="date"]::-webkit-datetime-edit {
   border-radius: 0;
   background: transparent;
 }
+.water-volume-picker {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.water-volume-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.water-volume-options button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 80px;
+  padding: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface-sunken);
+  color: var(--color-text);
+  font-size: 12px;
+}
+.water-volume-options button svg {
+  color: var(--color-accent);
+}
+.water-volume-options button[aria-pressed="true"] {
+  border-color: var(--color-accent);
+  background: var(--color-surface-raised);
+}
+.calorie-balance {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(120px, 1.5fr) minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  padding-block: 16px;
+}
+.calorie-balance .progress-ring {
+  width: 100%;
+  max-width: 220px;
+  margin: auto;
+}
+.calorie-balance-figure {
+  display: grid;
+  gap: 8px;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.calorie-balance-figure strong {
+  font-size: clamp(14px, 3vw, 22px);
+}
+.calorie-balance-figure span,
+.calorie-balance .ring-content span {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+.calorie-balance .ring-content strong {
+  font-size: clamp(18px, 4vw, 30px);
+}
+.calorie-balance > p {
+  grid-column: 1/-1;
+}
+@media (max-width: 350px) {
+  .calorie-balance {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .calorie-balance .progress-ring {
+    grid-column: 1/-1;
+    grid-row: 1;
+    max-width: 180px;
+  }
+}
+
+.form-grid > .water-volume-picker {
+  grid-column: 1 / -1;
+}

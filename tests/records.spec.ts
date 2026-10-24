@@ -45,7 +45,11 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
   await page.goto("/painel/agua");
   await page.locator(".record-create > summary").click();
   const water = form(page, "Salvar registro");
-  await water.getByLabel("Volume (ml)").fill("300");
+  await water.getByRole("button", { name: "300 ml", exact: true }).click();
+  await expect(water.getByLabel("Volume (ml)")).toHaveValue("300");
+  await expect(
+    page.getByText("Configurar meta com vigência", { exact: false }),
+  ).toHaveCount(0);
   await water
     .getByRole("button", { name: "Salvar registro", exact: true })
     .click();
@@ -136,9 +140,8 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
   await expect(
     page.locator(".nutrition-grid").getByText("Não informado", { exact: true }),
   ).toHaveCount(4);
-  await page.getByRole("button", { name: "Marcar dia como concluído" }).click();
   await expect(
-    page.getByText("Dia concluído manualmente.", { exact: false }),
+    page.getByText("Parcial: o diário", { exact: false }),
   ).toBeVisible();
   await page.locator(".meal-record-group > summary").click();
   await page
@@ -161,7 +164,7 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
     page.locator(".nutrition-grid").getByText("0 kcal", { exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByText("Dia ainda não confirmado.", { exact: false }),
+    page.getByText("Parcial: o diário", { exact: false }),
   ).toBeVisible();
   await capture("alimentacao");
   await page.goto("/painel");

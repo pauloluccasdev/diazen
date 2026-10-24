@@ -1,5 +1,6 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { mealFoods } from "./meal-registration";
 import { planTotals, type DietPlan } from "./diet-plan";
 export async function dashboardPlan(
   client: SupabaseClient,
@@ -20,12 +21,15 @@ export async function dashboardPlan(
   if (!version.data) return null;
   const categories = new Set<string>();
   const registeredMeals = new Set<number>();
+  const foodIndices = new Map<number, Set<number>>();
   const mealActuals: Record<number, { value: number | null; missing: number }> =
     {};
   for (let offset = 0; ; offset += 1000) {
     const result = await client
       .from("meal_items")
-      .select("category,plan_id,plan_meal_index,kcal,amount,reference_amount")
+      .select(
+        "category,plan_id,plan_meal_index,plan_food_index,kcal,amount,reference_amount",
+      )
       .eq("project_id", project)
       .eq("logged_on", date)
       .order("id")
@@ -39,6 +43,10 @@ export async function dashboardPlan(
         Number.isInteger(row.plan_meal_index)
       ) {
         registeredMeals.add(row.plan_meal_index);
+        const indices =
+          foodIndices.get(row.plan_meal_index) ?? new Set<number>();
+        indices.add(row.plan_food_index);
+        foodIndices.set(row.plan_meal_index, indices);
         const actual = mealActuals[row.plan_meal_index] ?? {
           value: null,
           missing: 0,
@@ -56,6 +64,14 @@ export async function dashboardPlan(
   }
   const document = version.data.document as DietPlan;
   return {
+    complete:
+      document.meals.some((m) => m.enabled) &&
+      document.meals.every(
+        (meal, index) =>
+          !meal.enabled ||
+          (mealFoods(meal).length > 0 &&
+            mealFoods(meal).every((_, fi) => foodIndices.get(index)?.has(fi))),
+      ),
     id: version.data.id,
     document,
     registeredMeals: [...registeredMeals],

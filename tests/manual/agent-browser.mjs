@@ -752,8 +752,7 @@ try {
         ),
         4,
       );
-      await clickText("Marcar dia como concluído");
-      await text("Dia concluído manualmente.");
+      await text("Parcial: o diário");
       for (const selector of [
         ".meal-record-group > summary",
         "article .food-record-details > summary",
@@ -769,7 +768,7 @@ try {
         "document.querySelector('article')",
       );
       await save("Salvar alteração", { kcal: 0 }, "0 kcal");
-      await text("Dia ainda não confirmado.");
+      await text("Parcial: o diário");
       await ab("reload");
       await ab("wait", "input[name=amount]");
       await save(
