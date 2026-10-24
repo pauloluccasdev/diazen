@@ -117,9 +117,8 @@ test("alimentos próprios, receitas, favoritos, recentes e cópia preservam o di
   await expect(page.getByRole("article", { includeHidden: true })).toHaveCount(
     2,
   );
-  await page.getByRole("button", { name: "Marcar dia como concluído" }).click();
   await expect(
-    page.getByText("Dia concluído manualmente.", { exact: false }),
+    page.getByText("Parcial: o diário", { exact: false }),
   ).toBeVisible();
   await page.getByText("Copiar refeição", { exact: true }).click();
   const copy = form(page, "Confirmar cópia da refeição");
@@ -141,7 +140,7 @@ test("alimentos próprios, receitas, favoritos, recentes e cópia preservam o di
     4,
   );
   await expect(
-    page.getByText("Dia ainda não confirmado.", { exact: false }),
+    page.getByText("Parcial: o diário", { exact: false }),
   ).toBeVisible();
   await page.reload();
   await expect(page.getByRole("article", { includeHidden: true })).toHaveCount(

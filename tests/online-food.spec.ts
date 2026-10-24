@@ -219,7 +219,7 @@ test("alimento tem resumo, troca explícita e referência online automática e e
       })
       .locator("dd"),
   ).toHaveText("0");
-  await expect(comparison).toContainText("Não informadas");
+  await expect(comparison).toContainText("Não informado");
   await page.goto("/painel/alimentacao");
   for (const [index, category] of [
     "breakfast",
@@ -266,7 +266,10 @@ test("alimento tem resumo, troca explícita e referência online automática e e
       .locator("dd"),
   ).toHaveText("2");
   await expect(comparison).toContainText("0 kcal");
-  await expect(comparison).toContainText("-503,5 kcal");
+  await expect(comparison.locator(".ring-content")).toContainText("503,5");
+  await expect(comparison.locator(".ring-content")).toContainText(
+    "kcal até o plano",
+  );
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   await comparison.screenshot({
     path: "artifacts/online-food-review/dashboard-comparison-390.png",

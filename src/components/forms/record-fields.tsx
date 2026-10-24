@@ -1,3 +1,4 @@
+import { WaterVolumePicker } from "@/components/water-volume-picker";
 import { ModalityPicker } from "@/components/modality-picker";
 import {
   categories,
@@ -95,18 +96,7 @@ export function RecordFields({
       {kind === "agua" && (
         <>
           <div className="form-grid">
-            <label>
-              Volume (ml)
-              <input
-                name="volume_ml"
-                type="number"
-                min={1}
-                max={5000}
-                step={1}
-                required
-                defaultValue={entry?.volume_ml ?? ""}
-              />
-            </label>
+            <WaterVolumePicker initial={entry?.volume_ml ?? ""} />
             <label>
               Horário (opcional)
               <input

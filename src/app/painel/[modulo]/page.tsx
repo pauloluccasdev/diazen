@@ -34,7 +34,7 @@ import { FoodConveniences } from "@/components/food-conveniences";
 import { ProgressRing } from "@/components/progress-ring";
 import { Droplets } from "lucide-react";
 import { WeightChart } from "@/components/weight-chart";
-import { saveRecord, deleteRecord, confirmMealDay } from "./actions";
+import { saveRecord, deleteRecord } from "./actions";
 function RecordPresentation({
   kind,
   row,
@@ -161,6 +161,18 @@ export default async function Records({
   const chart: Entry[] = graph.data ?? [];
   const days: { day: string; items: number; confirmed: boolean }[] =
     calendar.data ?? [];
+  const calendarStatus =
+    modulo === "alimentacao"
+      ? await Promise.all(
+          days.map(async (day) => ({
+            day: day.day,
+            complete:
+              day.day === date
+                ? diet?.complete
+                : (await dashboardPlan(client, selected.id, day.day))?.complete,
+          })),
+        )
+      : [];
   const renderRecord = (row: Entry) => (
     <article
       key={row.id}
@@ -440,9 +452,6 @@ export default async function Records({
                 </p>
               </>
             )}
-            <Link className="back-link" href="/painel/projetos">
-              Configurar meta com vigência →
-            </Link>
           </div>
         </section>
       )}
@@ -488,8 +497,9 @@ export default async function Records({
               >
                 <strong>{formatDate(day.day).slice(0, 5)}</strong>
                 <span>
-                  {day.confirmed
-                    ? "Concluído"
+                  {calendarStatus.find((status) => status.day === day.day)
+                    ?.complete
+                    ? "Completo"
                     : Number(day.items) > 0
                       ? "Parcial"
                       : "Sem registros"}
@@ -524,28 +534,17 @@ export default async function Records({
               })}
             </div>
             <p className="intro">
-              {summary.confirmed
-                ? "Dia concluído manualmente."
-                : "Dia ainda não confirmado."}{" "}
-              Conclusão não indica aderência nutricional.
+              {diet?.complete
+                ? "Completo: todas as refeições do plano foram registradas."
+                : Number(summary.food_count) > 0
+                  ? "Parcial: o diário ainda não contém todas as refeições do plano."
+                  : "Sem registros neste dia."}
             </p>
-            {editable && (
-              <ActionForm
-                action={confirmMealDay}
-                submit={
-                  summary.confirmed
-                    ? "Desfazer conclusão"
-                    : "Marcar dia como concluído"
-                }
-              >
-                <input type="hidden" name="logged_on" value={date} />
-                <input
-                  type="hidden"
-                  name="confirmed"
-                  value={String(!summary.confirmed)}
-                />
-              </ActionForm>
-            )}
+            <p className="field-hint">
+              O status é atualizado automaticamente pelos registros. Sem plano
+              salvo, não é possível determinar se todas as refeições foram
+              feitas.
+            </p>
           </section>
         </>
       )}
