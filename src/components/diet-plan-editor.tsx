@@ -1,6 +1,6 @@
 "use client";
 import { useState, useTransition, useSyncExternalStore } from "react";
-import { FileText, PencilLine } from "lucide-react";
+import { FileText, PencilLine, Globe, ArrowLeftRight } from "lucide-react";
 import { ActionDisclosure } from "./action-disclosure";
 import { useOnline } from "@/lib/use-online";
 import { readDietPdf, DietPdfError } from "@/lib/read-diet-pdf";
@@ -8,6 +8,7 @@ import {
   emptyComposition,
   analyzeDietPlan,
   applyPlanReference,
+  applyOnlinePlanReference,
   foodComposition,
   planTotals,
   planNutrients,
@@ -23,17 +24,21 @@ import {
 import { nutrients } from "@/lib/records";
 import { number } from "@/lib/domain";
 import { saveDietPlan } from "@/app/painel/plano/actions";
+import { OnlineFoodSearch } from "./online-food-search";
+import type { OnlineFoodReference } from "@/lib/online-food";
 const subscribeReady = () => () => {};
 function FoodReview({
   food,
   onChange,
   disabled,
   onApplyReference,
+  onUseOnline,
 }: {
   food: PlanFood;
   onChange: (food: PlanFood) => void;
   disabled: boolean;
   onApplyReference?: () => void;
+  onUseOnline: (reference: OnlineFoodReference) => void;
 }) {
   const [search, setSearch] = useState<string | null>(null);
   const query = search ?? (food.tacoId === null ? tacoName(food.name) : "");
@@ -44,7 +49,11 @@ function FoodReview({
   const values = foodComposition(food);
   return (
     <ActionDisclosure
-      title={`${food.name} · ${values.kcal === null ? "calorias pendentes" : `${number(values.kcal)} kcal`}`}
+      title={
+        values.kcal === null
+          ? "Completar dados nutricionais"
+          : "Revisar dados nutricionais"
+      }
       icon={PencilLine}
     >
       <div className="data-form">
@@ -182,6 +191,18 @@ function FoodReview({
               Usar valores informados
             </button>
           </>
+        )}
+        {food.tacoId === null && (
+          <ActionDisclosure title="Consultar na internet" icon={Globe}>
+            <OnlineFoodSearch
+              key={food.name}
+              name={food.name}
+              amount={food.amount}
+              unit={food.unit}
+              disabled={disabled}
+              onUse={onUseOnline}
+            />
+          </ActionDisclosure>
         )}
         <>
           <p className="intro">
@@ -392,6 +413,22 @@ export function DietPlanEditor({
                 : `${number(consumed.kcal)} kcal`}
               {consumed.missing > 0 ? " · parcial" : ""}.
             </p>
+            {plan.meals.some(
+              (meal) =>
+                meal.enabled &&
+                meal.groups.some(
+                  (group) =>
+                    group.included &&
+                    group.choices[group.selected].source.startsWith(
+                      "Referência padrão",
+                    ),
+                ),
+            ) && (
+              <p className="intro">
+                Os totais incluem referências padrão e podem variar conforme a
+                marca e o produto consumido.
+              </p>
+            )}
             <p className="intro">
               Comparação descritiva. O plano não confirma consumo nem aderência.
               As substituições entram no cálculo somente quando selecionadas;
@@ -466,44 +503,45 @@ export function DietPlanEditor({
                         ),
                       });
                     return (
-                      <div className="plan-food" key={gi}>
-                        <label className="checkbox-label">
-                          <input
-                            type="checkbox"
-                            checked={group.included}
-                            disabled={disabled}
-                            onChange={(e) =>
-                              patchGroup({ included: e.target.checked })
+                      <article
+                        className="plan-food"
+                        key={gi}
+                        aria-label={food.name}
+                      >
+                        <div className="plan-food-header">
+                          <div>
+                            <h3>{food.name}</h3>
+                            <p className="muted">
+                              {food.amount !== null && food.unit
+                                ? `${number(food.amount, 3)} ${food.unit}`
+                                : food.original}
+                            </p>
+                          </div>
+                          <strong
+                            className={
+                              group.included &&
+                              foodComposition(food).kcal === null
+                                ? "plan-food-pending"
+                                : ""
                             }
-                          />
-                          {food.optional
-                            ? "Incluir alimento opcional"
-                            : "Incluir alimento"}
-                          : {food.name}
-                        </label>
-                        {group.choices.length > 1 && (
-                          <label>
-                            Alimento ou substituição
-                            <select
-                              value={group.selected}
-                              disabled={disabled}
-                              onChange={(e) =>
-                                patchGroup({ selected: Number(e.target.value) })
-                              }
-                            >
-                              {group.choices.map((f, i) => (
-                                <option key={i} value={i}>
-                                  {i === 0 ? "Base: " : "Substituição: "}
-                                  {f.name} · {f.original}
-                                </option>
-                              ))}
-                            </select>
-                          </label>
-                        )}
+                          >
+                            {!group.included
+                              ? "Fora do cálculo"
+                              : foodComposition(food).kcal === null
+                                ? "Completar dados"
+                                : `${food.source.startsWith("Referência padrão") ? "≈ " : ""}${number(foodComposition(food).kcal!)} kcal`}
+                          </strong>
+                        </div>
                         {group.included && (
                           <FoodReview
+                            key={group.selected}
                             food={food}
                             disabled={disabled}
+                            onUseOnline={(reference) =>
+                              update(
+                                applyOnlinePlanReference(plan, food, reference),
+                              )
+                            }
                             onApplyReference={
                               plan.meals.some((m) =>
                                 m.groups.some((g) =>
@@ -540,7 +578,47 @@ export function DietPlanEditor({
                             }
                           />
                         )}
-                      </div>
+                        {group.included && group.choices.length > 1 && (
+                          <ActionDisclosure
+                            title="Trocar alimento"
+                            icon={ArrowLeftRight}
+                          >
+                            <label>
+                              Escolher alimento ou substituição
+                              <select
+                                value={group.selected}
+                                disabled={disabled}
+                                onChange={(e) =>
+                                  patchGroup({
+                                    selected: Number(e.target.value),
+                                  })
+                                }
+                              >
+                                {group.choices.map((choice, index) => (
+                                  <option key={index} value={index}>
+                                    {choice.name}
+                                    {choice.amount !== null && choice.unit
+                                      ? ` · ${number(choice.amount, 3)} ${choice.unit}`
+                                      : ""}
+                                  </option>
+                                ))}
+                              </select>
+                            </label>
+                          </ActionDisclosure>
+                        )}
+                        <button
+                          type="button"
+                          className="button-secondary plan-food-toggle"
+                          disabled={disabled}
+                          onClick={() =>
+                            patchGroup({ included: !group.included })
+                          }
+                        >
+                          {group.included
+                            ? "Retirar desta refeição"
+                            : "Incluir nesta refeição"}
+                        </button>
+                      </article>
                     );
                   })}
                   {editable && (

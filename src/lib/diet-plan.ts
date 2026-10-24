@@ -1,3 +1,4 @@
+import { type OnlineFoodReference, onlineFoodSource } from "./online-food.ts";
 import {
   tacoFoods,
   tacoPortion,
@@ -215,6 +216,52 @@ export function applyPlanReference(
             ? { ...food, tacoId: taco.id, source: tacoSource(taco) }
             : food,
         ),
+      })),
+    })),
+  };
+}
+export function applyOnlinePlanReference(
+  plan: DietPlan,
+  current: PlanFood,
+  reference: OnlineFoodReference,
+): DietPlan {
+  return {
+    ...plan,
+    meals: plan.meals.map((meal) => ({
+      ...meal,
+      groups: meal.groups.map((group) => ({
+        ...group,
+        choices: group.choices.map((food) => {
+          const pending =
+            food.tacoId === null &&
+            !food.source &&
+            planNutrients.every((key) => food.values[key] === null);
+          if (
+            food !== current &&
+            !(pending && tacoName(food.name) === tacoName(current.name))
+          )
+            return food;
+          if (food.amount === null || food.unit !== reference.unit) return food;
+          const values = Object.fromEntries(
+            planNutrients.map((key) => [
+              key,
+              reference.values[key] === null
+                ? null
+                : Number(
+                    (
+                      (reference.values[key]! * food.amount!) /
+                      reference.amount
+                    ).toFixed(3),
+                  ),
+            ]),
+          ) as Composition;
+          return {
+            ...food,
+            tacoId: null,
+            source: onlineFoodSource(reference),
+            values,
+          };
+        }),
       })),
     })),
   };

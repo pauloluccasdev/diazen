@@ -111,7 +111,10 @@ for (const mode of ["native", "compatibility", "server"] as const) {
     await expect(
       page.getByRole("button", { name: "Salvar versão do plano" }),
     ).toBeDisabled();
-    await page.getByText("Pão francês · 150 kcal", { exact: true }).click();
+    await page
+      .getByRole("article", { name: "Pão francês", exact: true })
+      .getByText("Revisar dados nutricionais", { exact: true })
+      .click();
     await expect(
       page.getByLabel("Calorias (kcal)", { exact: true }),
     ).toHaveValue("150");
