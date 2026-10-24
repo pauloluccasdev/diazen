@@ -23,16 +23,25 @@ test("alimento tem resumo, troca explícita e referência online automática e e
   await expect(page.getByLabel("Selecionar PDF")).toBeEnabled();
   const reference = {
     code: "1234567890123",
-    name: "Requeijão light fictício",
+    name: "Creme light fictício fictício",
     brand: "Marca de teste",
     amount: 30,
     unit: "g",
     values: { kcal: 60, protein: 3, carbs: 0, fat: 4 },
   };
   const calls: string[] = [];
+  let transient = true;
   await page.route("**/api/alimentos/online", async (route) => {
     const data = route.request().postDataJSON();
     calls.push(`${data.kind}:${data.query}`);
+    if (data.kind === "search" && transient) {
+      transient = false;
+      await route.fulfill({
+        status: 503,
+        json: { message: "Indisponibilidade transitória" },
+      });
+      return;
+    }
     if (data.kind === "product" && data.query === "1111111111111") {
       await route.fulfill({
         status: 404,
@@ -67,30 +76,49 @@ test("alimento tem resumo, troca explícita e referência online automática e e
       [
         [[50, "Refeição 1"]],
         [
-          [50, "Requeijão light"],
+          [50, "Creme light fictício"],
           [330, "20g"],
         ],
         [
-          [50, "Requeijão light"],
+          [50, "Creme light fictício"],
           [330, "30g"],
+        ],
+        [
+          [50, "Arroz branco"],
+          [330, "125g"],
+        ],
+        [
+          [50, "Peito de frango"],
+          [330, "150g"],
         ],
         [[50, "Observações:"]],
       ],
     ]),
   });
+  await expect(
+    page
+      .getByRole("article", { name: "Arroz branco", exact: true })
+      .getByText("≈ 160 kcal", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page
+      .getByRole("article", { name: "Peito de frango", exact: true })
+      .getByText("≈ 238,5 kcal", { exact: true }),
+  ).toBeVisible();
   const rows = page.getByRole("article", {
-    name: "Requeijão light",
+    name: "Creme light fictício",
     exact: true,
   });
   const row = rows.first();
   await expect(row.getByText("≈ 40 kcal", { exact: true })).toBeVisible({
-    timeout: 15000,
+    timeout: 25000,
   });
   await expect(
     rows.last().getByText("≈ 60 kcal", { exact: true }),
   ).toBeVisible();
   expect(calls).toEqual([
-    "search:Requeijão light",
+    "search:Creme light fictício",
+    "search:Creme light fictício",
     "product:1111111111111",
     `product:${reference.code}`,
   ]);
@@ -98,7 +126,7 @@ test("alimento tem resumo, troca explícita e referência online automática e e
     row.getByText("Consultar na internet", { exact: true }),
   ).toHaveCount(0);
   await expect(
-    row.getByRole("link", { name: "Open Food Facts", exact: true }),
+    row.getByRole("link", { name: "Conferir fonte", exact: true }),
   ).toBeVisible();
   await row.getByText("Revisar dados nutricionais", { exact: true }).click();
   await expect(row.getByLabel("Calorias (kcal)", { exact: true })).toHaveValue(
@@ -134,6 +162,17 @@ test("alimento tem resumo, troca explícita e referência online automática e e
   await row
     .getByRole("button", { name: "Incluir nesta refeição", exact: true })
     .click();
+  await expect(row.getByText("≈ 45 kcal", { exact: true })).toBeVisible();
+  const meal = page.locator("details.plan-meal").first();
+  const summary = meal.locator(":scope > summary");
+  await summary.focus();
+  await page.keyboard.press("Enter");
+  await expect(row).not.toBeVisible();
+  await expect(summary).toContainText("Refeição 1");
+  await meal.screenshot({
+    path: "artifacts/online-food-review/meal-collapsed-320.png",
+  });
+  await summary.click();
   await expect(row.getByText("≈ 45 kcal", { exact: true })).toBeVisible();
 });
 

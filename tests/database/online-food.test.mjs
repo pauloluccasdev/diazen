@@ -56,9 +56,9 @@ test("fonte online usa um rótulo completo, preserva zeros e não mistura regist
 test("referência padrão calcula porções repetidas sem trocar ml por g ou alterar fontes revisadas", () => {
   const p = parseDietPages([
     `Refeição 1
-Requeijão light    20g
-Requeijão light    40g
-Requeijão light    100ml
+Creme light fictício    20g
+Creme light fictício    40g
+Creme light fictício    100ml
 Observações:`,
   ]);
   const r = onlineFoodReference(product),

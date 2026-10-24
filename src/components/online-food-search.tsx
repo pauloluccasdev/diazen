@@ -16,15 +16,32 @@ async function request(
   if (delay) await new Promise((resolve) => setTimeout(resolve, delay));
   if (!active()) return null;
   next[kind] = Date.now() + (kind === "search" ? 6500 : 4500);
-  const r = await fetch("/api/alimentos/online", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ kind, query }),
-    signal: AbortSignal.timeout(15000),
-  });
-  if (r.status === 404) return null;
-  if (!r.ok) throw new Error("Consulta indisponível");
-  return r.json();
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const r = await fetch("/api/alimentos/online", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ kind, query }),
+        signal: AbortSignal.timeout(15000),
+      });
+      if (r.status === 404) return null;
+      if (r.ok) return r.json();
+      if (![429, 500, 502, 503, 504].includes(r.status))
+        throw new Error("Consulta recusada");
+    } catch (error) {
+      if (
+        attempt === 2 ||
+        (error instanceof Error && error.message === "Consulta recusada")
+      )
+        throw error;
+    }
+    if (attempt < 2) {
+      await new Promise((resolve) => setTimeout(resolve, 7000 * (attempt + 1)));
+      if (!active()) return null;
+      next[kind] = Date.now() + (kind === "search" ? 6500 : 4500);
+    }
+  }
+  throw new Error("Consulta indisponível");
 }
 function lookup(name: string, unit: "g" | "ml", active: () => boolean) {
   const key = `${name.trim().toLocaleLowerCase("pt-BR")}:${unit}`;
@@ -71,35 +88,56 @@ export function OnlineFoodSearch({
 }) {
   const apply = useEffectEvent(onUse);
   const [message, setMessage] = useState("Buscando referência padrão online…");
+  const [retry, setRetry] = useState(0);
+  const [failed, setFailed] = useState(false);
   useEffect(() => {
     if (disabled || !amount || !unit || name.trim().length < 2) return;
     let active = true;
     const timer = setTimeout(() => {
+      setFailed(false);
       setMessage("Buscando referência padrão online…");
       lookup(name, unit, () => active)
         .then((reference) => {
           if (!active) return;
           if (reference) apply(reference);
-          else
+          else {
+            setFailed(true);
             setMessage(
-              "Sem composição disponível. Você pode informar os valores abaixo.",
+              "Ainda não encontramos uma referência. Tentaremos novamente quando você solicitar.",
             );
+          }
         })
         .catch(() => {
-          if (active)
+          if (active) {
+            setFailed(true);
             setMessage(
-              "Consulta indisponível. Você pode informar os valores abaixo.",
+              "A fonte está temporariamente indisponível. Tentamos novamente automaticamente; você pode repetir a busca.",
             );
+          }
         });
     }, 1200);
     return () => {
       active = false;
       clearTimeout(timer);
     };
-  }, [name, amount, unit, disabled]);
+  }, [name, amount, unit, disabled, retry]);
   return message && !disabled && amount && unit ? (
-    <p className="field-hint" aria-live="polite">
-      {message}
-    </p>
+    <div className="plan-reference-status">
+      <p className="field-hint" aria-live="polite">
+        {message}
+      </p>
+      {failed && (
+        <button
+          type="button"
+          className="button-secondary"
+          onClick={() => {
+            cached.delete(`${name.trim().toLocaleLowerCase("pt-BR")}:${unit}`);
+            setRetry((v) => v + 1);
+          }}
+        >
+          Tentar buscar novamente
+        </button>
+      )}
+    </div>
   ) : null;
 }

@@ -45,10 +45,13 @@ Observações:`,
   assert.equal(p.meals[0].groups[0].choices[0].tacoId, 53);
   assert.equal(foodComposition(p.meals[0].groups[0].choices[0]).kcal, 150);
   assert.match(p.meals[0].groups[1].choices[0].source, /item 463/);
-  assert.equal(planTotals(p.meals).kcal.missing, 3);
+  assert.equal(planTotals(p.meals).kcal.missing, 0);
   const confirmed = applyPlanReference(p, "Peito de frango", 408);
-  assert.equal(confirmed.meals[1].groups[0].choices[0].tacoId, 408);
-  assert.equal(planTotals(confirmed.meals).kcal.missing, 1);
+  assert.match(
+    confirmed.meals[1].groups[0].choices[0].source,
+    /padrão.*grelhado/,
+  );
+  assert.equal(planTotals(confirmed.meals).kcal.missing, 0);
   assert.equal(p.meals[1].groups[0].choices[0].tacoId, null, "edição imutável");
   const manual = parseDietPages([
     `Café • 08:00
