@@ -2258,10 +2258,11 @@ input[type="date"]::-webkit-datetime-edit {
   }
 }
 .plan-workspace .plan-food {
-  border: 1px solid var(--color-border);
-  border-radius: 18px;
-  padding: 16px;
-  background: var(--color-surface-sunken);
+  border: 0;
+  border-top: 1px solid var(--color-border);
+  border-radius: 0;
+  padding: 20px 0;
+  background: transparent;
   gap: 12px;
   margin: 0;
 }
@@ -2300,26 +2301,27 @@ input[type="date"]::-webkit-datetime-edit {
   min-height: 44px;
   font-size: 13px;
 }
-.online-food-search {
-  display: grid;
-  gap: 16px;
+/* Keep food editing flat: one divider, without nested padded cards. */
+.plan-food > .project-setting {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
-.online-food-search > p:empty {
-  display: none;
+.plan-food > .project-setting > summary {
+  padding-inline: 0;
 }
-.online-food-result {
-  display: grid;
-  gap: 12px;
-  padding: 16px;
-  border: 1px solid var(--color-border);
-  border-radius: 14px;
-  overflow-wrap: anywhere;
+.plan-food > .project-setting > .project-setting-body {
+  padding: 16px 0 0;
 }
-.online-food-result p {
+.plan-food .field-hint {
   margin: 0;
   line-height: 1.6;
 }
-.online-food-result a,
-.online-food-search a {
+.plan-food-source {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+.plan-food-source a {
   text-decoration: underline;
 }

@@ -1,6 +1,13 @@
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { dietPdf } from "./fixtures/diet-pdf.mjs";
+// External nutrition is tested separately with deterministic provider responses.
+test.use({ serviceWorkers: "block" });
+test.beforeEach(async ({ page }) => {
+  await page.route("**/api/alimentos/online", (route) =>
+    route.fulfill({ json: { hits: [] } }),
+  );
+});
 async function emulateOlderPdfPlatform(page: Page) {
   // Simulates missing platform APIs in Safari versions preceding the newest engine.
   const removeRecentApis = () => {

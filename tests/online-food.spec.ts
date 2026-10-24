@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import { dietPdf } from "./fixtures/diet-pdf.mjs";
 import AxeBuilder from "@axe-core/playwright";
 test.use({ serviceWorkers: "block" });
-test("alimento tem resumo, troca explícita e fonte online confirmada por porção", async ({
+test("alimento tem resumo, troca explícita e referência online automática e editável por porção", async ({
   page,
 }) => {
   await page.goto("/entrar");
@@ -21,28 +21,6 @@ test("alimento tem resumo, troca explícita e fonte online confirmada por porç�
   await expect(page.getByRole("status")).toContainText("Projeto criado");
   await page.goto("/painel/plano");
   await expect(page.getByLabel("Selecionar PDF")).toBeEnabled();
-  await page.getByLabel("Selecionar PDF").setInputFiles({
-    name: "ficticio.pdf",
-    mimeType: "application/pdf",
-    buffer: dietPdf([
-      [
-        [[50, "Refeição 1"]],
-        [
-          [50, "Requeijão light"],
-          [330, "20g"],
-        ],
-        [[50, "Observações:"]],
-      ],
-    ]),
-  });
-  const row = page.getByRole("article", {
-    name: "Requeijão light",
-    exact: true,
-  });
-  await expect(row).toBeVisible();
-  await expect(row.getByText("20 g", { exact: true })).toBeVisible();
-  await row.getByText("Completar dados nutricionais", { exact: true }).click();
-  await row.getByText("Consultar na internet", { exact: true }).click();
   const reference = {
     code: "1234567890123",
     name: "Requeijão light fictício",
@@ -51,13 +29,27 @@ test("alimento tem resumo, troca explícita e fonte online confirmada por porç�
     unit: "g",
     values: { kcal: 60, protein: 3, carbs: 0, fat: 4 },
   };
+  const calls: string[] = [];
   await page.route("**/api/alimentos/online", async (route) => {
     const data = route.request().postDataJSON();
+    calls.push(`${data.kind}:${data.query}`);
+    if (data.kind === "product" && data.query === "1111111111111") {
+      await route.fulfill({
+        status: 404,
+        json: { message: "Rótulo sem composição" },
+      });
+      return;
+    }
     await route.fulfill({
       json:
         data.kind === "search"
           ? {
               hits: [
+                {
+                  code: "1111111111111",
+                  name: "Primeiro sem composição",
+                  brand: "Teste",
+                },
                 {
                   code: reference.code,
                   name: reference.name,
@@ -68,27 +60,58 @@ test("alimento tem resumo, troca explícita e fonte online confirmada por porç�
           : { reference },
     });
   });
-  await row
-    .getByRole("button", { name: "Consultar online", exact: true })
-    .click();
-  await row
-    .getByRole("button", {
-      name: "Ver composição de Requeijão light fictício",
-      exact: true,
-    })
-    .click();
-  await expect(row.getByLabel("Calorias (kcal)", { exact: true })).toHaveValue(
-    "",
-  );
-  await row
-    .getByRole("button", { name: "Usar esta referência padrão", exact: true })
-    .click();
+  await page.getByLabel("Selecionar PDF").setInputFiles({
+    name: "ficticio.pdf",
+    mimeType: "application/pdf",
+    buffer: dietPdf([
+      [
+        [[50, "Refeição 1"]],
+        [
+          [50, "Requeijão light"],
+          [330, "20g"],
+        ],
+        [
+          [50, "Requeijão light"],
+          [330, "30g"],
+        ],
+        [[50, "Observações:"]],
+      ],
+    ]),
+  });
+  const rows = page.getByRole("article", {
+    name: "Requeijão light",
+    exact: true,
+  });
+  const row = rows.first();
+  await expect(row.getByText("≈ 40 kcal", { exact: true })).toBeVisible({
+    timeout: 15000,
+  });
+  await expect(
+    rows.last().getByText("≈ 60 kcal", { exact: true }),
+  ).toBeVisible();
+  expect(calls).toEqual([
+    "search:Requeijão light",
+    "product:1111111111111",
+    `product:${reference.code}`,
+  ]);
+  await expect(
+    row.getByText("Consultar na internet", { exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    row.getByRole("link", { name: "Open Food Facts", exact: true }),
+  ).toBeVisible();
+  await row.getByText("Revisar dados nutricionais", { exact: true }).click();
   await expect(row.getByLabel("Calorias (kcal)", { exact: true })).toHaveValue(
     "40",
   );
   await expect(row.getByLabel("Fonte dos valores")).toHaveValue(
     /Open Food Facts/,
   );
+  await expect(row.getByLabel("Carboidratos (g)", { exact: true })).toHaveValue(
+    "0",
+  );
+  await row.getByLabel("Calorias (kcal)", { exact: true }).fill("45");
+  await expect(row.getByText("≈ 45 kcal", { exact: true })).toBeVisible();
   await page.setViewportSize({ width: 320, height: 844 });
   expect(
     await page.evaluate(
@@ -96,6 +119,14 @@ test("alimento tem resumo, troca explícita e fonte online confirmada por porç�
     ),
   ).toBe(true);
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  expect(
+    await row
+      .getByLabel("Calorias (kcal)", { exact: true })
+      .evaluate((el) => el.getBoundingClientRect().width),
+  ).toBeGreaterThan(180);
+  await row.screenshot({
+    path: "artifacts/online-food-review/automatic-row-320.png",
+  });
   await row
     .getByRole("button", { name: "Retirar desta refeição", exact: true })
     .click();
@@ -103,7 +134,7 @@ test("alimento tem resumo, troca explícita e fonte online confirmada por porç�
   await row
     .getByRole("button", { name: "Incluir nesta refeição", exact: true })
     .click();
-  await expect(row.getByText("≈ 40 kcal", { exact: true })).toBeVisible();
+  await expect(row.getByText("≈ 45 kcal", { exact: true })).toBeVisible();
 });
 
 test("consulta online bloqueia visitante e origem externa sem consultar o provedor", async ({

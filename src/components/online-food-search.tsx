@@ -1,11 +1,61 @@
 "use client";
-import { useState } from "react";
-import {
-  type OnlineFoodReference,
-  type OnlineFoodHit,
-  onlineFoodUrl,
-} from "@/lib/online-food";
-const nextQuery = { search: 0, product: 0 };
+import { useEffect, useEffectEvent, useState } from "react";
+import type { OnlineFoodReference, OnlineFoodHit } from "@/lib/online-food";
+
+// One queue per tab: imports may contain many foods, but the public provider
+// accepts only a few searches per minute. Repeated names share one lookup.
+let queue: Promise<unknown> = Promise.resolve();
+const next = { search: 0, product: 0 };
+const cached = new Map<string, Promise<OnlineFoodReference | null>>();
+async function request(
+  kind: "search" | "product",
+  query: string,
+  active: () => boolean,
+) {
+  const delay = Math.max(0, next[kind] - Date.now());
+  if (delay) await new Promise((resolve) => setTimeout(resolve, delay));
+  if (!active()) return null;
+  next[kind] = Date.now() + (kind === "search" ? 6500 : 4500);
+  const r = await fetch("/api/alimentos/online", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ kind, query }),
+    signal: AbortSignal.timeout(15000),
+  });
+  if (r.status === 404) return null;
+  if (!r.ok) throw new Error("Consulta indisponível");
+  return r.json();
+}
+function lookup(name: string, unit: "g" | "ml", active: () => boolean) {
+  const key = `${name.trim().toLocaleLowerCase("pt-BR")}:${unit}`;
+  const previous = cached.get(key);
+  if (previous) return previous;
+  const task = queue
+    .catch(() => {})
+    .then(async () => {
+      if (!active()) {
+        cached.delete(key);
+        return null;
+      }
+      const data = await request("search", name, active);
+      const hits: OnlineFoodHit[] = data?.hits ?? [];
+      for (const hit of hits) {
+        if (!active()) {
+          cached.delete(key);
+          return null;
+        }
+        const product = await request("product", hit.code, active);
+        const reference: OnlineFoodReference | undefined = product?.reference;
+        if (reference?.unit === unit && reference.values.kcal !== null)
+          return reference;
+      }
+      return null;
+    });
+  cached.set(key, task);
+  queue = task;
+  task.catch(() => cached.delete(key));
+  return task;
+}
 export function OnlineFoodSearch({
   name,
   amount,
@@ -19,155 +69,37 @@ export function OnlineFoodSearch({
   disabled: boolean;
   onUse: (reference: OnlineFoodReference) => void;
 }) {
-  const [query, setQuery] = useState(name),
-    [hits, setHits] = useState<OnlineFoodHit[]>([]),
-    [reference, setReference] = useState<OnlineFoodReference | null>(null),
-    [pending, setPending] = useState(false),
-    [message, setMessage] = useState("");
-  async function lookup(kind: "search" | "product", value: string) {
-    if (pending || disabled) return;
-    if (Date.now() < nextQuery[kind]) {
-      setMessage("Aguarde alguns segundos para uma nova consulta.");
-      return;
-    }
-    nextQuery[kind] = Date.now() + (kind === "search" ? 6500 : 4500);
-    setPending(true);
-    setMessage("");
-    setReference(null);
-    try {
-      const r = await fetch("/api/alimentos/online", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ kind, query: value }),
-      });
-      const data = await r.json();
-      if (!r.ok) {
-        setMessage(data.message ?? "Não foi possível consultar.");
-        return;
-      }
-      if (kind === "search") {
-        setHits(data.hits);
-        setReference(null);
-        if (!data.hits.length)
-          setMessage(
-            "Nenhum produto encontrado. Tente outro nome ou código de barras.",
-          );
-      } else {
-        setReference(data.reference);
-        setHits([]);
-      }
-    } catch {
-      setMessage("Confira a conexão e tente novamente.");
-    } finally {
-      setPending(false);
-    }
-  }
-  return (
-    <div className="online-food-search data-form">
-      <h4>Consultar outra fonte</h4>
-      <p className="intro">
-        Busca no Open Food Facts, base colaborativa de rótulos. Só o termo
-        pesquisado é enviado; confira o produto e use como referência padrão,
-        que pode variar por marca.
-      </p>
-      <label>
-        Nome ou código de barras
-        <input
-          value={query}
-          maxLength={100}
-          disabled={disabled || pending}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-      </label>
-      <button
-        type="button"
-        className="button-secondary"
-        disabled={disabled || pending || query.trim().length < 2}
-        onClick={() =>
-          lookup(
-            /^\d{8,14}$/.test(query.trim()) ? "product" : "search",
-            query.trim(),
-          )
-        }
-      >
-        {pending ? "Consultando…" : "Consultar online"}
-      </button>
-      <p aria-live="polite">{message}</p>
-      {hits.map((hit) => (
-        <div className="online-food-result" key={hit.code}>
-          <strong>{hit.name}</strong>
-          <span>
-            {hit.brand || "Marca não informada"} · {hit.code}
-          </span>
-          <button
-            type="button"
-            className="button-secondary"
-            disabled={disabled || pending}
-            aria-label={`Ver composição de ${hit.name}`}
-            onClick={() => lookup("product", hit.code)}
-          >
-            Ver composição deste produto
-          </button>
-        </div>
-      ))}
-      {reference && (
-        <div className="online-food-result">
-          <strong>
-            {reference.name} · {reference.brand}
-          </strong>
-          <p>
-            Referência por {reference.amount} {reference.unit}:{" "}
-            {reference.values.kcal ?? "não informado"} kcal · proteínas{" "}
-            {reference.values.protein ?? "não informado"} g · carboidratos{" "}
-            {reference.values.carbs ?? "não informado"} g · gorduras{" "}
-            {reference.values.fat ?? "não informado"} g.
-          </p>
-          <a
-            href={onlineFoodUrl(reference.code)}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Conferir rótulo e fonte ↗
-          </a>
-          <p>
-            Use esta composição como padrão apenas se corresponder ao alimento e
-            à versão desejada (por exemplo, light).
-          </p>
-          {(!amount || unit !== reference.unit) && (
-            <p className="form-error">
-              Informe acima uma porção em {reference.unit} para usar esta
-              referência. Não convertemos ml em g.
-            </p>
-          )}
-          <button
-            type="button"
-            className="button-primary"
-            disabled={disabled || pending || !amount || unit !== reference.unit}
-            onClick={() => onUse(reference)}
-          >
-            Usar esta referência padrão
-          </button>
-        </div>
-      )}
-      <p className="field-hint">
-        Dados:{" "}
-        <a
-          href="https://world.openfoodfacts.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Open Food Facts
-        </a>{" "}
-        ·{" "}
-        <a
-          href="https://opendatacommons.org/licenses/odbl/1-0/"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          ODbL
-        </a>
-        . Valores ausentes continuam pendentes.
-      </p>
-    </div>
-  );
+  const apply = useEffectEvent(onUse);
+  const [message, setMessage] = useState("Buscando referência padrão online…");
+  useEffect(() => {
+    if (disabled || !amount || !unit || name.trim().length < 2) return;
+    let active = true;
+    const timer = setTimeout(() => {
+      setMessage("Buscando referência padrão online…");
+      lookup(name, unit, () => active)
+        .then((reference) => {
+          if (!active) return;
+          if (reference) apply(reference);
+          else
+            setMessage(
+              "Sem composição disponível. Você pode informar os valores abaixo.",
+            );
+        })
+        .catch(() => {
+          if (active)
+            setMessage(
+              "Consulta indisponível. Você pode informar os valores abaixo.",
+            );
+        });
+    }, 1200);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [name, amount, unit, disabled]);
+  return message && !disabled && amount && unit ? (
+    <p className="field-hint" aria-live="polite">
+      {message}
+    </p>
+  ) : null;
 }
