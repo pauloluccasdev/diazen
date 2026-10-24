@@ -743,7 +743,7 @@ try {
       await save(
         "Salvar registro",
         { name: "Sem composição QA", amount: 150 },
-        "Sem composição QA",
+        "Refeição registrada.",
       );
       await count(1);
       assert.equal(
