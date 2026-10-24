@@ -141,6 +141,12 @@ async function clickText(value, tag = "button", scope = "document") {
 }
 async function field(name, value, scope = "", type = "fill") {
   const selector = `${scope} [name="${name}"]`.trim();
+  // Server actions can replace the filter after its result count is visible.
+  // Resolve a hydrated, visible control before taking accessibility references.
+  if (type === "select") await ab("wait", "--load", "networkidle");
+  await until(
+    `(() => { const e=document.querySelector(${JSON.stringify(selector)}); if(!e?.isConnected || !e.getClientRects().length || e.matches(':disabled') || !Object.keys(e).some(k=>k.startsWith('__reactProps')))return false; e.scrollIntoView({block:'center',behavior:'instant'}); return true; })()`,
+  );
   // Chromium's segmented date controls need their native value setter; typing
   // an ISO string with this CLI clears the control instead of selecting a date.
   if (
