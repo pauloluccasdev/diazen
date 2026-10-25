@@ -273,6 +273,11 @@ export default async function Panel({
                       {value}
                     </p>
                     <p>{detail}</p>
+                    {module === "atividades" && (
+                      <span className="field-hint">
+                        Consulte também sua conta Strava
+                      </span>
+                    )}
                     {module === "agua" &&
                       summary.water_ml !== null &&
                       summary.water_goal !== null && (

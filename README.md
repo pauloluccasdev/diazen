@@ -130,3 +130,6 @@ A migração incremental `202610240011_plan_meal_records.sql` adiciona origem do
 O dashboard oferece **Histórico geral** (`/painel/historico`) do projeto ativo: calendário mensal aberto, seleção de um dia e resultados em accordion por data, com grupos de refeições, hidratação, atividades, peso, medidas e fotos. A consulta não muda o projeto ativo; fotos abrem na galeria privada. Projetos anteriores continuam disponíveis em Projetos.
 
 A consulta por data fica centralizada no Histórico geral. As telas operacionais mantêm os campos de data para salvar registros retroativos, mas não exibem seletores de consulta nem a faixa de dias da Alimentação. A navegação no calendário mostra logo e “Carregando registros…” enquanto aguarda os dados.
+
+
+Atividades inclui conexão opcional com Strava para consultar até cinco atividades recentes da própria conta, incluindo calorias quando informadas pelo provedor. A consulta é independente dos registros manuais, sem importar dados para o projeto ou compará-los com alimentação. Requer OAuth e variáveis privadas do aplicativo Strava. Veja [configuração, limites e validação](docs/integracao-strava.md).
