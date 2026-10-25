@@ -131,7 +131,8 @@ export default async function Records({
     .order("logged_on", { ascending: false })
     .order("id", { ascending: false })
     .range((page - 1) * 20, page * 20);
-  if (daily || filters.data) query = query.eq("logged_on", date);
+  if (daily || modulo === "atividades" || filters.data)
+    query = query.eq("logged_on", date);
   const week = weekBounds(date);
   const [entries, totals, graph, diet, weekCounts] = await Promise.all([
     query.returns<Entry[]>(),
@@ -542,7 +543,12 @@ export default async function Records({
         className="records-section"
         aria-label="Histórico de registros"
       >
-        <h2>{daily || filters.data ? "Registros do dia" : "Histórico"}</h2>
+        <h2>
+          {daily || modulo === "atividades" || filters.data
+            ? "Registros do dia"
+            : "Histórico"}
+        </h2>
+        {modulo === "atividades" && <p className="muted">{formatDate(date)}</p>}
         {!rows.length && (
           <p className="intro">
             {!daily && filters.data

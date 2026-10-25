@@ -24,7 +24,7 @@ export function WeightChart({ rows }: { rows: Entry[] }) {
       <svg
         viewBox="0 0 600 202"
         role="img"
-        aria-label={`Peso nas últimas ${values.length} medições: de ${number(values[0].kg!)} a ${number(values.at(-1)!.kg!)} kg. Os valores estão no histórico abaixo.`}
+        aria-label={`Peso nas últimas ${values.length} medições: de ${number(values[0].kg!)} a ${number(values.at(-1)!.kg!)} kg. Toque em Peso para consultar as medições.`}
       >
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">

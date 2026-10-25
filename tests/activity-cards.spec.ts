@@ -16,6 +16,12 @@ test("semana de atividades e cards expansíveis preservam métricas e edição",
     .getByLabel("Nome do projeto", { exact: true })
     .fill("Semana de atividades QA");
   await page.getByLabel("Meta diária de água (ml)").fill("2000");
+  const startInput = page.getByLabel("Início", { exact: true });
+  const currentDate = await startInput.inputValue();
+  const previous = new Date(`${currentDate}T12:00:00Z`);
+  previous.setUTCDate(previous.getUTCDate() - 1);
+  const previousDate = previous.toISOString().slice(0, 10);
+  await startInput.fill(previousDate);
   await page
     .getByRole("button", { name: "Criar projeto", exact: true })
     .click();
@@ -70,8 +76,25 @@ test("semana de atividades e cards expansíveis preservam métricas e edição",
   await expect(week.locator(".has-records")).toHaveCount(1);
   await expect(week.locator('[aria-current="date"]')).toHaveAttribute(
     "href",
-    /\/painel\/historico\?data=/,
+    /\/painel\/atividades\?data=/,
   );
+  const currentHref = await week
+    .locator('[aria-current="date"]')
+    .getAttribute("href");
+  const otherDay = week.locator('a:not([aria-current="date"])').first();
+  if (await otherDay.count()) {
+    await otherDay.click();
+    await expect(page).toHaveURL(
+      /\/painel\/atividades\?data=.*#registros-do-dia/,
+    );
+    await expect(page.locator("article.activity-record")).toHaveCount(0);
+    await page.goto(currentHref!);
+  }
+  await week.locator('[aria-current="date"]').click();
+  await expect(page).toHaveURL(
+    /\/painel\/atividades\?data=.*#registros-do-dia/,
+  );
+  await expect(card).toBeVisible();
   await page.setViewportSize({ width: 320, height: 844 });
   const cardWidth = (await card.boundingBox())!.width;
   expect(
@@ -89,4 +112,37 @@ test("semana de atividades e cards expansíveis preservam métricas e edição",
   await page
     .locator(".activity-week-summary")
     .screenshot({ path: "artifacts/activity-week-320.png" });
+  await page.goto("/painel/peso");
+  await page.locator(".record-create > summary").click();
+  const weight = page.locator("form").filter({
+    has: page.getByRole("button", { name: "Salvar peso", exact: true }),
+  });
+  await weight.locator('input[name="logged_on"]').fill(previousDate);
+  await weight.getByLabel("Peso (kg)").fill("94");
+  await weight
+    .getByRole("button", { name: "Salvar peso", exact: true })
+    .click();
+  await expect(weight.getByRole("status")).toContainText("Peso salvo");
+  await weight.locator('input[name="logged_on"]').fill(currentDate);
+  await weight.getByLabel("Peso (kg)").fill("92");
+  await weight
+    .getByRole("button", { name: "Salvar peso", exact: true })
+    .click();
+  await expect(weight.getByRole("status")).toContainText("Peso salvo");
+  await page.goto("/painel");
+  const weightCard = page.locator(".metric-peso");
+  await expect(weightCard).toContainText("94 → 92 kg");
+  await expect(weightCard).toContainText("-2 kg no período");
+  await expect(
+    weightCard.getByRole("img", { name: /Peso nas últimas 2 medições/ }),
+  ).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await weightCard.screenshot({
+    path: "artifacts/dashboard-weight-comparison-320.png",
+  });
 });

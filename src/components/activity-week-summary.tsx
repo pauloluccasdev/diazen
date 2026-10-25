@@ -33,6 +33,8 @@ export function ActivityWeekSummary({
     window.addEventListener("resize", center);
     return () => window.removeEventListener("resize", center);
   }, [date]);
+  const dayHref = (value: string) =>
+    `/painel/atividades?${historyProject ? `projeto=${historyProject}&` : ""}data=${value}#registros-do-dia`;
   const historyHref = (value: string) =>
     historyProject
       ? `/painel/atividades?projeto=${historyProject}&data=${value}`
@@ -117,7 +119,7 @@ export function ActivityWeekSummary({
             <HistoryLink
               key={value}
               className={`activity-week-day${count ? " has-records" : ""}${value === date ? " is-selected" : ""}`}
-              href={historyHref(value)}
+              href={dayHref(value)}
               aria-current={value === date ? "date" : undefined}
             >
               {content}
@@ -127,8 +129,8 @@ export function ActivityWeekSummary({
         })}
       </nav>
       <p className="field-hint">
-        Os dias marcados têm atividades registradas. Toque em um dia para
-        consultar o histórico.
+        Os dias marcados têm atividades registradas. Toque em um dia para ver as
+        atividades abaixo.
       </p>
       <HistoryLink className="activity-week-history" href={historyHref(date)}>
         Ver histórico de atividades{" "}

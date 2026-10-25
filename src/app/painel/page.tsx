@@ -1,3 +1,4 @@
+import { WeightChart } from "@/components/weight-chart";
 import { garminConfig } from "@/lib/garmin-config";
 import { CalorieBalance } from "@/components/calorie-balance";
 import Link from "next/link";
@@ -17,7 +18,7 @@ import { LogoutButton } from "@/components/logout-button";
 import { OfflineSnapshot } from "@/components/offline-snapshot";
 import { dashboardPlan } from "@/lib/dashboard-plan";
 import { projectContext } from "@/lib/data";
-import type { Summary } from "@/lib/records";
+import type { Entry, Summary } from "@/lib/records";
 import { statusLabel, formatDate, today, isDate, number } from "@/lib/domain";
 export const metadata = { title: "Seu painel" };
 export const dynamic = "force-dynamic";
@@ -34,15 +35,27 @@ export default async function Panel({
       : selected?.ends_on && selected.ends_on < today()
         ? selected.ends_on
         : today();
+  let weights: Entry[] = [];
   let summary: Summary | null = null;
   let diet: Awaited<ReturnType<typeof dashboardPlan>> = null;
   if (selected) {
-    const [result, comparison] = await Promise.all([
+    const [result, comparison, weightResult] = await Promise.all([
       client.rpc("project_summary", { p_project: selected.id, p_date: date }),
       dashboardPlan(client, selected.id, date),
+      client
+        .from("weights")
+        .select("*")
+        .eq("project_id", selected.id)
+        .lte("logged_on", date)
+        .order("logged_on", { ascending: false })
+        .limit(30)
+        .returns<Entry[]>(),
     ]);
     const { data, error } = result;
     diet = comparison;
+    if (weightResult.error)
+      throw new Error("Falha ao carregar evolução do peso");
+    weights = weightResult.data ?? [];
     if (error) throw new Error("Falha ao carregar indicadores");
     summary = data as Summary;
   }
@@ -274,6 +287,49 @@ export default async function Panel({
                       {value}
                     </p>
                     <p>{detail}</p>
+                    {module === "peso" && weights.length >= 2 && (
+                      <>
+                        <p className="metric-comparison">
+                          {number(weights.at(-1)!.kg!, 2)} →{" "}
+                          {number(weights[0].kg!, 2)} kg ·{" "}
+                          {Number(weights[0].kg) - Number(weights.at(-1)!.kg) >
+                          0
+                            ? "+"
+                            : ""}
+                          {number(
+                            Number(weights[0].kg) - Number(weights.at(-1)!.kg),
+                            2,
+                          )}{" "}
+                          kg no período
+                        </p>
+                        <WeightChart rows={weights} />
+                      </>
+                    )}
+                    {module === "atividades" &&
+                      selected.sessions_goal !== null && (
+                        <div className="metric-comparison">
+                          <span>
+                            {summary.sessions ?? 0} de {selected.sessions_goal}{" "}
+                            sessões na semana
+                          </span>
+                          <progress
+                            value={summary.sessions ?? 0}
+                            max={selected.sessions_goal || 1}
+                            aria-label="Sessões registradas em relação à meta semanal"
+                          />
+                        </div>
+                      )}
+                    {module === "alimentacao" && diet && (
+                      <p className="metric-comparison">
+                        {summary.kcal === null
+                          ? "Sem consumo registrado"
+                          : `${number(summary.kcal)} kcal registradas`}{" "}
+                        ·{" "}
+                        {diet.totals.kcal.value === null
+                          ? "Plano sem calorias informadas"
+                          : `${number(diet.totals.kcal.value)} kcal planejadas`}
+                      </p>
+                    )}
                     {module === "atividades" && garminConfig(user.id) && (
                       <span className="field-hint">
                         Consulte suas atividades da Garmin
