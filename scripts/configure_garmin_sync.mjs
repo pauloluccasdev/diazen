@@ -20,8 +20,10 @@ export function garminScheduleSql(site, secret, enabled = false) {
   const command =
     "select net.http_post(url := (select decrypted_secret from vault.decrypted_secrets where name='diazen_garmin_sync_url'), headers := jsonb_build_object('Authorization','Bearer '||(select decrypted_secret from vault.decrypted_secrets where name='diazen_garmin_sync_secret'),'Content-Type','application/json'), body := '{}'::jsonb, timeout_milliseconds := 60000);";
   return `begin;
- create extension if not exists pg_cron with schema pg_catalog;
- create extension if not exists pg_net with schema extensions;
+ do $extensions$ begin
+ if not exists(select 1 from pg_extension where extname='pg_cron') then create extension pg_cron with schema pg_catalog;end if;
+ if not exists(select 1 from pg_extension where extname='pg_net') then create extension pg_net with schema extensions;end if;
+ end $extensions$;
  grant usage on schema cron to postgres;
  grant all privileges on all tables in schema cron to postgres;
  revoke all on schema net,cron from public,anon,authenticated;
