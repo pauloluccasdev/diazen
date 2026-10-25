@@ -2,10 +2,17 @@ import { apiAccount } from "@/lib/api-account";
 import { garminConfig, garminHeaders } from "@/lib/garmin-config";
 import { garminActivities, GarminFailure } from "@/lib/garmin-provider";
 import { siteUrl } from "@/lib/site-url";
+import { createHash } from "node:crypto";
+import type { GarminActivity } from "@/lib/garmin-provider";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
-let nextRequest = 0;
+// A brief, private cache deduplicates refreshes instead of rejecting the user.
+let recent: {
+  identity: string;
+  expires: number;
+  result: Promise<GarminActivity[]>;
+} | null = null;
 export async function POST(request: Request) {
   if (!siteUrl() || request.headers.get("origin") !== siteUrl())
     return new Response(null, { status: 403, headers: garminHeaders });
@@ -21,15 +28,29 @@ export async function POST(request: Request) {
       { message: "Consulta Garmin indisponível para esta conta." },
       { status: 403, headers: garminHeaders },
     );
-  if (Date.now() < nextRequest)
-    return Response.json(
-      { message: "Aguarde um minuto antes de atualizar novamente." },
-      { status: 429, headers: { ...garminHeaders, "Retry-After": "60" } },
-    );
-  nextRequest = Date.now() + 60000;
   try {
+    const identity = createHash("sha256")
+      .update(`${account.user.id}:${config.key}`)
+      .digest("hex");
+    if (
+      !recent ||
+      recent.identity !== identity ||
+      recent.expires <= Date.now()
+    ) {
+      const entry = {
+        identity,
+        expires: Date.now() + 60000,
+        result: garminActivities(config.key),
+      };
+      recent = entry;
+      const cleanup = () => {
+        if (recent === entry) recent = null;
+      };
+      void entry.result.catch(cleanup);
+      setTimeout(cleanup, 60000).unref();
+    }
     return Response.json(
-      { activities: await garminActivities(config.key) },
+      { activities: await recent.result },
       { headers: garminHeaders },
     );
   } catch (cause) {
@@ -42,7 +63,7 @@ export async function POST(request: Request) {
             ? "A chave Garmin expirou ou foi revogada. Atualize a chave da integração."
             : reason === "rate_limit"
               ? "A Garmin limitou as consultas. Aguarde alguns minutos e tente novamente."
-              : "Não foi possível consultar a Garmin agora. Tente novamente em um minuto.",
+              : "Não foi possível consultar a Garmin agora. Tente novamente.",
       },
       {
         status:

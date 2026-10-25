@@ -101,6 +101,23 @@ test("Garmin pessoal: consulta compacta, feedback, calorias ausentes e limpeza",
   ).toHaveAttribute("href", "https://connect.garmin.com/modern/activity/101");
   await expect(section).toContainText("30 min");
   await expect(section).toContainText("5 km");
+  await page.unroute("**/api/garmin/activities");
+  await page.route("**/api/garmin/activities", async (route) => {
+    await route.fulfill({
+      status: 502,
+      json: { message: "Falha temporária na Garmin. Tente novamente." },
+    });
+  });
+  await section
+    .getByRole("button", {
+      name: "Consultar atividades da Garmin",
+      exact: true,
+    })
+    .click();
+  await expect(section.getByRole("alert")).toContainText("Falha temporária");
+  await expect(
+    section.getByText("Corrida fictícia", { exact: true }),
+  ).toBeVisible();
   const after = await (await page.request.get("/api/exportar")).json();
   expect(after.activities).toEqual(before.activities);
   expect(after.meal_items).toEqual(before.meal_items);

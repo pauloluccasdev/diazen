@@ -32,9 +32,10 @@ const post = (origin = "http://localhost:3100") =>
     method: "POST",
     headers: { origin },
   });
+let sequence = 0;
 beforeEach(() => {
   process.env.NEXT_PUBLIC_SITE_URL = "http://localhost:3100";
-  process.env.GARMIN_PERSONAL_API_KEY = "synthetic-personal-key";
+  process.env.GARMIN_PERSONAL_API_KEY = `synthetic-personal-key-${++sequence}`;
   process.env.GARMIN_OWNER_USER_ID = "owner";
   globalThis.__garminUser = "owner";
   globalThis.fetch = async () => {
@@ -139,16 +140,65 @@ test("respostas inválidas, token vazio e erro privado não vazam", async () => 
     (error) => error.reason === "unavailable",
   );
 });
-test("API retorna apenas atividades, não expõe chave e limita consultas repetidas", async () => {
-  globalThis.fetch = async (url) =>
-    String(url).includes("personalapitoken")
+test("API reaproveita consultas repetidas sem erro, sem revelar chave e mantendo autorização", async () => {
+  let calls = 0;
+  globalThis.fetch = async (url) => {
+    calls++;
+    return String(url).includes("personalapitoken")
       ? new Response(token)
       : Response.json([{ activityId: 1, calories: 0 }]);
+  };
   const response = await route.POST(post());
   assert.equal(response.status, 200);
   assert.match(response.headers.get("cache-control"), /private, no-store/);
   const body = await response.json();
   assert.equal(body.activities[0].calories, 0);
   assert.ok(!JSON.stringify(body).includes("synthetic"));
-  assert.equal((await route.POST(post())).status, 429);
+  assert.equal((await route.POST(post())).status, 200);
+  assert.equal(calls, 2);
+  globalThis.__garminUser = "other";
+  assert.equal((await route.POST(post())).status, 403);
+  assert.equal(calls, 2);
+  globalThis.__garminUser = "owner";
+  process.env.GARMIN_PERSONAL_API_KEY = "rotated-synthetic-key";
+  assert.equal((await route.POST(post())).status, 200);
+  assert.equal(calls, 4);
+});
+
+test("falha não bloqueia nova tentativa e solicitações simultâneas compartilham a leitura", async () => {
+  globalThis.fetch = async () => new Response("private-error", { status: 500 });
+  const failed = await route.POST(post());
+  assert.equal(failed.status, 502);
+  assert.ok(!JSON.stringify(await failed.json()).includes("private-error"));
+  let calls = 0,
+    release;
+  const gate = new Promise((resolve) => {
+    release = resolve;
+  });
+  globalThis.fetch = async (url) => {
+    calls++;
+    if (String(url).includes("personalapitoken")) {
+      await gate;
+      return new Response(token);
+    }
+    return Response.json([{ activityId: 2 }]);
+  };
+  const first = route.POST(post()),
+    second = route.POST(post());
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(calls, 1);
+  release();
+  assert.deepEqual(
+    (await Promise.all([first, second])).map((r) => r.status),
+    [200, 200],
+  );
+  assert.equal(calls, 2);
+  const now = Date.now;
+  try {
+    Date.now = () => now() + 61000;
+    assert.equal((await route.POST(post())).status, 200);
+    assert.equal(calls, 4);
+  } finally {
+    Date.now = now;
+  }
 });
