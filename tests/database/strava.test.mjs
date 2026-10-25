@@ -291,3 +291,15 @@ test("sessão vencida e integração sem configuração não iniciam conexão", 
   assert.equal((await connect.POST(post("connect"))).status, 503);
   assert.equal((await (await activities.GET()).json()).configured, false);
 });
+
+test("sem sessão não afirma revogação remota e rejeita tokens vazios", async () => {
+  const result = await disconnect.POST(post("disconnect"));
+  assert.match((await result.json()).message, /Não foi possível confirmar/);
+  await assert.rejects(
+    () =>
+      stravaToken("fake", "fake", { code: "fake" }, async () =>
+        response({ ...token(), access_token: "" }),
+      ),
+    (error) => error.reason === "unavailable",
+  );
+});
