@@ -15,11 +15,13 @@ export async function POST(request: Request) {
   if (!account)
     return new Response(null, { status: 401, headers: stravaHeaders });
   const session = await stravaSession(account.user.id);
-  let revoked = true;
+  let revoked = false;
   try {
     const config = stravaConfig();
-    if (session && config)
+    if (session && config) {
       await revokeStrava(config.id, config.secret, session.refresh_token);
+      revoked = true;
+    }
   } catch {
     revoked = false;
   }

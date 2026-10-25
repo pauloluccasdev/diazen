@@ -41,7 +41,9 @@ export async function stravaToken(
   );
   if (
     typeof data.access_token !== "string" ||
+    !data.access_token ||
     typeof data.refresh_token !== "string" ||
+    !data.refresh_token ||
     data.access_token.length > 1000 ||
     data.refresh_token.length > 1000 ||
     !Number.isFinite(data.expires_at)
