@@ -1,7 +1,7 @@
 // Operational setup: Supabase Cron calls the private Diazen sync route.
 // Credentials are loaded locally and stored encrypted in Vault, never printed.
 import { pathToFileURL } from "node:url";
-export function garminScheduleSql(site, secret, enabled = false) {
+export function garminScheduleSql(site, secret, enabled = false, bypass) {
   const url = new URL(site);
   if (
     url.protocol !== "https:" ||
@@ -15,10 +15,21 @@ export function garminScheduleSql(site, secret, enabled = false) {
     !/^[A-Za-z0-9_-]{32,128}$/.test(secret)
   )
     throw Error("Configure origem HTTPS e segredo privado válidos.");
+  if (bypass !== undefined && !/^[a-zA-Z0-9]{32}$/.test(bypass))
+    throw Error("Configure segredo de automação válido.");
   const quote = (value) => "'" + value.replaceAll("'", "''") + "'";
   const endpoint = url.origin + "/api/garmin/sync";
-  const command =
+  let command =
     "select net.http_post(url := (select decrypted_secret from vault.decrypted_secrets where name='diazen_garmin_sync_url'), headers := jsonb_build_object('Authorization','Bearer '||(select decrypted_secret from vault.decrypted_secrets where name='diazen_garmin_sync_secret'),'Content-Type','application/json'), body := '{}'::jsonb, timeout_milliseconds := 60000);";
+  if (bypass)
+    command = command.replace(
+      "'Content-Type','application/json'",
+      "'Content-Type','application/json','x-vercel-protection-bypass',(select decrypted_secret from vault.decrypted_secrets where name='diazen_garmin_vercel_bypass')",
+    );
+  const bypassSql = bypass
+    ? `select id into current_id from vault.secrets where name='diazen_garmin_vercel_bypass';
+ if current_id is null then perform vault.create_secret(${quote(bypass)},'diazen_garmin_vercel_bypass');else perform vault.update_secret(current_id,${quote(bypass)});end if;`
+    : "";
   return `begin;
  do $extensions$ begin
  if not exists(select 1 from pg_extension where extname='pg_cron') then create extension pg_cron with schema pg_catalog;end if;
@@ -34,6 +45,7 @@ export function garminScheduleSql(site, secret, enabled = false) {
  if current_id is null then perform vault.create_secret(${quote(endpoint)},'diazen_garmin_sync_url');else perform vault.update_secret(current_id,${quote(endpoint)});end if;
  select id into current_id from vault.secrets where name='diazen_garmin_sync_secret';
  if current_id is null then perform vault.create_secret(${quote(secret)},'diazen_garmin_sync_secret');else perform vault.update_secret(current_id,${quote(secret)});end if;
+ ${bypassSql}
  end $setup$;
  select cron.schedule('diazen-garmin-sync','*/15 * * * *',${quote(command)});
  select cron.alter_job((select jobid from cron.job where jobname='diazen-garmin-sync'),active := ${enabled ? "true" : "false"});
@@ -68,6 +80,7 @@ export async function configureGarmin(args = process.argv.slice(2)) {
         process.env.GARMIN_SYNC_SITE_URL,
         process.env.GARMIN_SYNC_SECRET,
         args.includes("--enable"),
+        process.env.GARMIN_VERCEL_BYPASS_SECRET,
       ),
       false,
     );

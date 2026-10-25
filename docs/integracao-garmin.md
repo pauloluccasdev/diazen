@@ -8,9 +8,9 @@ Extensão autorizada em 25/10/2026, substituindo Strava. Após a consulta inicia
 - `GARMIN_OWNER_USER_ID`: UUID da única conta Diazen autorizada.
 - `GARMIN_SYNC_ENABLED=true`: habilita a verificação automática no aplicativo aberto.
 - `GARMIN_SYNC_SECRET`: segredo aleatório de 32–128 caracteres base64url, exclusivamente para chamadas do agendador.
-- `GARMIN_SYNC_SITE_URL`: origem HTTPS da prévia, usada apenas pela ferramenta administrativa local.
+- `GARMIN_SYNC_SITE_URL`: origem HTTPS de destino do agendador, usada apenas pela ferramenta administrativa local. Atualmente: `https://diazen.vercel.app`.
 
-Nenhuma variável usa `NEXT_PUBLIC_`. Chave, segredo e UUID permanecem em `.env.local` ignorado e variáveis privadas da Vercel, restritas a `preview/develop`. Não se configura produção/main. Não envie credenciais pelo chat ou Git. Rotacionar a chave exige atualizar o arquivo privado, a Secret na Vercel e publicar nova implantação. O agendador tem credencial própria, independente da chave Garmin.
+Nenhuma variável usa `NEXT_PUBLIC_`. Chave, segredo e UUID permanecem em `.env.local` ignorado e variáveis privadas da Vercel, configuradas em `preview/develop` e, por autorização do proprietário em 25/10/2026, também em Production para a `main`. Não envie credenciais pelo chat ou Git. Rotacionar a chave exige atualizar o arquivo privado, a Secret na Vercel e publicar nova implantação. O agendador tem credencial própria, independente da chave Garmin.
 
 O servidor envia `Authorization: ApiKey …` ao endpoint oficial e recebe JWT em `text/plain`. Usa esse token apenas em chamadas ao host oficial com `Authorization: Bearer …`. Não retorna credenciais, não segue redirects e não imprime respostas do provedor. A API pessoal não exige callback OAuth. A integração Strava foi retirada; cookies legados são apagados no logout/exclusão.
 
@@ -45,7 +45,7 @@ Com configuração administrativa local e migração aplicada:
 ```bash
 # Preparar/atualizar o agendamento desativado, antes de publicar a rota
 npm run garmin:cron -- --apply
-# Depois de validar a nova implantação da develop
+# Depois de validar a implantação no destino configurado
 npm run garmin:cron -- --apply --enable
 # Inspecionar somente flags, sem revelar credenciais
 npm run garmin:cron
@@ -75,3 +75,12 @@ Chamadas têm timeout, host fixo e limite de leitura de 1 MB. Localização, fot
 - [OpenAPI oficial](https://developer.garmin.com/gc-developer-program/personal/swagger-docs/): Activity List, Activity Summary, SummaryDTO, ActivityTypeDTO.
 - [Supabase Cron](https://supabase.com/docs/guides/cron), [agendamento com Vault/pg_net](https://supabase.com/docs/guides/functions/schedule-functions), [permissões do pg_net](https://supabase.com/docs/guides/database/extensions/pg_net).
 - [Limites de cron Vercel](https://vercel.com/docs/cron-jobs/usage-and-pricing), [execução em produção](https://vercel.com/docs/cron-jobs/manage-cron-jobs).
+
+
+## Produção — 25/10/2026
+
+O proprietário autorizou ativar a integração no deploy da main. As quatro variáveis privadas Garmin e as configurações essenciais Supabase foram adicionadas a Production; a origem é https://diazen.vercel.app. O mesmo banco e as mesmas configurações por usuário preservam histórico, preferências, marco inicial e deduplicação. O deploy foi refeito a partir da main já publicada, sem alteração de código nessa branch. Os callbacks de produção foram acrescentados ao Supabase Auth, preservando os existentes.
+
+O projeto Vercel exige autenticação também em produção. O agendador usa Protection Bypass for Automation somente na chamada HTTP, além do segredo próprio exigido pela API Diazen. A proteção Vercel não foi desativada. `GARMIN_VERCEL_BYPASS_SECRET` fica apenas no arquivo operacional local e no Supabase Vault; nunca no comando cron ou navegador. A ferramenta de configuração aceita essa variável opcional. O único job existente passa a chamar o domínio de produção a cada quinze minutos, sem criar um segundo agendamento. O acesso humano ainda pode exigir login Vercel antes do login Diazen.
+
+Validação operacional: nova implantação de produção READY; chamada autenticada à rota HTTP 200; job único ativo com intervalo de quinze minutos, destino de produção confirmado e chamada pg_net respondendo HTTP 200. Testes do gerador SQL cobrem segredo no Vault e ausência de segredo no comando cron. A homologação de uso declarada pelo proprietário não substitui essas verificações operacionais.
