@@ -45,7 +45,8 @@ export function GarminConnection() {
   }
   function consult() {
     if (!online || pending) return;
-    clear();
+    setMessage("");
+    setError("");
     controller.current = new AbortController();
     const signal = controller.current.signal;
     startTransition(async () => {
@@ -56,16 +57,20 @@ export function GarminConnection() {
           signal,
         });
         const data = await response.json().catch(() => ({}));
-        if (!response.ok || !Array.isArray(data.activities))
+        if (!response.ok || !Array.isArray(data.activities)) {
+          if (response.status === 401 || response.status === 403)
+            setActivities([]);
           throw Error(
             data.message ||
               "Não foi possível consultar a Garmin. Tente novamente.",
           );
+        }
         if (signal.aborted) return;
         setActivities(data.activities);
+        if (expiry.current) clearTimeout(expiry.current);
         setMessage(
           data.activities.length
-            ? "Consulta atualizada com o Garmin Connect."
+            ? "Atividades consultadas no Garmin Connect."
             : "Nenhuma atividade encontrada no Garmin Connect. Sincronize seu dispositivo e consulte novamente.",
         );
         expiry.current = setTimeout(

@@ -52,12 +52,12 @@ export default function Privacy() {
         adicionais.
       </p>
       <p>
-        Os resultados ficam apenas na memória desta tela por até quinze minutos,
-        sem acesso offline, cópia para o diário, exportação ou backups. A
-        consulta não modifica suas atividades na Garmin. Você pode limpar os
-        resultados na tela e revogar o acesso excluindo sua chave pessoal no
-        Garmin Connect. Sair da conta ou excluir a conta Diazen impede novas
-        consultas.
+        Os resultados podem ser reaproveitados na memória do servidor por até um
+        minuto e ficam na memória desta tela por até quinze minutos, sem acesso
+        offline, cópia para o diário, exportação ou backups. A consulta não
+        modifica suas atividades na Garmin. Você pode limpar os resultados na
+        tela e revogar o acesso excluindo sua chave pessoal no Garmin Connect.
+        Sair da conta ou excluir a conta Diazen impede novas consultas.
       </p>
       <h2>Dispositivo e conexão</h2>
       <p>
