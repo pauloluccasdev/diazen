@@ -80,8 +80,11 @@ export default function Privacy() {
       <p>
         A instalação usa cookies de sessão. A leitura offline pode mostrar um
         resumo previamente consultado nesta sessão do navegador; sair da conta
-        apaga esse resumo. Fotos não são armazenadas para leitura offline. Evite
-        deixar sua sessão aberta em dispositivo compartilhado.
+        apaga esse resumo. Uma preferência visual guarda apenas se a
+        apresentação da Garmin já foi vista, para recolher essa seção nas
+        próximas visitas; ela não contém atividades ou credenciais. Fotos não
+        são armazenadas para leitura offline. Evite deixar sua sessão aberta em
+        dispositivo compartilhado.
       </p>
       <h2>Exportação e exclusão</h2>
       <p>

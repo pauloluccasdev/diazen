@@ -133,3 +133,5 @@ A consulta por data fica centralizada no Histórico geral. As telas operacionais
 
 
 Atividades inclui Garmin Personal API exclusivamente para a conta proprietária configurada no servidor. Permite selecionar atividades anteriores para importar e salvar automaticamente as novas, com título, tipo, data, duração, distância e calorias disponíveis. Respeita o projeto ativo, evita duplicações e preserva edições/exclusões do diário. A sincronização ocorre ao abrir o aplicativo e a cada quinze minutos pelo Supabase Cron. Requer a migração incremental 012 e configuração privada; veja [operação, limites e validação Garmin](docs/integracao-garmin.md).
+
+Na tela Atividades, a apresentação da Garmin abre na primeira visita e começa recolhida nas seguintes, com um accordion acessível. Um marcador visual no navegador guarda apenas que a apresentação já foi vista. O resumo semanal destaca os dias com registros; cada atividade mostra duração, distância e calorias disponíveis em um card, com edição e exclusão recolhidas nos detalhes. A importação automática continua funcionando com a seção fechada.
