@@ -41,7 +41,10 @@ export async function GET(request: Request) {
     state.until > Date.now() &&
     state.state === params.get("state") &&
     params.get("code") &&
-    params.get("scope")?.split(",").includes("activity:read_all") &&
+    params
+      .get("scope")
+      ?.split(/[\s,]+/)
+      .includes("activity:read_all") &&
     !params.has("error")
   ) {
     try {

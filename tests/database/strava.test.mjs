@@ -137,7 +137,7 @@ test("OAuth aceita uma autorização válida uma vez e isola a conexão por cont
     assert.equal(init.cache, "no-store");
     return response(token());
   };
-  const url = `http://localhost:3100/api/strava/callback?state=${state}&code=synthetic&scope=activity:read_all`;
+  const url = `http://localhost:3100/api/strava/callback?state=${state}&code=synthetic&scope=read%20activity:read_all`;
   assert.match(
     (await callback.GET(new Request(url))).headers.get("location"),
     /strava=connected/,
