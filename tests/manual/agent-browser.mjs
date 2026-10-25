@@ -891,7 +891,13 @@ try {
       assert.deepEqual((await ab("errors")).errors, []);
     },
   );
-  if (!hosted)
+  if (!hosted) {
+    // Keep the deliberately failed SSR root in its own browser session. React
+    // can report recovery diagnostics after navigation, even after networkidle.
+    // A separate session prevents those expected events from leaking into photos.
+    const normalSession = activeSession;
+    activeSession = session + "-server-fault";
+    await login("registros@example.test");
     await check(
       "RNF005 recoverable server failure preserves records",
       async () => {
@@ -933,6 +939,9 @@ try {
       // Later scenarios retain strict exception checks.
       true,
     );
+    await ab("close");
+    activeSession = normalSession;
+  }
   await check(
     "RF016-017 upload, private WebP, comparison and confirmed deletion",
     async () => {
