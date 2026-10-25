@@ -164,6 +164,14 @@ export function RecordFields({
         ))}
       {kind === "atividades" && (
         <>
+          <label>
+            Título (opcional)
+            <input
+              name="name"
+              maxLength={200}
+              defaultValue={entry?.name ?? ""}
+            />
+          </label>
           <ModalityPicker initial={entry?.modality} />
           <div className="form-grid">
             <label>
@@ -183,16 +191,28 @@ export function RecordFields({
               <input
                 name="distance_km"
                 type="number"
-                min="0.001"
+                min={entry?.external_provider === "garmin" ? "0" : "0.001"}
                 max={1000}
                 step="0.001"
                 defaultValue={entry?.distance_km ?? ""}
               />
             </label>
           </div>
+          <label>
+            Calorias da atividade (kcal, opcional)
+            <input
+              name="kcal"
+              type="number"
+              min="0"
+              max="100000"
+              step="0.01"
+              defaultValue={entry?.kcal ?? ""}
+            />
+          </label>
           <p className="muted">
-            Distância obrigatória para corrida, ciclismo e natação. Na
-            musculação, basta informar a duração.
+            {entry?.external_provider === "garmin"
+              ? "Você pode revisar os dados importados. Distância e calorias não informadas pela Garmin podem permanecer em branco."
+              : "Distância obrigatória para corrida, ciclismo e natação. Na musculação e em outras atividades, basta informar a duração."}
           </p>
           <label>
             Descrição (opcional)

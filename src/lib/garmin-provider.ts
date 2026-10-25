@@ -13,6 +13,9 @@ export type GarminActivity = {
   seconds: number | null;
   metres: number | null;
   calories: number | null;
+  startedAt?: string | null;
+  imported?: boolean;
+  removed?: boolean;
 };
 const host = "https://personal.connectapi.garmin.com";
 async function read(response: Response) {
@@ -50,16 +53,12 @@ function n(value: unknown) {
     ? value
     : null;
 }
-export async function garminActivities(
-  key: string,
-  transport: typeof fetch = fetch,
-): Promise<GarminActivity[]> {
+async function garminGet(key: string, path: string, transport: typeof fetch) {
   const options = {
     cache: "no-store" as const,
     redirect: "error" as const,
     signal: AbortSignal.timeout(15000),
   };
-  // The documented Personal token endpoint returns a JWT as text/plain.
   const token = (
     await read(
       await transport(
@@ -74,44 +73,139 @@ export async function garminActivities(
   ).trim();
   if (token.length > 16000 || !/^[\w-]+\.[\w-]+\.[\w-]+$/.test(token))
     throw new GarminFailure("unavailable");
-  const raw = await read(
-    await transport(
-      `${host}/activitylist-service/activities/search/activities?start=0&limit=5&sortOrder=desc&sortBy=startLocal&excludeChildren=true`,
-      { ...options, headers: { Authorization: `Bearer ${token}` } },
-    ),
-  );
-  let list: unknown;
   try {
-    list = JSON.parse(raw);
-  } catch {
+    return JSON.parse(
+      await read(
+        await transport(`${host}${path}`, {
+          ...options,
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ),
+    );
+  } catch (cause) {
+    if (cause instanceof GarminFailure) throw cause;
     throw new GarminFailure("unavailable");
   }
+}
+function normalize(item: Record<string, unknown>): GarminActivity | null {
+  const id = String(item.activityId);
+  if (!/^\d{1,20}$/.test(id)) return null;
+  const type = item.activityType as { typeKey?: unknown } | undefined;
+  const utc =
+    typeof item.startTimeGMT === "string" &&
+    /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?Z?$/.test(
+      item.startTimeGMT,
+    )
+      ? Date.parse(item.startTimeGMT.replace(" ", "T").replace(/Z$/, "") + "Z")
+      : NaN;
+  return {
+    id,
+    name:
+      typeof item.activityName === "string" && item.activityName.trim()
+        ? item.activityName.slice(0, 200)
+        : "Atividade",
+    sport:
+      typeof type?.typeKey === "string"
+        ? type.typeKey.slice(0, 60)
+        : "Atividade",
+    date:
+      typeof item.startTimeLocal === "string"
+        ? item.startTimeLocal.slice(0, 19)
+        : "",
+    seconds: n(item.duration),
+    metres: n(item.distance),
+    calories: n(item.calories),
+    startedAt: Number.isFinite(utc) ? new Date(utc).toISOString() : null,
+  };
+}
+export async function garminActivities(
+  key: string,
+  transport: typeof fetch = fetch,
+  query: { start?: number; limit?: number; startDate?: string } = {},
+): Promise<GarminActivity[]> {
+  const limit = query.limit ?? 5;
+  if (
+    !Number.isInteger(limit) ||
+    limit < 1 ||
+    limit > 100 ||
+    !Number.isInteger(query.start ?? 0) ||
+    (query.start ?? 0) < 0 ||
+    (query.start ?? 0) > 100000
+  )
+    throw new GarminFailure("unavailable");
+  const params = new URLSearchParams({
+    start: String(query.start ?? 0),
+    limit: String(limit),
+    sortOrder: "desc",
+    sortBy: "startLocal",
+    excludeChildren: "true",
+  });
+  if (query.startDate && /^\d{4}-\d{2}-\d{2}$/.test(query.startDate))
+    params.set("startDate", query.startDate);
+  const list = await garminGet(
+    key,
+    `/activitylist-service/activities/search/activities?${params}`,
+    transport,
+  );
   if (!Array.isArray(list)) throw new GarminFailure("unavailable");
   const seen = new Set<string>();
-  return list.slice(0, 5).flatMap((item): GarminActivity[] => {
+  return list.slice(0, limit).flatMap((item) => {
     if (!item || typeof item !== "object") return [];
-    const id = String(item.activityId);
-    if (!/^\d{1,20}$/.test(id) || seen.has(id)) return [];
-    seen.add(id);
-    return [
-      {
-        id,
-        name:
-          typeof item.activityName === "string"
-            ? item.activityName.slice(0, 200)
-            : "Atividade",
-        sport:
-          typeof item.activityType?.typeKey === "string"
-            ? item.activityType.typeKey.slice(0, 60)
-            : "Atividade",
-        date:
-          typeof item.startTimeLocal === "string"
-            ? item.startTimeLocal.slice(0, 19)
-            : "",
-        seconds: n(item.duration),
-        metres: n(item.distance),
-        calories: n(item.calories),
-      },
-    ];
+    const normalized = normalize(item);
+    if (!normalized || seen.has(normalized.id)) return [];
+    seen.add(normalized.id);
+    return [normalized];
   });
+}
+export async function garminActivity(
+  key: string,
+  id: string,
+  transport: typeof fetch = fetch,
+): Promise<GarminActivity> {
+  if (!/^\d{1,20}$/.test(id)) throw new GarminFailure("unavailable");
+  const detail = await garminGet(
+    key,
+    `/activity-service/activity/${id}`,
+    transport,
+  );
+  if (!detail || String(detail.activityId) !== id || !detail.summaryDTO)
+    throw new GarminFailure("unavailable");
+  const normalized = normalize({
+    ...detail.summaryDTO,
+    activityId: detail.activityId,
+    activityName: detail.activityName,
+    activityType: detail.activityTypeDTO,
+  });
+  if (!normalized) throw new GarminFailure("unavailable");
+  return normalized;
+}
+export function garminModality(sport: string) {
+  if (["strength_training"].includes(sport)) return "strength";
+  if (
+    [
+      "running",
+      "trail_running",
+      "treadmill_running",
+      "indoor_running",
+      "track_running",
+      "virtual_run",
+    ].includes(sport)
+  )
+    return "running";
+  if (
+    [
+      "cycling",
+      "road_biking",
+      "road_cycling",
+      "indoor_cycling",
+      "mountain_biking",
+      "virtual_ride",
+      "gravel_cycling",
+      "e_bike_fitness",
+    ].includes(sport)
+  )
+    return "cycling";
+  if (["swimming", "lap_swimming", "open_water_swimming"].includes(sport))
+    return "swimming";
+  return "other";
 }

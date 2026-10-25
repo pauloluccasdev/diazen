@@ -12,7 +12,7 @@ import {
   modules,
   categories,
   measurements,
-  modalities,
+  activityModality,
   units,
   type Entry,
 } from "@/lib/records";
@@ -31,7 +31,7 @@ function description(row: Record) {
   if (row.kind === "medidas")
     return `${measurements[row.measurement_type!]} · ${number(row.value_cm!, 2)} cm`;
   if (row.kind === "atividades")
-    return `${modalities[row.modality!]} · ${number(row.duration_min!)} min${row.distance_km == null ? "" : ` · ${number(row.distance_km)} km`}`;
+    return `${row.name ? `${row.name} · ` : ""}${activityModality(row)} · ${number(row.duration_min!)} min${row.distance_km == null ? "" : ` · ${number(row.distance_km)} km`}${row.kcal == null ? "" : ` · ${number(row.kcal)} kcal`}${row.external_provider === "garmin" ? " · Garmin Connect" : ""}`;
   if (row.kind === "fotos") return "Fotografia privada";
   return `${row.name} · ${number(row.amount!, 3)} ${units[row.unit!]} · ${row.kcal == null ? "Calorias não informadas" : `${number((Number(row.kcal) * Number(row.amount)) / Number(row.reference_amount))} kcal`}`;
 }

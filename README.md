@@ -6,7 +6,7 @@ Stack: Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4 e Supabase 
 
 Uma prévia pública da `develop` está disponível na Vercel; o painel exige login Diazen. Veja [publicação e configuração de autenticação](docs/publicacao.md); o lançamento em produção continua pendente dos gates de homologação e review.
 
-O Supabase anteriormente usado pelo Planna foi resetado por autorização do proprietário e já recebeu as migrações 001 a 011. As migrações 009 (conveniências alimentares), 010 (planos) e 011 (registro de refeições) foram aplicadas incrementalmente, sem novo reset. Os fluxos essenciais passaram no serviço real com contas temporárias removidas ao final. Consulte [evidências e pendências de homologação](docs/homologacao-supabase.md). **Não reaplique o bundle nesse ambiente.**
+O Supabase anteriormente usado pelo Planna foi resetado por autorização do proprietário e já recebeu as migrações 001 a 012. As migrações 009 (conveniências alimentares), 010 (planos) e 011 (registro de refeições) e 012 (importação Garmin) foram aplicadas incrementalmente, sem novo reset. Os fluxos essenciais passaram no serviço real com contas temporárias removidas ao final. Consulte [evidências e pendências de homologação](docs/homologacao-supabase.md). **Não reaplique o bundle nesse ambiente.**
 
 ## Executar
 
@@ -132,4 +132,4 @@ O dashboard oferece **Histórico geral** (`/painel/historico`) do projeto ativo:
 A consulta por data fica centralizada no Histórico geral. As telas operacionais mantêm os campos de data para salvar registros retroativos, mas não exibem seletores de consulta nem a faixa de dias da Alimentação. A navegação no calendário mostra logo e “Carregando registros…” enquanto aguarda os dados.
 
 
-Atividades inclui consulta à Garmin Personal API, exclusivamente para a conta proprietária configurada no servidor. Mostra até cinco atividades recentes, com duração, distância e calorias fornecidas pela Garmin, em linhas recolhíveis. Não há callback nem importação automática no diário. A conexão Strava foi substituída. Veja [configuração, limites e validação Garmin](docs/integracao-garmin.md).
+Atividades inclui Garmin Personal API exclusivamente para a conta proprietária configurada no servidor. Permite selecionar atividades anteriores para importar e salvar automaticamente as novas, com título, tipo, data, duração, distância e calorias disponíveis. Respeita o projeto ativo, evita duplicações e preserva edições/exclusões do diário. A sincronização ocorre ao abrir o aplicativo e a cada quinze minutos pelo Supabase Cron. Requer a migração incremental 012 e configuração privada; veja [operação, limites e validação Garmin](docs/integracao-garmin.md).
