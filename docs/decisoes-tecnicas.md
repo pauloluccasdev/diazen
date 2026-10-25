@@ -472,3 +472,8 @@ O resumo semanal exibe sessões versus meta quando definida e os dias com regist
 O proprietário corrigiu a navegação dos dias no resumo de atividades: cada dia seleciona a data na própria tela e apresenta os registros abaixo, com feedback pendente existente e âncora da listagem. O link explícito do histórico permanece disponível. O projeto selecionado é preservado quando informado; a consulta inicial de atividades também se limita ao dia atual. Isso substitui o encaminhamento dos dias ao histórico central da decisão anterior.
 
 Os cards do dashboard comparam alimentação registrada com plano quando disponível, água com meta vigente e sessões com meta semanal. Peso ocupa a largura da grade, reutiliza o gráfico existente das últimas trinta medições até a data selecionada e informa a diferença entre a primeira e a última desse período, sem juízo de aderência ou sucesso. Sem duas medições, permanece o último peso conhecido sem inventar tendência. Consultas autenticadas filtradas pelo projeto, sem migração ou alteração do destino dos registros. RF-012/014/018/019; RNF-002/004/007/008/011.
+
+
+## Ajuste — Cards de peso e sessões compactos — 25/10/2026
+
+Por solicitação do proprietário, o card Peso volta a ocupar uma coluna da grade, alinhado aos demais, mantendo comparação e gráfico compacto. O card Atividades com meta mostra apenas sessões registradas versus meta e barra âmbar, removendo o título numérico e textos repetidos; sem meta mantém a informação de sessões e ausência de configuração. RF-018; RNF-007/008/011. Sem mudanças de consultas ou banco.
