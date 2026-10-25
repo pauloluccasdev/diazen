@@ -3375,9 +3375,6 @@ input[type="date"]::-webkit-datetime-edit {
 }
 
 /* Comparações do dashboard preservam o contexto do período e os dados ausentes. */
-.area-card.metric-peso {
-  grid-column: 1 / -1;
-}
 .metric-comparison {
   color: var(--color-text);
   font-size: 14px;
@@ -3395,4 +3392,36 @@ input[type="date"]::-webkit-datetime-edit {
 }
 .records-section {
   scroll-margin-top: 24px;
+}
+
+.metric-atividades .metric-comparison > span {
+  display: block;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+.metric-comparison progress {
+  appearance: none;
+  border: 0;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--color-border);
+}
+.metric-comparison progress::-webkit-progress-bar {
+  background: var(--color-border);
+}
+.metric-comparison progress::-webkit-progress-value {
+  background: var(--color-accent);
+  border-radius: 999px;
+}
+.metric-comparison progress::-moz-progress-bar {
+  background: var(--color-accent);
+  border-radius: 999px;
+}
+.area-card.metric-peso .weight-chart {
+  margin-top: 12px;
+  padding: 8px;
+}
+.area-card.metric-peso .weight-chart figcaption {
+  display: none;
 }

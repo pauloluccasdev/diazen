@@ -1,5 +1,4 @@
 import { WeightChart } from "@/components/weight-chart";
-import { garminConfig } from "@/lib/garmin-config";
 import { CalorieBalance } from "@/components/calorie-balance";
 import Link from "next/link";
 import {
@@ -28,7 +27,7 @@ export default async function Panel({
   searchParams: Promise<{ projeto?: string; data?: string }>;
 }) {
   const params = await searchParams,
-    { selected, active, client, user } = await projectContext(params.projeto);
+    { selected, active, client } = await projectContext(params.projeto);
   const date =
     params.data && isDate(params.data)
       ? params.data
@@ -281,12 +280,17 @@ export default async function Panel({
                       {label}
                       <span aria-hidden="true">›</span>
                     </h3>
-                    <p
-                      className={`metric-value${empty ? " metric-empty" : ""}`}
-                    >
-                      {value}
-                    </p>
-                    <p>{detail}</p>
+                    {(module !== "atividades" ||
+                      selected.sessions_goal === null) && (
+                      <>
+                        <p
+                          className={`metric-value${empty ? " metric-empty" : ""}`}
+                        >
+                          {value}
+                        </p>
+                        <p>{detail}</p>
+                      </>
+                    )}
                     {module === "peso" && weights.length >= 2 && (
                       <>
                         <p className="metric-comparison">
@@ -329,11 +333,6 @@ export default async function Panel({
                           ? "Plano sem calorias informadas"
                           : `${number(diet.totals.kcal.value)} kcal planejadas`}
                       </p>
-                    )}
-                    {module === "atividades" && garminConfig(user.id) && (
-                      <span className="field-hint">
-                        Consulte suas atividades da Garmin
-                      </span>
                     )}
                     {module === "agua" &&
                       summary.water_ml !== null &&

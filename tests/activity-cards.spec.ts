@@ -145,4 +145,12 @@ test("semana de atividades e cards expansíveis preservam métricas e edição",
   await weightCard.screenshot({
     path: "artifacts/dashboard-weight-comparison-320.png",
   });
+  await page.setViewportSize({ width: 390, height: 844 });
+  const activityBox = await page.locator(".metric-atividades").boundingBox();
+  const weightBox = await weightCard.boundingBox();
+  expect(Math.abs(activityBox!.y - weightBox!.y)).toBeLessThan(2);
+  expect(Math.abs(activityBox!.width - weightBox!.width)).toBeLessThan(2);
+  await page
+    .locator(".area-grid")
+    .screenshot({ path: "artifacts/dashboard-compact-cards-390.png" });
 });
