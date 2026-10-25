@@ -454,3 +454,7 @@ Autorização: solicitação explícita do proprietário, inclusive escolha “S
 ## Correção operacional — Reconfiguração idempotente do agendador Garmin — 25/10/2026
 
 O Supabase executa gatilhos de privilégios mesmo ao receber CREATE EXTENSION IF NOT EXISTS para uma extensão já instalada. A reaplicação pode falhar por privilégios dependentes. A ferramenta passa a consultar pg_extension antes de emitir DDL, preservando extensões existentes e usando cron.alter_job para ativar/desativar somente o job do Diazen. Reaplicação confirmada no serviço real, sem CASCADE, remoção de extensões ou alteração de jobs alheios. A chamada pg_net à rota publicada respondeu HTTP 200 e o job de quinze minutos foi habilitado. Sem alteração do schema operacional ou da interface.
+
+## Verificação — Isolar a falha deliberada do roteiro de auditoria — 25/10/2026
+
+A CI apresentou um diagnóstico recuperável React 419 da simulação intencional de falha de leitura durante a etapa seguinte de fotos, embora os testes Chromium/WebKit e o mesmo roteiro local passassem. O cenário de falha passa a usar sessão de navegador separada, encerrada antes de retornar à sessão normal. A auditoria continua exigindo ausência de exceções nas demais etapas, sem ampliar filtros ou ignorar erros de fotos. O roteiro completo passou localmente com o isolamento. Não altera código ou comportamento do aplicativo.
