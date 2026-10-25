@@ -86,6 +86,10 @@ test("Garmin pessoal: consulta compacta, feedback, calorias ausentes e limpeza",
   );
   const section = page.getByRole("region", { name: "Atividades da Garmin" });
   await expect(section).toBeVisible();
+  await expect(section.locator(".garmin-panel-details")).toHaveAttribute(
+    "open",
+    "",
+  );
   const exportedBefore = await page.request.get("/api/exportar");
   expect(exportedBefore.status()).toBe(200);
   const before = await exportedBefore.json();
@@ -114,8 +118,10 @@ test("Garmin pessoal: consulta compacta, feedback, calorias ausentes e limpeza",
   await expect(
     section.locator("li").filter({ hasText: "Treino fictício" }),
   ).toContainText("Sem calorias informadas");
-  await expect(section.locator("details[open]")).toHaveCount(0);
-  await section.locator("summary").first().click();
+  await expect(section.locator(".garmin-activity-details[open]")).toHaveCount(
+    0,
+  );
+  await section.locator(".garmin-activity-details > summary").first().click();
   await expect(
     section
       .getByRole("link", { name: "Ver no Garmin Connect", exact: false })
@@ -166,6 +172,10 @@ test("Garmin pessoal: consulta compacta, feedback, calorias ausentes e limpeza",
   expect(after.activities).toEqual(before.activities);
   expect(after.meal_items).toEqual(before.meal_items);
   await page.setViewportSize({ width: 320, height: 844 });
+  const panelWidth = (await section.boundingBox())!.width;
+  expect(
+    (await section.locator(".garmin-panel-summary").boundingBox())!.width,
+  ).toBeGreaterThan(panelWidth - 50);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
@@ -186,6 +196,25 @@ test("Garmin pessoal: consulta compacta, feedback, calorias ausentes e limpeza",
     .getByRole("button", { name: "Limpar consulta", exact: true })
     .click();
   await expect(section.locator("li")).toHaveCount(0);
+  await page.goto("/painel");
+  await page.goto("/painel/atividades");
+  await expect(section.locator(".garmin-panel-details")).not.toHaveAttribute(
+    "open",
+    "",
+  );
+  await expect(
+    section.getByRole("button", {
+      name: "Consultar atividades da Garmin",
+      exact: true,
+    }),
+  ).not.toBeVisible();
+  await section.locator(".garmin-panel-summary").click();
+  await expect(
+    section.getByRole("button", {
+      name: "Consultar atividades da Garmin",
+      exact: true,
+    }),
+  ).toBeVisible();
   await context.addCookies([
     {
       name: "diazen-strava-session",

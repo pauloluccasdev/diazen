@@ -3069,3 +3069,307 @@ input[type="date"]::-webkit-datetime-edit {
 .garmin-selection {
   font-size: 14px;
 }
+
+/* Atividades: integração recolhível, semana e registros com métricas. */
+.garmin-panel-details {
+  border: 0;
+  padding: 0;
+  background: none;
+  border-radius: 0;
+}
+.garmin-panel-summary {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 20px;
+  gap: 12px;
+  align-items: center;
+  list-style: none;
+  cursor: pointer;
+  min-height: 56px;
+}
+.garmin-panel-summary::-webkit-details-marker {
+  display: none;
+}
+.garmin-panel-summary .icon-box {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  border-radius: 14px;
+}
+.garmin-panel-summary h2 {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.3;
+}
+.garmin-panel-summary small {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+  margin-top: 6px;
+}
+.garmin-panel-details[open] > .garmin-panel-summary > svg {
+  transform: rotate(180deg);
+}
+.garmin-panel-details > .garmin-connection {
+  border-top: 1px solid var(--color-border);
+  padding-top: 24px;
+  margin-top: 20px;
+  gap: 20px;
+  min-width: 0;
+}
+.activity-week-summary {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+.activity-week-heading {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.activity-week-heading > div {
+  min-width: 0;
+}
+.activity-week-heading .icon-box {
+  flex: 0 0 48px;
+  width: 48px;
+  height: 48px;
+}
+.activity-week-heading .eyebrow {
+  margin: 0 0 8px;
+  font-size: 10px;
+}
+.activity-week-heading h2 {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.3;
+}
+.activity-week-goal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+.activity-week-goal strong {
+  color: var(--color-accent);
+  font-size: 18px;
+  white-space: nowrap;
+}
+.activity-week-progress {
+  height: 6px;
+  background: var(--color-border);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.activity-week-progress > span {
+  display: block;
+  height: 100%;
+  background: var(--color-accent);
+  border-radius: inherit;
+}
+.activity-week-days {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(44px, 1fr));
+  gap: 6px;
+  overflow-x: auto;
+  padding: 3px 1px 8px;
+}
+.activity-week-day {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  padding: 12px 4px;
+  min-height: 96px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  color: var(--color-text-muted);
+  background: var(--color-surface-sunken);
+  text-decoration: none;
+}
+.activity-week-day small {
+  text-transform: capitalize;
+  font-size: 11px;
+}
+.activity-week-day strong {
+  font-size: 20px;
+  color: var(--color-text);
+}
+.activity-week-day.has-records {
+  background: linear-gradient(
+    160deg,
+    var(--color-surface-raised),
+    var(--color-surface-sunken)
+  );
+}
+.activity-week-day.is-selected {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+.activity-week-day.is-selected strong,
+.activity-week-day.has-records .activity-day-status {
+  color: var(--color-accent);
+}
+.activity-week-day.is-future {
+  border-style: dashed;
+}
+.activity-day-status {
+  min-height: 16px;
+  display: flex;
+  align-items: center;
+}
+.activity-week-summary .field-hint {
+  margin: 0;
+}
+.activity-week-history {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.activity-record {
+  background:
+    radial-gradient(ellipse at 100% 0%, #ff9f2410, transparent 65%),
+    var(--color-surface);
+  overflow: hidden;
+}
+.activity-record-details {
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: none;
+}
+.activity-record-details > summary {
+  display: grid;
+  gap: 18px;
+  padding: 0;
+  list-style: none;
+  cursor: pointer;
+}
+.activity-record-details > summary::-webkit-details-marker {
+  display: none;
+}
+.activity-record-topline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+.activity-record-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-accent);
+}
+.activity-record-title {
+  display: block;
+  font-size: 20px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.activity-record-main {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.activity-record-main > strong {
+  font-size: 34px;
+  font-weight: 750;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+}
+.activity-record-main > span {
+  color: var(--color-text-muted);
+  font-size: 16px;
+}
+.activity-record-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.activity-record-metrics > span {
+  display: grid;
+  align-content: start;
+  gap: 7px;
+}
+.activity-record-metrics svg {
+  color: var(--color-text-muted);
+}
+.activity-record-metrics strong {
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.activity-record-metrics small {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}
+.activity-record-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+.activity-record-footer > span:last-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text);
+  min-height: 28px;
+}
+.activity-record-details[open] .activity-record-footer svg {
+  transform: rotate(180deg);
+}
+.activity-record-body {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border);
+}
+.activity-record-body > .record-action {
+  margin-top: 16px;
+}
+/* A largura do accordion acompanha o card, sem a caixa interna do resumo genérico. */
+.records-section details.activity-record-details {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+}
+.records-section details.activity-record-details > summary {
+  width: 100%;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+}
+.garmin-panel-details {
+  width: 100%;
+  margin: 0;
+}
+.garmin-panel-summary,
+.garmin-activity-details > summary {
+  width: 100%;
+  background: transparent;
+}
+.garmin-panel-summary .icon-box,
+.activity-week-heading .icon-box {
+  margin: 0;
+}
+.activity-record:hover {
+  border-color: var(--color-border-strong);
+}

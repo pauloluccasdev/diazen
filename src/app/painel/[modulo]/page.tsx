@@ -1,3 +1,6 @@
+import { ActivityRecordCard } from "@/components/activity-record-card";
+import { ActivityWeekSummary } from "@/components/activity-week-summary";
+import { weekBounds } from "@/lib/records";
 import { GarminConnection } from "@/components/garmin-connection";
 import { garminConfig } from "@/lib/garmin-config";
 import type { ReactNode } from "react";
@@ -47,6 +50,8 @@ function RecordPresentation({
   row: Entry;
   children: ReactNode;
 }) {
+  if (kind === "atividades")
+    return <ActivityRecordCard row={row}>{children}</ActivityRecordCard>;
   if (kind !== "alimentacao") return <>{children}</>;
   const kcal =
     row.kcal == null
@@ -127,7 +132,8 @@ export default async function Records({
     .order("id", { ascending: false })
     .range((page - 1) * 20, page * 20);
   if (daily || filters.data) query = query.eq("logged_on", date);
-  const [entries, totals, graph, diet] = await Promise.all([
+  const week = weekBounds(date);
+  const [entries, totals, graph, diet, weekCounts] = await Promise.all([
     query.returns<Entry[]>(),
     client.rpc("project_summary", {
       p_project: selected.id,
@@ -146,6 +152,27 @@ export default async function Records({
     modulo === "alimentacao"
       ? dashboardPlan(client, selected.id, date)
       : Promise.resolve(null),
+    modulo === "atividades"
+      ? (async () => {
+          const counts: Record<string, number> = {};
+          for (let offset = 0; ; offset += 1000) {
+            const result = await client
+              .from("activities")
+              .select("logged_on")
+              .eq("project_id", selected.id)
+              .gte("logged_on", week.start)
+              .lte("logged_on", week.end)
+              .order("id")
+              .range(offset, offset + 999);
+            if (result.error)
+              throw Error("Não foi possível carregar a semana de atividades.");
+            for (const row of result.data ?? [])
+              counts[row.logged_on] = (counts[row.logged_on] ?? 0) + 1;
+            if ((result.data?.length ?? 0) < 1000) break;
+          }
+          return counts;
+        })()
+      : Promise.resolve({} as Record<string, number>),
   ]);
   if (entries.error) throw new Error("Falha ao carregar registros");
   if (totals.error) throw new Error("Falha ao carregar totais");
@@ -159,14 +186,19 @@ export default async function Records({
   const renderRecord = (row: Entry) => (
     <article
       key={row.id}
-      className={`content-card${modulo === "alimentacao" ? " food-record" : ""}`}
+      id={modulo === "atividades" ? `atividade-${row.id}` : undefined}
+      className={`content-card${modulo === "alimentacao" ? " food-record" : modulo === "atividades" ? " activity-record" : ""}`}
     >
       <RecordPresentation kind={modulo} row={row}>
-        <p className="eyebrow">
-          {formatDate(row.logged_on)}
-          {row.category && ` · ${categories[row.category]}`}
-        </p>
-        {modulo !== "alimentacao" && <h3>{entryText(modulo, row)}</h3>}
+        {modulo !== "atividades" && (
+          <p className="eyebrow">
+            {formatDate(row.logged_on)}
+            {row.category && ` · ${categories[row.category]}`}
+          </p>
+        )}
+        {modulo !== "alimentacao" && modulo !== "atividades" && (
+          <h3>{entryText(modulo, row)}</h3>
+        )}
         {row.notes && <p className="intro">{row.notes}</p>}
         {modulo === "alimentacao" && (
           <>
@@ -444,19 +476,15 @@ export default async function Records({
         </section>
       )}
       {modulo === "atividades" && (
-        <section className="content-card">
-          <h2>
-            {summary.sessions === null
-              ? "Sem sessões registradas nesta semana"
-              : `${summary.sessions} sessões na semana`}
-          </h2>
-          <p className="intro">
-            {selected.sessions_goal === null
-              ? "Meta semanal não configurada"
-              : `Meta geral: ${selected.sessions_goal} sessões por semana`}
-            . Dias sem registro não confirmam ausência de atividade.
-          </p>
-        </section>
+        <ActivityWeekSummary
+          date={date}
+          start={week.start}
+          counts={weekCounts}
+          historyProject={selected.id === active?.id ? undefined : selected.id}
+          total={summary.sessions === null ? null : Number(summary.sessions)}
+          goal={selected.sessions_goal}
+          today={today()}
+        />
       )}
       {modulo === "alimentacao" && (
         <>
@@ -518,7 +546,7 @@ export default async function Records({
         {!rows.length && (
           <p className="intro">
             {!daily && filters.data
-              ? `Nenhum registro em ${formatDate(date)}. O resumo pode mostrar o último registro anterior a essa data. Consulte outras datas no histórico geral.`
+              ? `Nenhum registro em ${formatDate(date)}. ${modulo === "atividades" ? "Os dias marcados na semana têm atividades no histórico." : "O resumo pode mostrar o último registro anterior a essa data. Consulte outras datas no histórico geral."}`
               : "Sem registros para esta consulta."}
           </p>
         )}
