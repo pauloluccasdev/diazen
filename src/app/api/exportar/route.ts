@@ -19,6 +19,8 @@ export async function GET() {
     "weights",
     "measurements",
     "activities",
+    "garmin_imports",
+    "garmin_sync_settings",
     "meal_items",
     "meal_days",
     "food_library",
@@ -30,8 +32,18 @@ export async function GET() {
     for (let offset = 0; ; offset += 500) {
       const { data, error } = await account.client
         .from(table)
-        .select("*")
-        .order("id")
+        .select(
+          table === "garmin_sync_settings"
+            ? "user_id,enabled,auto_after,last_success_at"
+            : "*",
+        )
+        .order(
+          table === "garmin_sync_settings"
+            ? "user_id"
+            : table === "garmin_imports"
+              ? "external_id"
+              : "id",
+        )
         .range(offset, offset + 499);
       if (error)
         return Response.json(

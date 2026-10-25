@@ -27,7 +27,7 @@ import {
   type Summary,
   categories,
   measurements,
-  modalities,
+  activityModality,
   nutrients,
   units,
 } from "@/lib/records";
@@ -87,7 +87,7 @@ function entryText(kind: Module, row: Entry) {
   if (kind === "medidas")
     return `${measurements[row.measurement_type!]} · ${number(row.value_cm!, 2)} cm`;
   if (kind === "atividades")
-    return `${modalities[row.modality!]} · ${number(row.duration_min!, 2)} min${row.distance_km != null ? ` · ${number(row.distance_km, 3)} km` : ""}`;
+    return `${row.name ? `${row.name} · ` : ""}${activityModality(row)} · ${number(row.duration_min!, 2)} min${row.distance_km != null ? ` · ${number(row.distance_km, 3)} km` : ""}${row.kcal == null ? "" : ` · ${number(row.kcal)} kcal`}${row.external_provider === "garmin" ? " · Garmin Connect" : ""}`;
   return `${row.name} · ${number(row.amount!, 3)} ${units[row.unit!]}`;
 }
 export default async function Records({

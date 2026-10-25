@@ -3047,3 +3047,25 @@ input[type="date"]::-webkit-datetime-edit {
 .garmin-activity-details[open] > summary > svg {
   transform: rotate(180deg);
 }
+.garmin-auto-setting {
+  display: grid;
+  gap: 12px;
+  padding-block: 12px;
+  border-block: 1px solid var(--color-border);
+}
+.garmin-auto-setting label,
+.garmin-selection {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+}
+.garmin-auto-setting input,
+.garmin-selection input {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+}
+.garmin-selection {
+  font-size: 14px;
+}

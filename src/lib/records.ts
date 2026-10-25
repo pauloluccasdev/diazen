@@ -45,6 +45,7 @@ export const modalities = {
   running: "Corrida",
   cycling: "Ciclismo",
   swimming: "Natação",
+  other: "Outra atividade",
 } as const;
 export const categories = {
   breakfast: "Café da manhã",
@@ -72,6 +73,9 @@ export interface Entry {
   measurement_type?: keyof typeof measurements;
   value_cm?: number;
   modality?: keyof typeof modalities;
+  external_provider?: "garmin" | null;
+  external_id?: string | null;
+  external_type?: string | null;
   duration_min?: number;
   distance_km?: number | null;
   notes?: string | null;
@@ -85,6 +89,25 @@ export interface Entry {
   protein?: number | null;
   carbs?: number | null;
   fat?: number | null;
+}
+export function activityModality(row: Entry) {
+  if (
+    row.modality === "other" &&
+    row.external_provider === "garmin" &&
+    row.external_type
+  ) {
+    const labels: Record<string, string> = {
+      walking: "Caminhada",
+      hiking: "Trilha",
+      yoga: "Yoga",
+      pilates: "Pilates",
+      elliptical: "Elíptico",
+      cardio_training: "Cardio",
+      fitness_equipment: "Treino",
+    };
+    return labels[row.external_type] ?? row.external_type.replaceAll("_", " ");
+  }
+  return row.modality ? modalities[row.modality] : "Atividade";
 }
 export type Nutrient = "kcal" | "protein" | "carbs" | "fat";
 export const nutrients: Record<Nutrient, string> = {

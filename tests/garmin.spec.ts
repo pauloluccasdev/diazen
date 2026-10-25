@@ -32,6 +32,24 @@ test("Garmin pessoal: consulta compacta, feedback, calorias ausentes e limpeza",
     .getByRole("button", { name: "Criar projeto", exact: true })
     .click();
   await expect(page.getByRole("status")).toContainText("Projeto criado");
+  let automatic = true;
+  await page.route("**/api/garmin/settings", async (route) => {
+    if (route.request().method() === "POST")
+      automatic = route.request().postDataJSON().enabled;
+    await route.fulfill({
+      json: {
+        enabled: automatic,
+        auto_after: "2026-10-25T00:00:00Z",
+        last_success_at: null,
+      },
+    });
+  });
+  await page.route("**/api/garmin/import", async (route) => {
+    expect(route.request().postDataJSON()).toEqual({ ids: ["101"] });
+    await route.fulfill({
+      json: { results: [{ externalId: "101", status: "imported" }] },
+    });
+  });
   let complete: (() => void) | undefined;
   await page.route("**/api/garmin/activities", async (route) => {
     await new Promise<void>((resolve) => {
@@ -68,7 +86,11 @@ test("Garmin pessoal: consulta compacta, feedback, calorias ausentes e limpeza",
   );
   const section = page.getByRole("region", { name: "Atividades da Garmin" });
   await expect(section).toBeVisible();
-  const before = await (await page.request.get("/api/exportar")).json();
+  const exportedBefore = await page.request.get("/api/exportar");
+  expect(exportedBefore.status()).toBe(200);
+  const before = await exportedBefore.json();
+  expect(Array.isArray(before.garmin_imports)).toBe(true);
+  expect(Array.isArray(before.garmin_sync_settings)).toBe(true);
   await section
     .getByRole("button", {
       name: "Consultar atividades da Garmin",
@@ -101,6 +123,28 @@ test("Garmin pessoal: consulta compacta, feedback, calorias ausentes e limpeza",
   ).toHaveAttribute("href", "https://connect.garmin.com/modern/activity/101");
   await expect(section).toContainText("30 min");
   await expect(section).toContainText("5 km");
+  await section
+    .getByRole("checkbox", { name: "Selecionar Corrida fictícia", exact: true })
+    .check();
+  await section
+    .getByRole("button", { name: "Importar selecionadas (1)", exact: true })
+    .click();
+  await expect(section.getByRole("status")).toContainText(
+    "1 atividade importada",
+  );
+  await expect(
+    section.locator("li").filter({ hasText: "Corrida fictícia" }),
+  ).toContainText("Registrada no diário");
+  await section
+    .getByRole("checkbox", {
+      name: "Importar automaticamente novas atividades",
+      exact: true,
+    })
+    .uncheck();
+  await expect(section.getByRole("status")).toContainText(
+    "Importação automática pausada",
+  );
+
   await page.unroute("**/api/garmin/activities");
   await page.route("**/api/garmin/activities", async (route) => {
     await route.fulfill({

@@ -49,8 +49,26 @@ export async function POST(request: Request) {
       void entry.result.catch(cleanup);
       setTimeout(cleanup, 60000).unref();
     }
+    const activities = await recent.result;
+    const origins = await account.client
+      .from("garmin_imports")
+      .select("external_id,activity_id")
+      .in(
+        "external_id",
+        activities.map((a) => a.id),
+      );
+    if (origins.error) throw Error("Falha ao consultar importações");
+    const imported = new Map(
+      (origins.data ?? []).map((row) => [row.external_id, row.activity_id]),
+    );
     return Response.json(
-      { activities: await recent.result },
+      {
+        activities: activities.map((a) => ({
+          ...a,
+          imported: imported.has(a.id),
+          removed: imported.has(a.id) && imported.get(a.id) === null,
+        })),
+      },
       { headers: garminHeaders },
     );
   } catch (cause) {

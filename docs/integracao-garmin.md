@@ -1,38 +1,77 @@
 # Garmin Personal API
 
-Extensão de escopo autorizada pelo proprietário em 25/10/2026, substituindo a consulta Strava. Relacionada a RF-012/018/020/022, RB-04/10/11 e RNF-002/003/005/007/008/009/012/014/016. A API pessoal atende somente à conta do titular, não a uma integração comercial multiusuário.
+Extensão autorizada em 25/10/2026, substituindo Strava. Após a consulta inicial, o proprietário aprovou escolher atividades anteriores e salvar automaticamente todas as novas atividades. Relacionada a RF-012/013/018/020/022, RB-01/03/04/10/11 e RNF-002/003/004/005/007/008/009/012/013/014/016. A modalidade Personal atende somente à conta do titular; integração comercial multiusuário requer o programa Business.
 
-## Configurar
+## Configuração privada
 
-No servidor, configure `GARMIN_PERSONAL_API_KEY` e `GARMIN_OWNER_USER_ID` (UUID da conta Diazen autorizada). Ambas são privadas e não usam prefixo `NEXT_PUBLIC_`. Sem as duas, a seção não aparece. Outra conta autenticada não recebe os resultados nem acesso ao provedor. Nunca aceite o proprietário informado pelo navegador. Não coloque chaves, tokens ou dados pessoais no Git.
+- `GARMIN_PERSONAL_API_KEY`: chave criada pelo titular no Garmin Connect.
+- `GARMIN_OWNER_USER_ID`: UUID da única conta Diazen autorizada.
+- `GARMIN_SYNC_ENABLED=true`: habilita a verificação automática no aplicativo aberto.
+- `GARMIN_SYNC_SECRET`: segredo aleatório de 32–128 caracteres base64url, exclusivamente para chamadas do agendador.
+- `GARMIN_SYNC_SITE_URL`: origem HTTPS da prévia, usada apenas pela ferramenta administrativa local.
 
-A chave é criada pelo titular em Garmin Connect → Personal API Key. A chave pode expirar ou ser revogada no provedor. Para trocar, atualize `.env.local` e a variável Secret da Vercel, restrita ao preview da branch `develop`, e publique nova implantação. Nenhuma configuração foi aplicada à produção/main. O UUID também deve ser configurado nessa branch; somente a configuração da chave não libera outras contas.
+Nenhuma variável usa `NEXT_PUBLIC_`. Chave, segredo e UUID permanecem em `.env.local` ignorado e variáveis privadas da Vercel, restritas a `preview/develop`. Não se configura produção/main. Não envie credenciais pelo chat ou Git. Rotacionar a chave exige atualizar o arquivo privado, a Secret na Vercel e publicar nova implantação. O agendador tem credencial própria, independente da chave Garmin.
 
-Não há OAuth por redirecionamento nem callback: o servidor envia `Authorization: ApiKey …` ao endpoint oficial de token e recebe JWT em `text/plain`. Usa esse token apenas na consulta seguinte com `Authorization: Bearer …`. Não grava nem retorna credenciais, não segue redirects e não imprime o corpo das respostas nos logs.
+O servidor envia `Authorization: ApiKey …` ao endpoint oficial e recebe JWT em `text/plain`. Usa esse token apenas em chamadas ao host oficial com `Authorization: Bearer …`. Não retorna credenciais, não segue redirects e não imprime respostas do provedor. A API pessoal não exige callback OAuth. A integração Strava foi retirada; cookies legados são apagados no logout/exclusão.
 
-## Utilizar
+## Migração e persistência
 
-Dashboard → Atividades → **Consultar atividades da Garmin**. O carregamento tem mensagem e botão desabilitado. São consultadas até cinco atividades recentes sincronizadas com Garmin Connect, ordenadas por início local decrescente. Atividades-filhas de multisport são excluídas para evitar duplicação com o pai.
+Aplicar incrementalmente `202610250012_garmin_activity_import.sql`, sem reset. Ela adiciona título (`name`), calorias (`kcal`) e origem às atividades, configurações de sincronização e ledger de importação. Dados anteriores permanecem preservados. A migração 012 foi aplicada ao Supabase real após backup cifrado e verificado.
 
-Cada linha recolhível apresenta nome, modalidade, data e calorias quando disponíveis; ao abrir, duração em minutos, distância em quilômetros e link para o registro no Garmin Connect. Zero conhecido permanece zero; ausência, número negativo ou inválido permanecem sem valor. Duração usa o campo `duration`, em segundos; distância usa `distance`, em metros; calorias usam `calories`, em kcal. Não são calculados gasto total diário, déficit ou aderência.
+A importação manual envia apenas IDs selecionados; o servidor consulta os detalhes oficiais antes de gravar. Não confia em título, composição, data, proprietário ou projeto enviados pelo navegador. O título, tipo original, data local, duração, distância e calorias disponíveis são convertidos para o modelo do diário. Tipos não pertencentes às quatro modalidades originais usam “Outra atividade”, mantendo o tipo Garmin na origem. Não se infere musculação a partir de um tipo desconhecido.
 
-A consulta é somente leitura e independente das atividades manuais do projeto; não altera a tabela operacional nem os indicadores do diário. Não há importação automática, cron ou webhook. O botão **Limpar consulta** remove os resultados da tela, sem revogar a chave. Para interromper o acesso do servidor, exclua a chave no Garmin Connect ou remova as variáveis privadas. Logout/exclusão da conta bloqueiam consultas pelo controle de autenticação.
+Ausência permanece distinta de zero. Duração utiliza `duration` em segundos, convertida para minutos; distância utiliza metros convertidos para km; calorias são kcal. Distância/calorias ausentes da Garmin podem permanecer sem valor. Campos inválidos ou duração incompatível com os limites do diário exigem revisão. A data deve pertencer à vigência do ACTIVE e não pode ser futura; atividades anteriores continuam disponíveis na Garmin, sem atribuição a projetos encerrados.
 
-## Proteções e retenção
+O backend usa RPCs administrativas restritas a `service_role`, verifica a conta disponível e resolve o ACTIVE na transação. O navegador não pode executar essas RPCs ou forjar origem por INSERT/UPDATE. RLS protege configurações e ledger; a conta só pode alterar seu campo `enabled`. Importação e ledger são atômicos, serializados por usuário. ID externo único impede duplicação mesmo entre projetos. Editar um registro importado não muda sua origem; novas consultas não sobrescrevem as revisões. Excluir o registro mantém a referência no ledger para impedir recriação automática. Exclusão da conta remove esses dados por cascade e bloqueia novas sincronizações.
 
-A rota POST confere origem canônica, sessão válida, disponibilidade da conta e igualdade com o proprietário configurado antes de chamar o provedor. Respostas são `private, no-store`, com `Vary: Cookie`. Consultas repetidas ou simultâneas reaproveitam o resultado recente por até um minuto em memória privada da instância, sempre após revalidar conta e proprietário. A chave de separação inclui usuário e impressão da credencial, invalidando o reaproveitamento após rotação. Falhas não bloqueiam novas tentativas. Limites reais da Garmin continuam sendo respeitados. Falhas/limitação mostram mensagens recuperáveis sem detalhes internos.
+Registros importados participam dos indicadores de sessões, histórico, exportação e backup. Não há cálculo de déficit calórico, prescrição ou alteração das atividades originais da Garmin.
 
-Chamadas têm prazo total de quinze segundos e limite de leitura de 1 MB. Hosts e caminhos são fixos, sem aceitar URL do cliente. Somente os campos apresentados são devolvidos; dados de localização, perfil e demais métricas são descartados. Não são solicitados arquivos FIT, mapas ou detalhes de saúde adicionais. Resultados ficam na memória da instância por até um minuto para deduplicar consultas e na memória da tela por até quinze minutos, não entram no banco, exportação, backup, localStorage, sessionStorage ou cache offline. Chaves e tokens não chegam ao navegador. O código de OAuth Strava foi removido; cookies legados são apagados no logout/exclusão.
+## Uso e automação
 
-## Verificar
+Dashboard → Atividades → **Consultar atividades da Garmin**. A lista recente começa recolhida. Selecione atividades anteriores e use **Importar selecionadas**. A confirmação informa quantas foram salvas; atividades já importadas aparecem identificadas. Dados fora da vigência/limites não são silenciosamente ajustados. Registros salvos podem ser editados ou excluídos no diário.
 
-- `node --test tests/database/garmin.test.mjs`: proprietário/conta cruzada/visitante, CSRF, hosts, token plain text, redirects/cache, minimização, zero/ausência, respostas inválidas, limite de corpo, reaproveitamento, rotação, concorrência e nova tentativa após falha.
-- `npm run build` e `npx playwright test tests/garmin.spec.ts --project=chromium`: sessão fictícia, lista compacta, carregamento retido, unidades, ausência, limpeza, offline, axe e layout de 320 px. A fixture injeta chave/UUID fictícios, nunca a credencial real.
-- Teste real somente leitura: o endpoint oficial de token aceitou a chave do proprietário e a listagem retornou HTTP 200. Apenas status/formato foram registrados, sem valores das atividades ou credenciais. Isso não valida sincronização em todos os modelos de dispositivo.
+A opção **Importar automaticamente novas atividades** começa ativada para o proprietário que autorizou a automação. O marco inicial é a ativação registrada no banco: atividades realizadas antes desse instante precisam de seleção explícita. Ao pausar, preserva-se o diário; ao reativar, buscam-se atividades posteriores ao marco inicial que ainda não foram importadas.
+
+Ao abrir o painel e a cada cinco minutos enquanto a aba estiver visível/online, o aplicativo solicita sincronização. O servidor adquire lease de 90 segundos e evita novas varreduras bem-sucedidas por cinco minutos. O agendamento externo faz a mesma chamada a cada quinze minutos. A Personal API trabalha por consulta; não há webhook nem promessa de importação instantânea.
+
+Cada execução processa no máximo três páginas de cem atividades, com cursor persistido para continuar na execução seguinte. Atividades anteriores ao marco UTC são ignoradas. Ao terminar a varredura, reinicia-se o cursor para detectar sincronizações atrasadas. Falhas não avançam o cursor; leases expiram para permitir recuperação. Exclusões/duplicações do provedor não geram novos lançamentos do mesmo ID.
+
+## Agendamento no Supabase
+
+A Vercel Hobby limita cron a uma execução diária e só executa jobs em produção, portanto não atende à prévia `develop`. Usa-se Supabase Cron (`pg_cron`) e `pg_net`, sem novo provedor ou mudança de plano. O segredo de chamada fica cifrado no Supabase Vault; o job guarda apenas nomes de referências, nunca o token em seu comando.
+
+Com configuração administrativa local e migração aplicada:
+
+```bash
+# Preparar/atualizar o agendamento desativado, antes de publicar a rota
+npm run garmin:cron -- --apply
+# Depois de validar a nova implantação da develop
+npm run garmin:cron -- --apply --enable
+# Inspecionar somente flags, sem revelar credenciais
+npm run garmin:cron
+```
+
+A ferramenta instala extensões se ausentes e altera somente o job `diazen-garmin-sync`, programado para `*/15 * * * *`. Revoga acesso dos papéis públicos aos schemas/filas operacionais e às views do Vault. Não remove jobs existentes. A rota `/api/garmin/sync` exige segredo Bearer com comparação segura, ou sessão do proprietário e origem canônica para chamadas do aplicativo. Ignora proprietário e dados fornecidos no corpo. O agendamento resolve a conta pelo servidor e respeita pausa, exclusão e ausência de ACTIVE.
+
+Para pausar o job na infraestrutura, execute novamente `--apply` sem `--enable`. Antes de restaurar o banco, pause esse job e a atualização automática do aplicativo. Reative somente após reaplicar o ledger de exclusões, validar contas/projetos e conferir o marco/cursor. O backup do aplicativo cobre tabelas públicas/privadas, mas não substitui a configuração operacional de Cron/Vault: restauração em outro ambiente exige repetir a configuração com segredos locais protegidos. Não reative um job apontando para outra instalação sem revisar o destino.
+
+## Consulta, privacidade e falhas
+
+Respostas autenticadas são `private, no-store`, com `Vary: Cookie`. A prévia recente é reaproveitada por até um minuto em memória da instância, após revalidar proprietário a cada chamada; rotação da chave invalida o reaproveitamento. Falhas não bloqueiam novas tentativas. O navegador mantém a prévia por até quinze minutos, sem storage/offline. Atualização com falha preserva a lista anterior; limpar a consulta não exclui registros importados.
+
+Chamadas têm timeout, host fixo e limite de leitura de 1 MB. Localização, fotos, perfil e métricas adicionais retornadas pelo provedor são descartados. A referência UTC é usada para identificar atividades posteriores à ativação; a data local é preservada no diário. Credenciais permanecem no servidor. Estado de sincronização e referências de importação integram a exportação/exclusão da conta.
+
+## Verificação
+
+- `npm run test:db`: migrações reais em PostgreSQL embarcado; origem, RLS, privilégios, transação, zero/ausência, duplicação, edição/exclusão, pausa, lease, histórico encerrado e conta excluída. Testes de servidor cobrem CSRF/autenticação, credencial de cron, dados forjados, detalhe oficial, paginação/cursor, falhas e segurança do agendamento.
+- `npm run build` e `npx playwright test tests/garmin.spec.ts --project=chromium`: respostas sintéticas, loading real retido, lista recolhida, seleção/importação, pausa, erro preservando resultados, unidades, offline, axe e 320 px.
+- Teste real somente leitura confirmou token, lista e detalhe no endpoint oficial. Apenas status/formato foram registrados, sem valores ou credenciais. O detalhe usa timestamps ISO com fração de segundo, enquanto a lista usa separador espaço; ambos são normalizados. Nenhuma atividade antiga do proprietário foi escolhida como teste de gravação.
 
 ## Fontes oficiais consultadas em 25/10/2026
 
-- [Visão geral e modalidades Personal/Business](https://developer.garmin.com/gc-developer-program/overview/)
-- [Chave pessoal e autenticação](https://developer.garmin.com/gc-developer-program/personal/personal-api/)
-- [FAQ pessoal, validade e revogação](https://developer.garmin.com/gc-developer-program/personal/personal-faq/)
-- [Swagger oficial](https://developer.garmin.com/gc-developer-program/personal/swagger-docs/): `POST /personalapitoken-service/personal-api/personal-api-key/token` conforme página de autenticação; `GET /activitylist-service/activities/search/activities`, `SummarizedActivityDTO` e `ActivityTypeDTO` conforme schema OpenAPI incorporado à página pública. Não usa endpoints não documentados do site.
+- [Garmin Personal/Business](https://developer.garmin.com/gc-developer-program/overview/)
+- [Autenticação pessoal](https://developer.garmin.com/gc-developer-program/personal/personal-api/)
+- [Validade e revogação](https://developer.garmin.com/gc-developer-program/personal/personal-faq/)
+- [OpenAPI oficial](https://developer.garmin.com/gc-developer-program/personal/swagger-docs/): Activity List, Activity Summary, SummaryDTO, ActivityTypeDTO.
+- [Supabase Cron](https://supabase.com/docs/guides/cron), [agendamento com Vault/pg_net](https://supabase.com/docs/guides/functions/schedule-functions), [permissões do pg_net](https://supabase.com/docs/guides/database/extensions/pg_net).
+- [Limites de cron Vercel](https://vercel.com/docs/cron-jobs/usage-and-pricing), [execução em produção](https://vercel.com/docs/cron-jobs/manage-cron-jobs).

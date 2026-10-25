@@ -41,23 +41,40 @@ export default function Privacy() {
         ficam registradas no seu plano, e os valores podem variar conforme a
         marca consumida.
       </p>
-      <h2>Consulta pessoal à Garmin</h2>
+      <h2>Integração pessoal com Garmin</h2>
       <p>
-        A integração Garmin Personal API fica disponível exclusivamente à conta
-        Diazen do proprietário configurado no servidor. A chave pessoal e o
-        token de acesso não são enviados ao navegador. Ao solicitar a consulta,
-        mostramos até cinco atividades recentes sincronizadas com o Garmin
-        Connect, com nome, modalidade, data, duração, distância e calorias
-        quando disponíveis. Não solicitamos mapas, fotografias ou dados de saúde
-        adicionais.
+        A Garmin Personal API fica disponível exclusivamente à conta Diazen do
+        proprietário configurado no servidor. A chave pessoal e os tokens não
+        são enviados ao navegador. Consultamos atividades sincronizadas com o
+        Garmin Connect, com título, tipo, data, duração, distância e calorias
+        disponíveis, sem solicitar mapas, fotografias ou outras métricas de
+        saúde.
       </p>
       <p>
-        Os resultados podem ser reaproveitados na memória do servidor por até um
-        minuto e ficam na memória desta tela por até quinze minutos, sem acesso
-        offline, cópia para o diário, exportação ou backups. A consulta não
-        modifica suas atividades na Garmin. Você pode limpar os resultados na
-        tela e revogar o acesso excluindo sua chave pessoal no Garmin Connect.
-        Sair da conta ou excluir a conta Diazen impede novas consultas.
+        Você pode escolher atividades anteriores para importar. Com a importação
+        automática ativada, novas atividades realizadas após a ativação são
+        salvas no projeto ativo, respeitando sua vigência. A verificação ocorre
+        ao abrir o aplicativo e periodicamente em segundo plano. Você pode
+        pausar a importação automática em Atividades. Consultas repetidas não
+        duplicam registros nem sobrescrevem os dados que você revisou no diário.
+      </p>
+      <p>
+        Atividades importadas e suas referências passam a fazer parte do banco,
+        do histórico, da exportação e das cópias de segurança do Diazen. Ao
+        excluir uma atividade importada, mantemos seu identificador de origem
+        para não recriá-la automaticamente. Esses dados pertencem somente à sua
+        conta e são removidos no procedimento de exclusão da conta. Nenhuma
+        dessas ações modifica suas atividades originais na Garmin.
+      </p>
+      <p>
+        A prévia da consulta pode ser reaproveitada na memória do servidor por
+        até um minuto e permanece na memória da tela por até quinze minutos, sem
+        acesso offline. Limpar a consulta remove essa prévia, preservando
+        registros já importados. O agendador usa um segredo próprio armazenado
+        de forma cifrada no Supabase Vault; a chave Garmin permanece somente na
+        configuração privada do servidor. Você pode revogar o acesso excluindo
+        sua chave pessoal no Garmin Connect. A exclusão da conta Diazen bloqueia
+        novas sincronizações.
       </p>
       <h2>Dispositivo e conexão</h2>
       <p>

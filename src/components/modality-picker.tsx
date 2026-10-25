@@ -1,7 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Bike, Dumbbell, Footprints, Waves, Check } from "lucide-react";
+import {
+  Bike,
+  Dumbbell,
+  Footprints,
+  Waves,
+  Check,
+  Activity,
+} from "lucide-react";
 import { modalities } from "@/lib/records";
 
 const icons = {
@@ -9,6 +16,7 @@ const icons = {
   running: Footprints,
   cycling: Bike,
   swimming: Waves,
+  other: Activity,
 };
 
 export function ModalityPicker({

@@ -28,6 +28,8 @@ const tables = new Set([
   "weights",
   "measurements",
   "activities",
+  "garmin_imports",
+  "garmin_sync_settings",
   "meal_items",
   "meal_days",
   "food_library",
@@ -39,6 +41,9 @@ const tables = new Set([
   "deletion_ledger",
 ]);
 const commands = new Set([
+  "garmin_import_activity",
+  "garmin_claim_sync",
+  "garmin_finish_sync",
   "register_meal",
   "create_project",
   "save_weight",

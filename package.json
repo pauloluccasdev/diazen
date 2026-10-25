@@ -25,7 +25,8 @@
     "backup:ledger": "node scripts/backup.mjs --ledger",
     "backup:verify": "node scripts/backup.mjs --verify",
     "prebuild": "node scripts/prepare-pdf-worker.mjs",
-    "predev": "node scripts/prepare-pdf-worker.mjs"
+    "predev": "node scripts/prepare-pdf-worker.mjs",
+    "garmin:cron": "node scripts/configure_garmin_sync.mjs"
   },
   "repository": {
     "type": "git",

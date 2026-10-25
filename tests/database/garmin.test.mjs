@@ -9,9 +9,19 @@ registerHooks({
   resolve(specifier, context, next) {
     if (specifier === "server-only")
       return { url: "data:text/javascript,export{}", shortCircuit: true };
+    if (specifier === "next/cache")
+      return {
+        url: "data:text/javascript,export function revalidatePath(){}",
+        shortCircuit: true,
+      };
+    if (specifier === "@/lib/garmin-sync")
+      return {
+        url: "data:text/javascript,export async function persistGarmin(user,activity){globalThis.__garminPersist={user,activity};return {status:'imported'}};export async function syncGarmin(user){globalThis.__garminSynced=user;return {imported:0}}",
+        shortCircuit: true,
+      };
     if (specifier === "@/lib/api-account")
       return {
-        url: "data:text/javascript,export async function apiAccount(){return globalThis.__garminUser?{user:{id:globalThis.__garminUser}}:null}",
+        url: "data:text/javascript,export async function apiAccount(){return globalThis.__garminUser?{user:{id:globalThis.__garminUser},client:{from(){return {select(){return this},async in(){return {data:[],error:null}}}}}}:null}",
         shortCircuit: true,
       };
     const target = specifier.startsWith("@/")
@@ -201,4 +211,109 @@ test("falha não bloqueia nova tentativa e solicitações simultâneas compartil
   } finally {
     Date.now = now;
   }
+});
+
+test("detalhe importável usa ID fixo e composição retornada pela Garmin", async () => {
+  const { garminActivity, garminModality } =
+    await import("../../src/lib/garmin-provider.ts");
+  const calls = [];
+  const activity = await garminActivity("fake", "123", async (url) => {
+    calls.push(String(url));
+    return calls.length === 1
+      ? new Response(token)
+      : Response.json({
+          activityId: 123,
+          activityName: "Treino fictício",
+          activityTypeDTO: { typeKey: "strength_training" },
+          summaryDTO: {
+            duration: 1200,
+            distance: 0,
+            calories: 0,
+            startTimeLocal: "2026-10-25 08:00:00",
+            startTimeGMT: "2026-10-25T11:00:00.0",
+            startLatitude: 1,
+          },
+        });
+  });
+  assert.equal(
+    calls[1],
+    "https://personal.connectapi.garmin.com/activity-service/activity/123",
+  );
+  assert.equal(activity.calories, 0);
+  assert.equal(activity.startedAt, "2026-10-25T11:00:00.000Z");
+  assert.equal(garminModality(activity.sport), "strength");
+  assert.equal(garminModality("walking"), "other");
+  assert.equal(activity.startLatitude, undefined);
+  await assert.rejects(() => garminActivity("fake", "../123"));
+});
+
+test("importação verifica sessão/origem, ignora dados forjados e consulta o detalhe oficial", async () => {
+  const route = await import("../../src/app/api/garmin/import/route.ts");
+  const request = (body = {}, origin = "http://localhost:3100") =>
+    new Request("http://localhost:3100/api/garmin/import", {
+      method: "POST",
+      headers: { origin },
+      body: JSON.stringify(body),
+    });
+  assert.equal(
+    (await route.POST(request({ ids: ["123"] }, "https://foreign.invalid")))
+      .status,
+    403,
+  );
+  globalThis.__garminUser = null;
+  assert.equal((await route.POST(request({ ids: ["123"] }))).status, 401);
+  globalThis.__garminUser = "other";
+  assert.equal((await route.POST(request({ ids: ["123"] }))).status, 403);
+  globalThis.__garminUser = "owner";
+  assert.equal((await route.POST(request({ ids: ["../123"] }))).status, 400);
+  globalThis.fetch = async (url) =>
+    String(url).includes("personalapitoken")
+      ? new Response(token)
+      : Response.json({
+          activityId: 123,
+          activityName: "Nome do provedor",
+          activityTypeDTO: { typeKey: "running" },
+          summaryDTO: {
+            duration: 900,
+            distance: 1500,
+            calories: 75,
+            startTimeLocal: "2026-10-25 08:00:00",
+          },
+        });
+  const response = await route.POST(
+    request({ ids: ["123"], user: "other", calories: 9999, name: "Forjado" }),
+  );
+  assert.equal(response.status, 200);
+  assert.equal(globalThis.__garminPersist.user, "owner");
+  assert.equal(globalThis.__garminPersist.activity.calories, 75);
+  assert.equal(globalThis.__garminPersist.activity.name, "Nome do provedor");
+});
+test("sincronização agendada requer segredo, usa proprietário do servidor e rejeita cabeçalho inválido", async () => {
+  const route = await import("../../src/app/api/garmin/sync/route.ts");
+  process.env.GARMIN_SYNC_SECRET =
+    "synthetic-secret-for-background-sync-123456";
+  globalThis.__garminUser = null;
+  const request = (authorization, origin) =>
+    new Request("http://localhost:3100/api/garmin/sync", {
+      method: "POST",
+      headers: {
+        ...(authorization ? { authorization } : {}),
+        ...(origin ? { origin } : {}),
+      },
+    });
+  assert.equal((await route.POST(request("Bearer wrong"))).status, 403);
+  assert.equal(
+    (await route.POST(request(null, "http://localhost:3100"))).status,
+    401,
+  );
+  assert.equal(
+    (await route.POST(request("Bearer " + "é".repeat(40)))).status,
+    403,
+  );
+  assert.equal(
+    (await route.POST(request("Bearer " + process.env.GARMIN_SYNC_SECRET)))
+      .status,
+    200,
+  );
+  assert.equal(globalThis.__garminSynced, "owner");
 });

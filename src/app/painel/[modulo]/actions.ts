@@ -105,16 +105,24 @@ export async function saveRecord(
   } else if (kind === "atividades") {
     const modality = text("modality", 20),
       duration = n("duration_min"),
-      distance = n("distance_km");
+      distance = n("distance_km"),
+      kcal = n("kcal");
     if (
       !Object.hasOwn(modalities, modality) ||
       duration === null ||
       !Number.isFinite(duration) ||
       duration <= 0 ||
       duration > 1440 ||
-      (modality !== "strength" && distance === null) ||
+      (kcal !== null &&
+        (!Number.isFinite(kcal) || kcal < 0 || kcal > 100000)) ||
+      (["running", "cycling", "swimming"].includes(modality) &&
+        distance === null &&
+        !id) ||
       (distance !== null &&
-        (!Number.isFinite(distance) || distance <= 0 || distance > 1000))
+        (!Number.isFinite(distance) ||
+          distance < 0 ||
+          (!id && distance === 0) ||
+          distance > 1000))
     )
       return fail(
         "Confira modalidade, duração e distância. Corrida, ciclismo e natação exigem distância.",
@@ -122,6 +130,8 @@ export async function saveRecord(
     data = {
       ...data,
       modality,
+      name: text("name", 200) || null,
+      kcal,
       duration_min: duration,
       distance_km: distance,
       notes: text("notes", 1000) || null,
