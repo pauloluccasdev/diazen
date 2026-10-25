@@ -1,6 +1,5 @@
 "use server";
-import { clearStrava, stravaSession, stravaConfig } from "@/lib/strava-server";
-import { revokeStrava } from "@/lib/strava-provider";
+import { clearLegacyIntegrationCookies } from "@/lib/legacy-integration-cookies";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { requireAccount } from "@/lib/data";
@@ -35,15 +34,7 @@ export async function deleteAccount(
       error: "Não foi possível registrar a solicitação. Tente novamente.",
       message: "",
     };
-  const strava = await stravaSession(user.id);
-  try {
-    const config = stravaConfig();
-    if (strava && config)
-      await revokeStrava(config.id, config.secret, strava.refresh_token);
-  } catch {
-    /* O acesso local será removido independentemente da resposta externa. */
-  }
-  await clearStrava();
+  await clearLegacyIntegrationCookies();
   // Após o tombstone, JWTs anteriores já não conseguem ler os dados pelo RLS.
   await client.auth.signOut({ scope: "global" });
   const admin = createAdminClient();

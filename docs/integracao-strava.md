@@ -1,3 +1,5 @@
+> Integração retirada em 25/10/2026 por solicitação do proprietário. Este documento preserva o histórico; o código, rotas e variáveis do Strava foram substituídos pela [Garmin Personal API](integracao-garmin.md).
+
 # Integração com Strava
 
 O card Atividades leva à seção “Sua conta Strava”. Ela permite conectar a conta, consultar até cinco atividades recentes e desconectar. Os registros manuais do Diazen permanecem independentes.

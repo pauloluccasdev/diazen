@@ -1,5 +1,5 @@
 "use server";
-import { clearStrava } from "@/lib/strava-server";
+import { clearLegacyIntegrationCookies } from "@/lib/legacy-integration-cookies";
 
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -54,6 +54,6 @@ export async function signOut(): Promise<{ error: string }> {
       return { error: "Não foi possível sair. Tente novamente." };
     }
   }
-  await clearStrava();
+  await clearLegacyIntegrationCookies();
   redirect("/entrar");
 }

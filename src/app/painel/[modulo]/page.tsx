@@ -1,4 +1,5 @@
-import { StravaConnection } from "@/components/strava-connection";
+import { GarminConnection } from "@/components/garmin-connection";
+import { garminConfig } from "@/lib/garmin-config";
 import type { ReactNode } from "react";
 import { dashboardPlan } from "@/lib/dashboard-plan";
 import { ManualMealRecorder } from "@/components/manual-meal-recorder";
@@ -105,7 +106,7 @@ export default async function Records({
     Math.max(1, Math.floor(Number(filters.pagina) || 1)),
   );
   const context = await projectContext(filters.projeto),
-    { selected, active, client } = context;
+    { selected, active, client, user } = context;
   if (!selected)
     return (
       <section className="welcome">
@@ -346,7 +347,7 @@ export default async function Records({
         <ChevronRight size={18} aria-hidden="true" />
       </Link>
 
-      {modulo === "atividades" && <StravaConnection />}
+      {modulo === "atividades" && garminConfig(user.id) && <GarminConnection />}
       {modulo === "alimentacao" && diet && (
         <section className="planned-meals" aria-label="Refeições do plano">
           <h2>Suas refeições planejadas</h2>
