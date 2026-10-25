@@ -1,0 +1,39 @@
+name: Qualidade
+on:
+  push:
+    branches: [main, develop, "feat/**", "fix/**"]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run test:db
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run build
+        env:
+          # Diferentes do runtime dos testes: detectar configuração congelada no build.
+          NEXT_PUBLIC_SUPABASE_URL: https://build-only.example.invalid
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_build_only_unused
+          NEXT_PUBLIC_SITE_URL: https://build-only.example.invalid
+      - run: npm run typecheck
+      - name: Use official Ubuntu archive for browser dependencies
+        run: |
+          if [ -f /etc/apt/apt-mirrors.txt ]; then
+            printf '%s\n' 'https://archive.ubuntu.com/ubuntu/' | sudo tee /etc/apt/apt-mirrors.txt > /dev/null
+          fi
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npm run test:e2e
+      - run: npm run test:webkit
+      - run: npm install --global agent-browser@0.39.1
+      - run: npm run test:agent-browser
+        env:
+          DIAZEN_QA_PLAYWRIGHT_BROWSER: "1"

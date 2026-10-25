@@ -18,3 +18,22 @@ __pycache__/
 *.log
 *.tmp
 ~$*
+
+# Next.js e dependências
+node_modules/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+.vercel/
+playwright-report/
+test-results/
+
+# Artefatos locais de revisão e backup
+artifacts/
+backups/
+*.sql.gz
+supabase/.temp/
+
+# Worker reproduzido da dependência fixada durante build/dev
+/public/pdf/

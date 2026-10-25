@@ -1,0 +1,65 @@
+{
+  "name": "diazen",
+  "version": "0.1.0",
+  "description": "Aplicativo da Lucx Tech para diário, check-in, controle nutricional e evolução física.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test --project=chromium",
+    "test:db": "node --test tests/database/*.test.mjs",
+    "privacy:purge": "node --env-file=.env.local scripts/purge_accounts.mjs",
+    "format": "prettier --write src tests scripts/*.mjs public/sw.js public/offline.html *.ts *.mjs package.json .github/workflows/ci.yml",
+    "format:check": "prettier --check src tests scripts/*.mjs public/sw.js public/offline.html *.ts *.mjs package.json .github/workflows/ci.yml",
+    "test:webkit": "playwright test --project=webkit",
+    "test:agent-browser": "node tests/manual/agent-browser.mjs",
+    "test:agent-browser:hosted": "node tests/manual/agent-browser.mjs --hosted",
+    "env:check": "node scripts/check_environment.mjs",
+    "db:bundle": "node scripts/bundle_migrations.mjs",
+    "auth:configure": "node scripts/configure_supabase_auth.mjs",
+    "test:restore": "node tests/manual/restore-native.mjs",
+    "test:restore:services": "node tests/manual/restore-supabase.mjs",
+    "backup": "node scripts/backup.mjs",
+    "backup:ledger": "node scripts/backup.mjs --ledger",
+    "backup:verify": "node scripts/backup.mjs --verify",
+    "prebuild": "node scripts/prepare-pdf-worker.mjs",
+    "predev": "node scripts/prepare-pdf-worker.mjs",
+    "garmin:cron": "node scripts/configure_garmin_sync.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pauloluccasdev/diazen.git"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.118.0",
+    "lucide-react": "^1.61.0",
+    "next": "^16.4.2",
+    "pdfjs-dist": "6.4.299",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "sharp": "^0.35.5"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@electric-sql/pglite": "^0.5.11",
+    "@playwright/test": "^1.64.1",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.4.2",
+    "pg": "8.23.1",
+    "prettier": "^3.9.10",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^6.0.3"
+  },
+  "type": "module"
+}

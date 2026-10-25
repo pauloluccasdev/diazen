@@ -10,7 +10,7 @@
 ## Decisões e precedência
 
 - Produto: Diazen, da Lucx Tech. “Projeto 30 Trincado” é exemplo de projeto do usuário, não o nome do aplicativo.
-- Banco: Supabase, conforme decisão do proprietário posterior aos documentos. Frontend, backend, linguagem, hospedagem, autenticação e storage ainda estão pendentes.
+- Banco: Supabase, conforme decisão do proprietário posterior aos documentos. Base em Next.js, TypeScript, App Router e Tailwind; Supabase Auth, Storage privado e Vercel são a direção aprovada, com configuração ainda pendente. Consulte `docs/decisoes-tecnicas.md`.
 - Não escolha stack, instale frameworks, crie schema definitivo ou provisione serviços sem que a tarefa autorize essa etapa.
 - Requisitos funcionais delimitam escopo; Design System e tokens orientam implementação visual; o showcase é ilustrativo.
 - As cópias Markdown são geradas dos DOCX. Atualize a fonte documental antes de regenerá-las; registre decisões posteriores em `docs/decisoes-tecnicas.md`.
@@ -34,3 +34,11 @@
 - Versione migrações quando a modelagem for aprovada; jamais exponha chaves secretas, credenciais ou dados pessoais no Git.
 - Para Supabase, planeje políticas RLS e constraints no refinamento técnico, sem confiar apenas em filtros da interface. Não replique senhas de autenticação em tabelas da aplicação.
 - Valide comportamento, autorização, integridade e acessibilidade conforme a mudança. Documente como executar e verificar quando existir código.
+
+## Fluxo Git
+
+- A `develop` é a base de integração. Antes de iniciar cada funcionalidade, atualizar a `develop` e criar `feat/<nome>` ou branch com prefixo adequado a partir dela.
+- Fazer commits por funcionalidade concluída, executar as verificações pertinentes e enviar a branch ao remoto.
+- O agente está autorizado a realizar merge das branches concluídas na `develop`, validar a integração e fazer push da `develop`. Não sobrescrever alterações remotas nem usar force push.
+- Iniciar a próxima branch a partir da `develop` atualizada.
+- O proprietário realiza o PR final de `develop` para `main` e o code review ao término do desenvolvimento. Não realizar merge na `main`.
