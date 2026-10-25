@@ -200,7 +200,7 @@ test("alimento tem resumo, troca explícita e referência online automática e e
     ).toBe(true);
     expect(
       await page
-        .getByLabel("Data do consumo para comparar")
+        .getByRole("combobox", { name: "Versões salvas", exact: false })
         .evaluate((e) => e.getBoundingClientRect().width),
     ).toBeGreaterThan(200);
   }

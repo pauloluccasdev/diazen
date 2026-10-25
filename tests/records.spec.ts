@@ -43,6 +43,7 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
     .click();
   await expect(page.getByRole("status")).toContainText("Projeto criado");
   await page.goto("/painel/agua");
+  await expect(page.locator(".module-page > form.filter-form")).toHaveCount(0);
   await page.locator(".record-create > summary").click();
   const water = form(page, "Salvar registro");
   await water.getByRole("button", { name: "300 ml", exact: true }).click();
@@ -166,6 +167,8 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
   await expect(
     page.getByText("Parcial: o diário", { exact: false }),
   ).toBeVisible();
+  await expect(page.locator(".food-calendar")).toHaveCount(0);
+  await expect(page.locator(".module-page > form.filter-form")).toHaveCount(0);
   await capture("alimentacao");
   await page.goto("/painel");
   await page
@@ -196,7 +199,28 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
       .getByText("89,5 kg", { exact: true }),
   ).toBeVisible();
   await page.getByRole("link", { name: "Mês anterior", exact: true }).click();
-  await page.locator(".history-calendar-grid a").first().click();
+  let releaseHistory!: () => void;
+  const historyGate = new Promise<void>((resolve) => {
+    releaseHistory = resolve;
+  });
+  await page.route("**/painel/historico?**", async (route) => {
+    await historyGate;
+    await route.continue();
+  });
+  const selectingDay = page.locator(".history-calendar-grid a").first().click();
+  try {
+    await expect(
+      page.getByRole("status").filter({ hasText: "Carregando registros" }),
+    ).toBeVisible();
+    await page.screenshot({ path: "artifacts/history-loading.png" });
+  } finally {
+    releaseHistory();
+  }
+  await selectingDay;
+  await page.unroute("**/painel/historico?**");
+  await expect(
+    page.getByRole("status").filter({ hasText: "Carregando registros" }),
+  ).toHaveCount(0);
   await expect(page.locator(".history-day")).toContainText(
     "Nenhum registro neste dia",
   );
@@ -222,11 +246,7 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
   await expect(page.locator(".dashboard-hero")).toBeVisible();
   await expect(page.locator(".area-card.metric-agua")).toBeVisible();
   await page.setViewportSize({ width: 1280, height: 844 });
-  await expect(page.getByLabel("Projeto visualizado")).toBeHidden();
-  await page
-    .getByText("Alterar projeto ou data da consulta", { exact: true })
-    .click();
-  await expect(page.getByLabel("Projeto visualizado")).toBeVisible();
+  await expect(page.getByLabel("Data da consulta")).toHaveCount(0);
   await page.waitForFunction(
     () => sessionStorage.getItem("diazen-dashboard") !== null,
   );
@@ -263,11 +283,7 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
   await expect(page.locator(".dashboard-hero")).toBeVisible();
   await expect(page.locator(".area-card.metric-agua")).toBeVisible();
   await page.setViewportSize({ width: 1280, height: 844 });
-  await expect(page.getByLabel("Projeto visualizado")).toBeHidden();
-  await page
-    .getByText("Alterar projeto ou data da consulta", { exact: true })
-    .click();
-  await expect(page.getByLabel("Projeto visualizado")).toBeVisible();
+  await expect(page.getByLabel("Data da consulta")).toHaveCount(0);
   await page.waitForFunction(
     () => sessionStorage.getItem("diazen-dashboard") !== null,
   );

@@ -128,3 +128,5 @@ A migração incremental `202610240011_plan_meal_records.sql` adiciona origem do
 
 
 O dashboard oferece **Histórico geral** (`/painel/historico`) do projeto ativo: calendário mensal aberto, seleção de um dia e resultados em accordion por data, com grupos de refeições, hidratação, atividades, peso, medidas e fotos. A consulta não muda o projeto ativo; fotos abrem na galeria privada. Projetos anteriores continuam disponíveis em Projetos.
+
+A consulta por data fica centralizada no Histórico geral. As telas operacionais mantêm os campos de data para salvar registros retroativos, mas não exibem seletores de consulta nem a faixa de dias da Alimentação. A navegação no calendário mostra logo e “Carregando registros…” enquanto aguarda os dados.
