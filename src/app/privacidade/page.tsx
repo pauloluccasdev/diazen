@@ -41,39 +41,23 @@ export default function Privacy() {
         ficam registradas no seu plano, e os valores podem variar conforme a
         marca consumida.
       </p>
-      <h2>Conexão opcional com Strava</h2>
+      <h2>Consulta pessoal à Garmin</h2>
       <p>
-        Ao conectar sua conta, você autoriza a leitura de atividades no Strava,
-        inclusive privadas. Consultamos até cinco atividades recentes e
-        mostramos nome, modalidade, data, duração, distância e calorias quando
-        disponíveis. Os dados são exibidos somente para você, não são combinados
-        com o diário alimentar e não são copiados para o banco, exportação,
-        backups ou ferramentas de IA. A consulta fica temporariamente na memória
-        desta tela, por até 15 minutos, sem leitura offline.
+        A integração Garmin Personal API fica disponível exclusivamente à conta
+        Diazen do proprietário configurado no servidor. A chave pessoal e o
+        token de acesso não são enviados ao navegador. Ao solicitar a consulta,
+        mostramos até cinco atividades recentes sincronizadas com o Garmin
+        Connect, com nome, modalidade, data, duração, distância e calorias
+        quando disponíveis. Não solicitamos mapas, fotografias ou dados de saúde
+        adicionais.
       </p>
       <p>
-        A conexão usa um cookie cifrado e inacessível ao JavaScript, vinculado à
-        sua conta Diazen, com validade de até sete dias neste navegador. Sair da
-        conta remove esse cookie. Em Atividades, “Desconectar Strava” limpa a
-        consulta e solicita a revogação do acesso; você também pode remover a
-        autorização em{" "}
-        <a
-          href="https://www.strava.com/settings/apps"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Meus aplicativos no Strava
-        </a>
-        . Nenhuma dessas ações exclui suas atividades originais no Strava. O
-        Strava pode monitorar dados de uso de sua API conforme sua{" "}
-        <a
-          href="https://www.strava.com/legal/api_policy"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          política
-        </a>
-        .
+        Os resultados ficam apenas na memória desta tela por até quinze minutos,
+        sem acesso offline, cópia para o diário, exportação ou backups. A
+        consulta não modifica suas atividades na Garmin. Você pode limpar os
+        resultados na tela e revogar o acesso excluindo sua chave pessoal no
+        Garmin Connect. Sair da conta ou excluir a conta Diazen impede novas
+        consultas.
       </p>
       <h2>Dispositivo e conexão</h2>
       <p>

@@ -2945,62 +2945,105 @@ input[type="date"]::-webkit-datetime-edit {
   color: var(--color-text);
   font-size: 16px;
 }
-.strava-connection {
+.garmin-connection {
   display: grid;
   gap: 16px;
 }
-.strava-connection h2,
-.strava-connection p {
+.garmin-connection h2,
+.garmin-connection p {
   margin: 0;
 }
-.strava-connection button {
+.garmin-connection button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
 }
-.strava-activities {
+.garmin-activities {
   list-style: none;
   padding: 0;
   margin: 0;
 }
-.strava-activities li {
+.garmin-activities li {
   display: grid;
   gap: 12px;
   padding-block: 20px;
   border-top: 1px solid var(--color-border);
 }
-.strava-activities h3 {
+.garmin-activities h3 {
   font-size: 18px;
   overflow-wrap: anywhere;
 }
-.strava-activities dl {
+.garmin-activities dl {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
-.strava-activities dt {
+.garmin-activities dt {
   color: var(--color-text-muted);
   font-size: 12px;
 }
-.strava-activities dd {
+.garmin-activities dd {
   margin: 6px 0 0;
   font-weight: 700;
 }
-.strava-source {
+.garmin-source {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: #fc5200;
+  color: var(--color-accent);
   text-decoration: underline;
   font-weight: 700;
   min-height: 44px;
 }
 
-.strava-connection > .section-heading {
+.garmin-connection > .section-heading {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
   margin: 0;
+}
+.garmin-activity-details {
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: none;
+}
+.garmin-activity-details > summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 0;
+  min-height: 48px;
+  list-style: none;
+  cursor: pointer;
+}
+.garmin-activity-details > summary::-webkit-details-marker {
+  display: none;
+}
+.garmin-activity-details > summary > span:first-child {
+  grid-column: 1 / -1;
+}
+.garmin-activity-details strong {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.garmin-activity-details small {
+  display: block;
+  margin-top: 8px;
+  color: var(--color-text-muted);
+}
+.garmin-kcal {
+  color: var(--color-accent);
+  font-weight: 700;
+}
+.garmin-activity-body {
+  display: grid;
+  gap: 16px;
+  padding-top: 20px;
+}
+.garmin-activity-details[open] > summary > svg {
+  transform: rotate(180deg);
 }

@@ -1,3 +1,4 @@
+import { garminConfig } from "@/lib/garmin-config";
 import { CalorieBalance } from "@/components/calorie-balance";
 import Link from "next/link";
 import {
@@ -26,7 +27,7 @@ export default async function Panel({
   searchParams: Promise<{ projeto?: string; data?: string }>;
 }) {
   const params = await searchParams,
-    { selected, active, client } = await projectContext(params.projeto);
+    { selected, active, client, user } = await projectContext(params.projeto);
   const date =
     params.data && isDate(params.data)
       ? params.data
@@ -273,9 +274,9 @@ export default async function Panel({
                       {value}
                     </p>
                     <p>{detail}</p>
-                    {module === "atividades" && (
+                    {module === "atividades" && garminConfig(user.id) && (
                       <span className="field-hint">
-                        Consulte também sua conta Strava
+                        Consulte suas atividades da Garmin
                       </span>
                     )}
                     {module === "agua" &&
