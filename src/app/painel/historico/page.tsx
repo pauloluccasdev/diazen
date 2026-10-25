@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { HistoryLink as Link } from "@/components/history-link";
 import {
   ArrowRight,
   ChevronDown,

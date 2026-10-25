@@ -71,29 +71,28 @@ export default async function PlanPage({
         </p>
       </section>
       {!editable && <p className="readonly-note">Projeto somente leitura.</p>}
-      <form className="filter-form plan-filter">
-        <input type="hidden" name="projeto" value={selected.id} />
-        <label>
-          Data do consumo para comparar
-          <input type="date" name="data" defaultValue={date} max={today()} />
-        </label>
-        {versions.data.length > 0 && (
-          <label>
-            Versões salvas (20 mais recentes)
-            <select name="versao" defaultValue={id}>
-              {versions.data.map((v) => (
-                <option key={v.id} value={v.id}>
-                  {v.title} ·{" "}
-                  {new Date(v.created_at).toLocaleString("pt-BR", {
-                    timeZone: "America/Sao_Paulo",
-                  })}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
-        <button className="button-secondary">Consultar plano</button>
-      </form>
+      {versions.data.length > 0 && (
+        <form className="filter-form plan-filter">
+          <input type="hidden" name="projeto" value={selected.id} />
+          <input type="hidden" name="data" value={date} />
+          {versions.data.length > 0 && (
+            <label>
+              Versões salvas (20 mais recentes)
+              <select name="versao" defaultValue={id}>
+                {versions.data.map((v) => (
+                  <option key={v.id} value={v.id}>
+                    {v.title} ·{" "}
+                    {new Date(v.created_at).toLocaleString("pt-BR", {
+                      timeZone: "America/Sao_Paulo",
+                    })}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+          <button className="button-secondary">Abrir versão salva</button>
+        </form>
+      )}
       <DietPlanEditor
         key={`${selected.id}-${filters.versao ?? "current"}-${date}`}
         project={selected.id}

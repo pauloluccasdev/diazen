@@ -7,8 +7,6 @@ import {
   ChartNoAxesCombined,
   Camera,
   Ruler,
-  SlidersHorizontal,
-  ChevronDown,
   FolderOpen,
   ArrowRight,
   History,
@@ -28,9 +26,7 @@ export default async function Panel({
   searchParams: Promise<{ projeto?: string; data?: string }>;
 }) {
   const params = await searchParams,
-    { selected, projects, active, client } = await projectContext(
-      params.projeto,
-    );
+    { selected, active, client } = await projectContext(params.projeto);
   const date =
     params.data && isDate(params.data)
       ? params.data
@@ -130,46 +126,6 @@ export default async function Panel({
       </Link>
       {selected && summary ? (
         <>
-          <details className="dashboard-query">
-            <summary>
-              <span className="project-setting-icon" aria-hidden="true">
-                <SlidersHorizontal size={20} />
-              </span>
-              <span className="project-setting-title">
-                Alterar projeto ou data da consulta
-              </span>
-              <ChevronDown
-                className="project-setting-chevron"
-                size={18}
-                aria-hidden="true"
-              />
-            </summary>
-            <form className="filter-form dashboard-filters">
-              <label>
-                Projeto visualizado
-                <select name="projeto" defaultValue={selected.id}>
-                  {!projects.some((p) => p.id === selected.id) && (
-                    <option value={selected.id}>{selected.name}</option>
-                  )}
-                  {projects.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name} · {statusLabel[p.status]}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                Data da consulta
-                <input
-                  type="date"
-                  name="data"
-                  defaultValue={date}
-                  max={today()}
-                />
-              </label>
-              <button className="button-primary">Consultar</button>
-            </form>
-          </details>
           <section className="project-card dashboard-hero">
             <div className="project-content">
               <span className="status">

@@ -196,9 +196,6 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
       .locator("dd"),
   ).toHaveText("2");
   await page.goto("/painel/alimentacao");
-  await expect(
-    page.locator('.food-calendar [aria-current="date"]'),
-  ).toContainText("Completo");
   await page.locator(".meal-record-group > summary").first().click();
   const registeredFood = page
     .getByRole("article", { includeHidden: true })
@@ -214,7 +211,4 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
   await expect(
     page.getByText("Parcial: o diário", { exact: false }),
   ).toBeVisible();
-  await expect(
-    page.locator('.food-calendar [aria-current="date"]'),
-  ).toContainText("Parcial");
 });

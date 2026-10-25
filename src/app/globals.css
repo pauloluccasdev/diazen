@@ -2935,3 +2935,13 @@ input[type="date"]::-webkit-datetime-edit {
   padding: 12px 0;
   background: transparent;
 }
+
+.history-loading {
+  background: rgb(12 14 18 / 94%);
+  align-content: center;
+  gap: 16px;
+}
+.history-loading p {
+  color: var(--color-text);
+  font-size: 16px;
+}

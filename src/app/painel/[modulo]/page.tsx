@@ -125,7 +125,7 @@ export default async function Records({
     .order("id", { ascending: false })
     .range((page - 1) * 20, page * 20);
   if (daily || filters.data) query = query.eq("logged_on", date);
-  const [entries, totals, graph, calendar, diet] = await Promise.all([
+  const [entries, totals, graph, diet] = await Promise.all([
     query.returns<Entry[]>(),
     client.rpc("project_summary", {
       p_project: selected.id,
@@ -142,39 +142,18 @@ export default async function Records({
           .returns<Entry[]>()
       : Promise.resolve({ data: [] as Entry[], error: null }),
     modulo === "alimentacao"
-      ? client.rpc("food_calendar", {
-          p_project: selected.id,
-          p_date: date,
-        })
-      : Promise.resolve({ data: [], error: null }),
-    modulo === "alimentacao"
       ? dashboardPlan(client, selected.id, date)
       : Promise.resolve(null),
   ]);
   if (entries.error) throw new Error("Falha ao carregar registros");
   if (totals.error) throw new Error("Falha ao carregar totais");
   if (graph.error) throw new Error("Falha no gráfico");
-  if (calendar.error) throw new Error("Falha no calendário");
   const rows = (entries.data ?? []).slice(0, 20),
     hasMore = (entries.data?.length ?? 0) > 20;
   const summary = totals.data as Summary;
   const link = (nextPage: number) =>
     `/painel/${modulo}?projeto=${selected.id}&pagina=${nextPage}${daily || filters.data ? `&data=${date}` : ""}`;
   const chart: Entry[] = graph.data ?? [];
-  const days: { day: string; items: number; confirmed: boolean }[] =
-    calendar.data ?? [];
-  const calendarStatus =
-    modulo === "alimentacao"
-      ? await Promise.all(
-          days.map(async (day) => ({
-            day: day.day,
-            complete:
-              day.day === date
-                ? diet?.complete
-                : (await dashboardPlan(client, selected.id, day.day))?.complete,
-          })),
-        )
-      : [];
   const renderRecord = (row: Entry) => (
     <article
       key={row.id}
@@ -357,30 +336,14 @@ export default async function Records({
           </ActionForm>
         </details>
       )}
-      {daily ? (
-        <form className="filter-form">
-          <input type="hidden" name="projeto" value={selected.id} />
-          <label>
-            Data
-            <input
-              type="date"
-              name="data"
-              defaultValue={daily || filters.data ? date : ""}
-              max={today()}
-            />
-          </label>
-          <button className="button-primary">Consultar</button>
-        </form>
-      ) : (
-        <Link
-          className="button-secondary meal-record-link"
-          href="/painel/historico"
-        >
-          <History size={20} aria-hidden="true" />
-          <span>Consultar histórico geral</span>
-          <ChevronRight size={18} aria-hidden="true" />
-        </Link>
-      )}
+      <Link
+        className="button-secondary meal-record-link"
+        href="/painel/historico"
+      >
+        <History size={20} aria-hidden="true" />
+        <span>Consultar histórico geral</span>
+        <ChevronRight size={18} aria-hidden="true" />
+      </Link>
 
       {modulo === "alimentacao" && diet && (
         <section className="planned-meals" aria-label="Refeições do plano">
@@ -494,25 +457,6 @@ export default async function Records({
       )}
       {modulo === "alimentacao" && (
         <>
-          <nav className="food-calendar" aria-label="Calendário alimentar">
-            {days.map((day) => (
-              <Link
-                key={day.day}
-                href={`/painel/alimentacao?projeto=${selected.id}&data=${day.day}`}
-                aria-current={day.day === date ? "date" : undefined}
-              >
-                <strong>{formatDate(day.day).slice(0, 5)}</strong>
-                <span>
-                  {calendarStatus.find((status) => status.day === day.day)
-                    ?.complete
-                    ? "Completo"
-                    : Number(day.items) > 0
-                      ? "Parcial"
-                      : "Sem registros"}
-                </span>
-              </Link>
-            ))}
-          </nav>
           <section className="content-card">
             <h2>Totais de {formatDate(date)}</h2>
             <div className="nutrition-grid">
