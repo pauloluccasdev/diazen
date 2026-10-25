@@ -477,3 +477,10 @@ Os cards do dashboard comparam alimentação registrada com plano quando dispon�
 ## Ajuste — Cards de peso e sessões compactos — 25/10/2026
 
 Por solicitação do proprietário, o card Peso volta a ocupar uma coluna da grade, alinhado aos demais, mantendo comparação e gráfico compacto. O card Atividades com meta mostra apenas sessões registradas versus meta e barra âmbar, removendo o título numérico e textos repetidos; sem meta mantém a informação de sessões e ausência de configuração. RF-018; RNF-007/008/011. Sem mudanças de consultas ou banco.
+
+
+## Aceite — Homologação aprovada pelo proprietário — 25/10/2026
+
+O proprietário declarou ter homologado tudo e confirmou o funcionamento da versão atual, optando por corrigir eventuais bugs ao longo do uso. Registra-se o aceite funcional e visual, incluindo os fluxos de uso da lista de homologação, sem atribuir novas evidências automatizadas, medições de desempenho ou testes específicos à declaração geral. A homologação deixa de bloquear a versão aceita; problemas posteriores seguem como manutenção.
+
+O aceite não executa publicação em produção, merge na main, configuração de domínio ou agendamento de backups. Frequência e retenção de backups continuam sem valores escolhidos; não se presume aprovação dos parâmetros propostos. O PR final e o code review de develop para main permanecem com o proprietário. RF-001 a RF-022 no recorte implementado e autorizado; critérios de aceite de lançamento e controle de mudanças.

@@ -1,10 +1,12 @@
 # Homologação final do MVP
 
+**Homologação funcional e visual aprovada pelo proprietário em 25/10/2026.** Declaração: “homologuei tudo.. está tudo funcionando. Qualquer bug vamos ajustando com o tempo”. O aceite permite encerrar a homologação de uso da versão atual e tratar problemas posteriores como manutenção. É uma confirmação do proprietário; não acrescenta medições, modelos de aparelho ou evidências técnicas que não foram fornecidas.
+
 Esta lista reúne decisões e verificações de encerramento. Itens pendentes não são considerados aprovados pela passagem da CI. O proprietário realiza o review e o PR de `develop` para `main` ao concluir esta etapa.
 
 ## Layout e uso
 
-Prévia pública: <https://diazen-git-develop-pauloluccas-projects-58a37ef2.vercel.app>. Não exige conta Vercel; o painel exige login Diazen. Usar dados fictícios até concluir a homologação.
+Prévia pública: <https://diazen-git-develop-pauloluccas-projects-58a37ef2.vercel.app>. Não exige conta Vercel; o painel exige login Diazen. Homologação de uso aprovada pelo proprietário em 25/10/2026.
 
 Capturas locais reproduzíveis:
 
@@ -14,21 +16,21 @@ CAPTURE_REVIEW=1 npx playwright test tests/accessibility.spec.ts --project=chrom
 
 Requer build prévio. A configuração do teste utiliza Auth/Storage simulados e PostgreSQL embarcado, sem conexão ao Supabase remoto. Capturas em `artifacts/visual-review/chromium/` cobrem abertura, login, cadastro, recuperação, privacidade, termos, dashboard, projetos, água, peso, medidas, atividades, alimentação, biblioteca de alimentos/receitas, fotos e perfil em 390 e 1280 px. Mostram os estados iniciais dos módulos com um projeto ativo fictício; não documentam todos os estados preenchidos, erros ou fotos reais. Os arquivos ficam ignorados pelo Git.
 
-- [ ] Aprovação visual reaberta pelo proprietário em 22/10/2026 por divergências com o protótipo. Revisão geral e limites em [revisão visual](revisao-visual.md); validar novamente as telas publicadas.
-- [ ] Instalar e abrir a PWA no celular disponível; registrar sistema e navegador.
-- [ ] Consultar dashboard online, perder conexão e verificar leitura limitada, aviso e bloqueio de escrita; restaurar conexão e encerrar sessão.
-- [ ] Conferir zoom 200%, teclado e leitor de tela nas telas essenciais.
-- [ ] Registrar duração de navegação e gravação em rede comum e dispositivo móvel; investigar operações usuais acima da meta proposta de aproximadamente 2 segundos.
+- [x] Aprovação visual confirmada pelo proprietário em 25/10/2026, encerrando a revisão reaberta em 22/10/2026.
+- [x] Uso da PWA aceito na homologação global do proprietário em 25/10/2026; sistema/navegador não informados.
+- [x] Comportamento online/offline incluído no aceite global do proprietário em 25/10/2026; sem novo relatório individual de execução.
+- [x] Usabilidade e acessibilidade incluídas no aceite global do proprietário em 25/10/2026; os detalhes de cada verificação manual não foram informados.
+- [x] Desempenho percebido aceito pelo proprietário em 25/10/2026; nenhuma nova medição numérica fornecida.
 
 ## Conta, dados e operação
 
 - [x] Recuperação pelo e-mail padrão recebida e senha redefinida, confirmadas pelo proprietário em 22/10/2026.
-- [ ] Confirmar cadastro pelo e-mail padrão no mesmo navegador da solicitação; a recuperação acima não comprova esse fluxo.
+- [x] Fluxo de cadastro incluído na homologação global confirmada pelo proprietário em 25/10/2026.
 - [x] Ensaio nativo isolado de banco e arquivos locais com dados sintéticos, RLS e reaplicação de exclusões: `npm run test:restore`, executado em 22/10/2026.
 - [x] Ensaio controlado com Auth, PostgREST e Storage reais do Supabase local em 22/10/2026: `npm run test:restore:services`; login restaurado, arquivos por API/checksums, RLS e exclusão reaplicada. Não foi executada restauração de outro projeto hospedado; limites em [operação](operacao.md).
 - [x] Destino local indicado pelo proprietário; comandos de snapshot/ledger cifrados e verificador implementados, com cópias reais e teste de imagens do Storage em 22/10/2026.
 - [ ] Definir frequência e retenção dos backups locais; escolha de execução manual ou diária solicitada ao proprietário.
-- [ ] Confirmar responsável, contato, finalidade, retenção e textos de privacidade/termos adequados ao uso pessoal escolhido.
+- [x] Textos e uso pessoal incluídos no aceite global do proprietário em 25/10/2026. O aceite não constitui parecer jurídico nem define novos prazos de retenção.
 - [x] RF-009 incluído por decisão do proprietário em 22/10/2026: alimentos salvos, receitas, favoritos, recentes e cópia confirmada de refeições.
 
 ## Publicação após review

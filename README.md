@@ -1,10 +1,10 @@
 # Diazen
 
-PWA pessoal da **Lucx Tech** para diário alimentar, hidratação, atividades e evolução física. **MVP 0.1 em desenvolvimento, com núcleo implementado e validação local; homologação real ainda pendente.**
+PWA pessoal da **Lucx Tech** para diário alimentar, hidratação, atividades e evolução física. **MVP 0.1 com homologação funcional e visual aprovada pelo proprietário em 25/10/2026.** Problemas encontrados posteriormente serão tratados como manutenção.
 
 Stack: Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4 e Supabase (PostgreSQL, Auth e Storage privado). Hospedagem prevista na Vercel, inicialmente para uso pessoal.
 
-Uma prévia pública da `develop` está disponível na Vercel; o painel exige login Diazen. Veja [publicação e configuração de autenticação](docs/publicacao.md); o lançamento em produção continua pendente dos gates de homologação e review.
+Uma prévia pública da `develop` está disponível na Vercel; o painel exige login Diazen. Veja [publicação e configuração de autenticação](docs/publicacao.md); a publicação em produção permanece sujeita ao review/PR do proprietário e à configuração do ambiente definitivo.
 
 O Supabase anteriormente usado pelo Planna foi resetado por autorização do proprietário e já recebeu as migrações 001 a 012. As migrações 009 (conveniências alimentares), 010 (planos) e 011 (registro de refeições) e 012 (importação Garmin) foram aplicadas incrementalmente, sem novo reset. Os fluxos essenciais passaram no serviço real com contas temporárias removidas ao final. Consulte [evidências e pendências de homologação](docs/homologacao-supabase.md). **Não reaplique o bundle nesse ambiente.**
 
