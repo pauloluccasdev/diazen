@@ -30,3 +30,17 @@ test("agendamento usa Vault, destino HTTPS fixo, privilégio mínimo e começa d
     ),
   );
 });
+
+test("agendador protegido guarda bypass no Vault e não no comando cron", () => {
+  const secret = "synthetic-not-a-real-secret-1234567890";
+  const bypass = "0123456789abcdef0123456789abcdef";
+  const sql = garminScheduleSql("https://example.test", secret, true, bypass);
+  const command = sql.slice(sql.indexOf("select cron.schedule"));
+  assert.ok(command.includes("x-vercel-protection-bypass"));
+  assert.ok(command.includes("diazen_garmin_vercel_bypass"));
+  assert.ok(!command.includes(bypass));
+  assert.ok(!command.includes(secret));
+  assert.throws(() =>
+    garminScheduleSql("https://example.test", secret, true, "invalid"),
+  );
+});

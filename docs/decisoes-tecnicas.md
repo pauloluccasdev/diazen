@@ -484,3 +484,10 @@ Por solicitação do proprietário, o card Peso volta a ocupar uma coluna da gra
 O proprietário declarou ter homologado tudo e confirmou o funcionamento da versão atual, optando por corrigir eventuais bugs ao longo do uso. Registra-se o aceite funcional e visual, incluindo os fluxos de uso da lista de homologação, sem atribuir novas evidências automatizadas, medições de desempenho ou testes específicos à declaração geral. A homologação deixa de bloquear a versão aceita; problemas posteriores seguem como manutenção.
 
 O aceite não executa publicação em produção, merge na main, configuração de domínio ou agendamento de backups. Frequência e retenção de backups continuam sem valores escolhidos; não se presume aprovação dos parâmetros propostos. O PR final e o code review de develop para main permanecem com o proprietário. RF-001 a RF-022 no recorte implementado e autorizado; critérios de aceite de lançamento e controle de mudanças.
+
+
+## Operação — Garmin na produção da main — 25/10/2026
+
+Após o proprietário publicar main, autorizou configurar a integração Garmin em produção. Foram configuradas variáveis privadas Garmin e os parâmetros essenciais do Supabase, com origem https://diazen.vercel.app; a implantação foi refeita a partir da main publicada. Auth preserva os callbacks existentes e acrescenta os de produção. O banco não mudou, mantendo dados, preferências e idempotência de importação.
+
+A proteção Vercel estava habilitada para todos os deployments e impedia chamadas externas. Foi criado acesso específico de automação para o agendador, mantido cifrado no Vault e enviado em header, sem retirar a proteção. O endpoint continua exigindo o segredo próprio do Diazen. O job existente de quinze minutos foi redirecionado para produção e continua único; a ferramenta operacional passa a suportar o header opcional. Sem migração e sem merge do agente na main. RF-012/018; RNF-002/005/008/014.
