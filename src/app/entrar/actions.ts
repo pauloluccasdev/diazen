@@ -1,4 +1,5 @@
 "use server";
+import { clearStrava } from "@/lib/strava-server";
 
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -53,5 +54,6 @@ export async function signOut(): Promise<{ error: string }> {
       return { error: "Não foi possível sair. Tente novamente." };
     }
   }
+  await clearStrava();
   redirect("/entrar");
 }

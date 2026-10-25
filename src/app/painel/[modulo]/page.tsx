@@ -1,3 +1,4 @@
+import { StravaConnection } from "@/components/strava-connection";
 import type { ReactNode } from "react";
 import { dashboardPlan } from "@/lib/dashboard-plan";
 import { ManualMealRecorder } from "@/components/manual-meal-recorder";
@@ -345,6 +346,7 @@ export default async function Records({
         <ChevronRight size={18} aria-hidden="true" />
       </Link>
 
+      {modulo === "atividades" && <StravaConnection />}
       {modulo === "alimentacao" && diet && (
         <section className="planned-meals" aria-label="Refeições do plano">
           <h2>Suas refeições planejadas</h2>

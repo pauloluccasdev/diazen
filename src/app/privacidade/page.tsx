@@ -41,6 +41,40 @@ export default function Privacy() {
         ficam registradas no seu plano, e os valores podem variar conforme a
         marca consumida.
       </p>
+      <h2>Conexão opcional com Strava</h2>
+      <p>
+        Ao conectar sua conta, você autoriza a leitura de atividades no Strava,
+        inclusive privadas. Consultamos até cinco atividades recentes e
+        mostramos nome, modalidade, data, duração, distância e calorias quando
+        disponíveis. Os dados são exibidos somente para você, não são combinados
+        com o diário alimentar e não são copiados para o banco, exportação,
+        backups ou ferramentas de IA. A consulta fica temporariamente na memória
+        desta tela, por até 15 minutos, sem leitura offline.
+      </p>
+      <p>
+        A conexão usa um cookie cifrado e inacessível ao JavaScript, vinculado à
+        sua conta Diazen, com validade de até sete dias neste navegador. Sair da
+        conta remove esse cookie. Em Atividades, “Desconectar Strava” limpa a
+        consulta e solicita a revogação do acesso; você também pode remover a
+        autorização em{" "}
+        <a
+          href="https://www.strava.com/settings/apps"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Meus aplicativos no Strava
+        </a>
+        . Nenhuma dessas ações exclui suas atividades originais no Strava. O
+        Strava pode monitorar dados de uso de sua API conforme sua{" "}
+        <a
+          href="https://www.strava.com/legal/api_policy"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          política
+        </a>
+        .
+      </p>
       <h2>Dispositivo e conexão</h2>
       <p>
         A instalação usa cookies de sessão. A leitura offline pode mostrar um
@@ -66,8 +100,9 @@ export default function Privacy() {
         consultada com o responsável pela instalação.
       </p>
       <p className="muted">
-        Versão informativa de 21/10/2026. A revisão jurídica e operacional da
-        instalação real é uma etapa anterior à publicação para terceiros.
+        Versão informativa atualizada em 25/10/2026. A revisão jurídica e
+        operacional da instalação real é uma etapa anterior à publicação para
+        terceiros.
       </p>
     </article>
   );
