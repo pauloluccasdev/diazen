@@ -1,3 +1,5 @@
+import { MealDeleteDialog } from "@/components/meal-delete-dialog";
+import { ClearOfflineData } from "@/components/offline-snapshot";
 import { ActivityRecordCard } from "@/components/activity-record-card";
 import { ActivityWeekSummary } from "@/components/activity-week-summary";
 import { weekBounds } from "@/lib/records";
@@ -100,7 +102,12 @@ export default async function Records({
   searchParams,
 }: {
   params: Promise<{ modulo: string }>;
-  searchParams: Promise<{ projeto?: string; data?: string; pagina?: string }>;
+  searchParams: Promise<{
+    projeto?: string;
+    data?: string;
+    pagina?: string;
+    refeicao_excluida?: string;
+  }>;
 }) {
   const { modulo } = await params;
   if (!isModule(modulo)) notFound();
@@ -538,6 +545,15 @@ export default async function Records({
           activeName={active?.name}
         />
       )}
+      {modulo === "alimentacao" && filters.refeicao_excluida === "1" && (
+        <>
+          <ClearOfflineData />
+          <p role="status" className="form-success">
+            Refeição excluída. Todos os alimentos desse grupo foram removidos
+            dos registros da data.
+          </p>
+        </>
+      )}
       <section
         id="registros-do-dia"
         className="records-section"
@@ -601,6 +617,13 @@ export default async function Records({
                     </span>
                     <ChevronDown size={20} aria-hidden="true" />
                   </summary>
+                  {editable && (
+                    <MealDeleteDialog
+                      project={selected.id}
+                      date={date}
+                      category={category as keyof typeof categories}
+                    />
+                  )}
                   <div className="meal-record-items">
                     {items.map(renderRecord)}
                   </div>
