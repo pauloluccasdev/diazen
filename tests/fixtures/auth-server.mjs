@@ -16,6 +16,11 @@ const token = `${encode({ alg: "HS256", typ: "JWT" })}.${encode({ sub: user.id, 
 const users = [
   {
     ...user,
+    id: "00000000-0000-4000-8000-000000000021",
+    email: "zero-portions@example.test",
+  },
+  {
+    ...user,
     id: "00000000-0000-4000-8000-000000000020",
     email: "project-delete@example.test",
   },
