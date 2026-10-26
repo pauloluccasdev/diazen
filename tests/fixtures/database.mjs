@@ -41,6 +41,7 @@ const tables = new Set([
   "deletion_ledger",
 ]);
 const commands = new Set([
+  "delete_project",
   "garmin_import_activity",
   "garmin_claim_sync",
   "garmin_finish_sync",

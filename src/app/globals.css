@@ -3425,3 +3425,24 @@ input[type="date"]::-webkit-datetime-edit {
 .area-card.metric-peso .weight-chart figcaption {
   display: none;
 }
+
+.project-delete-trigger {
+  margin-top: 16px;
+  color: var(--color-danger);
+}
+.project-delete-dialog {
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+}
+.project-delete-dialog ul {
+  padding-left: 24px;
+  line-height: 1.7;
+}
+.project-delete-dialog .button-primary {
+  background: var(--color-danger);
+  color: var(--color-bg);
+  box-shadow: none;
+}
+.project-delete-dialog .button-primary:hover {
+  filter: brightness(1.1);
+}

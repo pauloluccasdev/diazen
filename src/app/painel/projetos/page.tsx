@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { ClearOfflineData } from "@/components/offline-snapshot";
+import { ProjectDeleteDialog } from "@/components/project-delete-dialog";
 import {
   CalendarDays,
   PencilLine,
@@ -28,7 +30,12 @@ export const metadata = { title: "Projetos e metas" };
 export default async function Projects({
   searchParams,
 }: {
-  searchParams: Promise<{ pagina?: string; estado?: string }>;
+  searchParams: Promise<{
+    pagina?: string;
+    estado?: string;
+    excluido?: string;
+    limpeza?: string;
+  }>;
 }) {
   const params = await searchParams;
   const page = Math.min(
@@ -72,6 +79,14 @@ export default async function Projects({
           o destino dos seus registros.
         </p>
       </section>
+      {params.excluido === "1" && <ClearOfflineData />}
+      {params.excluido === "1" && (
+        <p className="form-success" role="status">
+          Projeto excluído. Seus registros vinculados foram removidos.
+          {params.limpeza === "pendente" &&
+            " A remoção dos arquivos de fotos está pendente de nova tentativa; as fotos já não estão disponíveis na galeria."}
+        </p>
+      )}
       <section className="records-section" aria-label="Seus projetos">
         <form className="filter-form" method="get" action="/painel/projetos">
           <label htmlFor="project-status">Estado dos projetos</label>
@@ -255,6 +270,11 @@ export default async function Projects({
                 </ProjectSetting>
               </>
             )}
+            <ProjectDeleteDialog
+              id={p.id}
+              name={p.name}
+              active={p.status === "ACTIVE"}
+            />
           </article>
         ))}
       </section>

@@ -137,3 +137,9 @@ Atividades inclui Garmin Personal API exclusivamente para a conta proprietária 
 Na tela Atividades, a apresentação da Garmin abre na primeira visita e começa recolhida nas seguintes, com um accordion acessível. Um marcador visual no navegador guarda apenas que a apresentação já foi vista. O resumo semanal destaca os dias com registros; cada atividade mostra duração, distância e calorias disponíveis em um card, com edição e exclusão recolhidas nos detalhes. A importação automática continua funcionando com a seção fechada.
 
 Selecionar um dia no resumo semanal de Atividades mostra os registros daquela data na própria tela. No dashboard, os cards comparam os registros com as metas ou plano disponíveis; Peso mostra as últimas trinta medições e a variação no período quando há pelo menos duas datas.
+
+### Hotfix: excluir projeto
+
+Projetos oferece exclusão definitiva com modal, nome digitado e confirmação. Remove somente os dados vinculados ao projeto da própria conta, inclusive históricos; mantém conta, outros projetos e biblioteca de alimentos. Fotos usam fila de limpeza com nova tentativa pelo procedimento de privacidade. Após excluir o ACTIVE, é preciso ativar outro projeto para registrar/importar atividades. A migração incremental `supabase/migrations/202610260013_project_deletion.sql` é necessária antes de habilitar a exclusão no ambiente hospedado; aplicar somente esse arquivo em banco já migrado até 012, sem reset ou bundle. Esta hotfix não aplica a migração remota automaticamente.
+
+Verificar: `node --test tests/database/project-deletion.test.mjs` e, após build, `npx playwright test tests/project-deletion.spec.ts --project=chromium`. Os testes usam dados sintéticos locais e cobrem isolamento, cascata, confirmação, cancelamento, offline e acessibilidade. Antes de restaurar backup antigo, conferir projetos excluídos após o snapshot para não reintroduzi-los.
