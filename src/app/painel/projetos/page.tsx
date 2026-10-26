@@ -237,6 +237,7 @@ export default async function Projects({
                   </ProjectSetting>
                 </div>
                 <ActionForm
+                  className="data-form project-state-action"
                   action={changeProject}
                   submit={
                     p.status === "DRAFT" ? "Ativar projeto" : "Concluir projeto"
