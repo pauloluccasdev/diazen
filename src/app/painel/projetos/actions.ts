@@ -203,10 +203,22 @@ export async function deleteProject(
     p_project: id,
     p_name: name,
   });
-  if (error)
+  if (error) {
+    if (error.code === "PGRST202" || error.code === "42883")
+      return result(
+        "A exclusão está temporariamente indisponível neste ambiente. Tente novamente mais tarde.",
+      );
+    if (
+      error.code === "P0001" &&
+      error.message === "Confirmação de projeto inválida"
+    )
+      return result(
+        "Não foi possível excluir. Digite o nome exatamente como aparece no projeto.",
+      );
     return result(
-      "Não foi possível excluir. Confira o nome do projeto e tente novamente.",
+      "Não foi possível concluir a exclusão agora. Tente novamente mais tarde.",
     );
+  }
   let cleanupPending = false;
   try {
     await cleanPhotoJobs(admin, user.id, 20);
