@@ -45,13 +45,19 @@ export async function purgeAccount(admin: SupabaseClient, userId: string) {
   if (ledgerError) throw new Error("Falha ao concluir registro de exclusão");
   return true;
 }
-export async function cleanPhotoJobs(admin: SupabaseClient) {
+export async function cleanPhotoJobs(
+  admin: SupabaseClient,
+  userId?: string,
+  maxJobs = Infinity,
+) {
   let count = 0;
-  while (true) {
-    const { data, error } = await admin
+  while (count < maxJobs) {
+    let query = admin
       .from("photo_cleanup")
       .select("*")
-      .limit(100);
+      .limit(Math.min(100, maxJobs - count));
+    if (userId) query = query.eq("user_id", userId);
+    const { data, error } = await query;
     if (error) throw new Error("Falha ao consultar limpeza");
     if (!data?.length) break;
     for (const job of data) {

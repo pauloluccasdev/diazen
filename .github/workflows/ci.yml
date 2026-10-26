@@ -1,7 +1,7 @@
 name: Qualidade
 on:
   push:
-    branches: [main, develop, "feat/**", "fix/**"]
+    branches: [main, develop, "feat/**", "fix/**", "hotfix/**"]
   pull_request:
 permissions:
   contents: read

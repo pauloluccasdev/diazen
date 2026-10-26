@@ -14,6 +14,11 @@ const encode = (value) =>
 const token = `${encode({ alg: "HS256", typ: "JWT" })}.${encode({ sub: user.id, exp: Math.floor(Date.now() / 1000) + 3600, aud: "authenticated" })}.assinatura-de-teste`;
 
 const users = [
+  {
+    ...user,
+    id: "00000000-0000-4000-8000-000000000020",
+    email: "project-delete@example.test",
+  },
   user,
   {
     id: "00000000-0000-4000-8000-000000000019",
