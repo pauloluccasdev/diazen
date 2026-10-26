@@ -211,4 +211,43 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
   await expect(
     page.getByText("Parcial: o diário", { exact: false }),
   ).toBeVisible();
+  const dinner = page
+    .locator(".meal-record-group")
+    .filter({ has: page.locator("summary strong", { hasText: "Jantar" }) });
+  await dinner.locator(":scope > summary").click();
+  await dinner
+    .getByRole("button", { name: "Excluir refeição inteira", exact: true })
+    .click();
+  const dialog = page.getByRole("dialog", {
+    name: "Excluir refeição inteira?",
+    exact: true,
+  });
+  await expect(dialog).toContainText("Jantar");
+  await expect(
+    dialog.getByRole("button", { name: "Cancelar", exact: true }),
+  ).toBeFocused();
+  await dialog.getByRole("button", { name: "Cancelar", exact: true }).click();
+  await expect(page.getByRole("article", { includeHidden: true })).toHaveCount(
+    4,
+  );
+  await dinner
+    .getByRole("button", { name: "Excluir refeição inteira", exact: true })
+    .click();
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await dialog.getByRole("checkbox").check();
+  await dialog
+    .getByRole("button", { name: "Excluir todos os alimentos", exact: true })
+    .click();
+  await expect(page.getByRole("status")).toContainText("Refeição excluída");
+  await expect(page.getByRole("article", { includeHidden: true })).toHaveCount(
+    2,
+  );
+  await expect(page.locator(".meal-record-group")).toHaveCount(2);
+  const afterDelete = await (await page.request.get("/api/exportar")).json();
+  expect(
+    afterDelete.meal_items.some(
+      (r: { category: string }) => r.category === "dinner",
+    ),
+  ).toBe(false);
+  expect(afterDelete.diet_plans).toHaveLength(1);
 });

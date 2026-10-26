@@ -1,4 +1,5 @@
 "use server";
+import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireAccount } from "@/lib/data";
 import { isDate, isId, today } from "@/lib/domain";
@@ -245,5 +246,40 @@ export async function confirmMealDay(
   revalidatePath("/painel", "layout");
   return ok(
     "Confirmação atualizada. Concluído não significa aderência nutricional.",
+  );
+}
+
+export async function deleteMealGroup(
+  _state: FormResult,
+  form: FormData,
+): Promise<FormResult> {
+  const { client } = await requireAccount();
+  const project = String(form.get("project") ?? ""),
+    date = String(form.get("date") ?? ""),
+    category = String(form.get("category") ?? "");
+  if (
+    !isId(project) ||
+    !isDate(date) ||
+    date > today() ||
+    !Object.hasOwn(categories, category) ||
+    form.get("confirm") !== "on"
+  )
+    return fail(
+      "Confira a refeição e confirme a exclusão de todos os alimentos.",
+    );
+  const { data, error } = await client
+    .from("meal_items")
+    .delete()
+    .eq("project_id", project)
+    .eq("logged_on", date)
+    .eq("category", category)
+    .select("id");
+  if (error || !data?.length)
+    return fail(
+      "Não foi possível excluir a refeição. Confira os registros; projetos encerrados são somente leitura.",
+    );
+  revalidatePath("/painel", "layout");
+  redirect(
+    `/painel/alimentacao?projeto=${project}&data=${date}&refeicao_excluida=1`,
   );
 }
