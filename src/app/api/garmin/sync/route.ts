@@ -54,7 +54,8 @@ export async function POST(request: Request) {
         ...result,
         sleep_updated: sleepResult.updated,
         sleep_checked: sleepResult.checked,
-        sleep_revision: sleepResult.revision,
+        sleep_revision:
+          sleep.status === "fulfilled" ? sleepResult.revision : undefined,
         sleep_unavailable: sleep.status === "rejected",
         activities_unavailable: activity.status === "rejected",
       },
