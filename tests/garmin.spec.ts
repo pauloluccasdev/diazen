@@ -7,6 +7,17 @@ test("Garmin pessoal: consulta compacta, feedback, calorias ausentes e limpeza",
   request,
 }) => {
   test.setTimeout(120000);
+  let sleepRevision: string | null = null;
+  await page.route("**/api/garmin/sync", (route) =>
+    route.fulfill({
+      json: {
+        imported: 0,
+        sleep_updated: 0,
+        sleep_checked: false,
+        sleep_revision: sleepRevision,
+      },
+    }),
+  );
   expect(
     (
       await page.request.post("/api/garmin/activities", {
@@ -266,6 +277,25 @@ test("Garmin pessoal: consulta compacta, feedback, calorias ausentes e limpeza",
   await expect(sleep.locator(".sleep-stage-grid")).toContainText(
     "Não informado",
   );
+  const revised = await request.patch(
+    `http://127.0.0.1:54329/rest/v1/sleep_records?user_id=eq.${owner}&logged_on=eq.${date}`,
+    {
+      headers: { apikey: "chave-secreta-de-teste" },
+      data: {
+        total_seconds: 28800,
+        score: 88,
+        updated_at: new Date().toISOString(),
+      },
+    },
+  );
+  expect(revised.ok()).toBe(true);
+  sleepRevision = "revision-from-cron";
+  await page.evaluate(() => window.dispatchEvent(new Event("online")));
+  await expect(sleep.locator(".sleep-main-metrics")).toContainText(
+    "8 h 00 min",
+  );
+  await expect(sleep.locator(".sleep-main-metrics")).toContainText("88/100");
+
   const toggle = sleep.getByRole("checkbox", {
     name: "Sincronizar meu sono com a Garmin",
   });
@@ -274,7 +304,7 @@ test("Garmin pessoal: consulta compacta, feedback, calorias ausentes e limpeza",
   await expect(toggle).not.toBeChecked();
   await expect(sleep).toContainText("histórico foi preservado");
   await expect(sleep.locator(".sleep-main-metrics")).toContainText(
-    "7 h 30 min",
+    "8 h 00 min",
   );
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   await page.evaluate(() => {
@@ -295,7 +325,7 @@ test("Garmin pessoal: consulta compacta, feedback, calorias ausentes e limpeza",
   await page.goto("/painel");
   await expect(
     page.getByRole("region", { name: "Sono da Garmin" }),
-  ).toContainText("7 h 30 min");
+  ).toContainText("8 h 00 min");
   await context.addCookies([
     {
       name: "diazen-strava-session",

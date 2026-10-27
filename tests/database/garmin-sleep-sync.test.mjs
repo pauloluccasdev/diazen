@@ -42,6 +42,25 @@ beforeEach(() => {
     },
   ];
   globalThis.__sleepAdmin = {
+    from() {
+      return {
+        select() {
+          return this;
+        },
+        eq() {
+          return this;
+        },
+        order() {
+          return this;
+        },
+        limit() {
+          return this;
+        },
+        async maybeSingle() {
+          return { data: { updated_at: "revision" } };
+        },
+      };
+    },
     async rpc(name, args) {
       if (name === "garmin_claim_sleep") return { data: claim };
       if (name === "garmin_store_sleep") {
@@ -68,6 +87,7 @@ test("sem claim não consulta provedor nem grava", async () => {
   assert.deepEqual(await syncGarminSleep("owner"), {
     updated: 0,
     checked: false,
+    revision: "revision",
   });
   assert.equal(fetches, 0);
   assert.equal(saved.length, 0);
@@ -78,6 +98,7 @@ test("sincroniza apenas a conta configurada, minimiza dados e conclui lease", as
   assert.deepEqual(await syncGarminSleep("owner"), {
     updated: 1,
     checked: true,
+    revision: "revision",
   });
   assert.equal(saved[0].p_user, "owner");
   assert.equal(saved[0].p_lease, "lease");
@@ -90,6 +111,7 @@ test("resposta sem dados conclui busca sem inventar registro", async () => {
   assert.deepEqual(await syncGarminSleep("owner"), {
     updated: 0,
     checked: true,
+    revision: "revision",
   });
   assert.equal(saved.length, 0);
   assert.equal(finish[0].p_success, true);

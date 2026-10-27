@@ -10,6 +10,8 @@ A integração pessoal existente pode sincronizar sono após adesão explícita 
 - **RF-SONO-04:** mostrar no dashboard a duração e pontuação da data consultada; detalhes apresentam estágios, tempo acordado, cochilos, fonte e atualização. O histórico geral inclui o grupo Sono. Valores ausentes não são zero; resposta vazia do provedor não cria registro nem informa que a pessoa não dormiu.
 - **RF-SONO-05:** preservar registros anteriores em falhas e permitir consulta explícita, respeitando o mesmo intervalo. Preferências e registros entram em exportação, backup, exclusão de conta e exclusão do projeto. O resumo offline não inclui sono.
 
+Com o app aberto, a revisão do último registro no banco é conferida pelo polling em primeiro plano, a cada cinco minutos e ao retomar a conexão/aba. Uma atualização feita pelo cron renova o card sem exigir nova consulta ao provedor nem recarga manual. A revisão é somente um timestamp privado da conta, não o payload de sono.
+
 A informação fica disponível depois de o relógio enviá-la ao Garmin Connect. A Personal API é pull: não há streaming direto do relógio, notificações push ou garantia de disponibilidade em um horário fixo. A janela recente não importa automaticamente meses de histórico nem revisões de períodos anteriores a dois dias.
 
 ## Dados e autorização

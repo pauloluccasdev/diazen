@@ -550,3 +550,8 @@ Foram adicionados card no dashboard, tela Sono, preferência de ativação/pausa
 As migrações incrementais 014 (modelo/RLS/RPCs) e 015 (serialização do consentimento) foram aplicadas após backup cifrado e verificado, sem reset/bundle. As permissões administrativas e RLS foram conferidas; a sincronização ficou desativada por padrão e não foram gravados dados reais de sono em testes. A leitura real de verificação confirmou suporte do provedor sem imprimir valores. Exportação exclui lease e inclui registros/preferência; backup público/privado abrange as tabelas. Exclusão de projeto/conta remove os dados por FK. O sono não entra no resumo offline. Sem novo serviço, credencial ou segundo agendamento.
 
 Extensão RF-SONO-01 a RF-SONO-05 detalhada em [sono Garmin](sono-garmin.md), relacionada a RF-004/018/019/020/022 e RNF-002/004/005/007/008/011/013/014. A hotfix parte da main; o proprietário realiza PR/review e publicação. A automação de sono em produção depende da publicação dessa versão e da ativação pelo usuário.
+
+
+### Conferência de revisões feitas pelo agendador
+
+A revisão final incluiu teste de uma gravação externa simulando o cron enquanto o app permanece aberto. A API de sincronização informa uma revisão mínima do último registro; o componente em primeiro plano compara essa revisão e renova o painel mesmo quando a consulta ao provedor foi dispensada pela lease/intervalo. O marcador fica em ref de memória, sem cache offline ou payload de saúde. O teste confirma atualização de duração/pontuação sem navegação ou recarga manual. Isso evita que o cron atualize o banco enquanto o card permaneça desatualizado.

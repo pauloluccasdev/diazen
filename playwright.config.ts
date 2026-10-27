@@ -27,7 +27,7 @@ export default defineConfig({
       env: {
         SUPABASE_SECRET_KEY: "chave-secreta-de-teste",
         GARMIN_PERSONAL_API_KEY: "synthetic-key-never-a-real-credential",
-        GARMIN_SYNC_ENABLED: "false",
+        GARMIN_SYNC_ENABLED: "true",
         GARMIN_OWNER_USER_ID: "00000000-0000-4000-8000-000000000018",
         NEXT_PUBLIC_SITE_URL: "http://127.0.0.1:3100",
         NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54329",
