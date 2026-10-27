@@ -131,8 +131,12 @@ export async function rest(
       const match = /^(eq|gte|lte|gt|lt|ilike)\.(.*)$/.exec(value);
       if (!match) throw new Error("Unknown filter");
       values.push(match[2]);
+      const jsonPath = /^([a-z_]+)->>([0-9]+)$/.exec(key);
+      const column = jsonPath
+        ? `(${identifier(jsonPath[1])}->>${Number(jsonPath[2])})`
+        : identifier(key);
       filters.push(
-        `${identifier(key)} ${{ eq: "=", gte: ">=", lte: "<=", gt: ">", lt: "<", ilike: "ilike" }[match[1]]} $${values.length}`,
+        `${column} ${{ eq: "=", gte: ">=", lte: "<=", gt: ">", lt: "<", ilike: "ilike" }[match[1]]} $${values.length}`,
       );
     }
     const where = filters.length ? " where " + filters.join(" and ") : "";

@@ -122,6 +122,12 @@ test("alimentos próprios, receitas, favoritos, recentes e cópia preservam o di
   ).toBeVisible();
   await page.getByText("Copiar refeição", { exact: true }).click();
   const copy = form(page, "Confirmar cópia da refeição");
+  await expect(
+    copy.getByRole("combobox", { name: "Refeição de destino", exact: true }),
+  ).toHaveValue("");
+  await copy
+    .getByRole("combobox", { name: "Refeição de origem", exact: true })
+    .selectOption("breakfast");
   await copy
     .getByRole("combobox", { name: "Refeição de destino", exact: true })
     .selectOption("lunch");

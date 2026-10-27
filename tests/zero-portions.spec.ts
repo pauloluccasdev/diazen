@@ -38,6 +38,18 @@ test("porção zero exclui apenas o alimento não consumido e permite salvar os 
         ],
         [[50, "Observações:"]],
       ],
+      [
+        [[50, "Refeição 2"]],
+        [
+          [50, "Arroz branco"],
+          [330, "125g"],
+        ],
+        [
+          [50, "Peito de frango"],
+          [330, "150g"],
+        ],
+        [[50, "Observações:"]],
+      ],
     ]),
   });
   await page.getByLabel("Revisei a extração", { exact: false }).check();
@@ -95,4 +107,69 @@ test("porção zero exclui apenas o alimento não consumido e permite salvar os 
   await expect(record).not.toContainText("Peito de frango");
   await page.goto("/painel");
   await expect(page.locator(".daily-metric")).toContainText("128");
+  await page.goto("/painel/alimentacao");
+  await page.getByText("Copiar refeição", { exact: true }).click();
+  const copy = page.locator("form").filter({
+    has: page.getByRole("button", {
+      name: "Confirmar cópia da refeição",
+      exact: true,
+    }),
+  });
+  await expect(
+    copy.getByRole("combobox", { name: "Refeição de destino", exact: true }),
+  ).toHaveValue("");
+  await copy
+    .getByRole("combobox", { name: "Refeição de origem", exact: true })
+    .selectOption("breakfast");
+  await copy
+    .getByRole("combobox", { name: "Refeição de destino", exact: true })
+    .selectOption("dinner");
+  await copy
+    .getByRole("combobox", {
+      name: "Refeição do plano (opcional)",
+      exact: true,
+    })
+    .selectOption({ label: "Refeição 2" });
+  await copy.getByRole("checkbox").check();
+  await copy
+    .getByRole("button", { name: "Confirmar cópia da refeição", exact: true })
+    .click();
+  await expect(copy.getByRole("status")).toContainText("Jantar");
+  await expect(page.getByRole("article", { includeHidden: true })).toHaveCount(
+    2,
+  );
+  await expect(
+    page.getByText("Completo: todas as refeições do plano foram registradas."),
+  ).toBeVisible();
+  await page.goto("/painel");
+  const metrics = page.locator(".diet-comparison-grid");
+  await expect(
+    metrics
+      .locator("div")
+      .filter({
+        has: page.locator("dt", { hasText: "Refeições com registros" }),
+      })
+      .locator("dd"),
+  ).toHaveText("2");
+  await expect(
+    metrics
+      .locator("div")
+      .filter({
+        has: page.locator("dt", { hasText: "Refeições vinculadas ao plano" }),
+      })
+      .locator("dd"),
+  ).toHaveText("2");
+  await expect(page.locator(".daily-metric")).toContainText("256");
+  await page.goto("/painel/historico");
+  const groups = page.locator(".history-group");
+  await expect(
+    groups.filter({
+      has: page.locator("summary strong", { hasText: "Café da manhã" }),
+    }),
+  ).toContainText("1 registro");
+  await expect(
+    groups.filter({
+      has: page.locator("summary strong", { hasText: "Jantar" }),
+    }),
+  ).toContainText("1 registro");
 });

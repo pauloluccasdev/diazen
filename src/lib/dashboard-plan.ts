@@ -19,6 +19,31 @@ export async function dashboardPlan(
   if (version.error)
     throw new Error("Não foi possível carregar a comparação alimentar");
   if (!version.data) return null;
+  const expectedFoods = new Map<number, number>();
+  for (let offset = 0; ; offset += 1000) {
+    const requests = await client
+      .from("food_copy_requests")
+      .select("parameters,inserted_count,created_at,id")
+      .eq("parameters->>0", "register_meal")
+      .eq("parameters->>1", project)
+      .eq("parameters->>2", date)
+      .eq("parameters->>4", version.data.id)
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false })
+      .range(offset, offset + 999);
+    if (requests.error)
+      throw Error("Não foi possível conferir as refeições registradas");
+    for (const request of requests.data ?? []) {
+      const index = request.parameters?.[5];
+      if (
+        Number.isInteger(index) &&
+        request.inserted_count > 0 &&
+        !expectedFoods.has(index)
+      )
+        expectedFoods.set(index, request.inserted_count);
+    }
+    if ((requests.data?.length ?? 0) < 1000) break;
+  }
   const categories = new Set<string>();
   const registeredMeals = new Set<number>();
   const foodIndices = new Map<number, Set<number>>();
@@ -70,7 +95,10 @@ export async function dashboardPlan(
         (meal, index) =>
           !meal.enabled ||
           (mealFoods(meal).length > 0 &&
-            mealFoods(meal).every((_, fi) => foodIndices.get(index)?.has(fi))),
+            Array.from(
+              { length: expectedFoods.get(index) ?? mealFoods(meal).length },
+              (_, fi) => fi,
+            ).every((fi) => foodIndices.get(index)?.has(fi))),
       ),
     id: version.data.id,
     document,

@@ -191,7 +191,7 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
     comparison
       .locator("div")
       .filter({
-        has: page.locator("dt", { hasText: "Refeições do plano registradas" }),
+        has: page.locator("dt", { hasText: "Refeições vinculadas ao plano" }),
       })
       .locator("dd"),
   ).toHaveText("2");
