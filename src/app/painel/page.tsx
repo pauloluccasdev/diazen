@@ -1,3 +1,6 @@
+import { SleepCard } from "@/components/sleep-card";
+import { garminConfig } from "@/lib/garmin-config";
+import type { SleepRecord, SleepSettings } from "@/lib/sleep";
 import { WeightChart } from "@/components/weight-chart";
 import { CalorieBalance } from "@/components/calorie-balance";
 import Link from "next/link";
@@ -27,31 +30,52 @@ export default async function Panel({
   searchParams: Promise<{ projeto?: string; data?: string }>;
 }) {
   const params = await searchParams,
-    { selected, active, client } = await projectContext(params.projeto);
+    { selected, active, client, user } = await projectContext(params.projeto);
   const date =
     params.data && isDate(params.data)
       ? params.data
       : selected?.ends_on && selected.ends_on < today()
         ? selected.ends_on
         : today();
+  let sleepRecord: SleepRecord | null = null;
+  let sleepSettings: SleepSettings | null = null;
+  const sleepConfigured = Boolean(garminConfig(user.id));
   let weights: Entry[] = [];
   let summary: Summary | null = null;
   let diet: Awaited<ReturnType<typeof dashboardPlan>> = null;
   if (selected) {
-    const [result, comparison, weightResult] = await Promise.all([
-      client.rpc("project_summary", { p_project: selected.id, p_date: date }),
-      dashboardPlan(client, selected.id, date),
-      client
-        .from("weights")
-        .select("*")
-        .eq("project_id", selected.id)
-        .lte("logged_on", date)
-        .order("logged_on", { ascending: false })
-        .limit(30)
-        .returns<Entry[]>(),
-    ]);
+    const [result, comparison, weightResult, sleep, settings] =
+      await Promise.all([
+        client.rpc("project_summary", { p_project: selected.id, p_date: date }),
+        dashboardPlan(client, selected.id, date),
+        client
+          .from("weights")
+          .select("*")
+          .eq("project_id", selected.id)
+          .lte("logged_on", date)
+          .order("logged_on", { ascending: false })
+          .limit(30)
+          .returns<Entry[]>(),
+        client
+          .from("sleep_records")
+          .select("*")
+          .eq("project_id", selected.id)
+          .eq("logged_on", date)
+          .maybeSingle(),
+        sleepConfigured
+          ? client
+              .from("garmin_sleep_settings")
+              .select("enabled,last_attempt_at,last_success_at,last_error_at")
+              .eq("user_id", user.id)
+              .maybeSingle()
+          : Promise.resolve({ data: null, error: null }),
+      ]);
     const { data, error } = result;
     diet = comparison;
+    if (sleep.error || settings.error)
+      throw Error("Não foi possível carregar o sono.");
+    sleepRecord = sleep.data as SleepRecord | null;
+    sleepSettings = settings.data as SleepSettings | null;
     if (weightResult.error)
       throw new Error("Falha ao carregar evolução do peso");
     weights = weightResult.data ?? [];
@@ -355,6 +379,18 @@ export default async function Panel({
               )}
             </div>
           </section>
+          {(sleepConfigured || sleepRecord) && (
+            <SleepCard
+              row={sleepRecord}
+              date={date}
+              project={selected.id}
+              settings={sleepSettings}
+              configured={sleepConfigured}
+              editable={
+                selected.status === "ACTIVE" && selected.id === active?.id
+              }
+            />
+          )}
           <nav className="evolution-actions" aria-label="Evolução corporal">
             <Link
               className="button-secondary"

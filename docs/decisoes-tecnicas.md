@@ -539,3 +539,14 @@ Os testes exercitam cópia para Jantar, histórico agrupado em categorias distin
 ## Estabilidade da CI — Leitura da exportação no WebKit — 27/10/2026
 
 O check do PR 7 apresentou ECONNRESET em APIRequestContext.get('/api/exportar') no cenário de PDF/compatibilidade Safari, com 44 testes WebKit aprovados e sem resposta HTTP nessa requisição. O teste passa a permitir uma única repetição do GET somente para ECONNRESET, usando maxRetries nativo do Playwright; erros HTTP não são repetidos. A resposta deve ser HTTP 200 e todas as verificações de conteúdo, isolamento e ausência de consumo automático permanecem. Não há retry de gravações, repetição global de testes ou alteração no endpoint/aplicativo. RF-020; RNF-005/014.
+
+
+## Extensão autorizada — Sincronização de sono Garmin — 27/10/2026
+
+O proprietário solicitou disponibilizar a sincronização de sono ao usuário e atualizar os dados de manhã, à tarde ou à noite quando o relógio os disponibilizar. A extensão usa a Personal API existente, com adesão independente de atividades. O servidor consulta a janela de hoje e dois dias anteriores no Garmin Connect, após sincronização do relógio; a verificação ocorre pelo job já existente de quinze minutos e pelo app, com lease/intervalo compartilhados, sem polling direto do relógio ou horário fixo prometido.
+
+Foram adicionados card no dashboard, tela Sono, preferência de ativação/pausa e grupo no histórico. Os dados mínimos incluem duração, estágios, tempo acordado, cochilos, pontuação e horários informados; não há inferência clínica ou composição fictícia. Atualizações revisam o mesmo usuário/data no ACTIVE, sem duplicar nem editar histórico encerrado. Falhas preservam os dados anteriores; ausência é distinta de zero. A pausa usa o mesmo lock das gravações para impedir persistência após sua confirmação. Credenciais permanecem no servidor e vinculadas à conta proprietária, sem compartilhamento com outros usuários.
+
+As migrações incrementais 014 (modelo/RLS/RPCs) e 015 (serialização do consentimento) foram aplicadas após backup cifrado e verificado, sem reset/bundle. As permissões administrativas e RLS foram conferidas; a sincronização ficou desativada por padrão e não foram gravados dados reais de sono em testes. A leitura real de verificação confirmou suporte do provedor sem imprimir valores. Exportação exclui lease e inclui registros/preferência; backup público/privado abrange as tabelas. Exclusão de projeto/conta remove os dados por FK. O sono não entra no resumo offline. Sem novo serviço, credencial ou segundo agendamento.
+
+Extensão RF-SONO-01 a RF-SONO-05 detalhada em [sono Garmin](sono-garmin.md), relacionada a RF-004/018/019/020/022 e RNF-002/004/005/007/008/011/013/014. A hotfix parte da main; o proprietário realiza PR/review e publicação. A automação de sono em produção depende da publicação dessa versão e da ativação pelo usuário.

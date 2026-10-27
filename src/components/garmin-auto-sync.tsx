@@ -23,8 +23,10 @@ export function GarminAutoSync() {
             `${data.imported} ${data.imported === 1 ? "atividade importada" : "atividades importadas"} da Garmin para o diário.`,
           );
           window.dispatchEvent(new Event("diazen:garmin-sync"));
-          router.refresh();
         }
+        if (data.sleep_updated > 0)
+          setMessage("Dados de sono da Garmin atualizados.");
+        if (data.imported > 0 || data.sleep_checked) router.refresh();
       } catch {
         /* Falha automática mantém o diário disponível; consulta explícita permite nova tentativa. */
       } finally {

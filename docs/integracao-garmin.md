@@ -75,3 +75,8 @@ Chamadas têm timeout, host fixo e limite de leitura de 1 MB. Localização, fot
 - [OpenAPI oficial](https://developer.garmin.com/gc-developer-program/personal/swagger-docs/): Activity List, Activity Summary, SummaryDTO, ActivityTypeDTO.
 - [Supabase Cron](https://supabase.com/docs/guides/cron), [agendamento com Vault/pg_net](https://supabase.com/docs/guides/functions/schedule-functions), [permissões do pg_net](https://supabase.com/docs/guides/database/extensions/pg_net).
 - [Limites de cron Vercel](https://vercel.com/docs/cron-jobs/usage-and-pricing), [execução em produção](https://vercel.com/docs/cron-jobs/manage-cron-jobs).
+
+
+## Sono opcional
+
+A extensão de sono reutiliza credenciais e o endpoint agendado existente, com adesão independente. As migrações 014/015 foram aplicadas e a funcionalidade permanece dependente da publicação da hotfix e da ativação pelo usuário. Não criar outro cron nem habilitar automaticamente registros de sono. Ver [Sono Garmin](sono-garmin.md).

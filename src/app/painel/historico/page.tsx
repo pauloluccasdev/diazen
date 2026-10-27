@@ -1,3 +1,4 @@
+import { sleepDuration } from "@/lib/sleep";
 import { HistoryLink as Link } from "@/components/history-link";
 import {
   ArrowRight,
@@ -20,11 +21,14 @@ export const metadata = { title: "Histórico geral" };
 export const dynamic = "force-dynamic";
 const kinds = {
   ...modules,
+  sono: { title: "Sono", table: "sleep_records" },
   fotos: { title: "Fotografias privadas", table: "photos" },
 };
 type Kind = keyof typeof kinds;
 type Record = Entry & { kind: Kind };
 function description(row: Record) {
+  if (row.kind === "sono")
+    return `Sono · ${sleepDuration(row.total_seconds)}${row.score == null ? "" : ` · pontuação Garmin ${row.score}/100`}`;
   if (row.kind === "agua")
     return `${number(row.volume_ml!, 0)} ml${row.container_label ? ` · ${row.container_label}` : ""}`;
   if (row.kind === "peso") return `${number(row.kg!, 2)} kg`;
