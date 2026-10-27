@@ -245,10 +245,15 @@ export default async function Panel({
                     <dd>{diet.recordedMeals}</dd>
                   </div>
                   <div>
-                    <dt>Refeições do plano registradas</dt>
+                    <dt>Refeições vinculadas ao plano</dt>
                     <dd>{diet.registeredMeals.length}</dd>
                   </div>
                 </dl>
+                <p className="field-hint">
+                  Refeições com registros contam as categorias do diário. Cópias
+                  e lançamentos manuais só contam no plano quando vinculados a
+                  uma refeição dele.
+                </p>
                 <Link
                   className="button-secondary meal-record-link"
                   href={`/painel/plano?projeto=${selected.id}&data=${date}`}

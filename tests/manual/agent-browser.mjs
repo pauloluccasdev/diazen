@@ -845,6 +845,7 @@ try {
       await count(4);
       await clickText("Copiar refeição", "summary");
       const cp = await markForm("Confirmar cópia da refeição");
+      await field("source_category", "breakfast", cp, "select");
       await field("target_category", "lunch", cp, "select");
       await clickText("Confirmar cópia da refeição");
       await count(4);

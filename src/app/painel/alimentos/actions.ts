@@ -223,6 +223,49 @@ export async function copyMeal(
     form.get("confirm") !== "on"
   )
     return result("Confira origem, destino e confirme a cópia.");
+  const destination = text(form, "target_plan_meal");
+  if (destination) {
+    const [plan, rawIndex, extra] = destination.split(":");
+    const index = Number(rawIndex);
+    if (
+      !isId(plan) ||
+      !/^\d+$/.test(rawIndex ?? "") ||
+      extra !== undefined ||
+      !Number.isInteger(index) ||
+      index < 0 ||
+      index > 29
+    )
+      return result("Escolha uma refeição válida do plano de destino.");
+    const source = await client
+      .from("meal_items")
+      .select("name,amount,unit,reference_amount,source,kcal,protein,carbs,fat")
+      .eq("project_id", project)
+      .eq("logged_on", sourceDate)
+      .eq("category", sourceCategory)
+      .order("id")
+      .range(0, 100);
+    if (source.error || !source.data?.length || source.data.length > 100)
+      return result(
+        "Escolha uma refeição de origem com 1 a 100 alimentos para vincular ao plano.",
+      );
+    const copied = await client.rpc("register_meal", {
+      p_request: request,
+      p_date: targetDate,
+      p_category: targetCategory,
+      p_items: source.data,
+      p_plan: plan,
+      p_meal: index,
+    });
+    if (copied.error)
+      return result(
+        "Não foi possível copiar. Confira origem, destino e se a refeição do plano já foi registrada nesta data.",
+      );
+    refresh();
+    return result(
+      "",
+      `Cópia confirmada: ${copied.data} itens em ${categories[targetCategory as keyof typeof categories]}, ${targetDate.split("-").reverse().join("/")}, vinculados à refeição do plano. Registros existentes preservados.`,
+    );
+  }
   const { data, error } = await client.rpc("copy_meal", {
     p_source_project: project,
     p_source_date: sourceDate,
@@ -239,6 +282,6 @@ export async function copyMeal(
   refresh();
   return result(
     "",
-    `Cópia confirmada: ${data} itens. Registros existentes preservados.`,
+    `Cópia confirmada: ${data} itens em ${categories[targetCategory as keyof typeof categories]}, ${targetDate.split("-").reverse().join("/")}. Registros existentes preservados.`,
   );
 }

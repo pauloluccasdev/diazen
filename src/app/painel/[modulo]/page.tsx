@@ -543,6 +543,7 @@ export default async function Records({
           project={selected.id}
           date={date}
           activeName={active?.name}
+          activeProject={active?.id}
         />
       )}
       {modulo === "alimentacao" && filters.refeicao_excluida === "1" && (
