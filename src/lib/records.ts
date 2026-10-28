@@ -62,6 +62,8 @@ export const units = {
   portion: "porção",
 } as const;
 export interface Entry {
+  total_seconds?: number | null;
+  score?: number | null;
   id: string;
   user_id: string;
   project_id: string;

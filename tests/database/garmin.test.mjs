@@ -14,6 +14,11 @@ registerHooks({
         url: "data:text/javascript,export function revalidatePath(){}",
         shortCircuit: true,
       };
+    if (specifier === "@/lib/garmin-sleep-sync")
+      return {
+        url: "data:text/javascript,export async function syncGarminSleep(user){globalThis.__garminSleepSynced=user;return {updated:0,checked:false}}",
+        shortCircuit: true,
+      };
     if (specifier === "@/lib/garmin-sync")
       return {
         url: "data:text/javascript,export async function persistGarmin(user,activity){globalThis.__garminPersist={user,activity};return {status:'imported'}};export async function syncGarmin(user){globalThis.__garminSynced=user;return {imported:0}}",
@@ -21,7 +26,7 @@ registerHooks({
       };
     if (specifier === "@/lib/api-account")
       return {
-        url: "data:text/javascript,export async function apiAccount(){return globalThis.__garminUser?{user:{id:globalThis.__garminUser},client:{from(){return {select(){return this},async in(){return {data:[],error:null}}}}}}:null}",
+        url: "data:text/javascript,export async function apiAccount(){return globalThis.__garminUser?{user:{id:globalThis.__garminUser},client:{async rpc(name,args){globalThis.__garminSleepSetting=args.p_enabled;return {error:null}},from(){return {select(){return this},async in(){return {data:[],error:null}}}}}}:null}",
         shortCircuit: true,
       };
     const target = specifier.startsWith("@/")
@@ -316,4 +321,34 @@ test("sincronização agendada requer segredo, usa proprietário do servidor e r
     200,
   );
   assert.equal(globalThis.__garminSynced, "owner");
+});
+
+test("sono exige sessão e origem, valida adesão e não aceita identidade fornecida pelo cliente", async () => {
+  const sleep = await import("../../src/app/api/garmin/sleep/route.ts");
+  const request = (body, origin = "http://localhost:3100") =>
+    new Request("http://localhost:3100/api/garmin/sleep", {
+      method: "POST",
+      headers: { origin, "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  globalThis.__garminUser = null;
+  assert.equal((await sleep.POST(request({ enabled: true }))).status, 401);
+  globalThis.__garminUser = "owner";
+  assert.equal(
+    (await sleep.POST(request({ enabled: true }, "https://foreign.invalid")))
+      .status,
+    403,
+  );
+  assert.equal((await sleep.POST(request({ enabled: "true" }))).status, 400);
+  globalThis.__garminUser = "other";
+  assert.equal((await sleep.POST(request({ enabled: true }))).status, 403);
+  globalThis.__garminUser = "owner";
+  assert.equal(
+    (await sleep.POST(request({ enabled: true, user: "other" }))).status,
+    200,
+  );
+  assert.equal(globalThis.__garminSleepSetting, true);
+  assert.equal(globalThis.__garminSleepSynced, "owner");
+  assert.equal((await sleep.POST(request({ enabled: false }))).status, 200);
+  assert.equal(globalThis.__garminSleepSetting, false);
 });

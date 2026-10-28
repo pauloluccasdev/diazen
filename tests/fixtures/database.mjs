@@ -30,6 +30,8 @@ const tables = new Set([
   "activities",
   "garmin_imports",
   "garmin_sync_settings",
+  "garmin_sleep_settings",
+  "sleep_records",
   "meal_items",
   "meal_days",
   "food_library",
@@ -41,6 +43,10 @@ const tables = new Set([
   "deletion_ledger",
 ]);
 const commands = new Set([
+  "set_garmin_sleep_sync",
+  "garmin_claim_sleep",
+  "garmin_store_sleep",
+  "garmin_finish_sleep",
   "delete_project",
   "garmin_import_activity",
   "garmin_claim_sync",
@@ -152,7 +158,12 @@ export async function rest(
         .join(",");
       const limit = Number(url.searchParams.get("limit") ?? 1000),
         offset = Number(url.searchParams.get("offset") ?? 0);
-      sql = `select * from public.${identifier(table)}${where}${order ? " order by " + order : ""} limit ${Math.min(limit, 1000)} offset ${offset}`;
+      const projection = url.searchParams.get("select") ?? "*";
+      const columns =
+        projection === "*"
+          ? "*"
+          : projection.split(",").map(identifier).join(",");
+      sql = `select ${columns} from public.${identifier(table)}${where}${order ? " order by " + order : ""} limit ${Math.min(limit, 1000)} offset ${offset}`;
     } else if (request.method === "POST") {
       const pairs = Object.entries(payload);
       values.length = 0;

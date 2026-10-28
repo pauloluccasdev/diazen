@@ -47,8 +47,7 @@ export default function Privacy() {
         proprietário configurado no servidor. A chave pessoal e os tokens não
         são enviados ao navegador. Consultamos atividades sincronizadas com o
         Garmin Connect, com título, tipo, data, duração, distância e calorias
-        disponíveis, sem solicitar mapas, fotografias ou outras métricas de
-        saúde.
+        disponíveis, sem solicitar mapas ou fotografias.
       </p>
       <p>
         Você pode escolher atividades anteriores para importar. Com a importação
@@ -75,6 +74,26 @@ export default function Privacy() {
         configuração privada do servidor. Você pode revogar o acesso excluindo
         sua chave pessoal no Garmin Connect. A exclusão da conta Diazen bloqueia
         novas sincronizações.
+      </p>
+      <h2>Sincronização opcional de sono</h2>
+      <p>
+        Você pode ativar ou pausar o sono separadamente da importação de
+        atividades. Ao ativar, consultamos hoje e os dois dias anteriores no
+        Garmin Connect, dentro da vigência do projeto ativo, e verificamos novas
+        informações em cerca de quinze minutos durante todo o dia. O relógio
+        precisa sincronizar com o Garmin Connect para que os dados estejam
+        disponíveis.
+      </p>
+      <p>
+        Salvamos somente a data, duração do sono e cochilos, duração dos
+        estágios e tempo acordado, pontuação, horários informados e data de
+        atualização. Não armazenamos a resposta completa do provedor,
+        identificadores de perfil ou dados adicionais de saúde. Valores ausentes
+        permanecem sem informação. Os registros são privados, podem ser
+        atualizados quando a Garmin os revisa e fazem parte do histórico,
+        exportação e backups. Pausar preserva o histórico; excluir o projeto ou
+        a conta remove os dados correspondentes conforme o procedimento de
+        exclusão. Não mantemos registros de sono para leitura offline.
       </p>
       <h2>Dispositivo e conexão</h2>
       <p>
@@ -104,7 +123,7 @@ export default function Privacy() {
         consultada com o responsável pela instalação.
       </p>
       <p className="muted">
-        Versão informativa atualizada em 25/10/2026. A revisão jurídica e
+        Versão informativa atualizada em 27/10/2026. A revisão jurídica e
         operacional da instalação real é uma etapa anterior à publicação para
         terceiros.
       </p>

@@ -4,8 +4,20 @@ test.use({ serviceWorkers: "block" });
 test("Garmin pessoal: consulta compacta, feedback, calorias ausentes e limpeza", async ({
   page,
   context,
+  request,
 }) => {
   test.setTimeout(120000);
+  let sleepRevision: string | null = null;
+  await page.route("**/api/garmin/sync", (route) =>
+    route.fulfill({
+      json: {
+        imported: 0,
+        sleep_updated: 0,
+        sleep_checked: false,
+        sleep_revision: sleepRevision,
+      },
+    }),
+  );
   expect(
     (
       await page.request.post("/api/garmin/activities", {
@@ -215,6 +227,105 @@ test("Garmin pessoal: consulta compacta, feedback, calorias ausentes e limpeza",
       exact: true,
     }),
   ).toBeVisible();
+  // Dados sintéticos entram pelas RPCs administrativas do laboratório, nunca pela Garmin real.
+  const owner = "00000000-0000-4000-8000-000000000018";
+  const date = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Sao_Paulo",
+  }).format(new Date());
+  const rpc = async (name: string, data: unknown) => {
+    const response = await request.post(
+      `http://127.0.0.1:54329/rest/v1/rpc/${name}`,
+      { headers: { apikey: "chave-secreta-de-teste" }, data },
+    );
+    expect(response.ok()).toBe(true);
+    return response.json();
+  };
+  const seed = await request.post(
+    "http://127.0.0.1:54329/rest/v1/garmin_sleep_settings",
+    {
+      headers: { apikey: "chave-secreta-de-teste" },
+      data: { user_id: owner, enabled: true },
+    },
+  );
+  expect(seed.ok()).toBe(true);
+  const claim = await rpc("garmin_claim_sleep", { p_user: owner });
+  await rpc("garmin_store_sleep", {
+    p_user: owner,
+    p_lease: claim.lease,
+    p_data: {
+      date,
+      total_seconds: 27000,
+      nap_seconds: 0,
+      light_seconds: 18000,
+      deep_seconds: 3600,
+      rem_seconds: 5400,
+      awake_seconds: null,
+      score: 82,
+    },
+  });
+  await rpc("garmin_finish_sleep", {
+    p_user: owner,
+    p_lease: claim.lease,
+    p_success: true,
+  });
+  await page.goto("/painel/sono");
+  const sleep = page.getByRole("region", { name: "Sono da Garmin" });
+  await expect(sleep.locator(".sleep-main-metrics")).toContainText(
+    "7 h 30 min",
+  );
+  await expect(sleep.locator(".sleep-main-metrics")).toContainText("82/100");
+  await expect(sleep.locator(".sleep-stage-grid")).toContainText(
+    "Não informado",
+  );
+  const revised = await request.patch(
+    `http://127.0.0.1:54329/rest/v1/sleep_records?user_id=eq.${owner}&logged_on=eq.${date}`,
+    {
+      headers: { apikey: "chave-secreta-de-teste" },
+      data: {
+        total_seconds: 28800,
+        score: 88,
+        updated_at: new Date().toISOString(),
+      },
+    },
+  );
+  expect(revised.ok()).toBe(true);
+  sleepRevision = "revision-from-cron";
+  await page.evaluate(() => window.dispatchEvent(new Event("online")));
+  await expect(sleep.locator(".sleep-main-metrics")).toContainText(
+    "8 h 00 min",
+  );
+  await expect(sleep.locator(".sleep-main-metrics")).toContainText("88/100");
+
+  const toggle = sleep.getByRole("checkbox", {
+    name: "Sincronizar meu sono com a Garmin",
+  });
+  await expect(toggle).toBeChecked();
+  await toggle.uncheck();
+  await expect(toggle).not.toBeChecked();
+  await expect(sleep).toContainText("histórico foi preservado");
+  await expect(sleep.locator(".sleep-main-metrics")).toContainText(
+    "8 h 00 min",
+  );
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await page.evaluate(() => {
+    if (document.activeElement instanceof HTMLElement)
+      document.activeElement.blur();
+  });
+  await sleep.screenshot({ path: "artifacts/garmin-sleep-320.png" });
+  const exported = await (await page.request.get("/api/exportar")).json();
+  expect(exported.sleep_records).toHaveLength(1);
+  expect(exported.garmin_sleep_settings[0].enabled).toBe(false);
+  expect(exported.garmin_sleep_settings[0].lease_id).toBeUndefined();
+  await page.goto(`/painel/historico?data=${date}`);
+  await expect(
+    page
+      .locator(".history-group")
+      .filter({ has: page.locator("summary strong", { hasText: "Sono" }) }),
+  ).toContainText("1 registro");
+  await page.goto("/painel");
+  await expect(
+    page.getByRole("region", { name: "Sono da Garmin" }),
+  ).toContainText("8 h 00 min");
   await context.addCookies([
     {
       name: "diazen-strava-session",

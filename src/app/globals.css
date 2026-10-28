@@ -3652,3 +3652,87 @@ input[type="date"]::-webkit-datetime-edit {
 .meal-record-group .meal-delete-trigger {
   margin-block: 16px;
 }
+
+.sleep-card {
+  display: grid;
+  gap: 20px;
+  margin-block: 24px;
+}
+.sleep-card-heading {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.sleep-card-heading .icon-box {
+  margin: 0;
+  color: var(--color-accent);
+}
+.sleep-card-heading h2,
+.sleep-card-heading p {
+  margin: 0;
+}
+.sleep-card-heading p {
+  font-size: 14px;
+  margin-top: 4px;
+}
+.sleep-main-metrics,
+.sleep-stage-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  margin: 0;
+}
+.sleep-main-metrics dt,
+.sleep-stage-grid dt {
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+.sleep-main-metrics dd {
+  margin: 8px 0 0;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+.sleep-stage-grid dd {
+  margin: 8px 0 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+.sleep-sync-controls {
+  display: grid;
+  gap: 16px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border);
+}
+.sleep-card .sleep-empty {
+  color: var(--color-text-muted);
+  line-height: 1.7;
+}
+.sleep-card .field-hint {
+  margin: 0;
+}
+.sleep-sync-controls .checkbox-label {
+  min-height: 44px;
+  display: flex;
+  gap: 12px;
+  line-height: 1.6;
+  align-items: flex-start;
+}
+.sleep-sync-controls .checkbox-label input {
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+@media (max-width: 350px) {
+  .sleep-main-metrics dd {
+    font-size: 20px;
+  }
+}
+
+.sleep-options > summary {
+  width: 100%;
+  padding: 12px 0;
+  border: 0;
+  background: transparent;
+  font-size: 14px;
+}

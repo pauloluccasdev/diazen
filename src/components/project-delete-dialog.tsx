@@ -94,7 +94,7 @@ function Confirmation({
           <p>Serão excluídos:</p>
           <ul>
             <li>Refeições, registros de água e atividades</li>
-            <li>Peso, medidas corporais e fotos privadas</li>
+            <li>Peso, medidas corporais, sono e fotos privadas</li>
             <li>Metas e versões do plano alimentar</li>
           </ul>
         </div>

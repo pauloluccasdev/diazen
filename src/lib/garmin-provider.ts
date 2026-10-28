@@ -209,3 +209,103 @@ export function garminModality(sport: string) {
     return "swimming";
   return "other";
 }
+
+export type GarminSleep = {
+  date: string;
+  total_seconds: number | null;
+  nap_seconds: number | null;
+  deep_seconds: number | null;
+  light_seconds: number | null;
+  rem_seconds: number | null;
+  awake_seconds: number | null;
+  score: number | null;
+  started_at: string | null;
+  ended_at: string | null;
+};
+function sleepInstant(value: unknown) {
+  const time =
+    typeof value === "number" && Number.isFinite(value)
+      ? value
+      : typeof value === "string" && /^\d{4}-\d{2}-\d{2}T/.test(value)
+        ? Date.parse(/(?:Z|[+-]\d{2}:\d{2})$/.test(value) ? value : value + "Z")
+        : NaN;
+  return Number.isFinite(time) &&
+    time > 0 &&
+    Number.isFinite(new Date(time).getTime())
+    ? new Date(time).toISOString()
+    : null;
+}
+export async function garminSleep(
+  key: string,
+  from: string,
+  to: string,
+  transport: typeof fetch = fetch,
+): Promise<GarminSleep[]> {
+  if (
+    !/^\d{4}-\d{2}-\d{2}$/.test(from) ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(to) ||
+    !Number.isFinite(Date.parse(from)) ||
+    !Number.isFinite(Date.parse(to)) ||
+    from > to ||
+    Date.parse(to) - Date.parse(from) > 2 * 86400000
+  )
+    throw new GarminFailure("unavailable");
+  const data = await garminGet(
+    key,
+    `/sleep-service/sleep/dailySleepSummariesByDate?startDate=${from}&endDate=${to}`,
+    transport,
+  );
+  if (!Array.isArray(data) || data.length > 10)
+    throw new GarminFailure("unavailable");
+  const result: GarminSleep[] = [];
+  for (const item of data) {
+    if (
+      !item ||
+      typeof item !== "object" ||
+      typeof item.calendarDate !== "string" ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(item.calendarDate) ||
+      item.calendarDate < from ||
+      item.calendarDate > to
+    )
+      continue;
+    const calendarTime = Date.parse(item.calendarDate + "T12:00:00Z");
+    if (
+      !Number.isFinite(calendarTime) ||
+      new Date(calendarTime).toISOString().slice(0, 10) !== item.calendarDate
+    )
+      continue;
+    const seconds = (v: unknown) => {
+      const value = n(v);
+      return value !== null && Number.isInteger(value) && value <= 86400
+        ? value
+        : null;
+    };
+    const overall = item.sleepScores?.overall;
+    const score = n(overall?.value);
+    const record: GarminSleep = {
+      date: item.calendarDate,
+      total_seconds: seconds(item.sleepTimeSeconds),
+      nap_seconds: seconds(item.napTimeSeconds),
+      deep_seconds: seconds(item.deepSleepSeconds),
+      light_seconds: seconds(item.lightSleepSeconds),
+      rem_seconds: seconds(item.remSleepSeconds),
+      awake_seconds: seconds(item.awakeSleepSeconds),
+      score:
+        overall?.qualifierKey !== "INVALID" &&
+        score !== null &&
+        Number.isInteger(score) &&
+        score <= 100
+          ? score
+          : null,
+      started_at: sleepInstant(item.sleepStartTimestampGMT),
+      ended_at: sleepInstant(item.sleepEndTimestampGMT),
+    };
+    if (
+      item.sleepWindowConfirmed === true ||
+      record.score !== null ||
+      Object.values(record).some((v) => typeof v === "number" && v > 0)
+    )
+      result.push(record);
+  }
+  return result;
+}

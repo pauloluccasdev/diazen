@@ -1,6 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { apiAccount } from "@/lib/api-account";
 import { garminConfig, garminHeaders } from "@/lib/garmin-config";
+import { syncGarminSleep } from "@/lib/garmin-sleep-sync";
 import { syncGarmin } from "@/lib/garmin-sync";
 import { siteUrl } from "@/lib/site-url";
 import { revalidatePath } from "next/cache";
@@ -29,9 +30,37 @@ export async function POST(request: Request) {
   if (!garminConfig(user))
     return new Response(null, { status: 403, headers: garminHeaders });
   try {
-    const result = await syncGarmin(user);
-    if (result.imported) revalidatePath("/painel", "layout");
-    return Response.json(result, { headers: garminHeaders });
+    const [activity, sleep] = await Promise.allSettled([
+      syncGarmin(user),
+      syncGarminSleep(user),
+    ]);
+    if (
+      activity.status === "rejected" &&
+      (sleep.status === "rejected" || !sleep.value.checked)
+    )
+      throw Error("Integração indisponível");
+    const result =
+      activity.status === "fulfilled"
+        ? activity.value
+        : { imported: 0, review: 0, paused: false, pending: false };
+    const sleepResult =
+      sleep.status === "fulfilled"
+        ? sleep.value
+        : { updated: 0, checked: false, revision: null };
+    if (result.imported || sleepResult.checked)
+      revalidatePath("/painel", "layout");
+    return Response.json(
+      {
+        ...result,
+        sleep_updated: sleepResult.updated,
+        sleep_checked: sleepResult.checked,
+        sleep_revision:
+          sleep.status === "fulfilled" ? sleepResult.revision : undefined,
+        sleep_unavailable: sleep.status === "rejected",
+        activities_unavailable: activity.status === "rejected",
+      },
+      { headers: garminHeaders },
+    );
   } catch {
     return Response.json(
       {
