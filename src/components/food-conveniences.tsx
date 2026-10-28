@@ -1,6 +1,6 @@
 import type { DietPlan } from "@/lib/diet-plan";
 import { ActionDisclosure } from "@/components/action-disclosure";
-import { Copy, History, BookOpen, ArrowRight } from "lucide-react";
+import { Copy, History, BookOpen, ArrowRight, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { formatDate, number, today } from "@/lib/domain";
@@ -80,26 +80,34 @@ export async function FoodConveniences({
             </p>
             {!data?.length && <p>Sem alimentos recentes.</p>}
             {data?.map((food) => (
-              <details className="content-card" key={food.id}>
+              <details className="recent-food-item" key={food.id}>
                 <summary>
-                  {food.name} · {number(food.amount!, 3)} {units[food.unit!]} ·{" "}
-                  {formatDate(food.logged_on)}
+                  <span className="recent-food-heading">
+                    <strong>{food.name}</strong>
+                    <small>
+                      {number(food.amount!, 3)} {units[food.unit!]} ·{" "}
+                      {formatDate(food.logged_on)}
+                    </small>
+                  </span>
+                  <ChevronDown size={18} aria-hidden="true" />
                 </summary>
-                <p className="muted">
-                  Fonte: {food.source}. Referência:{" "}
-                  {number(food.reference_amount!, 3)} {units[food.unit!]}.
-                </p>
-                <ActionForm
-                  action={addLibraryFood}
-                  submit="Reutilizar alimento"
-                >
-                  <input type="hidden" name="recent_id" value={food.id} />
-                  <FoodUseFields
-                    date={date}
-                    amount={food.amount}
-                    unit={food.unit!}
-                  />
-                </ActionForm>
+                <div className="recent-food-body">
+                  <p className="muted">
+                    Fonte: {food.source}. Referência:{" "}
+                    {number(food.reference_amount!, 3)} {units[food.unit!]}.
+                  </p>
+                  <ActionForm
+                    action={addLibraryFood}
+                    submit="Reutilizar alimento"
+                  >
+                    <input type="hidden" name="recent_id" value={food.id} />
+                    <FoodUseFields
+                      date={date}
+                      amount={food.amount}
+                      unit={food.unit!}
+                    />
+                  </ActionForm>
+                </div>
               </details>
             ))}
           </ActionDisclosure>

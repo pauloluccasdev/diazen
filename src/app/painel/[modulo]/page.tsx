@@ -609,9 +609,13 @@ export default async function Records({
                       </small>
                     </span>
                     <span className="food-record-calories">
-                      {known.length
-                        ? `${number(kcal)} kcal`
-                        : "Calorias não informadas"}
+                      {known.length ? (
+                        <span className="meal-calorie-value">
+                          {number(kcal)} kcal
+                        </span>
+                      ) : (
+                        "Calorias não informadas"
+                      )}
                       {partial && known.length > 0 && (
                         <small>Subtotal parcial</small>
                       )}

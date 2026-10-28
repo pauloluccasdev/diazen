@@ -555,3 +555,10 @@ Extensão RF-SONO-01 a RF-SONO-05 detalhada em [sono Garmin](sono-garmin.md), re
 ### Conferência de revisões feitas pelo agendador
 
 A revisão final incluiu teste de uma gravação externa simulando o cron enquanto o app permanece aberto. A API de sincronização informa uma revisão mínima do último registro; o componente em primeiro plano compara essa revisão e renova o painel mesmo quando a consulta ao provedor foi dispensada pela lease/intervalo. O marcador fica em ref de memória, sem cache offline ou payload de saúde. O teste confirma atualização de duração/pontuação sem navegação ou recarga manual. Isso evita que o cron atualize o banco enquanto o card permaneça desatualizado.
+
+
+## 27/10/2026 — Acabamento das listas de alimentação
+
+Refinamento visual solicitado pelo proprietário: alimentos recentes usam linhas compactas com nome, porção e data separados, seta de expansão e formulário interno. Os grupos dos registros do dia têm 12 px de separação e calorias sem quebra entre número e unidade; em telas até 360 px, a informação calórica ocupa uma segunda linha. Permanecem os últimos 20 registros, a reutilização por cópia e os cálculos e permissões existentes. Sem alteração de escopo funcional, banco ou sincronização.
+
+Validação: build, lint e cenários Chromium de biblioteca/reutilização e registro de refeições, incluindo acessibilidade, largura móvel, altura das linhas recentes e separação entre os grupos. Capturas locais em `artifacts/food-recent-320.png` e `artifacts/meal-registration/food-page-320.png`.

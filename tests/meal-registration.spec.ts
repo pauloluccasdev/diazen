@@ -154,6 +154,17 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
   await expect(
     page.locator(".meal-record-group > summary").first(),
   ).toContainText("247,3 kcal");
+  const firstGroup = await page
+    .locator(".meal-record-group")
+    .nth(0)
+    .boundingBox();
+  const secondGroup = await page
+    .locator(".meal-record-group")
+    .nth(1)
+    .boundingBox();
+  expect(
+    secondGroup!.y - (firstGroup!.y + firstGroup!.height),
+  ).toBeGreaterThanOrEqual(11);
   await page.locator(".meal-record-group > summary").first().click();
   const record = page.getByRole("article", { includeHidden: true }).first();
   await expect(record.locator(".food-record-details")).not.toHaveAttribute(
