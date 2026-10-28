@@ -557,6 +557,13 @@ Extensão RF-SONO-01 a RF-SONO-05 detalhada em [sono Garmin](sono-garmin.md), re
 A revisão final incluiu teste de uma gravação externa simulando o cron enquanto o app permanece aberto. A API de sincronização informa uma revisão mínima do último registro; o componente em primeiro plano compara essa revisão e renova o painel mesmo quando a consulta ao provedor foi dispensada pela lease/intervalo. O marcador fica em ref de memória, sem cache offline ou payload de saúde. O teste confirma atualização de duração/pontuação sem navegação ou recarga manual. Isso evita que o cron atualize o banco enquanto o card permaneça desatualizado.
 
 
+## 27/10/2026 — Acabamento das listas de alimentação
+
+Refinamento visual solicitado pelo proprietário: alimentos recentes usam linhas compactas com nome, porção e data separados, seta de expansão e formulário interno. Os grupos dos registros do dia têm 12 px de separação e calorias sem quebra entre número e unidade; em telas até 360 px, a informação calórica ocupa uma segunda linha. Permanecem os últimos 20 registros, a reutilização por cópia e os cálculos e permissões existentes. Sem alteração de escopo funcional, banco ou sincronização.
+
+Validação: build, lint e cenários Chromium de biblioteca/reutilização e registro de refeições, incluindo acessibilidade, largura móvel, altura das linhas recentes e separação entre os grupos. Capturas locais em `artifacts/food-recent-320.png` e `artifacts/meal-registration/food-page-320.png`.
+
+
 ## 27/10/2026 — Métricas diárias de atividades no dashboard
 
 Por solicitação do proprietário, o card de atividades passa a destacar a duração, o título quando há uma única atividade e os totais de distância e calorias dos registros do projeto e da data consultados. A meta semanal permanece como comparação secundária compacta. A consulta autenticada respeita RLS e pagina todos os registros do dia. Valores ausentes não viram zero: totais incompletos são identificados como subtotais parciais; zero informado permanece zero. Não se calculam calorias a partir de duração ou modalidade. O detalhe continua acessível pelo card. Refinamento de apresentação dos indicadores de atividades existentes, sem nova modelagem ou alteração de sincronização.
