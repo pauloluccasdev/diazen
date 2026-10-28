@@ -137,7 +137,7 @@ export default async function Panel({
           value: activities.length
             ? `${number(
                 activities.reduce(
-                  (sum, row) => sum + (row.duration_min ?? 0),
+                  (sum, row) => sum + Number(row.duration_min ?? 0),
                   0,
                 ),
                 1,
@@ -371,7 +371,7 @@ export default async function Panel({
                                 {known.length
                                   ? `${number(
                                       known.reduce(
-                                        (sum, row) => sum + row[field]!,
+                                        (sum, row) => sum + Number(row[field]),
                                         0,
                                       ),
                                       field === "distance_km" ? 2 : 1,
@@ -379,11 +379,11 @@ export default async function Panel({
                                   : field === "distance_km"
                                     ? "Não informada"
                                     : "Não informadas"}
+                                {known.length > 0 &&
+                                  known.length < activities.length && (
+                                    <small> · Subtotal parcial</small>
+                                  )}
                               </dd>
-                              {known.length > 0 &&
-                                known.length < activities.length && (
-                                  <small>Subtotal parcial</small>
-                                )}
                             </div>
                           );
                         })}

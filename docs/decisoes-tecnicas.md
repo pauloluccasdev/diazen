@@ -576,3 +576,11 @@ Verificação: `npm run build`, `npm run lint` e `npx playwright test tests/acti
 No registro manual de refeições, o campo Alimento oferece sugestões locais da TACO logo abaixo da descrição, sem uma segunda pesquisa. A seleção preenche nome, referência por 100 g, unidade e nutrientes da fonte, preservando a quantidade digitada; a orientação pede conferir a porção em gramas. Se não houver opções locais, ao sair do campo inicia-se a consulta online existente, respeitando quantidade e unidade g/ml, limites e filas já implementados. Havendo opções locais inadequadas, permanece a consulta online explícita. Alterações de descrição ou unidade invalidam a ativação anterior da busca, permitindo nova consulta, sem aplicar uma resposta atrasada a outro alimento. Para unidade/porção, a interface explica a necessidade de g/ml ou preenchimento manual, sem inferir conversões. Dados ausentes permanecem nulos e não se inventam nutrientes. Não foram adicionados provedores, dependências ou alterações de banco.
 
 Verificação: build, lint e testes Chromium de registro de refeições e referência online. O cenário cobre ausência de resultado, nova descrição, segunda requisição com o termo novo, orientação de unidade incompatível e seleção TACO pelo campo único preservando quantidade.
+
+
+### Auditoria do novo layout de alimentos recentes
+
+A auditoria `test:agent-browser` ainda localizava a receita pela concatenação antiga de nome, porção e data. Após a separação visual desses campos, o seletor passou a identificar o nome no título do item recente, preservando as verificações de reutilização, quantidade de registros e cópia aditiva confirmada. Não foram ampliados timeouts ou removidos cenários.
+
+
+A execução integral também identificou um defeito no resumo diário de atividades com métricas parcialmente ausentes: o aviso de subtotal estava fora da definição semântica e valores decimais retornados como texto podiam concatenar e produzir NaN. O aviso foi colocado dentro de `dd` e a soma converte explicitamente os valores numéricos. Mantidas as distinções entre ausência e zero.
