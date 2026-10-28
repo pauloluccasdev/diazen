@@ -597,3 +597,6 @@ A regressão geral `tests/records.spec.ts` também foi atualizada para confirmar
 
 
 A validação Garmin no WebKit identificou uma disputa entre navegações completas artificiais do teste e a atualização automática do sono ao montar o painel. O cenário passa a usar o link de histórico do card e o link Voltar ao dashboard do histórico, verificando a URL e os dados renderizados em cada destino. Isso preserva o layout e o marcador de revisão, como no uso normal da aplicação. Foi removida a navegação redundante antes do logout; os cookies de sessão legada continuam inseridos e sua limpeza continua verificada. Não foram adicionados retries ou tempos de espera arbitrários nem desativada a sincronização.
+
+
+A auditoria agent-browser também passa a dispensar explicitamente o modal após o registro manual de alimentação, validando o título de sucesso e o campo Alimento vazio antes de editar ou consultar registros. Os demais formulários mantêm as verificações existentes.
