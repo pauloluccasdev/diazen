@@ -176,12 +176,54 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
   await manual
     .getByRole("combobox", { name: "Refeição", exact: true })
     .selectOption("dinner");
+  await page.route("**/painel/alimentacao", async (route) => {
+    if (route.request().method() === "POST")
+      await route.fulfill({ status: 503, body: "Indisponível" });
+    else await route.continue();
+  });
+  await manual
+    .getByRole("button", { name: "Salvar registro", exact: true })
+    .click();
+  const errorDialog = page.getByRole("dialog", {
+    name: "Não foi possível registrar",
+    exact: true,
+  });
+  await expect(errorDialog).toBeVisible();
+  await errorDialog
+    .getByRole("button", { name: "Voltar ao formulário", exact: true })
+    .click();
+  await expect(manual.locator(".meal-food-editor")).toHaveCount(2);
+  await expect(
+    manual.getByLabel("Alimento", { exact: true }).first(),
+  ).toHaveValue("Arroz branco");
+  await expect(manual.locator(".meal-total")).toContainText("278 kcal");
+  await page.unroute("**/painel/alimentacao");
   await manual
     .getByRole("button", { name: "Salvar registro", exact: true })
     .click();
   await expect(page.getByRole("article", { includeHidden: true })).toHaveCount(
     5,
   );
+  const savedDialog = page.getByRole("dialog", {
+    name: "Registro salvo",
+    exact: true,
+  });
+  await expect(savedDialog).toBeVisible();
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await savedDialog
+    .getByRole("button", { name: "Continuar", exact: true })
+    .click();
+  await expect(manual.locator(".meal-food-editor")).toHaveCount(1);
+  await expect(manual.getByLabel("Alimento", { exact: true })).toHaveValue("");
+  await expect(
+    manual.getByLabel("Quantidade consumida", { exact: true }),
+  ).toHaveValue("");
+  await expect(manual.locator(".meal-total")).toContainText(
+    "calorias pendentes",
+  );
+  await manual.locator(":scope > summary").click();
+  await manual.locator(":scope > summary").click();
+  await expect(manual.getByLabel("Alimento", { exact: true })).toHaveValue("");
   const exported = await (await page.request.get("/api/exportar")).json();
   expect(
     exported.meal_items.filter((r: { plan_id: string | null }) => r.plan_id),

@@ -187,7 +187,36 @@ async function save(button, values, expected) {
   for (const [name, value] of Object.entries(values))
     await field(name, value, selector);
   await clickText(button, "button", form(button));
-  if (expected) await text(expected);
+  if (
+    selector &&
+    button === "Salvar registro" &&
+    (await evaluate(
+      `Boolean(document.querySelector(${JSON.stringify(selector)})?.closest('.manual-meal-recorder'))`,
+    ))
+  ) {
+    await until(
+      "document.querySelector('.record-feedback-dialog[open]') !== null",
+    );
+    assert.equal(
+      await evaluate(
+        "document.querySelector('.record-feedback-dialog h2').textContent",
+      ),
+      "Registro salvo",
+    );
+    await clickText(
+      "Continuar",
+      "button",
+      "document.querySelector('.record-feedback-dialog')",
+    );
+    await until("document.querySelector('.record-feedback-dialog') === null");
+    assert.equal(
+      await evaluate(
+        `document.querySelector(${JSON.stringify(selector)}).querySelector('[name=name]').value`,
+      ),
+      "",
+    );
+  }
+  if (expected && expected !== "Refeição registrada.") await text(expected);
 }
 async function check(name, action, controlledServerFailure = false) {
   current = name;

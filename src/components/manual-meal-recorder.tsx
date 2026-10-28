@@ -1,5 +1,6 @@
 "use client";
 import { useRef, useState, useTransition } from "react";
+import { RecordFeedbackDialog } from "./record-feedback-dialog";
 import { RecordFields } from "./forms/record-fields";
 import { categories } from "@/lib/records";
 import { number } from "@/lib/domain";
@@ -238,7 +239,6 @@ export function ManualMealRecorder({
   max: string;
 }) {
   const form = useRef<HTMLFormElement>(null),
-    feedback = useRef<HTMLParagraphElement>(null),
     request = useRef("");
   const [rows, setRows] = useState([""]),
     [message, setMessage] = useState(""),
@@ -247,6 +247,7 @@ export function ManualMealRecorder({
       value: null,
       missing: 1,
     });
+  const [version, setVersion] = useState(0);
   const [pending, startTransition] = useTransition();
   const online = useOnline();
   function calculate(keys = rows) {
@@ -331,13 +332,16 @@ export function ManualMealRecorder({
                 else {
                   setMessage(result.message!);
                   request.current = "";
+                  form.current?.reset();
+                  setRows([""]);
+                  setVersion((v) => v + 1);
+                  setTotal({ value: null, missing: 1 });
                 }
               } catch {
                 setError(
                   "Não foi possível confirmar o registro. Confira o diário antes de tentar novamente.",
                 );
               }
-              feedback.current?.focus();
             });
           } catch (cause) {
             setError(
@@ -346,7 +350,7 @@ export function ManualMealRecorder({
           }
         }}
       >
-        <fieldset disabled={pending || !online}>
+        <fieldset key={version} disabled={pending || !online}>
           <label>
             Data
             <input
@@ -415,14 +419,17 @@ export function ManualMealRecorder({
           </button>
         </fieldset>
         {(error || message) && (
-          <p
-            ref={feedback}
-            tabIndex={-1}
-            role={error ? "alert" : "status"}
-            className={error ? "form-error" : ""}
-          >
-            {error || message}
-          </p>
+          <RecordFeedbackDialog
+            message={error || message}
+            error={Boolean(error)}
+            onClose={() => {
+              setError("");
+              setMessage("");
+              form.current
+                ?.querySelector<HTMLInputElement>('input[name="name"]')
+                ?.focus({ preventScroll: true });
+            }}
+          />
         )}
         {!online && (
           <p className="readonly-note">

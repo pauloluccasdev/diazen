@@ -584,3 +584,19 @@ A auditoria `test:agent-browser` ainda localizava a receita pela concatenação 
 
 
 A execução integral também identificou um defeito no resumo diário de atividades com métricas parcialmente ausentes: o aviso de subtotal estava fora da definição semântica e valores decimais retornados como texto podiam concatenar e produzir NaN. O aviso foi colocado dentro de `dd` e a soma converte explicitamente os valores numéricos. Mantidas as distinções entre ausência e zero.
+
+
+## 28/10/2026 — Confirmação e limpeza do registro manual de alimentação
+
+O formulário de registro manual de refeições mostra sucesso ou erro em diálogo modal nativo, com título e descrição acessíveis, foco no botão de retorno e fechamento por teclado. Após sucesso confirmado pelo servidor, limpa os campos, alimentos adicionais, composição, sugestões e total calculado, retornando a um único alimento vazio. Data e categoria retornam aos padrões do formulário. A limpeza remonta os campos para remover também estados internos; não se limita ao reset de inputs. O diálogo bloqueia novo envio até ser dispensado. Em erro, preserva todos os campos e o identificador de tentativa para uma repetição segura; não limpa dados antes da confirmação do servidor. O foco retorna ao campo Alimento ao dispensar o modal.
+
+Aplicação nesta alteração: registro manual de alimentação mostrado pelo proprietário. O componente de diálogo é reutilizável para expansão posterior aos demais formulários. Sem migração ou alteração no destino dos registros. Verificação: build, lint, cenários Chromium de refeições e composição online, incluindo falha simulada seguida de nova tentativa, preservação de dados no erro, reset no sucesso, reabertura vazia, acessibilidade do modal e registros consecutivos.
+
+
+A regressão geral `tests/records.spec.ts` também foi atualizada para confirmar e dispensar o modal de sucesso antes de abrir os alimentos persistidos. O cenário verifica que o campo Alimento está vazio após a confirmação. O modal mantém seu bloqueio de interação com o conteúdo ao fundo; os testes seguem o fluxo real de fechamento da confirmação.
+
+
+A validação Garmin no WebKit identificou uma disputa entre navegações completas artificiais do teste e a atualização automática do sono ao montar o painel. O cenário passa a usar o link de histórico do card e o link Voltar ao dashboard do histórico, verificando a URL e os dados renderizados em cada destino. Isso preserva o layout e o marcador de revisão, como no uso normal da aplicação. Foi removida a navegação redundante antes do logout; os cookies de sessão legada continuam inseridos e sua limpeza continua verificada. Não foram adicionados retries ou tempos de espera arbitrários nem desativada a sincronização.
+
+
+A auditoria agent-browser também passa a dispensar explicitamente o modal após o registro manual de alimentação, validando o título de sucesso e o campo Alimento vazio antes de editar ou consultar registros. Os demais formulários mantêm as verificações existentes.

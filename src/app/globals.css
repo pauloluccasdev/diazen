@@ -3867,3 +3867,46 @@ input[type="date"]::-webkit-datetime-edit {
   font-size: 13px;
   line-height: 1.5;
 }
+
+.record-feedback-dialog {
+  width: min(420px, calc(100vw - 32px));
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
+  margin: auto;
+  padding: 28px;
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: 0 24px 80px #0008;
+}
+.record-feedback-dialog::backdrop {
+  background: #000b;
+  backdrop-filter: blur(4px);
+}
+.record-feedback-icon {
+  display: inline-flex;
+  padding: 14px;
+  border-radius: 18px;
+  color: var(--color-accent);
+  background: #ff9f1a15;
+  margin-bottom: 16px;
+}
+.record-feedback-dialog.is-error .record-feedback-icon {
+  color: #ff6275;
+  background: #ff627515;
+}
+.record-feedback-dialog h2 {
+  font-size: 22px;
+  margin: 0 0 12px;
+}
+.record-feedback-dialog p {
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  margin: 0 0 24px;
+  overflow-wrap: anywhere;
+}
+.record-feedback-dialog > button {
+  width: 100%;
+  min-height: 48px;
+}
