@@ -55,8 +55,9 @@ function FoodRow({
     kcal: number | null;
     portionKcal: number | null;
   }>({ name: "", amount: null, unit: "g", kcal: null, portionKcal: null });
-  const [query, setQuery] = useState(""),
-    [lookup, setLookup] = useState(false);
+  const [chosen, setChosen] = useState(""),
+    [lookup, setLookup] = useState<string | null>(null);
+  const lookupKey = `${snapshot.name.trim().toLocaleLowerCase("pt-BR")}:${snapshot.unit}`;
   function sync() {
     const form = ref.current?.closest("form");
     if (!form) return;
@@ -103,6 +104,14 @@ function FoodRow({
           amount: 100,
           unit: data.unit === "g" || data.unit === "ml" ? data.unit : null,
         });
+        if (
+          searchTacoFoods(data.name).length === 0 &&
+          (data.unit === "g" || data.unit === "ml")
+        ) {
+          setLookup(
+            `${data.name.trim().toLocaleLowerCase("pt-BR")}:${data.unit}`,
+          );
+        }
         apply({
           reference_amount: 100,
           source: food.source || "Informado pelo usuário",
@@ -110,58 +119,73 @@ function FoodRow({
         });
       }}
     >
-      <RecordFields kind="alimentacao" foodOnly prefix={prefix} />
+      <RecordFields
+        kind="alimentacao"
+        foodOnly
+        prefix={prefix}
+        foodSuggestions={
+          snapshot.name.trim().length >= 2 && chosen !== snapshot.name ? (
+            <div
+              className="food-name-suggestions"
+              aria-label="Sugestões da TACO"
+            >
+              {searchTacoFoods(snapshot.name).length > 0 ? (
+                <p className="field-hint">
+                  Referências da TACO · selecione o alimento e confira a porção
+                  em gramas.
+                </p>
+              ) : (
+                <p className="field-hint">
+                  Sem referência na TACO para esta descrição. A consulta online
+                  usa a mesma descrição.
+                </p>
+              )}
+              {searchTacoFoods(snapshot.name).map((food) => (
+                <button
+                  key={food.id}
+                  type="button"
+                  className="button-secondary"
+                  onClick={() => {
+                    previous.current = food.name;
+                    setChosen(food.name);
+                    apply({
+                      name: food.name,
+                      unit: "g",
+                      reference_amount: 100,
+                      source: tacoSource(food),
+                      kcal: food.kcal,
+                      protein: food.protein,
+                      carbs: food.carbs,
+                      fat: food.fat,
+                    });
+                  }}
+                >
+                  {food.name} · {food.kcal ?? "—"} kcal / 100 g
+                </button>
+              ))}
+            </div>
+          ) : null
+        }
+      />
       <p className="field-hint" aria-live="polite">
         {snapshot.portionKcal === null
           ? "Calorias ainda não informadas"
           : `${number(snapshot.portionKcal)} kcal nesta porção`}
       </p>
-      <details>
-        <summary>Buscar referência para calcular calorias</summary>
-        <label>
-          Buscar na TACO
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            maxLength={120}
-          />
-        </label>
-        {searchTacoFoods(query).map((food) => (
-          <button
-            key={food.id}
-            type="button"
-            className="button-secondary"
-            onClick={() => {
-              previous.current = food.name;
-              apply({
-                name: food.name,
-                unit: "g",
-                reference_amount: 100,
-                source: tacoSource(food),
-                kcal: food.kcal,
-                protein: food.protein,
-                carbs: food.carbs,
-                fat: food.fat,
-              });
-            }}
-          >
-            {food.name} · {food.kcal ?? "—"} kcal / 100 g
-          </button>
-        ))}
-      </details>
       {snapshot.name.length > 1 &&
         snapshot.amount &&
         snapshot.kcal === null &&
-        !lookup && (
+        lookup !== lookupKey && (
           <button
             type="button"
             className="button-secondary"
-            onClick={() => setLookup(true)}
+            disabled={disabled}
+            onClick={() => setLookup(lookupKey)}
           >
             Buscar composição online
           </button>
         )}
-      {lookup &&
+      {lookup === lookupKey &&
         snapshot.name.length > 1 &&
         snapshot.amount &&
         snapshot.kcal === null &&
@@ -185,6 +209,16 @@ function FoodRow({
               });
             }}
           />
+        )}
+      {lookup === lookupKey &&
+        snapshot.kcal === null &&
+        snapshot.unit !== "g" &&
+        snapshot.unit !== "ml" && (
+          <p className="field-hint" role="status">
+            A busca online usa referências em gramas ou mililitros. Informe a
+            porção em g ou ml para consultar, ou preencha a composição
+            manualmente na unidade escolhida.
+          </p>
         )}
       {onRemove && (
         <button type="button" className="button-secondary" onClick={onRemove}>

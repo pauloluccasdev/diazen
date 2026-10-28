@@ -3852,3 +3852,18 @@ input[type="date"]::-webkit-datetime-edit {
 .metric-atividades > p {
   overflow-wrap: anywhere;
 }
+
+.food-name-suggestions {
+  display: grid;
+  gap: 8px;
+  margin: -4px 0 12px;
+}
+.food-name-suggestions > p {
+  margin: 0;
+}
+.food-name-suggestions > button {
+  justify-content: flex-start;
+  text-align: left;
+  font-size: 13px;
+  line-height: 1.5;
+}

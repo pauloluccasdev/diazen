@@ -119,6 +119,51 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
   const manual = page.locator(".manual-meal-recorder");
   await manual.locator(":scope > summary").click();
   let food = manual.locator(".meal-food-editor").first();
+  const searches: string[] = [];
+  await page.route("**/api/alimentos/online", async (route) => {
+    searches.push(route.request().postDataJSON().query);
+    await route.fulfill({ json: { hits: [] } });
+  });
+  await food
+    .getByLabel("Alimento", { exact: true })
+    .fill("Produto fictício sem referência");
+  await food.getByLabel("Quantidade consumida", { exact: true }).fill("2");
+
+  await expect(
+    food.getByRole("button", { name: "Tentar buscar novamente" }),
+  ).toBeVisible();
+  await food
+    .getByLabel("Alimento", { exact: true })
+    .fill("Outra descrição fictícia");
+  await expect(
+    food.getByRole("button", { name: "Buscar composição online" }),
+  ).toBeVisible();
+  expect(searches).toHaveLength(1);
+  await food.getByRole("button", { name: "Buscar composição online" }).click();
+  await expect(
+    food.getByRole("button", { name: "Tentar buscar novamente" }),
+  ).toBeVisible({ timeout: 15000 });
+  expect(searches).toEqual([
+    "Produto fictício sem referência",
+    "Outra descrição fictícia",
+  ]);
+  await food.locator('select[name$="unit"]').selectOption("unit");
+  await food.getByRole("button", { name: "Buscar composição online" }).click();
+  await expect(food.getByRole("status")).toContainText("gramas ou mililitros");
+  await food.locator('select[name$="unit"]').selectOption("g");
+  await expect(
+    food.getByRole("button", { name: "Buscar composição online" }),
+  ).toBeVisible();
+  await food.getByLabel("Alimento", { exact: true }).fill("Ovo");
+  await expect(
+    food.locator(".food-name-suggestions button").first(),
+  ).toBeVisible();
+  await food.locator(".food-name-suggestions button").first().click();
+  await expect(food.locator(".food-name-suggestions")).toHaveCount(0);
+  await expect(
+    food.getByLabel("Quantidade consumida", { exact: true }),
+  ).toHaveValue("2");
+  await expect(food.locator('input[name$="kcal"]')).not.toHaveValue("");
   await food.getByLabel("Alimento", { exact: true }).fill("Arroz branco");
   await food.getByLabel("Quantidade consumida", { exact: true }).fill("100");
   await manual

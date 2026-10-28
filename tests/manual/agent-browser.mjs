@@ -838,7 +838,7 @@ try {
       await count(3);
       await clickText("Alimentos recentes", "summary");
       const recentLabel = await evaluate(
-        "[...document.querySelectorAll('summary')].find(e=>e.textContent.trim().startsWith('Receita QA · 1 porção')).textContent.trim()",
+        "[...document.querySelectorAll('.recent-food-item > summary')].find(e=>e.querySelector('strong')?.textContent.trim()==='Receita QA').textContent.trim()",
       );
       await clickText(recentLabel, "summary");
       await clickText("Reutilizar alimento");
@@ -1012,6 +1012,24 @@ try {
       await ab("set", "offline", "off");
       await goto("/painel");
       await until("sessionStorage.getItem('diazen-dashboard') !== null");
+      assert.equal(
+        await evaluate(
+          "document.querySelector('.activity-day-totals').innerText.includes('NaN')",
+        ),
+        false,
+      );
+      assert.equal(
+        await evaluate(
+          "document.querySelector('.activity-day-totals').innerText.includes('Subtotal parcial')",
+        ),
+        true,
+      );
+      assert.equal(
+        await evaluate(
+          "document.querySelector('.activity-day-totals').innerText.includes('16 km')",
+        ),
+        true,
+      );
       await audit("dashboard");
       report.webVitals = await ab("vitals");
       if (!hosted) await until("navigator.serviceWorker.controller !== null");
