@@ -562,3 +562,10 @@ A revisão final incluiu teste de uma gravação externa simulando o cron enquan
 Refinamento visual solicitado pelo proprietário: alimentos recentes usam linhas compactas com nome, porção e data separados, seta de expansão e formulário interno. Os grupos dos registros do dia têm 12 px de separação e calorias sem quebra entre número e unidade; em telas até 360 px, a informação calórica ocupa uma segunda linha. Permanecem os últimos 20 registros, a reutilização por cópia e os cálculos e permissões existentes. Sem alteração de escopo funcional, banco ou sincronização.
 
 Validação: build, lint e cenários Chromium de biblioteca/reutilização e registro de refeições, incluindo acessibilidade, largura móvel, altura das linhas recentes e separação entre os grupos. Capturas locais em `artifacts/food-recent-320.png` e `artifacts/meal-registration/food-page-320.png`.
+
+
+## 27/10/2026 — Métricas diárias de atividades no dashboard
+
+Por solicitação do proprietário, o card de atividades passa a destacar a duração, o título quando há uma única atividade e os totais de distância e calorias dos registros do projeto e da data consultados. A meta semanal permanece como comparação secundária compacta. A consulta autenticada respeita RLS e pagina todos os registros do dia. Valores ausentes não viram zero: totais incompletos são identificados como subtotais parciais; zero informado permanece zero. Não se calculam calorias a partir de duração ou modalidade. O detalhe continua acessível pelo card. Refinamento de apresentação dos indicadores de atividades existentes, sem nova modelagem ou alteração de sincronização.
+
+Verificação: `npm run build`, `npm run lint` e `npx playwright test tests/activity-cards.spec.ts --project=chromium`. O cenário valida duração, distância, calorias zero, isolamento por data e layout móvel com acessibilidade.

@@ -40,6 +40,7 @@ export default async function Panel({
   let sleepRecord: SleepRecord | null = null;
   let sleepSettings: SleepSettings | null = null;
   const sleepConfigured = Boolean(garminConfig(user.id));
+  const activities: Entry[] = [];
   let weights: Entry[] = [];
   let summary: Summary | null = null;
   let diet: Awaited<ReturnType<typeof dashboardPlan>> = null;
@@ -81,6 +82,20 @@ export default async function Panel({
     weights = weightResult.data ?? [];
     if (error) throw new Error("Falha ao carregar indicadores");
     summary = data as Summary;
+    // Paginate so a busy day is never silently truncated by the API row limit.
+    for (let offset = 0; ; offset += 500) {
+      const { data: rows, error: activityError } = await client
+        .from("activities")
+        .select("id,name,modality,external_type,duration_min,distance_km,kcal")
+        .eq("project_id", selected.id)
+        .eq("logged_on", date)
+        .order("id")
+        .range(offset, offset + 499)
+        .returns<Entry[]>();
+      if (activityError) throw Error("Falha ao carregar atividades do dia");
+      activities.push(...(rows ?? []));
+      if (!rows || rows.length < 500) break;
+    }
   }
   const cards = summary
     ? [
@@ -117,16 +132,21 @@ export default async function Panel({
         {
           label: "Atividades",
           module: "atividades",
-          empty: summary.sessions === null,
+          empty: activities.length === 0,
           icon: Dumbbell,
-          value:
-            summary.sessions === null
-              ? "Sem sessões registradas"
-              : `${summary.sessions} sessões na semana`,
+          value: activities.length
+            ? `${number(
+                activities.reduce(
+                  (sum, row) => sum + (row.duration_min ?? 0),
+                  0,
+                ),
+                1,
+              )} min`
+            : "Sem atividades registradas",
           detail:
-            selected?.sessions_goal === null
-              ? "Meta não configurada"
-              : `Meta geral: ${selected?.sessions_goal} sessões/semana`,
+            activities.length === 1
+              ? activities[0].name || "1 atividade no dia"
+              : `${activities.length} atividades no dia`,
         },
         {
           label: "Peso",
@@ -309,17 +329,12 @@ export default async function Panel({
                       {label}
                       <span aria-hidden="true">›</span>
                     </h3>
-                    {(module !== "atividades" ||
-                      selected.sessions_goal === null) && (
-                      <>
-                        <p
-                          className={`metric-value${empty ? " metric-empty" : ""}`}
-                        >
-                          {value}
-                        </p>
-                        <p>{detail}</p>
-                      </>
-                    )}
+                    <p
+                      className={`metric-value${empty ? " metric-empty" : ""}`}
+                    >
+                      {value}
+                    </p>
+                    <p>{detail}</p>
                     {module === "peso" && weights.length >= 2 && (
                       <>
                         <p className="metric-comparison">
@@ -338,12 +353,48 @@ export default async function Panel({
                         <WeightChart rows={weights} />
                       </>
                     )}
+                    {module === "atividades" && activities.length > 0 && (
+                      <dl className="activity-day-totals">
+                        {(
+                          [
+                            ["Distância", "distance_km", "km"],
+                            ["Calorias", "kcal", "kcal"],
+                          ] as const
+                        ).map(([label, field, unit]) => {
+                          const known = activities.filter(
+                            (row) => row[field] != null,
+                          );
+                          return (
+                            <div key={field}>
+                              <dt>{label}</dt>
+                              <dd>
+                                {known.length
+                                  ? `${number(
+                                      known.reduce(
+                                        (sum, row) => sum + row[field]!,
+                                        0,
+                                      ),
+                                      field === "distance_km" ? 2 : 1,
+                                    )} ${unit}`
+                                  : field === "distance_km"
+                                    ? "Não informada"
+                                    : "Não informadas"}
+                              </dd>
+                              {known.length > 0 &&
+                                known.length < activities.length && (
+                                  <small>Subtotal parcial</small>
+                                )}
+                            </div>
+                          );
+                        })}
+                      </dl>
+                    )}
                     {module === "atividades" &&
                       selected.sessions_goal !== null && (
                         <div className="metric-comparison">
                           <span>
-                            {summary.sessions ?? 0} de {selected.sessions_goal}{" "}
-                            sessões na semana
+                            Semana · {summary.sessions ?? 0}/
+                            {selected.sessions_goal} sessões
                           </span>
                           <progress
                             value={summary.sessions ?? 0}
