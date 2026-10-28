@@ -594,3 +594,6 @@ Aplicação nesta alteração: registro manual de alimentação mostrado pelo pr
 
 
 A regressão geral `tests/records.spec.ts` também foi atualizada para confirmar e dispensar o modal de sucesso antes de abrir os alimentos persistidos. O cenário verifica que o campo Alimento está vazio após a confirmação. O modal mantém seu bloqueio de interação com o conteúdo ao fundo; os testes seguem o fluxo real de fechamento da confirmação.
+
+
+A validação Garmin no WebKit identificou uma disputa entre navegações completas artificiais do teste e a atualização automática do sono ao montar o painel. O cenário passa a usar o link de histórico do card e o link Voltar ao dashboard do histórico, verificando a URL e os dados renderizados em cada destino. Isso preserva o layout e o marcador de revisão, como no uso normal da aplicação. Foi removida a navegação redundante antes do logout; os cookies de sessão legada continuam inseridos e sua limpeza continua verificada. Não foram adicionados retries ou tempos de espera arbitrários nem desativada a sincronização.

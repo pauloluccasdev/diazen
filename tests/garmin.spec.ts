@@ -316,13 +316,19 @@ test("Garmin pessoal: consulta compacta, feedback, calorias ausentes e limpeza",
   expect(exported.sleep_records).toHaveLength(1);
   expect(exported.garmin_sleep_settings[0].enabled).toBe(false);
   expect(exported.garmin_sleep_settings[0].lease_id).toBeUndefined();
-  await page.goto(`/painel/historico?data=${date}`);
+  await sleep
+    .getByRole("link", { name: "Consultar histórico geral", exact: true })
+    .click();
+  await expect(page).toHaveURL(`/painel/historico?data=${date}`);
   await expect(
     page
       .locator(".history-group")
       .filter({ has: page.locator("summary strong", { hasText: "Sono" }) }),
   ).toContainText("1 registro");
-  await page.goto("/painel");
+  await page
+    .getByRole("link", { name: "Voltar ao dashboard", exact: true })
+    .click();
+  await expect(page).toHaveURL("/painel");
   await expect(
     page.getByRole("region", { name: "Sono da Garmin" }),
   ).toContainText("8 h 00 min");
@@ -335,7 +341,6 @@ test("Garmin pessoal: consulta compacta, feedback, calorias ausentes e limpeza",
       httpOnly: true,
     },
   ]);
-  await page.goto("/painel");
   await page
     .getByRole("button", { name: "Sair da conta", exact: true })
     .click();
