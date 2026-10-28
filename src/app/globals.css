@@ -3396,8 +3396,8 @@ input[type="date"]::-webkit-datetime-edit {
 
 .metric-atividades .metric-comparison > span {
   display: block;
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 400;
   line-height: 1.4;
 }
 .metric-comparison progress {
@@ -3735,4 +3735,24 @@ input[type="date"]::-webkit-datetime-edit {
   border: 0;
   background: transparent;
   font-size: 14px;
+}
+
+.activity-day-totals {
+  display: grid;
+  gap: 10px;
+  margin: 16px 0;
+}
+.activity-day-totals dt,
+.activity-day-totals small {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+.activity-day-totals dd {
+  margin: 2px 0 0;
+  font-size: 16px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.metric-atividades > p {
+  overflow-wrap: anywhere;
 }
