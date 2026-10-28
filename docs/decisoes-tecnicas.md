@@ -555,3 +555,10 @@ Extensão RF-SONO-01 a RF-SONO-05 detalhada em [sono Garmin](sono-garmin.md), re
 ### Conferência de revisões feitas pelo agendador
 
 A revisão final incluiu teste de uma gravação externa simulando o cron enquanto o app permanece aberto. A API de sincronização informa uma revisão mínima do último registro; o componente em primeiro plano compara essa revisão e renova o painel mesmo quando a consulta ao provedor foi dispensada pela lease/intervalo. O marcador fica em ref de memória, sem cache offline ou payload de saúde. O teste confirma atualização de duração/pontuação sem navegação ou recarga manual. Isso evita que o cron atualize o banco enquanto o card permaneça desatualizado.
+
+
+## 27/10/2026 — Métricas diárias de atividades no dashboard
+
+Por solicitação do proprietário, o card de atividades passa a destacar a duração, o título quando há uma única atividade e os totais de distância e calorias dos registros do projeto e da data consultados. A meta semanal permanece como comparação secundária compacta. A consulta autenticada respeita RLS e pagina todos os registros do dia. Valores ausentes não viram zero: totais incompletos são identificados como subtotais parciais; zero informado permanece zero. Não se calculam calorias a partir de duração ou modalidade. O detalhe continua acessível pelo card. Refinamento de apresentação dos indicadores de atividades existentes, sem nova modelagem ou alteração de sincronização.
+
+Verificação: `npm run build`, `npm run lint` e `npx playwright test tests/activity-cards.spec.ts --project=chromium`. O cenário valida duração, distância, calorias zero, isolamento por data e layout móvel com acessibilidade.
