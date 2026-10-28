@@ -584,3 +584,10 @@ A auditoria `test:agent-browser` ainda localizava a receita pela concatenação 
 
 
 A execução integral também identificou um defeito no resumo diário de atividades com métricas parcialmente ausentes: o aviso de subtotal estava fora da definição semântica e valores decimais retornados como texto podiam concatenar e produzir NaN. O aviso foi colocado dentro de `dd` e a soma converte explicitamente os valores numéricos. Mantidas as distinções entre ausência e zero.
+
+
+## 28/10/2026 — Confirmação e limpeza do registro manual de alimentação
+
+O formulário de registro manual de refeições mostra sucesso ou erro em diálogo modal nativo, com título e descrição acessíveis, foco no botão de retorno e fechamento por teclado. Após sucesso confirmado pelo servidor, limpa os campos, alimentos adicionais, composição, sugestões e total calculado, retornando a um único alimento vazio. Data e categoria retornam aos padrões do formulário. A limpeza remonta os campos para remover também estados internos; não se limita ao reset de inputs. O diálogo bloqueia novo envio até ser dispensado. Em erro, preserva todos os campos e o identificador de tentativa para uma repetição segura; não limpa dados antes da confirmação do servidor. O foco retorna ao campo Alimento ao dispensar o modal.
+
+Aplicação nesta alteração: registro manual de alimentação mostrado pelo proprietário. O componente de diálogo é reutilizável para expansão posterior aos demais formulários. Sem migração ou alteração no destino dos registros. Verificação: build, lint, cenários Chromium de refeições e composição online, incluindo falha simulada seguida de nova tentativa, preservação de dados no erro, reset no sucesso, reabertura vazia, acessibilidade do modal e registros consecutivos.
