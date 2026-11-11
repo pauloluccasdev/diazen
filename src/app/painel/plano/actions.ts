@@ -1,6 +1,6 @@
 "use server";
 import { requireAccount } from "@/lib/data";
-import { isId } from "@/lib/domain";
+import { isId, isDate, today } from "@/lib/domain";
 import { validatePlan } from "@/lib/diet-plan";
 import { isDeepStrictEqual } from "node:util";
 import { revalidatePath } from "next/cache";
@@ -8,9 +8,11 @@ export async function saveDietPlan(
   project: string,
   requestId: string,
   input: unknown,
+  effectiveFrom: string = today(),
 ) {
   const { client } = await requireAccount();
-  if (!isId(project) || !isId(requestId)) return { error: "Projeto inválido." };
+  if (!isId(project) || !isId(requestId) || !isDate(effectiveFrom))
+    return { error: "Projeto inválido." };
   let document;
   try {
     document = validatePlan(input);
@@ -23,7 +25,7 @@ export async function saveDietPlan(
   }
   const { data: existing, error: readError } = await client
     .from("diet_plans")
-    .select("id,project_id,document")
+    .select("id,project_id,document,effective_from")
     .eq("id", requestId)
     .maybeSingle();
   if (readError)
@@ -31,6 +33,7 @@ export async function saveDietPlan(
   if (
     existing &&
     (existing.project_id !== project ||
+      existing.effective_from !== effectiveFrom ||
       !isDeepStrictEqual(existing.document, document))
   )
     return {
@@ -42,6 +45,7 @@ export async function saveDietPlan(
       id: requestId,
       project_id: project,
       title: document.title,
+      effective_from: effectiveFrom,
       document,
     });
     if (error)

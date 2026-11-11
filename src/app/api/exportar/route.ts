@@ -14,6 +14,10 @@ export async function GET() {
   };
   for (const table of [
     "projects",
+    "display_preferences",
+    "project_phases",
+    "daily_checkins",
+    "eating_context_events",
     "water_goals",
     "water_entries",
     "weights",
@@ -42,13 +46,13 @@ export async function GET() {
               : "*",
         )
         .order(
-          table === "garmin_sleep_settings"
-            ? "user_id,enabled,enabled_at,last_attempt_at,last_success_at,last_error_at"
-            : table === "garmin_sync_settings"
-              ? "user_id"
-              : table === "garmin_imports"
-                ? "external_id"
-                : "id",
+          table === "display_preferences" ||
+            table === "garmin_sleep_settings" ||
+            table === "garmin_sync_settings"
+            ? "user_id"
+            : table === "garmin_imports"
+              ? "external_id"
+              : "id",
         )
         .range(offset, offset + 499);
       if (error)

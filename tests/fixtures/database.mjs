@@ -23,6 +23,10 @@ export async function createDatabase(users) {
 
 const tables = new Set([
   "projects",
+  "display_preferences",
+  "project_phases",
+  "daily_checkins",
+  "eating_context_events",
   "water_goals",
   "water_entries",
   "weights",
@@ -48,6 +52,7 @@ const commands = new Set([
   "garmin_store_sleep",
   "garmin_finish_sleep",
   "delete_project",
+  "save_daily_checkin",
   "garmin_import_activity",
   "garmin_claim_sync",
   "garmin_finish_sync",

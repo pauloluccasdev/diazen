@@ -26,7 +26,7 @@ export default async function PlanPage({
   const [versions, total] = await Promise.all([
     client
       .from("diet_plans")
-      .select("id,title,created_at")
+      .select("id,title,created_at,effective_from")
       .eq("project_id", selected.id)
       .order("created_at", { ascending: false })
       .order("id")
@@ -38,7 +38,10 @@ export default async function PlanPage({
   const id =
     filters.versao && isId(filters.versao)
       ? filters.versao
-      : versions.data?.[0]?.id;
+      : versions.data
+          ?.filter((v) => v.effective_from <= date)
+          .sort((a, b) => b.effective_from.localeCompare(a.effective_from))[0]
+          ?.id;
   let initial: DietPlan | null = null;
   if (id) {
     const result = await client
@@ -81,7 +84,7 @@ export default async function PlanPage({
               <select name="versao" defaultValue={id}>
                 {versions.data.map((v) => (
                   <option key={v.id} value={v.id}>
-                    {v.title} ·{" "}
+                    {v.title} · Vigente desde {formatDate(v.effective_from)} ·{" "}
                     {new Date(v.created_at).toLocaleString("pt-BR", {
                       timeZone: "America/Sao_Paulo",
                     })}
@@ -97,6 +100,11 @@ export default async function PlanPage({
         key={`${selected.id}-${filters.versao ?? "current"}-${date}`}
         project={selected.id}
         initial={initial}
+        effectiveFrom={
+          versions.data.find((v) => v.id === id)?.effective_from ?? date
+        }
+        minDate={selected.starts_on}
+        maxDate={selected.ends_on ?? undefined}
         editable={editable}
         consumed={{
           kcal: summary.kcal,

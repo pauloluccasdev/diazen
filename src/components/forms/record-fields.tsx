@@ -1,3 +1,4 @@
+import { FoodUnitSelect } from "./food-unit-select";
 import type { ReactNode } from "react";
 import { WaterVolumePicker } from "@/components/water-volume-picker";
 import { ModalityPicker } from "@/components/modality-picker";
@@ -5,7 +6,6 @@ import {
   categories,
   measurements,
   nutrients,
-  units,
   type Entry,
   type Module,
 } from "@/lib/records";
@@ -269,13 +269,7 @@ export function RecordFields({
             </label>
             <label>
               Unidade
-              <select name={prefix + "unit"} defaultValue={entry?.unit ?? "g"}>
-                {Object.entries(units).map(([key, label]) => (
-                  <option key={key} value={key}>
-                    {label}
-                  </option>
-                ))}
-              </select>
+              <FoodUnitSelect prefix={prefix} initial={entry?.unit ?? "g"} />
             </label>
           </div>
           {foodOnly ? (

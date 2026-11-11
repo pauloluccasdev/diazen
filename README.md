@@ -147,3 +147,11 @@ Verificar: `node --test tests/database/project-deletion.test.mjs` e, após build
 ### Sono Garmin
 
 A extensão autorizada adiciona card/tela de Sono e histórico diário, com adesão separada de atividades. Depois de publicar a hotfix, ative “Sincronizar meu sono com a Garmin”. O agendador existente consulta hoje e os dois dias anteriores em cerca de quinze minutos durante todo o dia, quando houver dados no Garmin Connect. Não consulta diretamente o relógio. Duração, estágios, cochilos e pontuação são privados e revisados sem duplicar o dia; pausar mantém o histórico. Migrações incrementais 014/015 já aplicadas ao Supabase hospedado após backup, sem habilitar a preferência do proprietário. Ver [comportamento, limites e testes](docs/sono-garmin.md).
+
+## Acompanhamento diário — ciclo aprovado em 11/11/2026
+
+O dashboard oferece ações do dia, fase atual/marco e acesso ao check-in. Em **Fases do projeto**, configure períodos não sobrepostos no ACTIVE. Em **Como foi meu dia?**, registre opcionalmente recuperação percebida, horas de sono manuais, reflexões e contextos alimentares independentes de calorias/consumo. O histórico geral inclui check-ins/contextos. Nenhum dado subjetivo substitui a Garmin ou gera prescrição.
+
+Em **Minha conta → O que quero ver no meu dashboard**, oculte peso, calorias ou acesso às fotos. Isso preserva os registros e a consulta deliberada aos módulos; o resumo offline anterior é invalidado. Não há check-in/contexto em cache offline.
+
+Trocar unidade de alimento invalida a composição anterior; informe nova referência compatível. Planos novos possuem início de vigência, inclusive futuro, sem alterar o diário existente. As migrações `202611110016_daily_followup.sql` e `202611110017_diet_plan_validity.sql` foram aplicadas incrementalmente no Supabase configurado, após backup cifrado e verificado. Em outras instalações, devem ser aplicadas antes desta versão. Não reaplicar o bundle em ambiente existente. Ver [escopo e aceite](docs/refinamento-diario-2026.md). Validação adicional: `node --test tests/database/daily-followup.test.mjs` e `npx playwright test tests/daily-followup.spec.ts --project=chromium`.

@@ -16,6 +16,23 @@ export default function Privacy() {
         opcionais podem permanecer em branco. O aplicativo não precisa de
         localização nem de acesso à agenda.
       </p>
+      <h2>Check-in e contexto alimentar opcionais</h2>
+      <p>
+        Se você escolher preencher, armazenamos horas de sono informadas,
+        percepções de qualidade do sono, fadiga, dores e disposição, reflexões e
+        contextos alimentares, incluindo fome, saciedade e perda de controle
+        percebida. São informações sensíveis, privadas e opcionais, usadas
+        apenas para sua consulta. Não geram diagnóstico, recomendações de
+        compensação, restrição ou pontuação global. Não são enviadas às fontes
+        nutricionais ou à Garmin.
+      </p>
+      <p>
+        Fases organizam períodos e objetivos. Preferências podem ocultar peso,
+        calorias e acesso às fotos no dashboard sem excluir seus dados.
+        Check-ins e contextos não entram no resumo offline. Todos participam da
+        exportação e exclusão; backups seguem a política de retenção
+        operacional.
+      </p>
       <h2>Armazenamento e acesso</h2>
       <p>
         Supabase processa autenticação, banco e arquivos. A hospedagem da
@@ -123,7 +140,7 @@ export default function Privacy() {
         consultada com o responsável pela instalação.
       </p>
       <p className="muted">
-        Versão informativa atualizada em 27/10/2026. A revisão jurídica e
+        Versão informativa atualizada em 11/11/2026. A revisão jurídica e
         operacional da instalação real é uma etapa anterior à publicação para
         terceiros.
       </p>

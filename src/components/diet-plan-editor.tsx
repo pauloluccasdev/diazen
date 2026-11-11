@@ -267,9 +267,15 @@ export function DietPlanEditor({
   initial,
   editable,
   consumed,
+  effectiveFrom,
+  minDate,
+  maxDate,
 }: {
   project: string;
   initial: DietPlan | null;
+  effectiveFrom: string;
+  minDate: string;
+  maxDate?: string;
   editable: boolean;
   consumed: { kcal: number | null; missing: number; date: string };
 }) {
@@ -283,6 +289,7 @@ export function DietPlanEditor({
     [serverReading, setServerReading] = useState(false),
     [reviewed, setReviewed] = useState(false),
     [requestId, setRequestId] = useState("");
+  const [validFrom, setValidFrom] = useState(effectiveFrom);
   const successRef = useRef<HTMLParagraphElement>(null);
   const [pending, startTransition] = useTransition();
   const online = useOnline();
@@ -480,6 +487,27 @@ export function DietPlanEditor({
               onChange={(e) => update({ ...plan, title: e.target.value })}
             />
           </label>
+          <label className="data-form">
+            Início de vigência desta versão
+            <input
+              type="date"
+              required
+              min={minDate}
+              max={maxDate}
+              value={validFrom}
+              disabled={disabled}
+              onChange={(e) => {
+                setValidFrom(e.target.value);
+                setSaved(false);
+                setReviewed(false);
+                setRequestId("");
+              }}
+            />
+          </label>
+          <p className="field-hint">
+            A versão passa a valer a partir desta data, até a próxima versão
+            vigente. Os registros de consumo existentes são preservados.
+          </p>
           {plan.meals.map((meal, mi) => (
             <details
               className="content-card plan-meal"
@@ -821,14 +849,26 @@ export function DietPlanEditor({
               <button
                 type="button"
                 className="button-primary"
-                disabled={disabled || !reviewed || !plan.title.trim()}
+                disabled={
+                  disabled ||
+                  !reviewed ||
+                  !plan.title.trim() ||
+                  !validFrom ||
+                  validFrom < minDate ||
+                  Boolean(maxDate && validFrom > maxDate)
+                }
                 onClick={() => {
                   setError("");
                   const id = requestId || crypto.randomUUID();
                   setRequestId(id);
                   startTransition(async () => {
                     try {
-                      const result = await saveDietPlan(project, id, plan);
+                      const result = await saveDietPlan(
+                        project,
+                        id,
+                        plan,
+                        validFrom,
+                      );
                       if (result.error) setError(result.error);
                       else {
                         setMessage(result.message!);

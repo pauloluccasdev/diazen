@@ -600,3 +600,9 @@ A validação Garmin no WebKit identificou uma disputa entre navegações comple
 
 
 A auditoria agent-browser também passa a dispensar explicitamente o modal após o registro manual de alimentação, validando o título de sucesso e o campo Alimento vazio antes de editar ou consultar registros. Os demais formulários mantêm as verificações existentes.
+
+## 11/11/2026 — Primeiro ciclo de acompanhamento diário aprovado
+
+O proprietário aprovou iniciar a primeira entrega do discovery de 10/11: confiabilidade das referências alimentares, fases, dashboard diário, check-in de recuperação/reflexão, contexto alimentar opcional e visibilidade de indicadores. O escopo, critérios de aceite, exclusões e verificação estão em [refinamento diário](refinamento-diario-2026.md). Não inclui agenda/fichas, prescrição, IA/OCR ou anexos de planos. A documentação baseline gerada dos DOCX não é alterada por esta extensão.
+
+Implementação incremental a partir da main homologada, em branch de funcionalidade, com PR/review do proprietário. Mantidas as tabelas existentes, snapshots nutricionais, unicidade e guardas de ACTIVE. Migrações 016/017 acrescentam dados privados opcionais, fases não sobrepostas e vigência explícita de planos. O histórico de versões antigo recebe a data de criação como início, sem reinterpretar alimentos consumidos. Preferências pertencem à conta e não apagam dados. Escalas são relatos pessoais sem validação clínica ou escore de prontidão. Notas comportamentais não entram no cache offline nem em logs. Nenhum plano pessoal ou fase é criado automaticamente.
