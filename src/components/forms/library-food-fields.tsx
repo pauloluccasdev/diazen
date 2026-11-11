@@ -1,5 +1,6 @@
+import { FoodUnitSelect } from "./food-unit-select";
 import { TacoPicker } from "./taco-picker";
-import { nutrients, units } from "@/lib/records";
+import { nutrients } from "@/lib/records";
 import type { LibraryFood } from "@/lib/food-library";
 export function LibraryFoodFields({ food }: { food?: LibraryFood }) {
   return (
@@ -35,13 +36,7 @@ export function LibraryFoodFields({ food }: { food?: LibraryFood }) {
         </label>
         <label>
           Unidade
-          <select name="unit" defaultValue={food?.unit ?? "g"}>
-            {Object.entries(units).map(([key, label]) => (
-              <option key={key} value={key}>
-                {label}
-              </option>
-            ))}
-          </select>
+          <FoodUnitSelect initial={food?.unit ?? "g"} />
         </label>
       </div>
       <p className="muted">

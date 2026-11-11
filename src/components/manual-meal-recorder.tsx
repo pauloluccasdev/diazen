@@ -152,6 +152,11 @@ function FoodRow({
                     apply({
                       name: food.name,
                       unit: "g",
+                      amount:
+                        fields(ref.current!.closest("form")!, prefix).unit ===
+                        "g"
+                          ? fields(ref.current!.closest("form")!, prefix).amount
+                          : null,
                       reference_amount: 100,
                       source: tacoSource(food),
                       kcal: food.kcal,
@@ -200,7 +205,12 @@ function FoodRow({
               const form = ref.current?.closest("form");
               if (!form) return;
               const data = fields(form, prefix);
-              if (data.name !== snapshot.name || data.values.kcal !== null)
+              if (
+                data.name !== snapshot.name ||
+                data.unit !== snapshot.unit ||
+                reference.unit !== data.unit ||
+                data.values.kcal !== null
+              )
                 return;
               apply({
                 reference_amount: reference.amount,

@@ -20,6 +20,8 @@ import {
 export const metadata = { title: "Histórico geral" };
 export const dynamic = "force-dynamic";
 const kinds = {
+  checkin: { title: "Check-in", table: "daily_checkins" },
+  contexto: { title: "Contexto alimentar", table: "eating_context_events" },
   ...modules,
   sono: { title: "Sono", table: "sleep_records" },
   fotos: { title: "Fotografias privadas", table: "photos" },
@@ -27,6 +29,8 @@ const kinds = {
 type Kind = keyof typeof kinds;
 type Record = Entry & { kind: Kind };
 function description(row: Record) {
+  if (row.kind === "checkin") return "Recuperação e reflexão registradas";
+  if (row.kind === "contexto") return "Contexto alimentar registrado";
   if (row.kind === "sono")
     return `Sono · ${sleepDuration(row.total_seconds)}${row.score == null ? "" : ` · pontuação Garmin ${row.score}/100`}`;
   if (row.kind === "agua")
@@ -253,7 +257,7 @@ export default async function HistoryPage({
                     {group.items.map((row) => (
                       <li key={`${row.kind}-${row.id}`}>
                         <Link
-                          href={`/painel/${row.kind}?projeto=${active.id}${row.kind === "fotos" ? "" : `&data=${date}`}`}
+                          href={`/painel/${row.kind === "checkin" || row.kind === "contexto" ? "acompanhamento" : row.kind}?projeto=${active.id}${row.kind === "fotos" ? "" : `&data=${date}`}`}
                         >
                           <span>
                             <strong>{description(row)}</strong>
