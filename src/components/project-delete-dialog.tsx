@@ -98,7 +98,7 @@ function Confirmation({
               água e atividades
             </li>
             <li>Peso, medidas corporais, sono e fotos privadas</li>
-            <li>Metas e versões do plano alimentar</li>
+            <li>Metas, versões dos planos e imagens de referência</li>
           </ul>
         </div>
         <p className="project-delete-preserved">

@@ -4061,3 +4061,138 @@ input[type="date"]::-webkit-datetime-edit {
   margin: 16px 0 0;
   overflow-wrap: anywhere;
 }
+
+.plan-kind-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 20px 0;
+}
+.phase-plan-editor > fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.plan-editor-row {
+  padding: 20px;
+  margin: 12px 0;
+  background: var(--color-surface-sunken);
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+}
+.plan-editor-row > label,
+.planned-exercise-editor > label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0;
+}
+.planned-exercise-editor {
+  border-top: 1px solid var(--color-border);
+  padding: 16px 0;
+}
+.weekday-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding: 12px 0;
+}
+.weekday-options legend {
+  color: var(--color-text-muted);
+}
+.weekday-options .checkbox-label {
+  font-size: 13px;
+}
+.plan-reference-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 16px 0;
+}
+.plan-reference-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.plan-reference-fields input[type="file"] {
+  width: 100%;
+  margin: 12px 0;
+}
+.saved-phase-plan h2,
+.plan-version-list a,
+.plan-image-row a {
+  overflow-wrap: anywhere;
+}
+.saved-phase-plan .metric-value {
+  font-size: 28px;
+  font-weight: 750;
+}
+.water-plan-slots,
+.plan-version-list,
+.workout-exercise-list {
+  list-style: none;
+  padding: 0;
+}
+.water-plan-slots li,
+.plan-version-list li,
+.workout-exercise-list li {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.water-plan-slots span,
+.plan-version-list span,
+.workout-exercise-list span {
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+.workout-sheet {
+  margin: 20px 0;
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+}
+.workout-sheet > summary {
+  font-size: 18px;
+  font-weight: 650;
+  min-height: 44px;
+}
+.workout-sheet p,
+.saved-phase-plan .daily-note p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.plan-image-row {
+  padding: 14px 0;
+  border-top: 1px solid var(--color-border);
+}
+.day-plans {
+  padding: 12px 0;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+.day-plans a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  color: var(--color-accent);
+}
+.day-plans svg {
+  flex-shrink: 0;
+}
+.day-plans p {
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+@media (max-width: 600px) {
+  .plan-editor-row {
+    padding: 14px;
+  }
+  .plan-kind-links {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}

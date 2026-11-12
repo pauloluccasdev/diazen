@@ -33,6 +33,16 @@ export default function Privacy() {
         exportação e exclusão; backups seguem a política de retenção
         operacional.
       </p>
+      <h2>Planos e imagens de referência</h2>
+      <p>
+        Você pode cadastrar seus planos de alimentação, hidratação e musculação
+        e anexar imagens privadas como referência. As imagens são otimizadas,
+        sem metadados sensíveis, e não aparecem na galeria corporal. Não há
+        leitura automática nem envio a serviços de IA. Versões e vínculos de
+        execução participam da exportação e exclusão. Imagens não são incluídas
+        no arquivo JSON da exportação; podem ser abertas pela própria conta. Não
+        armazenamos esses planos ou anexos no resumo offline.
+      </p>
       <h2>Armazenamento e acesso</h2>
       <p>
         Supabase processa autenticação, banco e arquivos. A hospedagem da

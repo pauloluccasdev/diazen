@@ -146,7 +146,7 @@ for (const mode of ["native", "compatibility", "server"] as const) {
       ),
     ).toBe(true);
     expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
-    await page.getByLabel("Revisei a extração", { exact: false }).check();
+    await page.getByLabel("Revisei os alimentos", { exact: false }).check();
     await page.getByRole("button", { name: "Salvar versão do plano" }).click();
     await expect(page.getByRole("status")).toContainText("Plano salvo");
     await page.reload();

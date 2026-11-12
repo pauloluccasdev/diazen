@@ -51,7 +51,7 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
       ],
     ]),
   });
-  await page.getByLabel("Revisei a extração", { exact: false }).check();
+  await page.getByLabel("Revisei os alimentos", { exact: false }).check();
   await page.getByRole("button", { name: "Salvar versão do plano" }).click();
   await page
     .getByRole("dialog")

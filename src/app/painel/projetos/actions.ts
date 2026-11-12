@@ -1,7 +1,7 @@
 "use server";
 import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { cleanPhotoJobs } from "@/lib/privacy";
+import { cleanPhotoJobs, cleanPlanAssetJobs } from "@/lib/privacy";
 import { revalidatePath } from "next/cache";
 import { requireAccount } from "@/lib/data";
 import { isDate, isId, today } from "@/lib/domain";
@@ -222,12 +222,23 @@ export async function deleteProject(
   let cleanupPending = false;
   try {
     await cleanPhotoJobs(admin, user.id, 20);
+    await cleanPlanAssetJobs(admin, user.id, 20);
     const pending = await admin
       .from("photo_cleanup")
       .select("photo_id")
       .eq("user_id", user.id)
       .limit(1);
-    cleanupPending = Boolean(pending.error || pending.data?.length);
+    const planPending = await admin
+      .from("plan_asset_cleanup")
+      .select("asset_id")
+      .eq("user_id", user.id)
+      .limit(1);
+    cleanupPending = Boolean(
+      pending.error ||
+      pending.data?.length ||
+      planPending.error ||
+      planPending.data?.length,
+    );
   } catch {
     cleanupPending = true;
   }

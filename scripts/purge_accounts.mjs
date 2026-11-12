@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import {
   purgeAccount,
   cleanPhotoJobs,
+  cleanPlanAssetJobs,
   reconcilePhotoStorage,
 } from "../src/lib/privacy.ts";
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -13,6 +14,7 @@ const admin = createClient(url, key, {
 });
 try {
   const jobs = await cleanPhotoJobs(admin);
+  const planJobs = await cleanPlanAssetJobs(admin);
   let accounts = 0;
   while (true) {
     const { data, error } = await admin
@@ -30,6 +32,7 @@ try {
       event: "privacy_cleanup_completed",
       accounts,
       photoJobs: jobs,
+      planJobs,
       orphanFiles: orphans,
     }),
   );

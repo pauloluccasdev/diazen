@@ -1,3 +1,5 @@
+import { currentPhasePlans } from "@/lib/phase-plan-data";
+import type { StrengthPlan } from "@/lib/phase-plans";
 import { DayOverview } from "@/components/daily/day-overview";
 import { displayPreferences } from "@/lib/daily-data";
 import type { ProjectPhase } from "@/lib/daily-followup";
@@ -42,6 +44,7 @@ export default async function Panel({
         : today();
   const preferences = await displayPreferences(client, user.id);
   let phase: ProjectPhase | null = null;
+  let plannedWorkouts: string[] = [];
   let checkinRecorded = false;
   let followupAvailable = true;
   let sleepAvailable = true;
@@ -61,6 +64,7 @@ export default async function Panel({
       settings,
       phaseResult,
       checkinResult,
+      planningResult,
     ] = await Promise.all([
       client.rpc("project_summary", { p_project: selected.id, p_date: date }),
       dashboardPlan(client, selected.id, date),
@@ -98,12 +102,20 @@ export default async function Panel({
         .eq("project_id", selected.id)
         .eq("logged_on", date)
         .maybeSingle(),
+      currentPhasePlans(client, selected.id, date).catch(() => null),
     ]);
     const { data, error } = result;
     diet = comparison;
     sleepAvailable = !sleep.error && !settings.error;
     followupAvailable = !phaseResult.error && !checkinResult.error;
     phase = phaseResult.data ?? null;
+    const weekday = new Date(`${date}T12:00:00Z`).getUTCDay();
+    plannedWorkouts = (
+      (planningResult?.strength?.document as StrengthPlan | undefined)
+        ?.workouts ?? []
+    )
+      .filter((w) => w.weekdays.includes(weekday))
+      .map((w) => w.label);
     checkinRecorded = Boolean(checkinResult.data);
     sleepRecord = sleep.data as SleepRecord | null;
     sleepSettings = settings.data as SleepSettings | null;
@@ -225,6 +237,7 @@ export default async function Panel({
             date={date}
             project={selected.id}
             projectName={selected.name}
+            plannedWorkouts={plannedWorkouts}
             phase={phase}
             checkin={checkinRecorded}
             available={followupAvailable}

@@ -12,6 +12,7 @@ export async function dashboardPlan(
     .select("id,document,title")
     .eq("project_id", project)
     .lte("effective_from", date)
+    .or(`valid_until.is.null,valid_until.gte.${date}`)
     .order("effective_from", { ascending: false })
     .order("created_at", { ascending: false })
     .order("id")

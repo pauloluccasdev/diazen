@@ -39,13 +39,14 @@ export async function registerMeal(input: {
         throw Error("Plano inválido.");
       const version = await client
         .from("diet_plans")
-        .select("document,effective_from")
+        .select("document,effective_from,valid_until")
         .eq("id", input.plan)
         .maybeSingle();
       if (
         version.error ||
         !version.data ||
-        version.data.effective_from > input.date
+        version.data.effective_from > input.date ||
+        (version.data.valid_until && version.data.valid_until < input.date)
       )
         throw Error("Plano indisponível.");
       const meal = (version.data.document as DietPlan).meals[input.index!];
