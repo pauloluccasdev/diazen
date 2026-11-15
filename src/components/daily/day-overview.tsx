@@ -6,6 +6,7 @@ export function DayOverview({
   date,
   project,
   projectName,
+  plannedWorkouts = [],
   phase,
   checkin,
   available,
@@ -14,6 +15,7 @@ export function DayOverview({
   date: string;
   project: string;
   projectName: string;
+  plannedWorkouts?: string[];
   phase: ProjectPhase | null;
   checkin: boolean;
   available: boolean;
@@ -50,6 +52,18 @@ export function DayOverview({
           {phase ? "Ver fases do projeto" : "Configurar fases"}{" "}
           <ArrowRight size={16} aria-hidden="true" />
         </Link>
+      </div>
+      <div className="day-plans">
+        <Link href={`/painel/planos?${target}`}>
+          Meus planos de alimentação, água e musculação{" "}
+          <ArrowRight size={16} aria-hidden="true" />
+        </Link>
+        {plannedWorkouts.length > 0 && (
+          <p>
+            <strong>Planejado para esta data:</strong>{" "}
+            {plannedWorkouts.join(" · ")}. A execução é confirmada por você.
+          </p>
+        )}
       </div>
       <div className="day-quick-actions" aria-label="Ações do dia">
         {[

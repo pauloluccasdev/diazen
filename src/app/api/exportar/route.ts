@@ -31,6 +31,9 @@ export async function GET() {
     "meal_days",
     "food_library",
     "diet_plans",
+    "phase_plans",
+    "plan_assets",
+    "workout_links",
     "food_copy_requests",
     "photos",
   ]) {

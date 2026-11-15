@@ -72,7 +72,9 @@ test("exclusão exige modal, nome e confirmação; cancela, bloqueia offline e r
     exact: true,
   });
   await expect(modal).toBeVisible();
-  await expect(modal).toContainText("Metas e versões do plano alimentar");
+  await expect(modal).toContainText(
+    "Metas, versões dos planos e imagens de referência",
+  );
   await expect(
     modal.getByRole("button", { name: "Cancelar", exact: true }),
   ).toBeFocused();

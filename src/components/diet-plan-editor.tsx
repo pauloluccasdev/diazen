@@ -1,4 +1,7 @@
 "use client";
+import { PlanReferences } from "./plans/plan-references";
+import type { PlanAsset } from "@/lib/phase-plans";
+import type { ProjectPhase } from "@/lib/daily-followup";
 import { useState, useTransition, useSyncExternalStore, useRef } from "react";
 import {
   FileText,
@@ -73,8 +76,11 @@ function FoodReview({
     >
       <div className="data-form">
         <p className="intro">
-          PDF, página {food.page}: {food.original}. Confira o alimento e o
-          preparo.
+          {food.original.startsWith("Cadastro manual") ||
+          food.original.startsWith("Incluído")
+            ? food.original
+            : `PDF, página ${food.page}: ${food.original}`}
+          . Confira o alimento e o preparo.
         </p>
         <label>
           Nome do alimento
@@ -270,12 +276,20 @@ export function DietPlanEditor({
   effectiveFrom,
   minDate,
   maxDate,
+  phases,
+  assets,
+  phaseId,
+  referenceImage,
 }: {
   project: string;
   initial: DietPlan | null;
   effectiveFrom: string;
   minDate: string;
   maxDate?: string;
+  phases: ProjectPhase[];
+  assets: PlanAsset[];
+  phaseId: string | null;
+  referenceImage: string | null;
   editable: boolean;
   consumed: { kcal: number | null; missing: number; date: string };
 }) {
@@ -290,6 +304,13 @@ export function DietPlanEditor({
     [reviewed, setReviewed] = useState(false),
     [requestId, setRequestId] = useState("");
   const [validFrom, setValidFrom] = useState(effectiveFrom);
+  const [selectedPhase, setSelectedPhase] = useState(phaseId ?? ""),
+    [selectedImage, setSelectedImage] = useState(referenceImage ?? "");
+  function changeReferences() {
+    setReviewed(false);
+    setSaved(false);
+    setRequestId("");
+  }
   const successRef = useRef<HTMLParagraphElement>(null);
   const [pending, startTransition] = useTransition();
   const online = useOnline();
@@ -365,6 +386,7 @@ export function DietPlanEditor({
                     const next = await readDietPdf(file, () =>
                       setServerReading(true),
                     );
+                    setSelectedImage("");
                     update(next);
                   } catch (cause) {
                     setError(
@@ -387,6 +409,56 @@ export function DietPlanEditor({
             )}
           </div>
         </details>
+      )}
+      {editable && (
+        <button
+          type="button"
+          className="button-secondary"
+          disabled={disabled}
+          onClick={() => {
+            if (
+              plan &&
+              !window.confirm(
+                "Iniciar uma versão manual? As versões salvas permanecem preservadas.",
+              )
+            )
+              return;
+            setSelectedImage("");
+            update({
+              version: 1,
+              title: "",
+              meals: [
+                {
+                  name: "Refeição 1",
+                  option: 1,
+                  conditional: false,
+                  enabled: true,
+                  groups: [
+                    {
+                      included: true,
+                      selected: 0,
+                      choices: [
+                        {
+                          name: "Alimento a revisar",
+                          amount: null,
+                          unit: null,
+                          original: "Cadastro manual",
+                          page: 1,
+                          optional: false,
+                          tacoId: null,
+                          source: "",
+                          values: emptyComposition(),
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            });
+          }}
+        >
+          Criar plano alimentar manualmente
+        </button>
       )}
       {!online && (
         <p className="readonly-note">
@@ -508,6 +580,21 @@ export function DietPlanEditor({
             A versão passa a valer a partir desta data, até a próxima versão
             vigente. Os registros de consumo existentes são preservados.
           </p>
+          <PlanReferences
+            phases={phases}
+            assets={assets}
+            phase={selectedPhase}
+            image={selectedImage}
+            disabled={disabled}
+            onPhase={(id) => {
+              setSelectedPhase(id);
+              changeReferences();
+            }}
+            onImage={(id) => {
+              setSelectedImage(id);
+              changeReferences();
+            }}
+          />
           {plan.meals.map((meal, mi) => (
             <details
               className="content-card plan-meal"
@@ -832,9 +919,9 @@ export function DietPlanEditor({
           {editable && (
             <section className="content-card data-form">
               <p className="intro">
-                Confira todas as linhas com o PDF. Itens sem fonte, porção exata
-                ou composição permanecem pendentes; você pode salvar um plano
-                parcial e completar em nova versão.
+                Confira todas as linhas com sua referência. Itens sem fonte,
+                porção exata ou composição permanecem pendentes; você pode
+                salvar um plano parcial e completar em nova versão.
               </p>
               <label className="checkbox-label">
                 <input
@@ -843,8 +930,7 @@ export function DietPlanEditor({
                   disabled={disabled}
                   onChange={(e) => setReviewed(e.target.checked)}
                 />
-                Revisei a extração, os alimentos, as porções e as opções
-                incluídas.
+                Revisei os alimentos, as porções e as opções incluídas.
               </label>
               <button
                 type="button"
@@ -868,6 +954,10 @@ export function DietPlanEditor({
                         id,
                         plan,
                         validFrom,
+                        {
+                          phase_id: selectedPhase || null,
+                          reference_image_id: selectedImage || null,
+                        },
                       );
                       if (result.error) setError(result.error);
                       else {

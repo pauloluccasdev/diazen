@@ -154,6 +154,14 @@ export async function reconcilePhotoStorage(
             (photo.storage_key === path || photo.thumbnail_key === path)
           )
             continue;
+          const { data: reference, error: referenceError } = await admin
+            .from("plan_assets")
+            .select("storage_key")
+            .eq("id", id)
+            .maybeSingle();
+          if (referenceError)
+            throw new Error("Falha ao verificar referência de plano");
+          if (reference?.storage_key === path) continue;
         }
         const { error } = await bucket.remove([path]);
         if (error) throw new Error("Falha ao remover órfão");
@@ -162,4 +170,47 @@ export async function reconcilePhotoStorage(
     }
   }
   return removed;
+}
+
+export async function cleanPlanAssetJobs(
+  admin: SupabaseClient,
+  userId?: string,
+  maxJobs = 100,
+) {
+  let count = 0;
+  while (count < maxJobs) {
+    let query = admin
+      .from("plan_asset_cleanup")
+      .select("*")
+      .limit(Math.min(50, maxJobs - count));
+    if (userId) query = query.eq("user_id", userId);
+    const { data, error } = await query;
+    if (error) throw Error("Falha ao consultar referências pendentes");
+    if (!data?.length) break;
+    for (const job of data) {
+      const check = await admin
+        .from("plan_assets")
+        .select("*")
+        .eq("id", job.asset_id)
+        .maybeSingle();
+      if (check.error) throw Error("Falha ao conferir referência");
+      if (
+        !check.data ||
+        check.data.user_id !== job.user_id ||
+        !job.paths.includes(check.data.storage_key)
+      ) {
+        const removed = await admin.storage
+          .from("body-photos")
+          .remove(job.paths);
+        if (removed.error) throw Error("Falha ao remover referência");
+      }
+      const done = await admin
+        .from("plan_asset_cleanup")
+        .delete()
+        .eq("asset_id", job.asset_id);
+      if (done.error) throw Error("Falha ao concluir limpeza");
+      count++;
+    }
+  }
+  return count;
 }

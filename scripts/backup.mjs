@@ -110,6 +110,19 @@ try {
           "select storage_key,thumbnail_key from public.photos order by id",
         )
       ).rows;
+      const hasPlanAssets = (
+        await client.query(
+          "select to_regclass('public.plan_assets') is not null as present",
+        )
+      ).rows[0].present;
+      if (hasPlanAssets)
+        photos.push(
+          ...(
+            await client.query(
+              "select storage_key,null as thumbnail_key from public.plan_assets order by id",
+            )
+          ).rows,
+        );
       const deletions = (
         await client.query(
           "select user_id,requested_at,purged_at from public.deletion_ledger order by user_id",
@@ -174,7 +187,10 @@ try {
       ];
       stage = "storage_files";
       for (const photo of photos)
-        for (const storageKey of [photo.storage_key, photo.thumbnail_key]) {
+        for (const storageKey of [
+          photo.storage_key,
+          photo.thumbnail_key,
+        ].filter(Boolean)) {
           if (
             !/^[0-9a-f-]{36}\/[0-9a-f-]{36}\/[0-9a-f-]{36}(-thumb)?\.webp$/.test(
               storageKey,

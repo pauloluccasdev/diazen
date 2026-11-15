@@ -1,3 +1,5 @@
+import type { PlanAsset } from "@/lib/phase-plans";
+import type { ProjectPhase } from "@/lib/daily-followup";
 import Link from "next/link";
 import { ReturnLink } from "@/components/return-link";
 import { DietPlanEditor } from "@/components/diet-plan-editor";
@@ -23,35 +25,60 @@ export default async function PlanPage({
       </section>
     );
   const date = filters.data && isDate(filters.data) ? filters.data : today();
-  const [versions, total] = await Promise.all([
+  const [versions, total, phases, assets] = await Promise.all([
     client
       .from("diet_plans")
-      .select("id,title,created_at,effective_from")
+      .select(
+        "id,title,created_at,effective_from,phase_id,reference_image_id,valid_until",
+      )
       .eq("project_id", selected.id)
       .order("created_at", { ascending: false })
       .order("id")
       .limit(20),
     client.rpc("project_summary", { p_project: selected.id, p_date: date }),
+    client
+      .from("project_phases")
+      .select("*")
+      .eq("project_id", selected.id)
+      .order("starts_on", { ascending: false })
+      .limit(100)
+      .returns<ProjectPhase[]>(),
+    client
+      .from("plan_assets")
+      .select("*")
+      .eq("project_id", selected.id)
+      .order("created_at", { ascending: false })
+      .order("id")
+      .limit(50)
+      .returns<PlanAsset[]>(),
   ]);
-  if (versions.error || total.error)
+  if (versions.error || total.error || phases.error || assets.error)
     throw new Error("Não foi possível carregar o plano alimentar");
   const id =
     filters.versao && isId(filters.versao)
       ? filters.versao
       : versions.data
-          ?.filter((v) => v.effective_from <= date)
+          ?.filter(
+            (v) =>
+              v.effective_from <= date &&
+              (!v.valid_until || v.valid_until >= date),
+          )
           .sort((a, b) => b.effective_from.localeCompare(a.effective_from))[0]
           ?.id;
   let initial: DietPlan | null = null;
+  let referenceImage: string | null = null,
+    phaseId: string | null = null;
   if (id) {
     const result = await client
       .from("diet_plans")
-      .select("document")
+      .select("document,phase_id,reference_image_id")
       .eq("id", id)
       .eq("project_id", selected.id)
       .maybeSingle();
     if (result.error) throw new Error("Não foi possível carregar a versão");
     initial = result.data?.document ?? null;
+    referenceImage = result.data?.reference_image_id ?? null;
+    phaseId = result.data?.phase_id ?? null;
   }
   const summary = total.data as Summary;
   const editable = ["ACTIVE", "DRAFT"].includes(selected.status);
@@ -100,6 +127,10 @@ export default async function PlanPage({
         key={`${selected.id}-${filters.versao ?? "current"}-${date}`}
         project={selected.id}
         initial={initial}
+        phases={phases.data ?? []}
+        assets={assets.data ?? []}
+        phaseId={phaseId}
+        referenceImage={referenceImage}
         effectiveFrom={
           versions.data.find((v) => v.id === id)?.effective_from ?? date
         }
