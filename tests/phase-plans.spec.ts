@@ -130,7 +130,23 @@ test("planos revisados, imagem privada, meta vigente e vínculo de execução n�
     ).target_ml,
   ).toBe(2000);
   expect(goals.water_entries).toHaveLength(0);
-  await page.goto("/painel/planos/novo?tipo=strength");
+  // The SSR form must not accept input before its controlled state is ready.
+  let releaseScripts!: () => void;
+  const scriptsReady = new Promise<void>((resolve) => {
+    releaseScripts = resolve;
+  });
+  const chunks = "**/_next/static/**/*.js";
+  await page.route(chunks, async (route) => {
+    await scriptsReady;
+    await route.continue();
+  });
+  await page.goto("/painel/planos/novo?tipo=strength", {
+    waitUntil: "commit",
+  });
+  await expect(page.getByLabel("Nome desta versão")).toBeDisabled();
+  releaseScripts();
+  await expect(page.getByLabel("Nome desta versão")).toBeEnabled();
+  await page.unroute(chunks);
   await page.getByLabel("Nome desta versão").fill("Fichas QA");
   await page
     .getByRole("combobox", { name: "Fase (opcional)", exact: true })
@@ -144,6 +160,7 @@ test("planos revisados, imagem privada, meta vigente e vínculo de execução n�
   await page.getByLabel("Repetições máximas").fill("12");
   await page.getByLabel("Descanso (segundos, opcional)").fill("60");
   await page.getByRole("checkbox", { name: /Conferi os dados/ }).check();
+  await expect(page.getByLabel("Nome desta versão")).toHaveValue("Fichas QA");
   await page
     .getByRole("button", { name: "Salvar versão do plano", exact: true })
     .click();

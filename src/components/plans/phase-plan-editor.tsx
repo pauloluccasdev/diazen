@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useState, useTransition, useSyncExternalStore } from "react";
 import { useOnline } from "@/lib/use-online";
 import { RecordFeedbackDialog } from "@/components/record-feedback-dialog";
 import { PlanReferences } from "./plan-references";
@@ -17,6 +17,9 @@ import {
   type PlannedExercise,
 } from "@/lib/phase-plans";
 import type { ProjectPhase } from "@/lib/daily-followup";
+const subscribeReady = () => () => {};
+const clientReady = () => true;
+const serverReady = () => false;
 function Numeric({
   label,
   value,
@@ -82,8 +85,9 @@ export function PhasePlanEditor({
     [message, setMessage] = useState(""),
     [error, setError] = useState(false);
   const [pending, startTransition] = useTransition(),
+    ready = useSyncExternalStore(subscribeReady, clientReady, serverReady),
     online = useOnline(),
-    disabled = pending || !online;
+    disabled = !ready || pending || !online;
   function edited() {
     setReviewed(false);
     setSaved(false);
