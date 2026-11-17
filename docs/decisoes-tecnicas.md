@@ -486,8 +486,135 @@ O proprietário declarou ter homologado tudo e confirmou o funcionamento da vers
 O aceite não executa publicação em produção, merge na main, configuração de domínio ou agendamento de backups. Frequência e retenção de backups continuam sem valores escolhidos; não se presume aprovação dos parâmetros propostos. O PR final e o code review de develop para main permanecem com o proprietário. RF-001 a RF-022 no recorte implementado e autorizado; critérios de aceite de lançamento e controle de mudanças.
 
 
-## Operação — Garmin na produção da main — 25/10/2026
+## Escopo autorizado — Exclusão integral de projeto — 26/10/2026
 
-Após o proprietário publicar main, autorizou configurar a integração Garmin em produção. Foram configuradas variáveis privadas Garmin e os parâmetros essenciais do Supabase, com origem https://diazen.vercel.app; a implantação foi refeita a partir da main publicada. Auth preserva os callbacks existentes e acrescenta os de produção. O banco não mudou, mantendo dados, preferências e idempotência de importação.
+O proprietário solicitou excluir projetos com todos os dados vinculados, com modal de confirmação e aviso explícito. Autorizou branch hotfix a partir da main e reservou para si o PR de hotfix para main. A exclusão se aplica a rascunhos, ativos, concluídos e arquivados; constitui exceção explícita à regra de históricos somente leitura, sem permitir edição ou DELETE direto em tabelas de projetos.
 
-A proteção Vercel estava habilitada para todos os deployments e impedia chamadas externas. Foi criado acesso específico de automação para o agendador, mantido cifrado no Vault e enviado em header, sem retirar a proteção. O endpoint continua exigindo o segredo próprio do Diazen. O job existente de quinze minutos foi redirecionado para produção e continua único; a ferramenta operacional passa a suportar o header opcional. Sem migração e sem merge do agente na main. RF-012/018; RNF-002/005/008/014.
+A migração incremental 013 cria RPC autenticada com conferência de proprietário, conta disponível, nome exato do projeto, lock do usuário/projeto e execução transacional. FKs removem metas, registros, fotos e versões do plano; referências de cópias e auditoria daquele projeto também são removidas. A fila durável existente conserva somente os caminhos necessários à limpeza física das fotos, sem acesso do usuário. O servidor tenta executar a limpeza e informa eventual pendência. Ausência de configuração administrativa bloqueia a exclusão antes da transação. A biblioteca de alimentos, conta e outros projetos são preservados. IDs mínimos de importação Garmin permanecem como referências sem atividade para não recriar registros excluídos; preferências de sincronização continuam da conta, e sem ACTIVE não há novas importações operacionais.
+
+O modal exige nome digitado e checkbox, informa irreversibilidade no aplicativo e impacto de remover o ACTIVE, permite cancelar/Escape, mantém foco acessível e bloqueia envio offline/pendente. Após sucesso, revalida o painel, limpa o resumo offline e apresenta confirmação. Backups existentes seguem retenção operacional; esta mudança não apaga pacotes de backup nem comprova restauração de projetos excluídos. O procedimento de restauração deve conferir exclusões posteriores antes de liberar dados.
+
+RF-003/004/012/014/018/020/022; RB de proprietário, projeto ativo e somente leitura com exceção autorizada; RNF-002/005/007/008/011/013/014. Migração versionada para revisão/aplicação controlada; nenhum projeto real é excluído por testes. Não aplicar bundle de migrações nem resetar banco existente.
+
+
+## Ajuste visual — Ações e confirmação de exclusão de projeto — 26/10/2026
+
+O proprietário solicitou melhorar os botões Concluir/Excluir e a hierarquia tipográfica do modal, mantendo o processo hotfix a partir de main e PR pelo proprietário. As ações da lista passam a ter largura completa e altura mínima de 48 px, com conclusão em âmbar discreto e exclusão em contorno vermelho. O modal deixa de herdar o estilo de confirmação de plano salvo e apresenta título, identificação do projeto, lista de dados afetados, preservação da conta/outros projetos e impacto de excluir o ACTIVE em blocos separados. O título e os controles finais permanecem visíveis, com rolagem apenas do conteúdo central. Os controles têm gap de 12 px, labels persistentes e foco seguro em Cancelar sem rolar o conteúdo inicial. As confirmações de nome/checkbox, autorização, offline, fila de fotos e RPC permanecem inalteradas. RF-003/004/020/022; RNF-007/008/011. Sem nova migração ou alteração remota de dados.
+
+
+## Correção operacional — Ativar RPC de exclusão no Supabase — 26/10/2026
+
+O proprietário reportou erro ao excluir após publicar as hotfixes de exclusão e layout na main. A verificação somente leitura confirmou ausência da função delete_project(uuid,text): o deploy de código não aplica migrações SQL. Por autorização do pedido de correção, foi aplicada somente a migração incremental 013 já revisada/publicada, sem reset, bundle ou exclusão de projetos reais. A primeira tentativa retornou erro temporário HTTP 500; consulta posterior confirmou ausência da função antes da repetição, que concluiu com HTTP 201. Conferidos owner postgres, SECURITY DEFINER, execução para authenticated e bloqueio de anon; solicitado reload do schema PostgREST.
+
+Nova hotfix a partir de main melhora o feedback: função ausente/indisponibilidade não acusa nome incorreto; apenas a exceção explícita de confirmação sugere conferir o nome. O fluxo de nome/checkbox e a autorização permanecem inalterados. O proprietário abre o PR para main; a correção de banco é operacional e já vale para o código publicado. RF-003/004/020; RNF-002/005/008/014.
+
+
+## Correção — Porções zero no registro de refeições do plano — 26/10/2026
+
+O proprietário reportou que porções ajustadas para zero impediam salvar e solicitou melhorar o layout dos campos, mantendo hotfix a partir de main e PR pelo proprietário. A tela passa a diferenciar zero (não consumido) de vazio (porção ainda ausente), aceitar zero nos controles e permitir registro quando pelo menos uma porção é positiva e todas são válidas. Os alimentos zerados contribuem com zero para o consumo apresentado e são omitidos pelo normalizador do servidor antes da RPC; não se grava composição fictícia ou registro de consumo de quantidade zero. A constraint positiva do diário e o banco permanecem inalterados. Uma refeição inteiramente zerada não cria lançamento e recebe orientação na tela.
+
+As referências originais são preservadas durante o ajuste; as calorias dos alimentos consumidos são proporcionais à porção, inclusive ao voltar de zero a uma porção positiva. O servidor continua reconstruindo os alimentos a partir da versão privada salva, validando unidades, datas, autoria/projeto e idempotência. O plano e suas quantidades originais não são alterados. O resumo identifica os valores como informados durante a edição; o estado de completude existente do diário não é redefinido por esta mudança.
+
+O editor apresenta nome e calorias/estado ao lado de um campo com borda, foco visível, unidade separada, altura de toque e teclado decimal. Labels acessíveis conservam o nome do alimento. Testes sintéticos cobrem zero parcial, todos zerados, valores inválidos, restauração da porção, total, persistência, plano preservado, dashboard e layout/acessibilidade em 320 px. RF-006/007/018/022; RNF-002/004/007/008/011. Sem nova migração ou alteração remota de dados.
+
+
+## Extensão da hotfix — Excluir grupo de refeição — 26/10/2026
+
+O proprietário solicitou excluir todo um grupo do diário (por exemplo, Café da manhã) e reiterou o problema de porções zero. A verificação do GitHub confirmou que a correção de zero estava no PR 6 ainda aberto, enquanto main/produção mantinham o comportamento anterior. A extensão permanece na mesma hotfix/PR para revisão pelo proprietário, sem merge automático.
+
+O grupo passa a oferecer exclusão integral com modal, identificação da categoria/data e checkbox obrigatório. O servidor valida os parâmetros, usa cliente autenticado e DELETE único filtrado por projeto/data/categoria. RLS e guardas existentes limitam ao proprietário e ACTIVE; dados de outras categorias/datas/projetos permanecem intactos e históricos encerrados não aceitam exclusão. A operação não depende dos vinte itens visíveis na página; o modal informa que inclui outras páginas. O plano alimentar não é removido. Após sucesso, revalida indicadores, invalida resumo offline e mostra confirmação. Testes verificam lote de 25 itens, isolamento, datas/categorias preservadas, somente leitura, cancelamento, acessibilidade e persistência. RF-006/007/018/022; RNF-002/004/007/008/011. Sem nova migração ou alteração de dados reais.
+
+
+## Correção — Destino explícito da cópia e conferência dos vínculos do plano — 27/10/2026
+
+O proprietário reportou cópia de uma refeição para o jantar agrupada no café da manhã e divergência nos contadores. A análise confirmou que o formulário selecionava implicitamente a primeira categoria como destino; a RPC e o histórico usavam a categoria recebida corretamente. A cópia tradicional não carregava vínculo de plano, portanto contava no diário por categoria, mas não no contador de refeições vinculadas. A nova hotfix parte da main e permanece sujeita ao PR do proprietário.
+
+Origem e destino passam a exigir seleção explícita. A confirmação informa categoria e data efetivamente utilizadas. Quando existe plano no ACTIVE, o usuário pode escolher opcionalmente a refeição de destino do plano. Nesse caso o servidor lê os snapshots de origem com cliente autenticado, limita a 100 alimentos e usa a RPC register_meal existente, que valida destino ACTIVE/plano, categoria/data, unicidade e idempotência. Não herda nem deduz a refeição do plano a partir da origem ou da semelhança entre alimentos. Sem vínculo explícito, permanece a RPC de cópia tradicional. Cópias não substituem registros nem alteram a composição original/plano.
+
+O dashboard passa a rotular “Refeições vinculadas ao plano” e explicar a diferença para categorias com registros. A conferência de completude lê, no ledger privado existente, a quantidade efetivamente confirmada na última solicitação de cada refeição/data/plano, em vez de exigir a quantidade original de alimentos do planejamento. Assim, porções zero omitidas e cópias explicitamente vinculadas podem completar o registro; remover depois um alimento registrado continua deixando a conferência parcial. O número de alimentos não é usado para inferir aderência nutricional. Consultas são paginadas e filtradas por projeto/data/plano com RLS.
+
+Os testes exercitam cópia para Jantar, histórico agrupado em categorias distintas, dois vínculos no dashboard, porções zero, total de calorias preservado, seleção obrigatória e exclusão posterior com status parcial. Sem nova migração. Registros pessoais anteriores não são reclassificados pela hotfix: qualquer correção desses dados depende da confirmação do proprietário sobre o destino e vínculo desejados. RF-006/007/009/018/019/022; RNF-002/004/007/008/011/014.
+
+
+## Estabilidade da CI — Leitura da exportação no WebKit — 27/10/2026
+
+O check do PR 7 apresentou ECONNRESET em APIRequestContext.get('/api/exportar') no cenário de PDF/compatibilidade Safari, com 44 testes WebKit aprovados e sem resposta HTTP nessa requisição. O teste passa a permitir uma única repetição do GET somente para ECONNRESET, usando maxRetries nativo do Playwright; erros HTTP não são repetidos. A resposta deve ser HTTP 200 e todas as verificações de conteúdo, isolamento e ausência de consumo automático permanecem. Não há retry de gravações, repetição global de testes ou alteração no endpoint/aplicativo. RF-020; RNF-005/014.
+
+
+## Extensão autorizada — Sincronização de sono Garmin — 27/10/2026
+
+O proprietário solicitou disponibilizar a sincronização de sono ao usuário e atualizar os dados de manhã, à tarde ou à noite quando o relógio os disponibilizar. A extensão usa a Personal API existente, com adesão independente de atividades. O servidor consulta a janela de hoje e dois dias anteriores no Garmin Connect, após sincronização do relógio; a verificação ocorre pelo job já existente de quinze minutos e pelo app, com lease/intervalo compartilhados, sem polling direto do relógio ou horário fixo prometido.
+
+Foram adicionados card no dashboard, tela Sono, preferência de ativação/pausa e grupo no histórico. Os dados mínimos incluem duração, estágios, tempo acordado, cochilos, pontuação e horários informados; não há inferência clínica ou composição fictícia. Atualizações revisam o mesmo usuário/data no ACTIVE, sem duplicar nem editar histórico encerrado. Falhas preservam os dados anteriores; ausência é distinta de zero. A pausa usa o mesmo lock das gravações para impedir persistência após sua confirmação. Credenciais permanecem no servidor e vinculadas à conta proprietária, sem compartilhamento com outros usuários.
+
+As migrações incrementais 014 (modelo/RLS/RPCs) e 015 (serialização do consentimento) foram aplicadas após backup cifrado e verificado, sem reset/bundle. As permissões administrativas e RLS foram conferidas; a sincronização ficou desativada por padrão e não foram gravados dados reais de sono em testes. A leitura real de verificação confirmou suporte do provedor sem imprimir valores. Exportação exclui lease e inclui registros/preferência; backup público/privado abrange as tabelas. Exclusão de projeto/conta remove os dados por FK. O sono não entra no resumo offline. Sem novo serviço, credencial ou segundo agendamento.
+
+Extensão RF-SONO-01 a RF-SONO-05 detalhada em [sono Garmin](sono-garmin.md), relacionada a RF-004/018/019/020/022 e RNF-002/004/005/007/008/011/013/014. A hotfix parte da main; o proprietário realiza PR/review e publicação. A automação de sono em produção depende da publicação dessa versão e da ativação pelo usuário.
+
+
+### Conferência de revisões feitas pelo agendador
+
+A revisão final incluiu teste de uma gravação externa simulando o cron enquanto o app permanece aberto. A API de sincronização informa uma revisão mínima do último registro; o componente em primeiro plano compara essa revisão e renova o painel mesmo quando a consulta ao provedor foi dispensada pela lease/intervalo. O marcador fica em ref de memória, sem cache offline ou payload de saúde. O teste confirma atualização de duração/pontuação sem navegação ou recarga manual. Isso evita que o cron atualize o banco enquanto o card permaneça desatualizado.
+
+
+## 27/10/2026 — Acabamento das listas de alimentação
+
+Refinamento visual solicitado pelo proprietário: alimentos recentes usam linhas compactas com nome, porção e data separados, seta de expansão e formulário interno. Os grupos dos registros do dia têm 12 px de separação e calorias sem quebra entre número e unidade; em telas até 360 px, a informação calórica ocupa uma segunda linha. Permanecem os últimos 20 registros, a reutilização por cópia e os cálculos e permissões existentes. Sem alteração de escopo funcional, banco ou sincronização.
+
+Validação: build, lint e cenários Chromium de biblioteca/reutilização e registro de refeições, incluindo acessibilidade, largura móvel, altura das linhas recentes e separação entre os grupos. Capturas locais em `artifacts/food-recent-320.png` e `artifacts/meal-registration/food-page-320.png`.
+
+
+## 27/10/2026 — Métricas diárias de atividades no dashboard
+
+Por solicitação do proprietário, o card de atividades passa a destacar a duração, o título quando há uma única atividade e os totais de distância e calorias dos registros do projeto e da data consultados. A meta semanal permanece como comparação secundária compacta. A consulta autenticada respeita RLS e pagina todos os registros do dia. Valores ausentes não viram zero: totais incompletos são identificados como subtotais parciais; zero informado permanece zero. Não se calculam calorias a partir de duração ou modalidade. O detalhe continua acessível pelo card. Refinamento de apresentação dos indicadores de atividades existentes, sem nova modelagem ou alteração de sincronização.
+
+Verificação: `npm run build`, `npm run lint` e `npx playwright test tests/activity-cards.spec.ts --project=chromium`. O cenário valida duração, distância, calorias zero, isolamento por data e layout móvel com acessibilidade.
+
+
+## 28/10/2026 — Campo único para consulta de composição alimentar
+
+No registro manual de refeições, o campo Alimento oferece sugestões locais da TACO logo abaixo da descrição, sem uma segunda pesquisa. A seleção preenche nome, referência por 100 g, unidade e nutrientes da fonte, preservando a quantidade digitada; a orientação pede conferir a porção em gramas. Se não houver opções locais, ao sair do campo inicia-se a consulta online existente, respeitando quantidade e unidade g/ml, limites e filas já implementados. Havendo opções locais inadequadas, permanece a consulta online explícita. Alterações de descrição ou unidade invalidam a ativação anterior da busca, permitindo nova consulta, sem aplicar uma resposta atrasada a outro alimento. Para unidade/porção, a interface explica a necessidade de g/ml ou preenchimento manual, sem inferir conversões. Dados ausentes permanecem nulos e não se inventam nutrientes. Não foram adicionados provedores, dependências ou alterações de banco.
+
+Verificação: build, lint e testes Chromium de registro de refeições e referência online. O cenário cobre ausência de resultado, nova descrição, segunda requisição com o termo novo, orientação de unidade incompatível e seleção TACO pelo campo único preservando quantidade.
+
+
+### Auditoria do novo layout de alimentos recentes
+
+A auditoria `test:agent-browser` ainda localizava a receita pela concatenação antiga de nome, porção e data. Após a separação visual desses campos, o seletor passou a identificar o nome no título do item recente, preservando as verificações de reutilização, quantidade de registros e cópia aditiva confirmada. Não foram ampliados timeouts ou removidos cenários.
+
+
+A execução integral também identificou um defeito no resumo diário de atividades com métricas parcialmente ausentes: o aviso de subtotal estava fora da definição semântica e valores decimais retornados como texto podiam concatenar e produzir NaN. O aviso foi colocado dentro de `dd` e a soma converte explicitamente os valores numéricos. Mantidas as distinções entre ausência e zero.
+
+
+## 28/10/2026 — Confirmação e limpeza do registro manual de alimentação
+
+O formulário de registro manual de refeições mostra sucesso ou erro em diálogo modal nativo, com título e descrição acessíveis, foco no botão de retorno e fechamento por teclado. Após sucesso confirmado pelo servidor, limpa os campos, alimentos adicionais, composição, sugestões e total calculado, retornando a um único alimento vazio. Data e categoria retornam aos padrões do formulário. A limpeza remonta os campos para remover também estados internos; não se limita ao reset de inputs. O diálogo bloqueia novo envio até ser dispensado. Em erro, preserva todos os campos e o identificador de tentativa para uma repetição segura; não limpa dados antes da confirmação do servidor. O foco retorna ao campo Alimento ao dispensar o modal.
+
+Aplicação nesta alteração: registro manual de alimentação mostrado pelo proprietário. O componente de diálogo é reutilizável para expansão posterior aos demais formulários. Sem migração ou alteração no destino dos registros. Verificação: build, lint, cenários Chromium de refeições e composição online, incluindo falha simulada seguida de nova tentativa, preservação de dados no erro, reset no sucesso, reabertura vazia, acessibilidade do modal e registros consecutivos.
+
+
+A regressão geral `tests/records.spec.ts` também foi atualizada para confirmar e dispensar o modal de sucesso antes de abrir os alimentos persistidos. O cenário verifica que o campo Alimento está vazio após a confirmação. O modal mantém seu bloqueio de interação com o conteúdo ao fundo; os testes seguem o fluxo real de fechamento da confirmação.
+
+
+A validação Garmin no WebKit identificou uma disputa entre navegações completas artificiais do teste e a atualização automática do sono ao montar o painel. O cenário passa a usar o link de histórico do card e o link Voltar ao dashboard do histórico, verificando a URL e os dados renderizados em cada destino. Isso preserva o layout e o marcador de revisão, como no uso normal da aplicação. Foi removida a navegação redundante antes do logout; os cookies de sessão legada continuam inseridos e sua limpeza continua verificada. Não foram adicionados retries ou tempos de espera arbitrários nem desativada a sincronização.
+
+
+A auditoria agent-browser também passa a dispensar explicitamente o modal após o registro manual de alimentação, validando o título de sucesso e o campo Alimento vazio antes de editar ou consultar registros. Os demais formulários mantêm as verificações existentes.
+
+## 11/11/2026 — Primeiro ciclo de acompanhamento diário aprovado
+
+O proprietário aprovou iniciar a primeira entrega do discovery de 10/11: confiabilidade das referências alimentares, fases, dashboard diário, check-in de recuperação/reflexão, contexto alimentar opcional e visibilidade de indicadores. O escopo, critérios de aceite, exclusões e verificação estão em [refinamento diário](refinamento-diario-2026.md). Não inclui agenda/fichas, prescrição, IA/OCR ou anexos de planos. A documentação baseline gerada dos DOCX não é alterada por esta extensão.
+
+Implementação incremental a partir da main homologada, em branch de funcionalidade, com PR/review do proprietário. Mantidas as tabelas existentes, snapshots nutricionais, unicidade e guardas de ACTIVE. Migrações 016/017 acrescentam dados privados opcionais, fases não sobrepostas e vigência explícita de planos. O histórico de versões antigo recebe a data de criação como início, sem reinterpretar alimentos consumidos. Preferências pertencem à conta e não apagam dados. Escalas são relatos pessoais sem validação clínica ou escore de prontidão. Notas comportamentais não entram no cache offline nem em logs. Nenhum plano pessoal ou fase é criado automaticamente.
+
+## 11/11/2026 — Planos da fase e referências privadas
+
+Após o validate do PR #13, o proprietário autorizou expressamente seu merge na main, atualização local e continuação em nova branch. PR mesclado em 6584394; próxima entrega em `feat/planos-da-fase`. Esta autorização não se estende ao merge de PRs futuros.
+
+A extensão aprovada reutiliza o editor alimentar e adiciona cadastros manuais versionados de hidratação e fichas de musculação, com fase opcional. Imagens são referências privadas otimizadas, sem OCR/IA ou prescrição. Guardam-se início, limite de vigência e nome da fase como snapshot; remover ou editar a fase não altera a interpretação da versão anterior. O cadastro não equivale a consumo ou execução. Escolher uma referência de hidratação atualiza a meta somente mediante confirmação explícita, de hoje em diante. Executar uma ficha cria uma atividade por comando idempotente ou vincula uma existente da mesma conta/projeto/data, sem duplicar a sessão. Desvincular preserva a atividade. Séries realizadas, cargas e progressão permanecem em próximo incremento.
+
+Migração incremental 018 acrescenta tabelas e políticas RLS, imagens no bucket privado existente com metadados separados da galeria corporal e fila própria de limpeza durável. O backup inclui esses arquivos; exportação inclui metadados, planos e vínculos; exclusão do projeto/conta abrange a extensão. Não há notas/imagens dos planos no cache offline. Detalhes e aceite em [Planos da fase](planos-da-fase.md). Documentos baseline derivados de DOCX permanecem preservados.
+
+## 15/11/2026 — Inicialização segura do editor de planos
+
+A regressão WebKit identificou perda do nome digitado entre a renderização do HTML e a ativação do formulário React, deixando o campo obrigatório vazio e impedindo o salvamento. O editor de planos permanece desabilitado no HTML inicial e habilita os campos somente após a inicialização do cliente. Não há aumento de timeout ou repetição automática para contornar a falha. O teste retém os scripts da página, verifica o bloqueio inicial e, após liberá-los, preenche e salva a versão preservando o nome. O CI também preserva traces de falhas por três dias, usando somente os dados sintéticos da suíte.

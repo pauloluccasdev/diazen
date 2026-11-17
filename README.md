@@ -137,3 +137,29 @@ Atividades inclui Garmin Personal API exclusivamente para a conta proprietária 
 Na tela Atividades, a apresentação da Garmin abre na primeira visita e começa recolhida nas seguintes, com um accordion acessível. Um marcador visual no navegador guarda apenas que a apresentação já foi vista. O resumo semanal destaca os dias com registros; cada atividade mostra duração, distância e calorias disponíveis em um card, com edição e exclusão recolhidas nos detalhes. A importação automática continua funcionando com a seção fechada.
 
 Selecionar um dia no resumo semanal de Atividades mostra os registros daquela data na própria tela. No dashboard, os cards comparam os registros com as metas ou plano disponíveis; Peso mostra as últimas trinta medições e a variação no período quando há pelo menos duas datas.
+
+### Hotfix: excluir projeto
+
+Projetos oferece exclusão definitiva com modal, nome digitado e confirmação. Remove somente os dados vinculados ao projeto da própria conta, inclusive históricos; mantém conta, outros projetos e biblioteca de alimentos. Fotos usam fila de limpeza com nova tentativa pelo procedimento de privacidade. Após excluir o ACTIVE, é preciso ativar outro projeto para registrar/importar atividades. A migração incremental `supabase/migrations/202610260013_project_deletion.sql` é necessária antes de habilitar a exclusão no ambiente hospedado; aplicar somente esse arquivo em banco já migrado até 012, sem reset ou bundle. Esta hotfix não aplica a migração remota automaticamente.
+
+Verificar: `node --test tests/database/project-deletion.test.mjs` e, após build, `npx playwright test tests/project-deletion.spec.ts --project=chromium`. Os testes usam dados sintéticos locais e cobrem isolamento, cascata, confirmação, cancelamento, offline e acessibilidade. Antes de restaurar backup antigo, conferir projetos excluídos após o snapshot para não reintroduzi-los.
+
+### Sono Garmin
+
+A extensão autorizada adiciona card/tela de Sono e histórico diário, com adesão separada de atividades. Depois de publicar a hotfix, ative “Sincronizar meu sono com a Garmin”. O agendador existente consulta hoje e os dois dias anteriores em cerca de quinze minutos durante todo o dia, quando houver dados no Garmin Connect. Não consulta diretamente o relógio. Duração, estágios, cochilos e pontuação são privados e revisados sem duplicar o dia; pausar mantém o histórico. Migrações incrementais 014/015 já aplicadas ao Supabase hospedado após backup, sem habilitar a preferência do proprietário. Ver [comportamento, limites e testes](docs/sono-garmin.md).
+
+## Acompanhamento diário — ciclo aprovado em 11/11/2026
+
+O dashboard oferece ações do dia, fase atual/marco e acesso ao check-in. Em **Fases do projeto**, configure períodos não sobrepostos no ACTIVE. Em **Como foi meu dia?**, registre opcionalmente recuperação percebida, horas de sono manuais, reflexões e contextos alimentares independentes de calorias/consumo. O histórico geral inclui check-ins/contextos. Nenhum dado subjetivo substitui a Garmin ou gera prescrição.
+
+Em **Minha conta → O que quero ver no meu dashboard**, oculte peso, calorias ou acesso às fotos. Isso preserva os registros e a consulta deliberada aos módulos; o resumo offline anterior é invalidado. Não há check-in/contexto em cache offline.
+
+Trocar unidade de alimento invalida a composição anterior; informe nova referência compatível. Planos novos possuem início de vigência, inclusive futuro, sem alterar o diário existente. As migrações `202611110016_daily_followup.sql` e `202611110017_diet_plan_validity.sql` foram aplicadas incrementalmente no Supabase configurado, após backup cifrado e verificado. Em outras instalações, devem ser aplicadas antes desta versão. Não reaplicar o bundle em ambiente existente. Ver [escopo e aceite](docs/refinamento-diario-2026.md). Validação adicional: `node --test tests/database/daily-followup.test.mjs` e `npx playwright test tests/daily-followup.spec.ts --project=chromium`.
+
+## Meus planos — cadastro manual e execução básica
+
+Em **Dashboard → Meus planos**, cadastre referências de hidratação ou fichas de musculação. Informe os valores do seu planejamento, associe uma fase opcional e revise antes de salvar. É possível anexar JPG/PNG/WebP privado (até 3 MB); a imagem serve para consulta e não é transcrita automaticamente. Em **Plano alimentar**, também é possível criar uma versão manual sem PDF. Cada salvamento cria uma versão imutável.
+
+Salvar um plano não gera consumo nem atividade. Para água, escolha e confirme uma referência dentro das faixas cadastradas para atualizar a meta de hoje em diante. Na ficha, registre a duração ou escolha uma atividade já registrada/importada da data consultada; o vínculo não duplica a sessão. A remoção do vínculo mantém a atividade. Cargas/séries executadas e comparação por exercício serão uma próxima entrega.
+
+Requer a migração incremental `supabase/migrations/202611110018_phase_plans.sql` sobre 017, com backup prévio; já aplicada ao Supabase configurado após backup cifrado verificado, sem criar dados pessoais. Em outras instalações, aplicar antes de publicar esta versão; não reaplicar o bundle. Limpeza de referências excluídas integra `npm run privacy:purge`, e `npm run backup` inclui as imagens privadas. Ver [escopo e aceite](docs/planos-da-fase.md). Validar com `node --test tests/database/phase-plans.test.mjs tests/database/plan-asset-cleanup.test.mjs` e, após build, `npx playwright test tests/phase-plans.spec.ts --project=chromium`.

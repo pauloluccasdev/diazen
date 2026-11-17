@@ -1,4 +1,7 @@
 "use server";
+import { redirect } from "next/navigation";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { cleanPhotoJobs, cleanPlanAssetJobs } from "@/lib/privacy";
 import { revalidatePath } from "next/cache";
 import { requireAccount } from "@/lib/data";
 import { isDate, isId, today } from "@/lib/domain";
@@ -180,4 +183,67 @@ export async function changeDraftDates(
     );
   revalidatePath("/painel", "layout");
   return result("", "Datas do rascunho atualizadas.");
+}
+
+export async function deleteProject(
+  _state: FormResult,
+  form: FormData,
+): Promise<FormResult> {
+  const { client, user } = await requireAccount();
+  const id = String(form.get("id") ?? "");
+  const name = String(form.get("name") ?? "");
+  if (!isId(id) || !name || name.length > 100 || form.get("confirm") !== "on")
+    return result("Digite o nome do projeto e confirme a exclusão definitiva.");
+  const admin = createAdminClient();
+  if (!admin)
+    return result(
+      "Exclusão temporariamente indisponível. Tente novamente mais tarde.",
+    );
+  const { error } = await client.rpc("delete_project", {
+    p_project: id,
+    p_name: name,
+  });
+  if (error) {
+    if (error.code === "PGRST202" || error.code === "42883")
+      return result(
+        "A exclusão está temporariamente indisponível neste ambiente. Tente novamente mais tarde.",
+      );
+    if (
+      error.code === "P0001" &&
+      error.message === "Confirmação de projeto inválida"
+    )
+      return result(
+        "Não foi possível excluir. Digite o nome exatamente como aparece no projeto.",
+      );
+    return result(
+      "Não foi possível concluir a exclusão agora. Tente novamente mais tarde.",
+    );
+  }
+  let cleanupPending = false;
+  try {
+    await cleanPhotoJobs(admin, user.id, 20);
+    await cleanPlanAssetJobs(admin, user.id, 20);
+    const pending = await admin
+      .from("photo_cleanup")
+      .select("photo_id")
+      .eq("user_id", user.id)
+      .limit(1);
+    const planPending = await admin
+      .from("plan_asset_cleanup")
+      .select("asset_id")
+      .eq("user_id", user.id)
+      .limit(1);
+    cleanupPending = Boolean(
+      pending.error ||
+      pending.data?.length ||
+      planPending.error ||
+      planPending.data?.length,
+    );
+  } catch {
+    cleanupPending = true;
+  }
+  revalidatePath("/painel", "layout");
+  redirect(
+    `/painel/projetos?excluido=1${cleanupPending ? "&limpeza=pendente" : ""}`,
+  );
 }

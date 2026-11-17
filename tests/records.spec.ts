@@ -144,6 +144,16 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
   await expect(
     page.getByText("Parcial: o diário", { exact: false }),
   ).toBeVisible();
+  const savedMeal = page.getByRole("dialog", {
+    name: "Registro salvo",
+    exact: true,
+  });
+  await expect(savedMeal).toBeVisible();
+  await savedMeal
+    .getByRole("button", { name: "Continuar", exact: true })
+    .click();
+  await expect(savedMeal).toHaveCount(0);
+  await expect(meal.getByLabel("Alimento", { exact: true })).toHaveValue("");
   await page.locator(".meal-record-group > summary").click();
   await page
     .getByRole("article", { includeHidden: true })

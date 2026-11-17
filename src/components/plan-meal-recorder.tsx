@@ -58,7 +58,7 @@ export function PlanMealRecorder({
             {registered ? "Registrada" : "Ainda não registrada"} ·{" "}
             {total === null
               ? "Calorias pendentes"
-              : `${number(total)} kcal planejadas`}
+              : `${number(total)} kcal ${editing && !registered ? "informadas" : "planejadas"}`}
           </small>
         </span>
         <ChevronDown size={20} aria-hidden="true" />
@@ -69,34 +69,62 @@ export function PlanMealRecorder({
           {total === null ? "Calorias pendentes" : `${number(total)} kcal`}
           {calories.some((v) => v === null) ? " · parcial" : ""}
         </p>
-        <ul className="planned-meal-foods">
+        {editing && !done && (
+          <p className="portion-help">
+            Informe quanto você consumiu. Use 0 para os alimentos que não comeu;
+            eles não serão adicionados ao diário.
+          </p>
+        )}
+        <ul
+          className={`planned-meal-foods${editing && !done ? " editing-portions" : ""}`}
+        >
           {shownFoods.map((food, fi) => (
             <li key={fi}>
-              <span>{food.name}</span>
+              <div className="portion-food-heading">
+                <span>{food.name}</span>
+                {editing && !done && (
+                  <small
+                    className={food.amount === 0 ? "portion-not-consumed" : ""}
+                  >
+                    {food.amount === 0
+                      ? "Não consumido"
+                      : mealComposition(food).kcal === null
+                        ? "Calorias pendentes"
+                        : `${number(mealComposition(food).kcal!)} kcal`}
+                  </small>
+                )}
+              </div>
               {editing && !done ? (
-                <label>
-                  Porção de {food.name} ({food.unit ?? "g"})
-                  <input
-                    type="number"
-                    min="0.001"
-                    max="100000"
-                    step="0.001"
-                    value={food.amount ?? ""}
-                    disabled={pending || !online}
-                    onChange={(e) => {
-                      setFoods(
-                        foods.map((f, i) =>
-                          i === fi
-                            ? changedPortion(
-                                initial[fi],
-                                e.target.value ? Number(e.target.value) : null,
-                              )
-                            : f,
-                        ),
-                      );
-                      request.current = "";
-                    }}
-                  />
+                <label className="portion-control">
+                  <span>Porção</span>
+                  <span className="portion-input">
+                    <input
+                      aria-label={`Porção de ${food.name} (${food.unit ?? "g"})`}
+                      inputMode="decimal"
+                      type="number"
+                      min="0"
+                      max="100000"
+                      step="0.001"
+                      value={food.amount ?? ""}
+                      disabled={pending || !online}
+                      onChange={(e) => {
+                        setFoods(
+                          foods.map((f, i) =>
+                            i === fi
+                              ? changedPortion(
+                                  initial[fi],
+                                  e.target.value
+                                    ? Number(e.target.value)
+                                    : null,
+                                )
+                              : f,
+                          ),
+                        );
+                        request.current = "";
+                      }}
+                    />
+                    <span aria-hidden="true">{food.unit ?? "g"}</span>
+                  </span>
                 </label>
               ) : (
                 <span>
@@ -185,6 +213,11 @@ export function PlanMealRecorder({
                 ))}
               </select>
             </label>
+            {editing && foods.every((f) => f.amount === 0) && (
+              <p className="field-hint" role="status">
+                Informe uma porção maior que zero para registrar a refeição.
+              </p>
+            )}
             <div className="meal-actions">
               <button
                 type="submit"
@@ -193,7 +226,14 @@ export function PlanMealRecorder({
                   pending ||
                   !online ||
                   !category ||
-                  foods.some((f) => !f.amount)
+                  foods.some(
+                    (f) =>
+                      f.amount === null ||
+                      !Number.isFinite(f.amount) ||
+                      f.amount < 0 ||
+                      f.amount > 100000,
+                  ) ||
+                  !foods.some((f) => f.amount !== null && f.amount > 0)
                 }
               >
                 {pending

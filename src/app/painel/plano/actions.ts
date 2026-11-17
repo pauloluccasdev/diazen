@@ -1,6 +1,6 @@
 "use server";
 import { requireAccount } from "@/lib/data";
-import { isId } from "@/lib/domain";
+import { isId, isDate, today } from "@/lib/domain";
 import { validatePlan } from "@/lib/diet-plan";
 import { isDeepStrictEqual } from "node:util";
 import { revalidatePath } from "next/cache";
@@ -8,9 +8,20 @@ export async function saveDietPlan(
   project: string,
   requestId: string,
   input: unknown,
+  effectiveFrom: string = today(),
+  references: { phase_id: string | null; reference_image_id: string | null } = {
+    phase_id: null,
+    reference_image_id: null,
+  },
 ) {
   const { client } = await requireAccount();
-  if (!isId(project) || !isId(requestId)) return { error: "Projeto inválido." };
+  if (!isId(project) || !isId(requestId) || !isDate(effectiveFrom))
+    return { error: "Projeto inválido." };
+  if (
+    (references.phase_id && !isId(references.phase_id)) ||
+    (references.reference_image_id && !isId(references.reference_image_id))
+  )
+    return { error: "Referências inválidas." };
   let document;
   try {
     document = validatePlan(input);
@@ -23,7 +34,7 @@ export async function saveDietPlan(
   }
   const { data: existing, error: readError } = await client
     .from("diet_plans")
-    .select("id,project_id,document")
+    .select("id,project_id,document,effective_from,phase_id,reference_image_id")
     .eq("id", requestId)
     .maybeSingle();
   if (readError)
@@ -31,6 +42,9 @@ export async function saveDietPlan(
   if (
     existing &&
     (existing.project_id !== project ||
+      existing.effective_from !== effectiveFrom ||
+      existing.phase_id !== references.phase_id ||
+      existing.reference_image_id !== references.reference_image_id ||
       !isDeepStrictEqual(existing.document, document))
   )
     return {
@@ -42,6 +56,8 @@ export async function saveDietPlan(
       id: requestId,
       project_id: project,
       title: document.title,
+      effective_from: effectiveFrom,
+      ...references,
       document,
     });
     if (error)

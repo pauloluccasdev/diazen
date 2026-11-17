@@ -7,6 +7,7 @@ import {
   changedPortion,
   registrationItems,
   newMealFood,
+  mealComposition,
 } from "../../src/lib/meal-registration.ts";
 import { randomUUID } from "node:crypto";
 test("porções registradas escalam snapshots sem modificar o plano e preservam ausente versus zero", () => {
@@ -29,6 +30,22 @@ test("porções registradas escalam snapshots sem modificar o plano e preservam 
   assert.equal(registrationItems([missing])[0].kcal, 0);
   assert.equal(registrationItems([missing])[0].protein, null);
   assert.throws(() => registrationItems([{ ...missing, amount: 0 }]));
+  const skipped = changedPortion(foods[1], 0);
+  assert.equal(mealComposition(skipped).kcal, 0);
+  const partial = registrationItems([changedPortion(foods[0], 100), skipped]);
+  assert.equal(partial.length, 1);
+  assert.equal(partial[0].kcal, 128);
+  assert.equal(
+    changedPortion(skipped, foods[1].amount).amount,
+    foods[1].amount,
+  );
+  assert.equal(
+    mealComposition(changedPortion(skipped, foods[1].amount)).kcal,
+    mealComposition(foods[1]).kcal,
+  );
+  for (const amount of [null, -1, Infinity, NaN, 100001])
+    assert.throws(() => registrationItems([{ ...missing, amount }, foods[0]]));
+  assert.equal(JSON.stringify(plan), original);
 });
 test("registro de refeição é atômico, idempotente, isolado e resolve apenas ACTIVE", async () => {
   const alice = "88888888-8888-4888-8888-888888888888",

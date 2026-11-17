@@ -1,3 +1,5 @@
+import { MealDeleteDialog } from "@/components/meal-delete-dialog";
+import { ClearOfflineData } from "@/components/offline-snapshot";
 import { ActivityRecordCard } from "@/components/activity-record-card";
 import { ActivityWeekSummary } from "@/components/activity-week-summary";
 import { weekBounds } from "@/lib/records";
@@ -100,7 +102,12 @@ export default async function Records({
   searchParams,
 }: {
   params: Promise<{ modulo: string }>;
-  searchParams: Promise<{ projeto?: string; data?: string; pagina?: string }>;
+  searchParams: Promise<{
+    projeto?: string;
+    data?: string;
+    pagina?: string;
+    refeicao_excluida?: string;
+  }>;
 }) {
   const { modulo } = await params;
   if (!isModule(modulo)) notFound();
@@ -536,7 +543,17 @@ export default async function Records({
           project={selected.id}
           date={date}
           activeName={active?.name}
+          activeProject={active?.id}
         />
+      )}
+      {modulo === "alimentacao" && filters.refeicao_excluida === "1" && (
+        <>
+          <ClearOfflineData />
+          <p role="status" className="form-success">
+            Refeição excluída. Todos os alimentos desse grupo foram removidos
+            dos registros da data.
+          </p>
+        </>
       )}
       <section
         id="registros-do-dia"
@@ -592,15 +609,26 @@ export default async function Records({
                       </small>
                     </span>
                     <span className="food-record-calories">
-                      {known.length
-                        ? `${number(kcal)} kcal`
-                        : "Calorias não informadas"}
+                      {known.length ? (
+                        <span className="meal-calorie-value">
+                          {number(kcal)} kcal
+                        </span>
+                      ) : (
+                        "Calorias não informadas"
+                      )}
                       {partial && known.length > 0 && (
                         <small>Subtotal parcial</small>
                       )}
                     </span>
                     <ChevronDown size={20} aria-hidden="true" />
                   </summary>
+                  {editable && (
+                    <MealDeleteDialog
+                      project={selected.id}
+                      date={date}
+                      category={category as keyof typeof categories}
+                    />
+                  )}
                   <div className="meal-record-items">
                     {items.map(renderRecord)}
                   </div>

@@ -109,9 +109,19 @@ test("alimentos próprios, receitas, favoritos, recentes e cópia preservam o di
     page.locator(".nutrition-grid").getByText("Não informado", { exact: true }),
   ).toHaveCount(3);
   await page.getByText("Alimentos recentes", { exact: true }).click();
+  await page.setViewportSize({ width: 320, height: 844 });
+  await expect(page.locator(".recent-food-item").first()).toBeVisible();
+  const recentHeight = (await page
+    .locator(".recent-food-item")
+    .first()
+    .boundingBox())!.height;
+  expect(recentHeight).toBeLessThan(120);
+  await page
+    .locator(".food-conveniences")
+    .screenshot({ path: "artifacts/food-recent-320.png" });
   await page
     .locator(".food-conveniences summary")
-    .filter({ hasText: /Minha receita · 1 porção/ })
+    .filter({ hasText: /Minha receita.*1 porção/ })
     .click();
   await page.getByRole("button", { name: "Reutilizar alimento" }).click();
   await expect(page.getByRole("article", { includeHidden: true })).toHaveCount(
@@ -122,6 +132,12 @@ test("alimentos próprios, receitas, favoritos, recentes e cópia preservam o di
   ).toBeVisible();
   await page.getByText("Copiar refeição", { exact: true }).click();
   const copy = form(page, "Confirmar cópia da refeição");
+  await expect(
+    copy.getByRole("combobox", { name: "Refeição de destino", exact: true }),
+  ).toHaveValue("");
+  await copy
+    .getByRole("combobox", { name: "Refeição de origem", exact: true })
+    .selectOption("breakfast");
   await copy
     .getByRole("combobox", { name: "Refeição de destino", exact: true })
     .selectOption("lunch");

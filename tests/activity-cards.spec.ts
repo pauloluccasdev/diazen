@@ -130,6 +130,12 @@ test("semana de atividades e cards expansíveis preservam métricas e edição",
     .click();
   await expect(weight.getByRole("status")).toContainText("Peso salvo");
   await page.goto("/painel");
+  const activitySummary = page.locator(".metric-atividades");
+  await expect(activitySummary).toContainText("30 min");
+  await expect(activitySummary).toContainText("Corrida de teste");
+  await expect(activitySummary).toContainText("5 km");
+  await expect(activitySummary).toContainText("0 kcal");
+  await expect(activitySummary).not.toContainText("sessões na semana");
   const weightCard = page.locator(".metric-peso");
   await expect(weightCard).toContainText("94 → 92 kg");
   await expect(weightCard).toContainText("-2 kg no período");
@@ -145,11 +151,21 @@ test("semana de atividades e cards expansíveis preservam métricas e edição",
   await weightCard.screenshot({
     path: "artifacts/dashboard-weight-comparison-320.png",
   });
+  await page.goto(`/painel?data=${previousDate}`);
+  await expect(activitySummary).toContainText("Sem atividades registradas");
+  await expect(activitySummary).not.toContainText("30 min");
+  await page.goto("/painel");
+  await expect(weightCard).toContainText("92 kg");
+  await expect(activitySummary).toContainText("30 min");
   await page.setViewportSize({ width: 390, height: 844 });
-  const activityBox = await page.locator(".metric-atividades").boundingBox();
-  const weightBox = await weightCard.boundingBox();
-  expect(Math.abs(activityBox!.y - weightBox!.y)).toBeLessThan(2);
-  expect(Math.abs(activityBox!.width - weightBox!.width)).toBeLessThan(2);
+  await expect(async () => {
+    const activityBox = await activitySummary.boundingBox();
+    const weightBox = await weightCard.boundingBox();
+    expect(activityBox).not.toBeNull();
+    expect(weightBox).not.toBeNull();
+    expect(Math.abs(activityBox!.y - weightBox!.y)).toBeLessThan(2);
+    expect(Math.abs(activityBox!.width - weightBox!.width)).toBeLessThan(2);
+  }).toPass();
   await page
     .locator(".area-grid")
     .screenshot({ path: "artifacts/dashboard-compact-cards-390.png" });

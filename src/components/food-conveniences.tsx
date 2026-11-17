@@ -1,5 +1,6 @@
+import type { DietPlan } from "@/lib/diet-plan";
 import { ActionDisclosure } from "@/components/action-disclosure";
-import { Copy, History, BookOpen, ArrowRight } from "lucide-react";
+import { Copy, History, BookOpen, ArrowRight, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { formatDate, number, today } from "@/lib/domain";
@@ -12,11 +13,13 @@ export async function FoodConveniences({
   project,
   date,
   activeName,
+  activeProject,
 }: {
   client: SupabaseClient;
   project: string;
   date: string;
   activeName?: string;
+  activeProject?: string;
 }) {
   const { data, error } = await client
     .from("meal_items")
@@ -26,6 +29,26 @@ export async function FoodConveniences({
     .limit(20)
     .returns<Entry[]>();
   if (error) throw new Error("Falha ao carregar alimentos recentes");
+  const planResult = activeProject
+    ? await client
+        .from("diet_plans")
+        .select("id,document")
+        .eq("project_id", activeProject)
+        .lte("effective_from", date)
+        .or(`valid_until.is.null,valid_until.gte.${date}`)
+        .order("effective_from", { ascending: false })
+        .order("created_at", { ascending: false })
+        .order("id")
+        .limit(1)
+        .maybeSingle()
+    : { data: null, error: null };
+  if (planResult.error)
+    throw Error("Não foi possível carregar o plano de destino");
+  const destinationPlan = planResult.data as {
+    id: string;
+    document: DietPlan;
+  } | null;
+
   return (
     <section
       className="content-card food-conveniences"
@@ -59,26 +82,34 @@ export async function FoodConveniences({
             </p>
             {!data?.length && <p>Sem alimentos recentes.</p>}
             {data?.map((food) => (
-              <details className="content-card" key={food.id}>
+              <details className="recent-food-item" key={food.id}>
                 <summary>
-                  {food.name} · {number(food.amount!, 3)} {units[food.unit!]} ·{" "}
-                  {formatDate(food.logged_on)}
+                  <span className="recent-food-heading">
+                    <strong>{food.name}</strong>
+                    <small>
+                      {number(food.amount!, 3)} {units[food.unit!]} ·{" "}
+                      {formatDate(food.logged_on)}
+                    </small>
+                  </span>
+                  <ChevronDown size={18} aria-hidden="true" />
                 </summary>
-                <p className="muted">
-                  Fonte: {food.source}. Referência:{" "}
-                  {number(food.reference_amount!, 3)} {units[food.unit!]}.
-                </p>
-                <ActionForm
-                  action={addLibraryFood}
-                  submit="Reutilizar alimento"
-                >
-                  <input type="hidden" name="recent_id" value={food.id} />
-                  <FoodUseFields
-                    date={date}
-                    amount={food.amount}
-                    unit={food.unit!}
-                  />
-                </ActionForm>
+                <div className="recent-food-body">
+                  <p className="muted">
+                    Fonte: {food.source}. Referência:{" "}
+                    {number(food.reference_amount!, 3)} {units[food.unit!]}.
+                  </p>
+                  <ActionForm
+                    action={addLibraryFood}
+                    submit="Reutilizar alimento"
+                  >
+                    <input type="hidden" name="recent_id" value={food.id} />
+                    <FoodUseFields
+                      date={date}
+                      amount={food.amount}
+                      unit={food.unit!}
+                    />
+                  </ActionForm>
+                </div>
               </details>
             ))}
           </ActionDisclosure>
@@ -90,8 +121,9 @@ export async function FoodConveniences({
             <p className="intro">
               Origem: projeto consultado. Copia todos os alimentos da categoria
               e data escolhidas, inclusive além da página atual. O destino é o
-              projeto ativo. Não substitui registros existentes e desfaz a
-              conclusão manual do dia de destino.
+              projeto ativo. Escolha a refeição de destino e, se desejar,
+              vincule a cópia a uma refeição do plano. Os alimentos e valores da
+              origem são preservados; registros existentes não são substituídos.
             </p>
             <ActionForm action={copyMeal} submit="Confirmar cópia da refeição">
               <input type="hidden" name="source_project" value={project} />
@@ -112,7 +144,10 @@ export async function FoodConveniences({
               </label>
               <label>
                 Refeição de origem
-                <select name="source_category">
+                <select name="source_category" required defaultValue="">
+                  <option value="" disabled>
+                    Escolha a origem
+                  </option>
                   {Object.entries(categories).map(([key, label]) => (
                     <option key={key} value={key}>
                       {label}
@@ -132,7 +167,10 @@ export async function FoodConveniences({
               </label>
               <label>
                 Refeição de destino
-                <select name="target_category">
+                <select name="target_category" required defaultValue="">
+                  <option value="" disabled>
+                    Escolha o destino
+                  </option>
                   {Object.entries(categories).map(([key, label]) => (
                     <option key={key} value={key}>
                       {label}
@@ -140,6 +178,34 @@ export async function FoodConveniences({
                   ))}
                 </select>
               </label>
+              {destinationPlan && (
+                <div>
+                  <label>
+                    Refeição do plano (opcional)
+                    <select
+                      name="target_plan_meal"
+                      defaultValue=""
+                      aria-describedby="copy-plan-hint"
+                    >
+                      <option value="">Sem vínculo com o plano</option>
+                      {destinationPlan.document.meals.map((meal, index) =>
+                        meal.enabled ? (
+                          <option
+                            key={index}
+                            value={`${destinationPlan.id}:${index}`}
+                          >
+                            {meal.name}
+                          </option>
+                        ) : null,
+                      )}
+                    </select>
+                  </label>
+                  <small id="copy-plan-hint" className="field-hint">
+                    Escolha a refeição do plano que você está realizando. A
+                    cópia não altera o planejamento.
+                  </small>
+                </div>
+              )}
               <label className="checkbox-label">
                 <input type="checkbox" name="confirm" required />
                 Confirmo adicionar uma cópia dos alimentos ao projeto ativo,

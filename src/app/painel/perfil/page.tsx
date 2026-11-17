@@ -1,3 +1,5 @@
+import { DisplaySettings } from "@/components/daily/display-settings";
+import { displayPreferences } from "@/lib/daily-data";
 import Link from "next/link";
 import { PasswordInput } from "@/components/password-input";
 import {
@@ -15,7 +17,8 @@ import { ActionForm } from "@/components/forms/action-form";
 import { deleteAccount } from "./actions";
 export const metadata = { title: "Minha conta e privacidade" };
 export default async function Profile() {
-  const { user } = await requireAccount();
+  const { user, client } = await requireAccount();
+  const preferences = await displayPreferences(client, user.id);
   return (
     <>
       <section className="welcome">
@@ -52,6 +55,7 @@ export default async function Profile() {
           </Link>
         ))}
       </nav>
+      <DisplaySettings initial={preferences} />
       <section className="content-card">
         <h2>Seus dados, com você.</h2>
         <p className="intro">

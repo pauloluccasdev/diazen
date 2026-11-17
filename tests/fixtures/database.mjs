@@ -23,6 +23,14 @@ export async function createDatabase(users) {
 
 const tables = new Set([
   "projects",
+  "phase_plans",
+  "plan_assets",
+  "plan_asset_cleanup",
+  "workout_links",
+  "display_preferences",
+  "project_phases",
+  "daily_checkins",
+  "eating_context_events",
   "water_goals",
   "water_entries",
   "weights",
@@ -30,6 +38,8 @@ const tables = new Set([
   "activities",
   "garmin_imports",
   "garmin_sync_settings",
+  "garmin_sleep_settings",
+  "sleep_records",
   "meal_items",
   "meal_days",
   "food_library",
@@ -41,6 +51,13 @@ const tables = new Set([
   "deletion_ledger",
 ]);
 const commands = new Set([
+  "set_garmin_sleep_sync",
+  "garmin_claim_sleep",
+  "garmin_store_sleep",
+  "garmin_finish_sleep",
+  "delete_project",
+  "save_daily_checkin",
+  "record_planned_workout",
   "garmin_import_activity",
   "garmin_claim_sync",
   "garmin_finish_sync",
@@ -127,11 +144,30 @@ export async function rest(
     for (const [key, value] of url.searchParams) {
       if (["select", "order", "limit", "offset", "on_conflict"].includes(key))
         continue;
+      if (key === "or") {
+        const parts = value.replace(/^\(|\)$/g, "").split(",");
+        const expressions = parts.map((part) => {
+          const match = /^([a-z_]+)\.(is|gte)\.(.*)$/.exec(part);
+          if (!match) throw Error("Invalid alternative filter");
+          const column = identifier(match[1]);
+          if (match[2] === "is" && match[3] === "null")
+            return `${column} is null`;
+          if (match[2] !== "gte") throw Error("Invalid alternative");
+          values.push(match[3]);
+          return `${column} >= $${values.length}`;
+        });
+        filters.push(`(${expressions.join(" or ")})`);
+        continue;
+      }
       const match = /^(eq|gte|lte|gt|lt|ilike)\.(.*)$/.exec(value);
       if (!match) throw new Error("Unknown filter");
       values.push(match[2]);
+      const jsonPath = /^([a-z_]+)->>([0-9]+)$/.exec(key);
+      const column = jsonPath
+        ? `(${identifier(jsonPath[1])}->>${Number(jsonPath[2])})`
+        : identifier(key);
       filters.push(
-        `${identifier(key)} ${{ eq: "=", gte: ">=", lte: "<=", gt: ">", lt: "<", ilike: "ilike" }[match[1]]} $${values.length}`,
+        `${column} ${{ eq: "=", gte: ">=", lte: "<=", gt: ">", lt: "<", ilike: "ilike" }[match[1]]} $${values.length}`,
       );
     }
     const where = filters.length ? " where " + filters.join(" and ") : "";
@@ -147,7 +183,12 @@ export async function rest(
         .join(",");
       const limit = Number(url.searchParams.get("limit") ?? 1000),
         offset = Number(url.searchParams.get("offset") ?? 0);
-      sql = `select * from public.${identifier(table)}${where}${order ? " order by " + order : ""} limit ${Math.min(limit, 1000)} offset ${offset}`;
+      const projection = url.searchParams.get("select") ?? "*";
+      const columns =
+        projection === "*"
+          ? "*"
+          : projection.split(",").map(identifier).join(",");
+      sql = `select ${columns} from public.${identifier(table)}${where}${order ? " order by " + order : ""} limit ${Math.min(limit, 1000)} offset ${offset}`;
     } else if (request.method === "POST") {
       const pairs = Object.entries(payload);
       values.length = 0;
@@ -178,7 +219,9 @@ export async function rest(
         Object.entries(row).map(([key, value]) => [
           key,
           value instanceof Date &&
-          (key.endsWith("_on") || key === "effective_from")
+          (key.endsWith("_on") ||
+            key === "effective_from" ||
+            key === "valid_until")
             ? value.toISOString().slice(0, 10)
             : value,
         ]),

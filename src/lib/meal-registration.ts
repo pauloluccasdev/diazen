@@ -10,9 +10,11 @@ export type MealFood = Omit<PlanFood, "unit"> & {
   unit: keyof typeof units | null;
 };
 export const mealComposition = (food: MealFood) =>
-  food.unit === "g" || food.unit === "ml" || food.unit === null
-    ? foodComposition(food as PlanFood)
-    : food.values;
+  food.amount === 0
+    ? { kcal: 0, protein: 0, carbs: 0, fat: 0 }
+    : food.unit === "g" || food.unit === "ml" || food.unit === null
+      ? foodComposition(food as PlanFood)
+      : food.values;
 export const newMealFood = (): MealFood => ({
   name: "",
   amount: null,
@@ -33,6 +35,7 @@ export function changedPortion(
   food: MealFood,
   amount: number | null,
 ): MealFood {
+  if (amount === 0) return { ...food, amount: 0 };
   if (amount === null)
     return { ...food, amount: null, values: newMealFood().values };
   if (food.tacoId !== null) return { ...food, amount };
@@ -60,7 +63,18 @@ export function changedPortion(
 export function registrationItems(foods: MealFood[]) {
   if (!Array.isArray(foods) || !foods.length || foods.length > 100)
     throw Error("Informe entre 1 e 100 alimentos.");
-  return foods.map((food) => {
+  for (const food of foods) {
+    if (
+      food.amount === null ||
+      !Number.isFinite(food.amount) ||
+      food.amount < 0 ||
+      food.amount > 100000
+    )
+      throw Error("Confira os alimentos e as porções.");
+  }
+  const consumed = foods.filter((food) => food.amount! > 0);
+  if (!consumed.length) throw Error("Informe ao menos um alimento consumido.");
+  return consumed.map((food) => {
     if (
       !food.name.trim() ||
       !food.amount ||

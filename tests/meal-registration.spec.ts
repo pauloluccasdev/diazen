@@ -51,7 +51,7 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
       ],
     ]),
   });
-  await page.getByLabel("Revisei a extração", { exact: false }).check();
+  await page.getByLabel("Revisei os alimentos", { exact: false }).check();
   await page.getByRole("button", { name: "Salvar versão do plano" }).click();
   await page
     .getByRole("dialog")
@@ -119,6 +119,51 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
   const manual = page.locator(".manual-meal-recorder");
   await manual.locator(":scope > summary").click();
   let food = manual.locator(".meal-food-editor").first();
+  const searches: string[] = [];
+  await page.route("**/api/alimentos/online", async (route) => {
+    searches.push(route.request().postDataJSON().query);
+    await route.fulfill({ json: { hits: [] } });
+  });
+  await food
+    .getByLabel("Alimento", { exact: true })
+    .fill("Produto fictício sem referência");
+  await food.getByLabel("Quantidade consumida", { exact: true }).fill("2");
+
+  await expect(
+    food.getByRole("button", { name: "Tentar buscar novamente" }),
+  ).toBeVisible();
+  await food
+    .getByLabel("Alimento", { exact: true })
+    .fill("Outra descrição fictícia");
+  await expect(
+    food.getByRole("button", { name: "Buscar composição online" }),
+  ).toBeVisible();
+  expect(searches).toHaveLength(1);
+  await food.getByRole("button", { name: "Buscar composição online" }).click();
+  await expect(
+    food.getByRole("button", { name: "Tentar buscar novamente" }),
+  ).toBeVisible({ timeout: 15000 });
+  expect(searches).toEqual([
+    "Produto fictício sem referência",
+    "Outra descrição fictícia",
+  ]);
+  await food.locator('select[name$="unit"]').selectOption("unit");
+  await food.getByRole("button", { name: "Buscar composição online" }).click();
+  await expect(food.getByRole("status")).toContainText("gramas ou mililitros");
+  await food.locator('select[name$="unit"]').selectOption("g");
+  await expect(
+    food.getByRole("button", { name: "Buscar composição online" }),
+  ).toBeVisible();
+  await food.getByLabel("Alimento", { exact: true }).fill("Ovo");
+  await expect(
+    food.locator(".food-name-suggestions button").first(),
+  ).toBeVisible();
+  await food.locator(".food-name-suggestions button").first().click();
+  await expect(food.locator(".food-name-suggestions")).toHaveCount(0);
+  await expect(
+    food.getByLabel("Quantidade consumida", { exact: true }),
+  ).toHaveValue("2");
+  await expect(food.locator('input[name$="kcal"]')).not.toHaveValue("");
   await food.getByLabel("Alimento", { exact: true }).fill("Arroz branco");
   await food.getByLabel("Quantidade consumida", { exact: true }).fill("100");
   await manual
@@ -131,12 +176,54 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
   await manual
     .getByRole("combobox", { name: "Refeição", exact: true })
     .selectOption("dinner");
+  await page.route("**/painel/alimentacao", async (route) => {
+    if (route.request().method() === "POST")
+      await route.fulfill({ status: 503, body: "Indisponível" });
+    else await route.continue();
+  });
+  await manual
+    .getByRole("button", { name: "Salvar registro", exact: true })
+    .click();
+  const errorDialog = page.getByRole("dialog", {
+    name: "Não foi possível registrar",
+    exact: true,
+  });
+  await expect(errorDialog).toBeVisible();
+  await errorDialog
+    .getByRole("button", { name: "Voltar ao formulário", exact: true })
+    .click();
+  await expect(manual.locator(".meal-food-editor")).toHaveCount(2);
+  await expect(
+    manual.getByLabel("Alimento", { exact: true }).first(),
+  ).toHaveValue("Arroz branco");
+  await expect(manual.locator(".meal-total")).toContainText("278 kcal");
+  await page.unroute("**/painel/alimentacao");
   await manual
     .getByRole("button", { name: "Salvar registro", exact: true })
     .click();
   await expect(page.getByRole("article", { includeHidden: true })).toHaveCount(
     5,
   );
+  const savedDialog = page.getByRole("dialog", {
+    name: "Registro salvo",
+    exact: true,
+  });
+  await expect(savedDialog).toBeVisible();
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await savedDialog
+    .getByRole("button", { name: "Continuar", exact: true })
+    .click();
+  await expect(manual.locator(".meal-food-editor")).toHaveCount(1);
+  await expect(manual.getByLabel("Alimento", { exact: true })).toHaveValue("");
+  await expect(
+    manual.getByLabel("Quantidade consumida", { exact: true }),
+  ).toHaveValue("");
+  await expect(manual.locator(".meal-total")).toContainText(
+    "calorias pendentes",
+  );
+  await manual.locator(":scope > summary").click();
+  await manual.locator(":scope > summary").click();
+  await expect(manual.getByLabel("Alimento", { exact: true })).toHaveValue("");
   const exported = await (await page.request.get("/api/exportar")).json();
   expect(
     exported.meal_items.filter((r: { plan_id: string | null }) => r.plan_id),
@@ -154,6 +241,17 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
   await expect(
     page.locator(".meal-record-group > summary").first(),
   ).toContainText("247,3 kcal");
+  const firstGroup = await page
+    .locator(".meal-record-group")
+    .nth(0)
+    .boundingBox();
+  const secondGroup = await page
+    .locator(".meal-record-group")
+    .nth(1)
+    .boundingBox();
+  expect(
+    secondGroup!.y - (firstGroup!.y + firstGroup!.height),
+  ).toBeGreaterThanOrEqual(11);
   await page.locator(".meal-record-group > summary").first().click();
   const record = page.getByRole("article", { includeHidden: true }).first();
   await expect(record.locator(".food-record-details")).not.toHaveAttribute(
@@ -191,7 +289,7 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
     comparison
       .locator("div")
       .filter({
-        has: page.locator("dt", { hasText: "Refeições do plano registradas" }),
+        has: page.locator("dt", { hasText: "Refeições vinculadas ao plano" }),
       })
       .locator("dd"),
   ).toHaveText("2");
@@ -211,4 +309,43 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
   await expect(
     page.getByText("Parcial: o diário", { exact: false }),
   ).toBeVisible();
+  const dinner = page
+    .locator(".meal-record-group")
+    .filter({ has: page.locator("summary strong", { hasText: "Jantar" }) });
+  await dinner.locator(":scope > summary").click();
+  await dinner
+    .getByRole("button", { name: "Excluir refeição inteira", exact: true })
+    .click();
+  const dialog = page.getByRole("dialog", {
+    name: "Excluir refeição inteira?",
+    exact: true,
+  });
+  await expect(dialog).toContainText("Jantar");
+  await expect(
+    dialog.getByRole("button", { name: "Cancelar", exact: true }),
+  ).toBeFocused();
+  await dialog.getByRole("button", { name: "Cancelar", exact: true }).click();
+  await expect(page.getByRole("article", { includeHidden: true })).toHaveCount(
+    4,
+  );
+  await dinner
+    .getByRole("button", { name: "Excluir refeição inteira", exact: true })
+    .click();
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await dialog.getByRole("checkbox").check();
+  await dialog
+    .getByRole("button", { name: "Excluir todos os alimentos", exact: true })
+    .click();
+  await expect(page.getByRole("status")).toContainText("Refeição excluída");
+  await expect(page.getByRole("article", { includeHidden: true })).toHaveCount(
+    2,
+  );
+  await expect(page.locator(".meal-record-group")).toHaveCount(2);
+  const afterDelete = await (await page.request.get("/api/exportar")).json();
+  expect(
+    afterDelete.meal_items.some(
+      (r: { category: string }) => r.category === "dinner",
+    ),
+  ).toBe(false);
+  expect(afterDelete.diet_plans).toHaveLength(1);
 });

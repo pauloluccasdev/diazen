@@ -175,7 +175,7 @@ test("alimento tem resumo, troca explícita e referência online automática e e
   });
   await summary.click();
   await expect(row.getByText("≈ 45 kcal", { exact: true })).toBeVisible();
-  await page.getByLabel("Revisei a extração", { exact: false }).check();
+  await page.getByLabel("Revisei os alimentos", { exact: false }).check();
   await page
     .getByRole("button", { name: "Salvar versão do plano", exact: true })
     .click();
@@ -252,9 +252,15 @@ test("alimento tem resumo, troca explícita e referência online automática e e
     await expect(
       page.getByRole("article", { includeHidden: true }),
     ).toHaveCount(index + 1);
-    await expect(
-      form.getByRole("button", { name: "Salvar registro", exact: true }),
-    ).toBeDisabled();
+    const savedDialog = page.getByRole("dialog", {
+      name: "Registro salvo",
+      exact: true,
+    });
+    await expect(savedDialog).toBeVisible();
+    await savedDialog
+      .getByRole("button", { name: "Continuar", exact: true })
+      .click();
+    await expect(form.getByLabel("Alimento", { exact: true })).toHaveValue("");
   }
   await page.goto("/painel");
   await expect(

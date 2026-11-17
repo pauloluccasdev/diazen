@@ -187,7 +187,36 @@ async function save(button, values, expected) {
   for (const [name, value] of Object.entries(values))
     await field(name, value, selector);
   await clickText(button, "button", form(button));
-  if (expected) await text(expected);
+  if (
+    selector &&
+    button === "Salvar registro" &&
+    (await evaluate(
+      `Boolean(document.querySelector(${JSON.stringify(selector)})?.closest('.manual-meal-recorder'))`,
+    ))
+  ) {
+    await until(
+      "document.querySelector('.record-feedback-dialog[open]') !== null",
+    );
+    assert.equal(
+      await evaluate(
+        "document.querySelector('.record-feedback-dialog h2').textContent",
+      ),
+      "Registro salvo",
+    );
+    await clickText(
+      "Continuar",
+      "button",
+      "document.querySelector('.record-feedback-dialog')",
+    );
+    await until("document.querySelector('.record-feedback-dialog') === null");
+    assert.equal(
+      await evaluate(
+        `document.querySelector(${JSON.stringify(selector)}).querySelector('[name=name]').value`,
+      ),
+      "",
+    );
+  }
+  if (expected && expected !== "Refeição registrada.") await text(expected);
 }
 async function check(name, action, controlledServerFailure = false) {
   current = name;
@@ -838,13 +867,14 @@ try {
       await count(3);
       await clickText("Alimentos recentes", "summary");
       const recentLabel = await evaluate(
-        "[...document.querySelectorAll('summary')].find(e=>e.textContent.trim().startsWith('Receita QA · 1 porção')).textContent.trim()",
+        "[...document.querySelectorAll('.recent-food-item > summary')].find(e=>e.querySelector('strong')?.textContent.trim()==='Receita QA').textContent.trim()",
       );
       await clickText(recentLabel, "summary");
       await clickText("Reutilizar alimento");
       await count(4);
       await clickText("Copiar refeição", "summary");
       const cp = await markForm("Confirmar cópia da refeição");
+      await field("source_category", "breakfast", cp, "select");
       await field("target_category", "lunch", cp, "select");
       await clickText("Confirmar cópia da refeição");
       await count(4);
@@ -1011,6 +1041,24 @@ try {
       await ab("set", "offline", "off");
       await goto("/painel");
       await until("sessionStorage.getItem('diazen-dashboard') !== null");
+      assert.equal(
+        await evaluate(
+          "document.querySelector('.activity-day-totals').innerText.includes('NaN')",
+        ),
+        false,
+      );
+      assert.equal(
+        await evaluate(
+          "document.querySelector('.activity-day-totals').innerText.includes('Subtotal parcial')",
+        ),
+        true,
+      );
+      assert.equal(
+        await evaluate(
+          "document.querySelector('.activity-day-totals').innerText.includes('16 km')",
+        ),
+        true,
+      );
       await audit("dashboard");
       report.webVitals = await ab("vitals");
       if (!hosted) await until("navigator.serviceWorker.controller !== null");

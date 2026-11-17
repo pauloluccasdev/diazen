@@ -16,6 +16,33 @@ export default function Privacy() {
         opcionais podem permanecer em branco. O aplicativo não precisa de
         localização nem de acesso à agenda.
       </p>
+      <h2>Check-in e contexto alimentar opcionais</h2>
+      <p>
+        Se você escolher preencher, armazenamos horas de sono informadas,
+        percepções de qualidade do sono, fadiga, dores e disposição, reflexões e
+        contextos alimentares, incluindo fome, saciedade e perda de controle
+        percebida. São informações sensíveis, privadas e opcionais, usadas
+        apenas para sua consulta. Não geram diagnóstico, recomendações de
+        compensação, restrição ou pontuação global. Não são enviadas às fontes
+        nutricionais ou à Garmin.
+      </p>
+      <p>
+        Fases organizam períodos e objetivos. Preferências podem ocultar peso,
+        calorias e acesso às fotos no dashboard sem excluir seus dados.
+        Check-ins e contextos não entram no resumo offline. Todos participam da
+        exportação e exclusão; backups seguem a política de retenção
+        operacional.
+      </p>
+      <h2>Planos e imagens de referência</h2>
+      <p>
+        Você pode cadastrar seus planos de alimentação, hidratação e musculação
+        e anexar imagens privadas como referência. As imagens são otimizadas,
+        sem metadados sensíveis, e não aparecem na galeria corporal. Não há
+        leitura automática nem envio a serviços de IA. Versões e vínculos de
+        execução participam da exportação e exclusão. Imagens não são incluídas
+        no arquivo JSON da exportação; podem ser abertas pela própria conta. Não
+        armazenamos esses planos ou anexos no resumo offline.
+      </p>
       <h2>Armazenamento e acesso</h2>
       <p>
         Supabase processa autenticação, banco e arquivos. A hospedagem da
@@ -47,8 +74,7 @@ export default function Privacy() {
         proprietário configurado no servidor. A chave pessoal e os tokens não
         são enviados ao navegador. Consultamos atividades sincronizadas com o
         Garmin Connect, com título, tipo, data, duração, distância e calorias
-        disponíveis, sem solicitar mapas, fotografias ou outras métricas de
-        saúde.
+        disponíveis, sem solicitar mapas ou fotografias.
       </p>
       <p>
         Você pode escolher atividades anteriores para importar. Com a importação
@@ -75,6 +101,26 @@ export default function Privacy() {
         configuração privada do servidor. Você pode revogar o acesso excluindo
         sua chave pessoal no Garmin Connect. A exclusão da conta Diazen bloqueia
         novas sincronizações.
+      </p>
+      <h2>Sincronização opcional de sono</h2>
+      <p>
+        Você pode ativar ou pausar o sono separadamente da importação de
+        atividades. Ao ativar, consultamos hoje e os dois dias anteriores no
+        Garmin Connect, dentro da vigência do projeto ativo, e verificamos novas
+        informações em cerca de quinze minutos durante todo o dia. O relógio
+        precisa sincronizar com o Garmin Connect para que os dados estejam
+        disponíveis.
+      </p>
+      <p>
+        Salvamos somente a data, duração do sono e cochilos, duração dos
+        estágios e tempo acordado, pontuação, horários informados e data de
+        atualização. Não armazenamos a resposta completa do provedor,
+        identificadores de perfil ou dados adicionais de saúde. Valores ausentes
+        permanecem sem informação. Os registros são privados, podem ser
+        atualizados quando a Garmin os revisa e fazem parte do histórico,
+        exportação e backups. Pausar preserva o histórico; excluir o projeto ou
+        a conta remove os dados correspondentes conforme o procedimento de
+        exclusão. Não mantemos registros de sono para leitura offline.
       </p>
       <h2>Dispositivo e conexão</h2>
       <p>
@@ -104,7 +150,7 @@ export default function Privacy() {
         consultada com o responsável pela instalação.
       </p>
       <p className="muted">
-        Versão informativa atualizada em 25/10/2026. A revisão jurídica e
+        Versão informativa atualizada em 11/11/2026. A revisão jurídica e
         operacional da instalação real é uma etapa anterior à publicação para
         terceiros.
       </p>

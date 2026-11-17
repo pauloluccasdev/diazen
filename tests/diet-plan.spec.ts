@@ -146,14 +146,18 @@ for (const mode of ["native", "compatibility", "server"] as const) {
       ),
     ).toBe(true);
     expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
-    await page.getByLabel("Revisei a extração", { exact: false }).check();
+    await page.getByLabel("Revisei os alimentos", { exact: false }).check();
     await page.getByRole("button", { name: "Salvar versão do plano" }).click();
     await expect(page.getByRole("status")).toContainText("Plano salvo");
     await page.reload();
     await expect(
       page.getByRole("heading", { name: "Refeição 1 · opção 1", exact: true }),
     ).toBeVisible();
-    const exported = await (await page.request.get("/api/exportar")).json();
+    const exportResponse = await page.request.get("/api/exportar", {
+      maxRetries: 1,
+    });
+    expect(exportResponse.status()).toBe(200);
+    const exported = await exportResponse.json();
     expect(exported.diet_plans).toHaveLength(1);
     expect(
       exported.diet_plans[0].document.meals[0].groups[0].choices[0].tacoId,
