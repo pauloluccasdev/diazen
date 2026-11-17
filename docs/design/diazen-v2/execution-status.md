@@ -18,7 +18,7 @@ Em 17/11/2026, o proprietário aprovou recipientes de água salvos e perfil com 
 | ---- | ------------------------------- | --------------------- |
 | 0    | Discovery técnico e visual      | Concluída — `997afe0` |
 | 1    | Dashboard desktop, claro/escuro | Concluída — `2c94fc7` |
-| 2    | Dashboard mobile e tablet       | Pendente              |
+| 2    | Dashboard mobile e tablet       | Em execução           |
 | 3    | Alimentação                     | Pendente              |
 | 4    | Hidratação                      | Pendente              |
 | 5    | Treinos                         | Pendente              |
@@ -41,3 +41,14 @@ Em 17/11/2026, o proprietário aprovou recipientes de água salvos e perfil com 
 - [x] CI completa aprovada no commit `2c94fc7` ([execução 44111144869](https://github.com/pauloluccasdev/diazen/actions/runs/44111144869)); integração na develop nesta entrega.
 
 Uma fase só muda para concluída com evidência de implementação e verificação. Séries realizadas/tonelagem e demais extensões condicionais da matriz não são contabilizadas como entregues pelo simples redesign de suas regiões.
+
+## Fase 2 — verificação em andamento
+
+- [x] Referência R02 e composição mobile/tablet revisadas.
+- [x] Hero/seletor único, calendário, cartões e quatro atalhos funcionais.
+- [x] Dados reais, valores ausentes/parciais e diferença neutra de peso.
+- [x] Acessibilidade e overflow em 320/390/430/768/1024 e regressão desktop.
+- [x] Build, TypeScript, ESLint e formatação locais.
+- [x] Três cenários Chromium e três WebKit direcionados aprovados.
+- [x] Capturas e relatório [phase-2-mobile-report.md](phase-2-mobile-report.md).
+- [ ] CI completa e integração na develop.

@@ -3,12 +3,16 @@ import type { Project } from "@/lib/domain";
 export function ProjectTimeline({
   project,
   date,
+  compact = false,
 }: {
   project: Project;
   date: string;
+  compact?: boolean;
 }) {
   if (!project.ends_on)
-    return (
+    return compact ? (
+      <span className="project-mobile-progress">Sem data final definida</span>
+    ) : (
       <p className="v2-project-duration">
         <CalendarDays size={16} aria-hidden="true" />
         Projeto sem data final definida
@@ -24,6 +28,17 @@ export function ProjectTimeline({
       Math.max(0, Math.round((cursor - start) / day) + 1),
     ),
     percentage = Math.round((elapsed / total) * 100);
+  if (compact)
+    return (
+      <span className="project-mobile-progress">
+        <progress
+          max={total}
+          value={elapsed}
+          aria-label="Tempo decorrido do projeto"
+        />
+        <strong>{percentage}%</strong>
+      </span>
+    );
   return (
     <div className="v2-project-timeline">
       <div>

@@ -1,0 +1,423 @@
+/* R02: composição exclusiva de mobile/tablet; desktop preserva R01. */
+.project-mobile-progress progress::-webkit-progress-bar {
+  background: var(--color-border);
+}
+.project-mobile-progress progress::-webkit-progress-value {
+  background: var(--v2-primary);
+  border-radius: 999px;
+}
+.project-mobile-progress progress::-moz-progress-bar {
+  background: var(--v2-primary);
+  border-radius: 999px;
+}
+.v2-card-macros progress::-webkit-progress-bar {
+  background: var(--color-border);
+}
+.v2-card-macros progress::-webkit-progress-value {
+  background: var(--macro-color);
+  border-radius: 999px;
+}
+.v2-card-macros progress::-moz-progress-bar {
+  background: var(--macro-color);
+  border-radius: 999px;
+}
+.mobile-weight-change {
+  display: none;
+}
+.mobile-workout-name {
+  display: none;
+}
+@media (max-width: 1023px) {
+  .v2-more {
+    margin: 0;
+  }
+  .v2-tagline {
+    line-height: 16px;
+  }
+  .v2-dashboard .v2-dashboard-toolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "project project" "title date";
+    gap: 18px 8px;
+    align-items: center;
+  }
+  .v2-dashboard-toolbar > .v2-project-selector {
+    grid-area: project;
+  }
+  .dashboard-day-title {
+    grid-area: title;
+    font-size: 19px;
+    letter-spacing: -0.4px;
+    margin: 0;
+  }
+
+  .v2-dashboard .areas-section {
+    margin: 0;
+  }
+  .v2-dashboard .areas-section > .section-heading {
+    display: none;
+  }
+  .v2-project-selector > summary > svg {
+    display: none;
+  }
+  .v2-project-selector > summary > span {
+    position: relative;
+    z-index: 1;
+    width: 78%;
+  }
+  .v2-project-selector strong {
+    color: #f6f6f6;
+    font-size: 19px;
+    line-height: 1.2;
+  }
+  .v2-project-selector > summary::after {
+    position: relative;
+    z-index: 1;
+    color: #ddd;
+    align-self: flex-start;
+  }
+  .project-mobile-progress progress {
+    appearance: none;
+    border: 0;
+    border-radius: 999px;
+    overflow: hidden;
+    accent-color: var(--v2-primary);
+    background: var(--color-border);
+    width: 100%;
+    height: 6px;
+    margin: 0;
+  }
+  .project-mobile-progress strong {
+    font-size: 12px;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .v2-query-form {
+    padding: 14px 18px;
+  }
+  .v2-dashboard-toolbar .dz-date-navigator {
+    grid-area: date;
+    min-width: 0;
+    gap: 2px;
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+  .v2-dashboard-toolbar .dz-date-navigator details {
+    margin: 0;
+  }
+  .v2-dashboard-toolbar .dz-date-navigator > a {
+    width: 36px;
+    min-height: 44px;
+    background: var(--color-surface);
+  }
+  .v2-dashboard-toolbar .dz-date-navigator summary {
+    min-height: 44px;
+    font-size: 11px;
+    padding: 0 3px;
+    background: transparent;
+  }
+  .v2-dashboard-toolbar .dz-date-navigator summary > svg {
+    display: none;
+  }
+  .v2-dashboard .area-grid {
+    grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr);
+    gap: 10px;
+  }
+  .v2-dashboard .metric-card .icon-box {
+    width: 27px;
+    height: 27px;
+    margin: 0 6px 0 0;
+    display: inline-grid;
+    vertical-align: middle;
+    border-radius: 8px;
+  }
+  .v2-dashboard .metric-card .icon-box svg {
+    width: 19px;
+    height: 19px;
+  }
+  .v2-dashboard .metric-alimentacao h2,
+  .v2-dashboard .metric-agua h2 {
+    display: inline;
+    font-size: 12px;
+  }
+  .v2-dashboard .metric-alimentacao h2 > span,
+  .v2-dashboard .metric-agua h2 > span {
+    display: none;
+  }
+  .v2-dashboard .metric-alimentacao .metric-value {
+    font-size: 25px;
+    margin: 13px 0 0;
+    letter-spacing: -0.7px;
+  }
+  .v2-dashboard .metric-agua .metric-value {
+    font-size: 28px;
+    margin: 13px 0 0;
+  }
+  .v2-dashboard .metric-card > .metric-empty {
+    font-size: 15px;
+    letter-spacing: -0.2px;
+  }
+  .v2-dashboard .metric-alimentacao:has(> .progress-ring) .metric-value,
+  .v2-dashboard
+    .metric-alimentacao:has(> .progress-ring)
+    > p:not(.metric-value) {
+    padding-right: 58px;
+  }
+  .v2-dashboard .metric-alimentacao > .progress-ring {
+    position: absolute;
+    width: 62px;
+    height: 62px;
+    right: 9px;
+    top: 43px;
+    margin: 0;
+  }
+  .v2-dashboard .metric-alimentacao > .progress-ring strong {
+    font-size: 14px;
+  }
+  .v2-dashboard .metric-alimentacao > .metric-comparison,
+  .v2-dashboard .metric-agua > .progress-ring {
+    display: none;
+  }
+  .v2-dashboard .v2-card-macros {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .v2-dashboard .v2-card-macros > div {
+    display: block;
+    border: 0;
+    padding: 0;
+    --macro-color: #f16769;
+  }
+  .v2-dashboard .v2-card-macros dt,
+  .v2-dashboard .v2-card-macros dd {
+    display: inline;
+    font-size: 10px;
+    margin: 0;
+  }
+  .v2-dashboard .v2-card-macros dt {
+    margin-right: 4px;
+  }
+  .v2-card-macros progress {
+    appearance: none;
+    border: 0;
+    border-radius: 999px;
+    overflow: hidden;
+    background: var(--color-border);
+    display: block;
+    width: 100%;
+    height: 4px;
+    margin: 2px 0 0;
+    accent-color: #f16769;
+  }
+  .v2-card-macros > div:nth-child(2) {
+    --macro-color: #08b8e4;
+  }
+  .v2-card-macros > div:nth-child(3) {
+    --macro-color: #a25cef;
+  }
+  .v2-dashboard .metric-atividades,
+  .v2-dashboard .metric-peso {
+    min-height: 84px;
+    padding: 14px 35px 14px 64px;
+    border-radius: 18px;
+  }
+  .v2-dashboard .metric-atividades > .icon-box,
+  .v2-dashboard .metric-peso > .icon-box {
+    position: absolute;
+    top: 18px;
+    left: 14px;
+    width: 36px;
+    height: 36px;
+  }
+  .v2-dashboard .metric-atividades h2,
+  .v2-dashboard .metric-peso h2 {
+    font-size: 12px;
+    font-weight: 400;
+  }
+  .v2-dashboard .metric-atividades .metric-value,
+  .v2-dashboard .metric-peso .metric-value {
+    font-size: 24px;
+    margin-top: 5px;
+  }
+  .v2-dashboard .metric-atividades .activity-day-totals,
+  .v2-dashboard .metric-atividades .metric-comparison,
+  .v2-dashboard .metric-peso > .weight-chart,
+  .v2-dashboard .metric-peso > .metric-comparison {
+    display: none;
+  }
+  .v2-dashboard .metric-atividades > p:not(.metric-value),
+  .v2-dashboard .metric-peso > p:not(.metric-value) {
+    margin-top: 4px;
+    font-size: 10px;
+  }
+  .v2-dashboard .metric-atividades h2 > span,
+  .v2-dashboard .metric-peso h2 > span {
+    top: 30px;
+  }
+  .v2-quick-actions nav {
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .v2-quick-actions nav > a {
+    min-height: 80px;
+    padding: 8px 6px;
+    gap: 8px;
+    font-size: 11px;
+    border-radius: 16px;
+  }
+  .v2-quick-actions nav > a:first-child {
+    background: #4a3512;
+    border-color: #ffc12e;
+  }
+  .v2-dashboard .metric-peso > .mobile-weight-change {
+    display: grid;
+    position: absolute;
+    right: 35px;
+    top: 22px;
+    gap: 3px;
+    margin: 0;
+    text-align: right;
+  }
+  .mobile-weight-change strong {
+    font-size: 14px;
+    font-weight: 650;
+    color: var(--color-text);
+  }
+  .mobile-weight-change span {
+    font-size: 9px;
+  }
+  .v2-dashboard .metric-peso:has(.mobile-weight-change) .metric-value {
+    padding-right: 90px;
+  }
+  .v2-project-selector {
+    background: #1c1d20;
+    border-color: #3c3d40;
+    border-radius: 18px;
+    overflow: hidden;
+  }
+  .v2-project-selector > summary::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      #1c1d20 0%,
+      #1c1d20ed 38%,
+      #1c1d2010 88%
+    );
+    border-radius: 18px;
+  }
+  .v2-dashboard
+    .metric-atividades
+    .activity-day-totals:not(:has(.activity-total-known)),
+  .activity-day-totals .activity-total-unknown,
+  .v2-dashboard .activity-day-totals dt {
+    display: none;
+  }
+  .v2-dashboard .activity-day-totals dd {
+    font-size: 10px;
+  }
+  .v2-dashboard
+    .metric-peso
+    > p:not(.metric-value):not(.mobile-weight-change):not(.metric-comparison) {
+    display: none;
+  }
+  .v2-dashboard .metric-atividades .activity-day-totals {
+    display: flex;
+    gap: 4px 10px;
+    margin: 5px 0 0;
+  }
+  .v2-header {
+    padding: 16px 0 10px;
+    gap: 0 12px;
+  }
+  .v2-project-selector > summary {
+    width: 100%;
+    position: relative;
+    min-height: 112px;
+    padding: 16px 18px;
+    overflow: hidden;
+    border-radius: inherit;
+    background: url("/images/athlete-project-v2.webp") right -10px
+      bottom -60px / auto 230px no-repeat;
+    padding-block: 12px;
+  }
+  .v2-project-selector small {
+    font-size: 12px;
+    color: #e0e0e3;
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+  .project-mobile-dates {
+    display: block;
+    font-size: 11px;
+    color: #c5c6ca;
+    margin-top: 7px;
+    line-height: 1.3;
+  }
+  .project-mobile-progress {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 10px;
+    width: 90%;
+  }
+  .v2-dashboard .metric-alimentacao,
+  .v2-dashboard .metric-agua {
+    min-height: 137px;
+    padding: 12px;
+    border-radius: 18px;
+  }
+  .v2-dashboard .metric-atividades {
+    background:
+      url("/images/strength-editorial-v2.webp") right -35px center / 170px auto
+        no-repeat,
+      #1c1d20;
+    padding-right: 110px;
+    padding-block: 12px;
+  }
+  .v2-dashboard .metric-atividades .metric-value {
+    font-size: 21px;
+    margin: 3px 0 0;
+  }
+  .v2-dashboard .metric-atividades > p:not(.metric-value),
+  .desktop-workout-duration {
+    display: none;
+  }
+  .mobile-workout-name {
+    display: inline;
+  }
+  .v2-dashboard .metric-peso {
+    min-height: 76px;
+    padding-block: 12px;
+  }
+}
+@media (min-width: 1024px) {
+  .dashboard-day-title,
+  .project-mobile-dates,
+  .project-mobile-progress {
+    display: none;
+  }
+}
+@media (min-width: 1024px) {
+  .v2-dashboard .v2-card-macros dt {
+    margin-right: 4px;
+  }
+  .v2-card-macros progress {
+    display: none;
+  }
+}
+@media (max-width: 359px) {
+  .v2-dashboard .metric-peso > .mobile-weight-change {
+    position: static;
+    text-align: left;
+    margin-top: 8px;
+  }
+  .v2-dashboard .metric-peso:has(.mobile-weight-change) .metric-value {
+    padding-right: 0;
+  }
+}

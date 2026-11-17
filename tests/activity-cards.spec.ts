@@ -140,8 +140,13 @@ test("semana de atividades e cards expansíveis preservam métricas e edição",
   await expect(weightCard).toContainText("94 → 92 kg");
   await expect(weightCard).toContainText("-2 kg no período");
   await expect(
-    weightCard.getByRole("img", { name: /Peso nas últimas 2 medições/ }),
+    page
+      .locator(".dz-weight-panel")
+      .getByRole("img", { name: /Evolução do peso: 2 medições/ }),
   ).toBeVisible();
+  await expect(weightCard.locator(".mobile-weight-change strong")).toHaveText(
+    "-2 kg",
+  );
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,

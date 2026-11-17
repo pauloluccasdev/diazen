@@ -243,10 +243,12 @@ export function ManualMealRecorder({
   date,
   min,
   max,
+  initiallyOpen = false,
 }: {
   date: string;
   min: string;
   max: string;
+  initiallyOpen?: boolean;
 }) {
   const form = useRef<HTMLFormElement>(null),
     request = useRef("");
@@ -277,7 +279,11 @@ export function ManualMealRecorder({
     setMessage("");
   }
   return (
-    <details className="content-card record-create manual-meal-recorder">
+    <details
+      id="novo-registro"
+      open={initiallyOpen}
+      className="content-card record-create manual-meal-recorder"
+    >
       <summary>Registrar refeição</summary>
       <p className="intro">
         Informe os alimentos e as porções que você consumiu. A composição

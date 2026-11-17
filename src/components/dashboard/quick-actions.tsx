@@ -27,7 +27,7 @@ export function QuickActions({
         ].map(({ path, label, icon: Icon }) => (
           <Link
             key={path}
-            href={`/painel/${path}?projeto=${project}&data=${date}`}
+            href={`/painel/${path}?projeto=${project}&data=${date}${editable ? "&registrar=1#novo-registro" : ""}`}
           >
             <Icon size={26} aria-hidden="true" />
             <span>{label}</span>

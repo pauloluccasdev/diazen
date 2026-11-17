@@ -309,48 +309,7 @@ body:has(.panel-shell) {
   font-size: 12px;
   flex: 1 1 130px;
 }
-.v2-dashboard .dashboard-hero {
-  min-height: 174px;
-  grid-template-columns: 1fr;
-  margin: 0;
-  border-radius: 24px;
-  background:
-    linear-gradient(90deg, #1c1d20 0%, #1c1d20ed 42%, #1c1d2030 100%),
-    url("/images/athlete-editorial.webp") 85% 40% / cover;
-  box-shadow: none;
-}
-.v2-dashboard .dashboard-hero .project-content {
-  width: 100%;
-  padding: 22px;
-}
-.v2-dashboard .dashboard-hero h2 {
-  margin: 10px 0 6px;
-  font-size: 22px;
-  max-width: 80%;
-  overflow-wrap: anywhere;
-  color: #f6f6f6;
-}
-.v2-dashboard .dashboard-hero .status,
-.v2-dashboard .dashboard-hero p {
-  color: #d0d1d5;
-  font-size: 11px;
-  max-width: 100%;
-}
-.v2-dashboard .dashboard-hero .dashboard-manage {
-  background: transparent;
-  border: 0;
-  padding: 0;
-  min-height: 44px;
-  margin-top: 6px;
-  font-size: 11px;
-  color: #f6f6f6;
-  justify-content: start;
-  width: auto;
-  box-shadow: none;
-}
-.v2-dashboard .dashboard-manage > svg:first-child {
-  display: none;
-}
+
 .v2-project-timeline {
   margin-top: 16px;
 }
@@ -931,9 +890,7 @@ body:has(.panel-shell) {
     flex: 1 1 100px;
     min-height: 58px;
   }
-  .v2-dashboard .dashboard-hero {
-    display: none;
-  }
+
   .v2-dashboard .readonly-note {
     grid-column: 1 / -1;
   }
@@ -1221,33 +1178,7 @@ body:has(.panel-shell) {
 .v2-project-selector {
   margin-top: 0;
 }
-.v2-dashboard .dashboard-hero {
-  min-height: 0;
-}
-.v2-dashboard .dashboard-hero .project-content {
-  padding: 18px;
-}
-.v2-dashboard .dashboard-hero h2 {
-  font-weight: 700;
-}
-.v2-dashboard .dashboard-hero .v2-project-timeline {
-  position: relative;
-  margin-top: 16px;
-  padding-right: 38px;
-}
-.v2-dashboard .dashboard-hero .v2-project-timeline > div {
-  position: absolute;
-  right: 0;
-  top: -7px;
-}
-.v2-dashboard .dashboard-hero .v2-project-timeline > div > span,
-.v2-dashboard .dashboard-hero .v2-project-timeline p {
-  display: none;
-}
-.v2-dashboard .dashboard-hero .v2-project-timeline progress {
-  height: 6px;
-  margin-bottom: 0;
-}
+
 .v2-water-wave {
   display: block;
   position: absolute;

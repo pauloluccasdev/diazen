@@ -107,6 +107,7 @@ export default async function Records({
     data?: string;
     pagina?: string;
     refeicao_excluida?: string;
+    registrar?: string;
   }>;
 }) {
   const { modulo } = await params;
@@ -332,6 +333,7 @@ export default async function Records({
       )}
       {editable && modulo === "alimentacao" && (
         <ManualMealRecorder
+          initiallyOpen={filters.registrar === "1"}
           date={date}
           min={selected.starts_on}
           max={
@@ -342,7 +344,11 @@ export default async function Records({
         />
       )}
       {editable && modulo !== "alimentacao" && (
-        <details className="content-card record-create">
+        <details
+          id="novo-registro"
+          open={filters.registrar === "1"}
+          className="content-card record-create"
+        >
           <summary>
             {modulo === "peso"
               ? "Registrar ou atualizar peso"

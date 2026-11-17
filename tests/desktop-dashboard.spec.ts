@@ -137,7 +137,7 @@ test("desktop v2: dados equivalentes, temas persistidos, busca e períodos sem a
   await page.getByRole("button", { name: "Entrar", exact: true }).click();
   await expect(page).toHaveURL(/\/painel$/);
   await expect(page.locator(".metric-alimentacao")).toContainText("2.180 kcal");
-  await expect(page.locator(".metric-agua")).toContainText("2.600 ml");
+  await expect(page.locator(".metric-agua")).toContainText("2,6 L");
   await expect(page.locator(".dz-macro-distribution")).toContainText("166 g");
   await expect(page.locator(".dz-week-panel")).toContainText(
     "Comparativo semanal",
@@ -234,6 +234,90 @@ test("desktop v2: dados equivalentes, temas persistidos, busca e períodos sem a
   await expect(page.locator(".metric-alimentacao")).not.toContainText(
     "2.180 kcal",
   );
+  await page.goto("/painel");
+  await expect(page.locator(".metric-alimentacao")).toContainText("2.180 kcal");
+  await mkdir("artifacts/diazen-v2/mobile-fiel", { recursive: true });
+  for (const width of [320, 390, 430, 768]) {
+    await page.setViewportSize({ width, height: width < 768 ? 844 : 1024 });
+    await expect(page.locator(".dashboard-day-title")).toBeVisible();
+    await expect(page.locator(".project-mobile-progress")).toBeVisible();
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+      `mobile overflow ${width}`,
+    ).toBe(true);
+    expect(
+      (
+        await new AxeBuilder({ page })
+          .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+          .analyze()
+      ).violations,
+      `mobile axe ${width}`,
+    ).toEqual([]);
+    await page.screenshot({
+      path: `artifacts/diazen-v2/mobile-fiel/${width}.png`,
+      fullPage: true,
+      animations: "disabled",
+    });
+    if (width === 390)
+      await writeFile(
+        "artifacts/diazen-v2/mobile-fiel/geometry.json",
+        JSON.stringify(
+          await page
+            .locator(
+              ".v2-project-selector,.v2-project-selector > summary,.v2-project-selector small,.v2-project-selector strong,.v2-header,.metric-atividades,.metric-peso,.v2-quick-actions",
+            )
+            .evaluateAll((nodes) =>
+              nodes.map((e) => {
+                const s = getComputedStyle(e),
+                  r = e.getBoundingClientRect();
+                return {
+                  tag: e.tagName,
+                  text: e.textContent?.slice(0, 60),
+                  box: { x: r.x, y: r.y, w: r.width, h: r.height },
+                  display: s.display,
+                  color: s.color,
+                  padding: s.padding,
+                  overflow: s.overflow,
+                  borderRadius: s.borderRadius,
+                };
+              }),
+            ),
+          null,
+          2,
+        ),
+      );
+    if (width === 390)
+      await page.screenshot({
+        path: "artifacts/diazen-v2/mobile-fiel/viewport-390.png",
+        animations: "disabled",
+      });
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page
+    .getByRole("navigation", { name: "Ações rápidas" })
+    .getByRole("link", { name: "Água", exact: true })
+    .click();
+  await expect(page).toHaveURL(/registrar=1#novo-registro$/);
+  await expect(page.locator("#novo-registro")).toHaveAttribute("open", "");
+  await expect(
+    page.locator("#novo-registro").getByLabel("Volume (ml)", { exact: true }),
+  ).toBeVisible();
+  await page.goto("/painel");
+  await page
+    .getByRole("navigation", { name: "Ações rápidas" })
+    .getByRole("link", { name: "Registrar refeição", exact: true })
+    .click();
+  await expect(page.locator(".manual-meal-recorder")).toHaveAttribute(
+    "open",
+    "",
+  );
+  await expect(
+    page
+      .locator(".manual-meal-recorder")
+      .getByLabel("Alimento", { exact: true }),
+  ).toBeVisible();
   const after = await (await page.request.get("/api/exportar")).json();
   for (const key of [
     "meal_items",

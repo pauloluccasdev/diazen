@@ -1,9 +1,9 @@
+import "@/components/dashboard/mobile.css";
 import { DateNavigator } from "@/components/dashboard/date-navigator";
 import { DashboardInsights } from "@/components/dashboard/insights";
 import { dashboardDetails, type DashboardDetails } from "@/lib/dashboard-data";
 import { periodStart } from "@/lib/dashboard-metrics";
 import { ProjectSelector } from "@/components/dashboard/project-selector";
-import { ProjectTimeline } from "@/components/dashboard/project-timeline";
 import { QuickActions } from "@/components/dashboard/quick-actions";
 import { currentPhasePlans } from "@/lib/phase-plan-data";
 import type { StrengthPlan } from "@/lib/phase-plans";
@@ -22,7 +22,6 @@ import {
   ChartNoAxesCombined,
   Camera,
   Ruler,
-  FolderOpen,
   ArrowRight,
   History,
 } from "lucide-react";
@@ -31,8 +30,8 @@ import { LogoutButton } from "@/components/logout-button";
 import { OfflineSnapshot } from "@/components/offline-snapshot";
 import { dashboardPlan } from "@/lib/dashboard-plan";
 import { projectContext } from "@/lib/data";
-import { type Entry, type Summary } from "@/lib/records";
-import { statusLabel, formatDate, today, isDate, number } from "@/lib/domain";
+import { activityModality, type Entry, type Summary } from "@/lib/records";
+import { formatDate, today, isDate, number } from "@/lib/domain";
 export const metadata = { title: "Seu painel" };
 export const dynamic = "force-dynamic";
 export default async function Panel({
@@ -174,6 +173,10 @@ export default async function Panel({
   );
   const greeting =
     hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
+  const activityDuration = activities.reduce(
+    (sum, row) => sum + Number(row.duration_min ?? 0),
+    0,
+  );
   const cards = summary
     ? [
         {
@@ -205,11 +208,15 @@ export default async function Panel({
           value:
             summary.water_ml === null
               ? "Sem registros"
-              : `${number(summary.water_ml, 0)} ml`,
+              : summary.water_ml >= 1000
+                ? `${number(summary.water_ml / 1000, 1)} L`
+                : `${number(summary.water_ml, 0)} ml`,
           detail:
             summary.water_goal === null
               ? "Meta não configurada"
-              : `Meta vigente: ${number(summary.water_goal, 0)} ml`,
+              : summary.water_goal >= 1000
+                ? `de ${number(summary.water_goal / 1000, 1)} L`
+                : `Meta vigente: ${number(summary.water_goal, 0)} ml`,
         },
         {
           label: "Treinos",
@@ -217,13 +224,7 @@ export default async function Panel({
           empty: activities.length === 0,
           icon: Dumbbell,
           value: activities.length
-            ? `${number(
-                activities.reduce(
-                  (sum, row) => sum + Number(row.duration_min ?? 0),
-                  0,
-                ),
-                1,
-              )} min`
+            ? `${number(activityDuration, 1)} min`
             : "Sem atividades registradas",
           detail:
             activities.length === 1
@@ -276,6 +277,9 @@ export default async function Panel({
       {selected && summary ? (
         <>
           <div className="v2-dashboard-toolbar">
+            <h1 className="dashboard-day-title" id="daily-title">
+              {date === today() ? "Visão de hoje" : "Visão do dia"}
+            </h1>
             <ProjectSelector
               projects={projects}
               selected={selected}
@@ -284,30 +288,6 @@ export default async function Panel({
             />
             <DateNavigator date={date} project={selected.id} period={period} />
           </div>
-          <section className="project-card dashboard-hero">
-            <div className="project-content">
-              <span className="status">
-                <span
-                  className={`status-dot status-${selected.status.toLowerCase()}`}
-                />
-                {statusLabel[selected.status]}
-              </span>
-              <h2>{selected.name}</h2>
-              <p>
-                Desde {formatDate(selected.starts_on)}
-                {selected.ends_on && ` até ${formatDate(selected.ends_on)}`}
-              </p>
-              <ProjectTimeline project={selected} date={date} />
-              <Link
-                className="button-secondary dashboard-manage"
-                href="/painel/projetos"
-              >
-                <FolderOpen size={20} aria-hidden="true" />
-                <span>Gerenciar projetos</span>
-                <ArrowRight size={18} aria-hidden="true" />
-              </Link>
-            </div>
-          </section>
           {selected.status !== "ACTIVE" && (
             <p className="readonly-note">
               {selected.status === "DRAFT"
@@ -319,12 +299,6 @@ export default async function Panel({
             </p>
           )}
           <section className="areas-section" aria-labelledby="daily-title">
-            <div className="section-heading">
-              <h1 id="daily-title">
-                {date === today() ? "Visão de hoje" : "Visão do dia"}
-              </h1>
-              <span>{formatDate(date)}</span>
-            </div>
             <div className="area-grid">
               {cards
                 .filter(
@@ -346,18 +320,69 @@ export default async function Panel({
                     <p
                       className={`metric-value${empty ? " metric-empty" : ""}`}
                     >
-                      {value}
+                      {module === "atividades" && activities.length > 0 ? (
+                        <>
+                          <span className="mobile-workout-name">
+                            {activities.length === 1
+                              ? activityModality(activities[0])
+                              : `${activities.length} atividades`}
+                          </span>
+                          <span className="desktop-workout-duration">
+                            {value}
+                          </span>
+                        </>
+                      ) : (
+                        value
+                      )}
                     </p>
                     <p>{detail}</p>
+                    {module === "peso" &&
+                      summary.weight !== null &&
+                      extra?.previousWeight?.kg != null && (
+                        <p
+                          className="mobile-weight-change"
+                          title={`Comparação com ${formatDate(extra.previousWeight.logged_on)}`}
+                        >
+                          <strong>
+                            {Number(summary.weight) -
+                              Number(extra.previousWeight.kg) >
+                            0
+                              ? "+"
+                              : ""}
+                            {number(
+                              Number(summary.weight) -
+                                Number(extra.previousWeight.kg),
+                              2,
+                            )}{" "}
+                            kg
+                          </strong>
+                          <span>vs. última medição</span>
+                        </p>
+                      )}
                     {module === "alimentacao" && preferences.show_calories && (
                       <dl className="v2-card-macros">
                         {(
                           [
-                            ["P", summary.protein, summary.missing_protein],
-                            ["C", summary.carbs, summary.missing_carbs],
-                            ["G", summary.fat, summary.missing_fat],
+                            [
+                              "P",
+                              summary.protein,
+                              summary.missing_protein,
+                              diet?.totals.protein,
+                            ],
+                            [
+                              "C",
+                              summary.carbs,
+                              summary.missing_carbs,
+                              diet?.totals.carbs,
+                            ],
+                            [
+                              "G",
+                              summary.fat,
+                              summary.missing_fat,
+                              diet?.totals.fat,
+                            ],
                           ] as const
-                        ).map(([label, value, missing]) => (
+                        ).map(([label, value, missing, goal]) => (
                           <div key={label}>
                             <dt>{label}</dt>
                             <dd>
@@ -367,6 +392,17 @@ export default async function Panel({
                               {value !== null && missing > 0 && (
                                 <small> parcial</small>
                               )}
+                              {value !== null &&
+                                missing === 0 &&
+                                goal?.value != null &&
+                                goal.value > 0 &&
+                                goal.missing === 0 && (
+                                  <progress
+                                    max={goal.value}
+                                    value={Number(value)}
+                                    aria-label={`${label === "P" ? "Proteínas" : label === "C" ? "Carboidratos" : "Gorduras"} em relação ao plano`}
+                                  />
+                                )}
                             </dd>
                           </div>
                         ))}
@@ -392,6 +428,10 @@ export default async function Panel({
                     )}
                     {module === "atividades" && activities.length > 0 && (
                       <dl className="activity-day-totals">
+                        <div className="activity-total-known">
+                          <dt>Duração</dt>
+                          <dd>{number(activityDuration, 1)} min</dd>
+                        </div>
                         {(
                           [
                             ["Distância", "distance_km", "km"],
@@ -407,7 +447,14 @@ export default async function Panel({
                               (row) => row[field] != null,
                             );
                             return (
-                              <div key={field}>
+                              <div
+                                key={field}
+                                className={
+                                  known.length
+                                    ? "activity-total-known"
+                                    : "activity-total-unknown"
+                                }
+                              >
                                 <dt>{label}</dt>
                                 <dd>
                                   {known.length

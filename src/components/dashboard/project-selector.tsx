@@ -1,7 +1,8 @@
 import Form from "next/form";
 import { CalendarDays, FolderOpen } from "lucide-react";
 import type { Project } from "@/lib/domain";
-import { statusLabel } from "@/lib/domain";
+import { statusLabel, formatDate } from "@/lib/domain";
+import { ProjectTimeline } from "./project-timeline";
 
 export function ProjectSelector({
   projects,
@@ -33,6 +34,11 @@ export function ProjectSelector({
               : "Projeto em consulta"}
           </small>
           <strong>{selected.name}</strong>
+          <span className="project-mobile-dates">
+            {formatDate(selected.starts_on)}
+            {selected.ends_on && ` – ${formatDate(selected.ends_on)}`}
+          </span>
+          <ProjectTimeline project={selected} date={date} compact />
         </span>
       </summary>
       <Form action="/painel" className="v2-query-form">
