@@ -26,7 +26,9 @@ Fluxo verificado: interface → consultas/autenticação no servidor → Postgre
 - Três testes de cálculo: dias bissextos/períodos, zero/nulo/subtotal por data e proporções energéticas, aprovados.
 - Jornadas Chromium direcionadas de alimentação, porção zero, atividades, acompanhamento e dashboard passaram durante a implementação. A revisão completa identificou acessibilidade do rótulo da data e alvo de toque em1024px; corrigidos sem relaxar o axe.
 - Última execução direcionada Chromium: os dois cenários de dashboard passaram (20,6s), incluindo Light/Dark, HTML inicial do tema, busca/Escape, períodos, datas, ausência de exceções e exportação inalterada.
-- Última execução direcionada WebKit: seis cenários aprovados (1,5min), cobrindo desktop/responsividade, alimentação/porção zero, atividades e acompanhamento. CI completa em execução no commit `350f774`: [Qualidade](https://github.com/pauloluccasdev/diazen/actions/runs/44109073955). Não declarar homologação em iPhone físico.
+- Última execução direcionada WebKit: seis cenários aprovados (1,5min), cobrindo desktop/responsividade, alimentação/porção zero, atividades e acompanhamento. CI completa aprovada no commit `2c94fc7`: [Qualidade](https://github.com/pauloluccasdev/diazen/actions/runs/44111144869), incluindo banco, build, lint, TypeScript, Chromium, WebKit e agent-browser. Não declarar homologação em iPhone físico.
+
+O teste agent-browser passou a excluir controles dentro de disclosures fechados ao resolver o alvo: o menu de conta adicionou um segundo botão de logout, cujo retângulo não prova visibilidade. Todos os 26 cenários locais passaram após a correção. A CI agora preserva evidências desse executor em caso de falha.
 
 React: efeitos somente para atalhos e fechamento externo, com cleanup; estado de tema inicial vem do servidor; leituras independentes em paralelo, sem cliente administrativo; dados de saúde não entram em índice global de busca ou cookie. SVG usa strings únicas nos títulos e papéis explícitos nos pontos focáveis, preservando correções de hidratação e compatibilidade WebKit.
 
