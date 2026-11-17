@@ -8,6 +8,13 @@ test("Diazen v2: shell responsivo, dados persistidos, consulta e navegação por
   test.setTimeout(120000);
   const exceptions: string[] = [];
   page.on("pageerror", (error) => exceptions.push(error.message));
+  const navigate = async (name: string, inMore = false) => {
+    const navigation = page.getByRole("navigation", {
+      name: "Navegação do painel",
+    });
+    if (inMore) await navigation.locator(".v2-more > summary").click();
+    await navigation.getByRole("link", { name, exact: true }).click();
+  };
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/entrar");
   await page
@@ -24,7 +31,7 @@ test("Diazen v2: shell responsivo, dados persistidos, consulta e navegação por
     path: `artifacts/diazen-v2/${info.project.name}-empty-390.png`,
     fullPage: true,
   });
-  await page.goto("/painel/projetos");
+  await navigate("Projetos");
   await page
     .getByLabel("Nome do projeto", { exact: true })
     .fill("Projeto Consistência");
@@ -43,7 +50,7 @@ test("Diazen v2: shell responsivo, dados persistidos, consulta e navegação por
     .getByRole("button", { name: "Criar projeto", exact: true })
     .click();
   await expect(page.getByRole("status")).toContainText("Projeto criado");
-  await page.goto("/painel/agua");
+  await navigate("Hidratação", true);
   await page.locator(".record-create > summary").click();
   const water = page.locator("form").filter({
     has: page.getByRole("button", { name: "Salvar registro", exact: true }),
@@ -57,7 +64,8 @@ test("Diazen v2: shell responsivo, dados persistidos, consulta e navegação por
     [shifted(-7), "95"],
     [date, "94"],
   ] as const) {
-    await page.goto("/painel/peso");
+    await navigate("Início");
+    await navigate("Evolução");
     await page.locator(".record-create > summary").click();
     const weight = page.locator("form").filter({
       has: page.getByRole("button", { name: "Salvar peso", exact: true }),
@@ -69,7 +77,7 @@ test("Diazen v2: shell responsivo, dados persistidos, consulta e navegação por
       .click();
     await expect(weight.getByRole("status")).toContainText("Peso salvo");
   }
-  await page.goto("/painel/atividades");
+  await navigate("Treinos", true);
   await page.locator(".record-create > summary").click();
   const activity = page.locator("form").filter({
     has: page.getByRole("button", { name: "Salvar registro", exact: true }),
@@ -84,7 +92,7 @@ test("Diazen v2: shell responsivo, dados persistidos, consulta e navegação por
   await expect(activity.getByRole("status")).toContainText(
     "Registro adicionado",
   );
-  await page.goto("/painel/alimentacao");
+  await navigate("Diário");
   await page.locator(".manual-meal-recorder > summary").click();
   const meal = page.locator(".manual-meal-recorder");
   await meal.getByLabel("Alimento", { exact: true }).fill("Arroz branco");
@@ -97,7 +105,7 @@ test("Diazen v2: shell responsivo, dados persistidos, consulta e navegação por
     .getByRole("dialog")
     .getByRole("button", { name: "Continuar", exact: true })
     .click();
-  await page.goto("/painel");
+  await navigate("Início");
   await expect(page.locator(".metric-alimentacao")).toContainText("128 kcal");
   await expect(page.locator(".metric-agua")).toContainText("500 ml");
   await expect(page.locator(".metric-atividades")).toContainText("50 min");
