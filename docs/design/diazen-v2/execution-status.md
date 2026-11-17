@@ -19,7 +19,7 @@ Em 17/11/2026, o proprietário aprovou recipientes de água salvos e perfil com 
 | 0    | Discovery técnico e visual      | Concluída — `997afe0` |
 | 1    | Dashboard desktop, claro/escuro | Concluída — `2c94fc7` |
 | 2    | Dashboard mobile e tablet       | Em execução           |
-| 3    | Alimentação                     | Pendente              |
+| 3    | Alimentação                     | Em execução           |
 | 4    | Hidratação                      | Pendente              |
 | 5    | Treinos                         | Pendente              |
 | 6    | Evolução corporal               | Pendente              |
@@ -51,4 +51,6 @@ Uma fase só muda para concluída com evidência de implementação e verificaç
 - [x] Build, TypeScript, ESLint e formatação locais.
 - [x] Três cenários Chromium e três WebKit direcionados aprovados.
 - [x] Capturas e relatório [phase-2-mobile-report.md](phase-2-mobile-report.md).
-- [ ] CI completa e integração na develop.
+- [x] CI completa do commit `e7f5ca0` aprovada ([44118454686](https://github.com/pauloluccasdev/diazen/actions/runs/44118454686)).
+- [x] Ajuste adicional de tablet: build, dois cenários Chromium e dois WebKit aprovados; integração na develop nesta entrega.
+- [ ] CI do ajuste final de tablet, antes de contabilizar a fase como concluída.

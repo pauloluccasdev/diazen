@@ -28,6 +28,9 @@
   display: none;
 }
 @media (max-width: 1023px) {
+  .v2-dashboard .metric-peso.area-card:has(.weight-chart) {
+    padding-right: 35px;
+  }
   .v2-more {
     margin: 0;
   }
@@ -394,6 +397,21 @@
   .v2-dashboard .metric-peso {
     min-height: 76px;
     padding-block: 12px;
+  }
+}
+@media (min-width: 768px) and (max-width: 1023px) {
+  .v2-dashboard .area-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  .v2-dashboard .metric-alimentacao {
+    grid-column: span 4;
+  }
+  .v2-dashboard .metric-agua {
+    grid-column: span 2;
+  }
+  .v2-dashboard .metric-atividades,
+  .v2-dashboard .metric-peso {
+    grid-column: span 3;
   }
 }
 @media (min-width: 1024px) {
