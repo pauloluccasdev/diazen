@@ -1,61 +1,152 @@
-# Diazen 2.0 — plano de implementação
+# Diazen 2.0 — plano de reconstrução visual e funcional
 
-## Autorização e limites
+17/11/2026 · Fase 0 · **aguarda aprovação**. Base: `develop@b7d718c`. Este plano substitui a sequência anterior de sprints para trabalhos futuros. A entrega anterior permanece registrada em [sprint-1-report.md](sprint-1-report.md) e no histórico Git; não constitui homologação de alta fidelidade.
 
-Solicitação do proprietário de 16/11/2026: redesign incremental do aplicativo existente, somente Sprint 1 nesta entrega. Mobile Dark Premium e desktop Light Premium; bottom navigation e sidebar agora expressamente aprovadas, substituindo a restrição visual do baseline 0.1. Regras funcionais, backend, banco, API, autenticação, autorização e cálculos permanecem preservados. Não iniciar Sprint 2 sem aprovação.
+## 1. Escopo desta entrega e precedência
 
-A develop estava defasada em relação à main homologada do PR14. Foi integrada a main preservando integralmente sua árvore de arquivos, antes da branch `feat/diazen-v2-sprint-1`. Sem alteração de configuração remota, migração ou serviços.
+Autorizado agora: investigação e documentação. Não modificar produção, dependências, autenticação, API, schema ou serviços; não iniciar Dashboard desktop. Autorização genérica para refatoração futura não dispensa a aprovação entre fases, nem a apresentação prévia de propostas de backend/banco. Não fazer merge na main.
 
-## Auditoria
+As 13 referências foram abertas, inclusive as regiões mobile/desktop dos compostos. Estão acessíveis em `references/`, sem o sufixo `(1)` da lista do pedido; o [manifesto](references/README.md) registra a correspondência. Não há arquivo inacessível conhecido. Caso apareça outra revisão das imagens, comparar hashes/arquivos antes de trocar a referência.
 
-Stack real: Next.js 16.4 / App Router, React 19.3, TypeScript 6, Tailwind 4, CSS existente, Inter local e Lucide. Supabase Auth/PostgreSQL/Storage privado; Vercel; PWA offline apenas leitura. Playwright Chromium/WebKit, axe, PGlite e auditoria agent-browser existentes. Não adicionar biblioteca UI/gráficos.
+Documentos desta fase:
 
-Rotas: `/painel` dashboard; `/painel/alimentacao`, `/painel/alimentos`, `/painel/plano` e `/painel/planos` alimentação e planos; `/painel/agua`; `/painel/atividades`; `/painel/peso`, `/painel/medidas`; `/painel/fotos`; `/painel/projetos`, `/painel/fases`; `/painel/acompanhamento`, `/painel/sono`; `/painel/perfil`; autenticação pública em `/entrar`, `/cadastro`, `/recuperar-senha`, `/nova-senha`.
+1. [Auditoria visual e técnica](visual-audit.md): stack, arquitetura, rotas, modelo existente, 13 composições e divergências verificadas.
+2. [Inventário/matriz funcional](functional-gap-analysis.md): cada elemento, comportamento, evidência, dependência, backend/banco, status e complexidade; fórmulas e propostas de extensão.
+3. [Design System](design-system.md): tokens semânticos, três contextos de tema, geometria, componentes, estados, assets e comparação.
+4. Este plano: backlog, sequência, dependências, riscos e gates de aprovação.
 
-O layout raiz contém marca/main/footer públicos e o layout protegido verifica a conta e monta sincronização Garmin. O dashboard já usa `projectContext`, `project_summary`, plano alimentar vigente, preferências, fases/check-in, atividades paginadas e últimas 30 medições. Componentes reaproveitáveis: ProgressRing, WeightChart, CalorieBalance, DayOverview, SleepCard, LogoutButton, ActionForm e diálogos nativos. Preservar queries, handlers e snapshots.
+Precedência: segurança/integridade e regras de negócio preservadas; referência visual governa composição; este discovery explicita incompatibilidades e propostas. As cópias baseline derivadas dos DOCX não são reescritas. Registrar nova decisão posterior em `docs/decisoes-tecnicas.md`.
 
-Problemas atuais: navegação de três links sem shell desktop; um único tema/layout em todos os tamanhos; indicadores/alimentação duplicados em blocos extensos; baixa prioridade do projeto e ações rápidas; CSS acumulado com cores literais. Solução: camada v2 explícita e tokens semânticos, componentes de shell e apresentação do dashboard. Módulos não têm seus fluxos/layouts redesenhados nesta sprint.
+## 2. Estratégia de arquitetura
 
-## Referências e decisões visuais
+Manter monólito Next/Supabase, App Router e TypeScript. Reusar Supabase SSR, `requireAccount`, `projectContext`, RLS, triggers/RPCs, ações de registros e catálogo. Não criar um segundo backend, gerenciador global de saúde, biblioteca de dashboard ou esquema paralelo.
 
-Imagens originais fornecidas em Downloads foram copiadas para `references/`. Sprint 1 usa **Painel fitness Diazen em modo escuro-1.png** (mobile) e **Dashboard de Progresso Diazen.png** (desktop), abertas e inspecionadas. Demais imagens permanecem como referência das sprints futuras, a inspecionar antes de implementar cada módulo.
+Estrutura proposta, somente após aprovação:
 
-Mobile: marca e assinatura, conta, hero do projeto com fotografia escura, visão do dia, alimentação/água em duas colunas, atividades/peso horizontais, ações rápidas e navegação inferior de cinco destinos. Desktop: sidebar amarela, header discreto, projeto/data, quatro métricas, gráfico amplo de peso, painel alimentar e registros recentes. Tablet adapta a navegação sem sobreposição.
+- `src/styles/diazen-v2/tokens.css`: cores/temas/espaço/tipo/bordas/movimento, com ponte temporária para o baseline. Breakpoints definidos uma vez nessa camada e documentados no DS.
+- `src/components/ui/`: Field, Button, Dialog/Sheet, Menu, SegmentedNavigation, Empty/Loading/Error e gráficos pequenos, aproveitando componentes existentes adequados.
+- `src/components/shell/`: DesktopSidebar/Header, MobileNavigation/ModuleHeader, CommandSearch, DesktopThemeControl e ProjectSwitcher. Evoluir o PanelShell sem reescrever autorização do layout.
+- `src/components/dashboard/`: view desktop, composição mobile e componentes de métrica/peso/macros/feed/comparativo/projeto.
+- `src/components/<modulo>/`: views próprias de alimentação/água/atividades/evolução/fotos/projetos/perfil; não acrescentar mais ramificações visuais à página genérica.
+- `src/lib/<modulo>-view.ts`: DTOs/transformações determinísticas; módulos server-only separados para consultas novas. Sem cliente administrativo nas leituras do usuário. Preservar comandos atuais e seus contratos.
+- `src/app/painel/[modulo]/page.tsx`: resolver contexto, autorizar, obter dados e compor a view especializada. Manter URLs antigas, parâmetros, IDs e links; adicionar filtros novos sem invalidar os antigos.
 
-Tokens iniciais: fundo #101113, superfícies #1C1D20/#26272B, texto #F6F6F6/#A4A6AC e âmbar #FFC12E. Desktop: #F1F2F4/#FFF, texto #151923/#657084, ciano #08B8E4. Usar tom mais escuro do âmbar/ciano em textos no fundo claro para contraste AA. Espaços 4/8/12/16/20/24/32; raio 12/16/20/24; controles >=44 px; Inter existente; sombras leves. Sem novos gradientes/glow, exceto overlay necessário para leitura sobre a fotografia já existente. Não extrair pessoas/fotos dos mockups para a produção.
+Arquivos ilustram responsabilidades, não uma árvore obrigatória a criar inteira na Fase 1. Extrair somente o necessário em cada fase. Remover estilo legado de uma região apenas quando migrada e verificada, sem apagar `globals.css` em bloco. Evitar uma terceira camada de overrides que esconda conflitos de tema.
 
-Diferenças funcionais obrigatórias: sem busca global/notificações de fachada, avatar fictício, hábitos/aderência fictícios, meta diária de sessões inferida da meta semanal ou comparação semanal sem dados disponíveis. Progresso do projeto significa tempo decorrido, com rótulo explícito. Peso sem cor moral para subida/descida; nenhum índice corporal calculado. Metas e comparações apenas quando configuradas/completas. O seletor consulta projeto, nunca altera ACTIVE. Preferências de ocultar indicadores continuam server-side, inclusive resumo offline. Consultar histórico não muda o destino de escrita.
+O mesmo modelo de dados alimenta desktop/mobile. Composições podem divergir sem duplicar consultas, forms, IDs ou dados privados escondidos. Camada visual não decide ACTIVE, unidade, autorização ou snapshot nutricional.
 
-## Estrutura proposta — Sprint 1
+## 3. Backlog priorizado e dependências
 
-- `panel-shell`: navegação responsiva, marca, conta e conteúdos existentes; sidebar desktop, bottom nav mobile e menu Mais acessível com demais destinos.
-- `dashboard/project-selector`: formulário GET de consulta, lista já autorizada, status e vigência; sem ação de ativação.
-- `dashboard/quick-actions`: destinos existentes, texto de consulta em histórico fechado.
-- Apresentação do dashboard: hero, métricas, gráfico de peso, resumo alimentar, registros de atividades e progresso temporal; componentes existentes de acompanhamento e sono preservados.
-- `diazen-v2.css`: tokens e estilos centralizados, importados depois do baseline e limitados ao painel. Módulos recebem somente shell/base sem redesign de seus formulários/listas. Auth público permanece no tema atual até Sprint 9.
+| Prioridade / pacote         | IDs da matriz                       | Valor e trabalho                                                                                                   | Dependência / gate                                                                       |
+| --------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| P0 — evidência visual       | V01–V11                             | Medir proporções, corrigir composições, comparar UI sem molduras, registrar divergências; não aprovar só por axe   | Cada uma das 13 referências + fixtures coerentes                                         |
+| P0 — fundação/desktop       | S01/S03/S06/S07, D01–D11            | Grid e header de R01, busca de páginas, conta, tema desktop claro/escuro e gráficos conectados                     | Aprovação Fase 1 + leituras A + fórmulas D07/D09/D10                                     |
+| P0 — mobile                 | S02/D13 e composição R02            | Integrar seletor ao hero, data compacta, proporções de métricas, ações e bottom nav                                | Aprovação desktop; assets mobile; gate próprio                                           |
+| P1 — alimentação            | F01–F09                             | Resumo/anel/macros, seis categorias completas, registro contextual, edição/exclusão/atalhos                        | Editor e snapshot existentes; agregação completa; sem novo estado de conclusão implícito |
+| P1 — água                   | H01–H05                             | Resumo/garrafa, presets, lista/horas, gráfico semanal e recipientes                                                | Leitura histórica de meta; cadastro de recipientes exige proposta B aprovada             |
+| P1 — treinos                | T01–T05                             | KPIs, distribuição, frequência, meta e manutenção por modalidade                                                   | Leituras semanais; origem/ausência de kcal; sem tonelagem inventada                      |
+| P1 — evolução               | E01–E03                             | Peso/medidas, períodos reais, metas condicionais, comparação                                                       | Eixo temporal e modos target/range/track preservados                                     |
+| P1 — fotos                  | P01–P05                             | Galeria, poses/timeline, viewer/comparação, mudanças registradas                                                   | Storage privado existente; contagens globais; sem composição por foto                    |
+| P1 — projetos               | J01–J04                             | ACTIVE em destaque, cards/menus, filtros, formulários/estados                                                      | Uma única ativação; V03 contraste sobre imagem; assets editoriais                        |
+| P1 — perfil                 | C01–C04                             | Perfil/subnav, metas, preferências, segurança/export/exclusão                                                      | Proposta C e ciclo de avatar; tema desktop já implementado na Fase 1                     |
+| P1 — autenticação           | A01/A02                             | Boas-vindas e fluxos por rota, dark/light e feedback                                                               | Assets; política de senha/callbacks preservada                                           |
+| P2 — extensões condicionais | S04/S05/D12/F06/F09/T06/E04/C02/A03 | Busca privada, notificações, hábitos, confirmações/horários, séries executadas, composição, campos pessoais/sessão | Proposta e aprovação separadas; não são pré-requisitos silenciosos do redesign           |
+| Excluído automaticamente    | A04/C05                             | Google/Apple, assinatura e idiomas extras                                                                          | Só outra autorização específica pode incluí-los                                          |
 
-## Riscos e mitigação
+Fidelidade não permite esconder uma função existente para simplificar a tela. Planos, sono, fases, check-in, contexto alimentar e conveniências continuam acessíveis em região secundária acordada; não duplicar todos esses formulários na área principal de R01.
 
-RLS/ACTIVE: não mover decisões de autorização ao cliente. Ausência vs zero/parcial: manter avisos e não inventar denominadores. Consultas históricas: preservar query params e status legível. Privacidade: não replicar saúde em estado global/cache nem carregar fotos privadas no shell; avatar é ícone. CSS: isolar seletores v2 e verificar contraste dos módulos após tema compartilhado. Navegação fixa: safe-area, espaço inferior e foco/scroll sem conteúdo encoberto. Hidratação React: controles cliente prontos antes de edição e links reais com teclado. Performance: uma fonte e imagem já existentes, sem runtime chart/UI novo. Testes antigos de composição podem precisar acompanhar o novo layout, preservando as assertivas de dados/autorização.
+## 4. Entregas incrementais e complexidade
 
-## Sprints e critérios de aceite
+Escala relativa por entrega, considerando implementação, integração, estados, responsividade e QA: P=2–3 pontos; M=5–8; G=8–13; GG=13–21. Pontos não são dias nem compromisso de prazo; reestimar após a primeira entrega e aprovação de assets/modelos. Entregas GG podem ser subdivididas sem pular o gate final. Não executar todas em uma vez.
 
-| Sprint                | Escopo e aceite específico                                                                                                                                                       | Dependência                                        |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
-| 1 (autorizada)        | Shell/mobile/tablet/desktop, projeto/data e dashboard fiel aos dois protótipos; somente dados existentes; navegação, vazios, erro, preferências, histórico e offline preservados | Auditoria/tokens                                   |
-| 2 (aguarda aprovação) | Alimentação, seis categorias fixas, alimentos/busca/edição/exclusão; snapshots e porções/nulos preservados, sem exigir fotos                                                     | Base v2 e inspeção dos dois protótipos alimentares |
-| 3                     | Hidratação, recipientes, rápido, meta e histórico; soma e vigência temporal preservadas                                                                                          | Base v2 e protótipos de água                       |
-| 4                     | Treinos/modalidades, manual, detalhes e manutenção; sem planejador avançado ou gasto inventado                                                                                   | Base v2 e protótipos de treinos                    |
-| 5                     | Peso/medidas/gráficos e manutenção, metas opcionais; sem composição corporal inferida                                                                                            | Base v2 e referência evolução                      |
-| 6                     | Fotos privadas, posições, galeria, comparação/exclusão; storage e autorização preservados                                                                                        | Base v2 e referência fotos                         |
-| 7                     | Projetos por estado/criar/editar/encerrar; um ACTIVE e histórico somente leitura                                                                                                 | Base v2 e referência projetos                      |
-| 8                     | Conta, preferências, exportação, exclusão e logout; sem planos pagos/notificações avançadas                                                                                      | Base v2 e referência perfil                        |
-| 9                     | Boas-vindas/login/cadastro/recuperação e estados, somente e-mail/senha                                                                                                           | Base v2 e referência auth                          |
+| Fase / incremento            | Entrega                                                                                                    | Complexidade estimada           | Aceite específico / aprovação                                                                                                                              |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0 — atual                    | Quatro documentos, auditoria13 refs, matriz e evidências do baseline                                       | M /5–8                          | Somente docs; apresentar e aguardar                                                                                                                        |
+| 1 — Dashboard desktop        | R01, shell/header/busca/conta, projeto/data, quatro KPIs, peso/macros, três painéis inferiores, light/dark | GG /13–21                       | Capturas1672/1440/1366, dados equivalentes coerentes, leituras/fórmulas aprovadas, mobile existente sem regressão. Solicitar aprovação; não iniciar Fase 2 |
+| 2 — Dashboard mobile/tablet  | R02, hero/selector integrado, data, alimentação/água assimétricas, treino/peso, ações e bottom nav         | G /8–13                         | 320/390/430/768 e landscape, assets adequados, desktop intacto; gate próprio                                                                               |
+| 3 — Alimentação              | R03/R04, resumo e seis categorias, busca/registro/edição/exclusão/reutilização                             | GG /13–21                       | Dados completos além20 itens, unidades e ausentes, porções0 no ajuste, fluxo mobile/desktop; sem novo estado manual não aprovado                           |
+| 4 — Hidratação               | R05/R06, resumo, presets, horários/CRUD, semana e recipientes                                              | G /8–13, +M se novo cadastro    | Metas por data, total consistente e histórico preservado; aprovação do modelo B antes de implementá-lo                                                     |
+| 5 — Treinos                  | R07/R08, indicadores, modalidades, histórico e manutenção                                                  | G /8–13                         | Contagens/somas/distribuição iguais entre gráfico/lista; calorias reais/parciais; não executar T06 automaticamente                                         |
+| 6 — Evolução                 | R09, Peso/Medidas/Fotos, gráfico/filtro/meta e histórico                                                   | G /8–13                         | Datas reais no eixo, unicidade, edição/remoção, alvo/faixa/sem meta; composição/IMC sem inferência                                                         |
+| 7 — Fotos                    | R10, poses, timeline, galeria/viewer e comparação                                                          | G–GG /13–21                     | Arquivos privados, paginação/contagens, comparação entre páginas, exclusão/limpeza, mudanças só de registros                                               |
+| 8 — Projetos                 | R11, cards/menus/filtros/criação/estados/metas                                                             | G /8–13                         | Um ACTIVE em todos os estados e concorrência; encerrados readonly; contraste das imagens; exclusão autorizada preservada                                   |
+| 9 — Perfil                   | R12, dados/identidade, metas/preferências/privacidade/segurança                                            | GG /13–21 com avatar/modelo     | Aprovação prévia C; RLS, upload/troca/limpeza, export/delete/backup; sem campos pessoais obrigatórios por decoração                                        |
+| 10 — Autenticação            | R13, cada uma das quatro composições e nova senha                                                          | G /8–13                         | E-mail/senha 12–128, confirmação e PKCE, feedback/pending, sem enumeração/social; manter sessão e proteção                                                 |
+| Separada — séries realizadas | Proposta D, execução detalhada e volume válido                                                             | GG /21+ com refinamento próprio | Modelagem/convenções, RLS, idempotência e dados de execução; não integra silenciosamente Fase 5                                                            |
 
-Cada sprint exige build, tipos, lint/formatação, testes relevantes de comportamento/autorização, axe/teclado/contraste, ausência de erros inesperados e overflow. Inspecionar screenshots em 320, 390, 768, 1024 e 1440 px (adicionalmente zoom 200% e landscape); dados sintéticos somente em laboratório isolado. Screenshots em `artifacts/diazen-v2/`, sem dados pessoais. Não declarar equivalência pixel a pixel: registrar diferenças necessárias e submeter a revisão visual do proprietário. Entrega: resumo, arquivos/componentes, funcionalidades preservadas, testes/build, screenshots, pendências/riscos e próxima sprint recomendada.
+As Fases 1/2 são incrementos independentes do mesmo módulo. O módulo Dashboard só recebe conclusão integral após ambas aprovadas; “desktop entregue” não significa mobile novo pronto. Demais módulos exigem as duas composições e aprovação antes do próximo. A tabela não autoriza implementar nenhuma fase agora.
 
-Rastreabilidade: RF003/004/005/018/022; RNF002/003/004/007/008/009/011/012/014/015/016; RB01–04/06–10. Esta extensão visual foi autorizada pelo proprietário (RB11), sem nova modelagem.
+## 5. Escopo concreto da próxima entrega proposta
 
-## Achado operacional durante a Sprint 1
+Depois da aprovação, iniciar uma branch a partir da develop atualizada e executar somente Dashboard desktop:
 
-`npm audit --omit=dev` apontou um aviso moderado preexistente em Next.js 16.4.2 (GHSA-mfr8-8qww-v76h, combinação de `use cache`/`unstable_cache` com root params). Não foram encontrados esses usos no código atual. O CLI apresenta um bloqueio inicial de recomendação; a repetição do mesmo build conclui. Atualização de dependência não foi incluída no redesign e deve ser tratada em manutenção separada. Não é evidência de exploração nem de ausência geral de risco.
+1. Confirmar R01 e medidas de header/sidebar/grid na resolução1672×941. Preparar cenário sintético com projeto e registros coerentes, mais vazio/parcial/histórico.
+2. Introduzir tokens e tema desktop Light/Dark, preservando mobile dark. Nenhum flash de tema na navegação/reload; nenhuma leitura da preferência afeta autorização.
+3. Evoluir shell e header: busca real de páginas/ações com teclado, menu de conta; sino não aparece como botão sem função.
+4. Integrar seletor de projeto e navegação de datas na faixa da saudação. Sem nome pessoal cadastrado, saudação neutra; não usar “Arnold” ou identidade de demonstração em produção.
+5. Reproduzir quatro KPIs, curva de peso com resumo lateral, donut/legenda e três painéis inferiores. A faixa extra de ações rápidas da entrega anterior não ocupa uma nova linha no desktop; manter acesso por busca/controles existentes.
+6. Implementar **somente as leituras novas aprovadas** na proposta A da matriz: intervalo de pesos, duas semanas de kcal e feed de eventos com contexto. Não alterar schema, RPCs ou comandos de gravação nessa opção.
+7. Preservar sono/check-in/fases/planos e preferências em acessos secundários acordados. “Hábitos 4/7” não ganha números inventados; submeter substituição informativa dentro da região do projeto.
+8. Comparar light em 1672×941 com R01 e revisar notebook/amplo. Desktop dark mantém geometria e recebe aprovação específica, pois não há raster desktop dark fornecido.
+9. Rodar verificações, entregar screenshots e relatório de diferenças. Parar para aprovação. Não redesenhar mobile/alimentação nesta entrega.
+
+Decisões pendentes para esse gate: semântica do comparativo em kcal, feed entre tipos com datas reais, tratamento de meta diária de treino ausente, substituição de hábitos, nome/avatar ausentes e assets. São propostas explícitas da matriz; ausência de resposta não aprova backend ou adaptações.
+
+## 6. Critérios de aceite transversais
+
+### Visual
+
+- Comparar UI útil dos rasters, sem molduras/apresentação. Referência de geometria, padding, tipografia, imagens, ícones, gráficos e hierarquia, não só paleta.
+- Mesma densidade de dados e textos comparáveis em fixtures; valores corrigidos para serem consistentes. Dados fictícios somente no laboratório isolado.
+- Landmarks alvo com desvios<=4px na resolução equivalente, sujeitos à revisão; documentar diferenças de fonte/antialiasing. Sem certificação por uma pontuação automática única.
+- Estados vazios mantêm estrutura; erros e dados parciais têm tratamento próprio. Nenhum controle de fachada.
+- Claro/escuro desktop e mobile dark; foco/contraste em hover e sobre imagens; screenshots não bastam para garantir contraste.
+- Aprovação visual explícita do proprietário após apresentar diferenças. Uma screenshot do próprio app não se torna referência aprovada automaticamente.
+
+### Funcional e dados
+
+- Leitura por proprietário/projeto, gravação continua resolvendo ACTIVE no servidor, DRAFT sem registros, encerrados readonly salvo exclusão legal já prevista.
+- Consultar data/projeto e trocar tema não grava saúde nem altera projeto ativo. Preservar URLs/deep links e retorno do navegador.
+- Nenhum valor desconhecido é convertido em 0, nenhuma meta/gasto/volume corporal inventado. Fórmulas e parciais rotulados.
+- Forms: válido, inválido, servidor indisponível, sem resultado, pending, novo envio, cancelamento, sucesso e erro; reset só após sucesso, edição preservada no erro.
+- Listas e gráficos usam conjuntos completos/autorizados com paginação, não contagem da página como total.
+- Fotos e avatares privados, sem cache público, metadados removidos; exclusão/exportação/backup cobrem qualquer novo dado aprovado.
+- Offline permanece leitura limitada; toda escrita bloqueada com mensagem.
+
+### Qualidade e evidências por fase
+
+1. Testes unitários de novas fórmulas/transforms (nulos/zero/parciais/datas/limites), sem espelhar CSS em testes artificiais.
+2. Testes de banco/RLS/constraints quando modelo/comando mudar, incluindo outra conta, encerrados e concorrência relevante.
+3. Playwright Chromium/WebKit com jornadas reais e consultas persistidas, axe e teclado; contagens, edição/exclusão, retorno e erros.
+4. Screenshots determinísticas: dados isolados, datas/fontes fixas, animações controladas, viewports equivalentes; overlay e revisão humana. Baseline visual de regressão somente depois da aprovação.
+5. `npm run format:check`, lint, build, typecheck, testes pertinentes e regressão completa antes da integração. Após mudanças visuais múltiplas, revisar hooks, acessibilidade, SSR/hidratação e bundle.
+6. Ausência de exceções inesperadas no console. Não filtrar erros ou aumentar timeouts para conseguir passar; investigar trace. Evitar recargas artificiais durante jornadas do App Router.
+7. Sem overflow, sem foco atrás da bottom nav/dialog, reflow/zoom 200%, scroll, safe-area e teclado virtual. Safari/iPhone físico continua verificação separada quando disponível.
+8. Entrega: resumo, arquivos/componentes, comportamento preservado/novo, resultado de testes/build, capturas, diferenças pendentes, riscos e próxima fase aguardando aprovação.
+
+## 7. Riscos, dependências e mitigação
+
+| Risco / dependência                                 | Mitigação / bloqueio de aceite                                                                                                       |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Só há PNGs, não tokens/fontes/camadas originais     | Medição por região, normalização e review; não alegar fonte exata ou identidade pixel a pixel já alcançada                           |
+| Assets esportivos faltantes                         | Obter assets apropriados/licenciados e revisar crop/luz; não substituir por card genérico nem por corpo do usuário inventado         |
+| Conflitos CSS entre temas                           | Tokens por contexto, migração por módulo, casos claros/escuros e contraste sobre imagem; preservar atomicidade da troca de tema      |
+| Dado para componente inexiste                       | Manter semântica/estado informativo e propor fluxo/modelo; não preencher com mocks ou estimativas                                    |
+| Novas consultas aumentam custo                      | Janela limitada, paginação completa e paralelismo; medir antes de propor RPC/index; nenhum fetch de lista de saúde no cliente global |
+| Schema remoto pode diferir do versionado            | Antes de uma migração aprovada, inventário somente leitura, backup e plano incremental; sem reset/bundle em ambiente existente       |
+| Alterações de perfil/avatar ampliam dado sensível   | Minimização, RLS, arquivos privados, exportação/exclusão/backup e reautenticação onde apropriado                                     |
+| Persistência de tema causa flash/hydration mismatch | Estado inicial SSR por cookie allowlisted; sem leitura tardia de localStorage ou supressão de warnings                               |
+| Matriz de tema/breakpoints amplia QA                | Reutilizar contratos e fixtures, baseline aprovado por tema; nunca pular desktop dark como “só troca de cor”                         |
+| Aviso moderado preexistente em Next                 | Propor manutenção separada; não atualizar silenciosamente dependência durante discovery; registrar verificação e risco               |
+| Testes passam mas layout diverge                    | Gate visual independente. V03 demonstra que axe pode passar com texto sobre fotografia pouco legível                                 |
+| Escopo cresce por elementos ilustrativos            | Backlog por elemento, propostas B–E aprovadas antes do backend; aprovação entre fases; sem autoria implícita de prescrição           |
+
+## 8. Evidência desta Fase 0 e limites
+
+- Os 13 arquivos foram abertos. Auditados módulos, componentes, rotas, Server Actions, Auth, migrações001–018, APIs, estilos, assets e testes relevantes.
+- Executada captura/acessibilidade Chromium, 1 cenário aprovado (19,7s), com 34 capturas locais das páginas públicas/protegidas em 390/1280px; 16 capturas representativas foram preservadas em `screenshots/discovery-baseline/`. Capturas documentam estados vazios e estrutura, não equivalência dos exemplos populados.
+- CI histórica da base develop [44010735461](https://github.com/pauloluccasdev/diazen/actions/runs/44010735461): aprovada. Não se reapresenta esse resultado como teste novo de código alterado.
+- `npm audit --omit=dev` repetido nesta fase: um aviso moderado em Next; nenhuma atualização executada.
+- Sem migração, provisionamento, mudança de API/Auth, produção, dado pessoal ou geração de novos assets. Não houve medição pixel-diff nem aprovação visual. Safari físico e zoom nativo não homologados.
+
+Ao apresentar estes documentos, **parar e aguardar aprovação da Fase 1 — Dashboard desktop**. A observação de desktop dark já integra o plano; não equivale a autorização para implementar agora. Fluxo Git: branch documental da develop atualizada, commit/push; main/release continuam com o proprietário.
