@@ -13,7 +13,28 @@ test("Diazen v2: shell responsivo, dados persistidos, consulta e navegação por
       name: "Navegação do painel",
     });
     if (inMore) await navigation.locator(".v2-more > summary").click();
-    await navigation.getByRole("link", { name, exact: true }).click();
+    const link = navigation.getByRole("link", { name, exact: true });
+    const href = await link.getAttribute("href");
+    await link.click();
+    await expect(page).toHaveURL(new URL(href!, "http://127.0.0.1:3100").href);
+    if (name === "Início")
+      await expect(page.locator(".v2-dashboard")).toBeVisible();
+    else {
+      const headings: Record<string, string> = {
+        Projetos: "Meus projetos.",
+        Hidratação: "Hidratação.",
+        Evolução: "Peso.",
+        Treinos: "Atividades.",
+        Diário: "Alimentação.",
+      };
+      await expect(
+        page.getByRole("heading", {
+          level: 1,
+          name: headings[name],
+          exact: true,
+        }),
+      ).toBeVisible();
+    }
   };
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/entrar");

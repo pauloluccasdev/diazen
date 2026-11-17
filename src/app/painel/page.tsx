@@ -1,3 +1,7 @@
+import { DateNavigator } from "@/components/dashboard/date-navigator";
+import { DashboardInsights } from "@/components/dashboard/insights";
+import { dashboardDetails, type DashboardDetails } from "@/lib/dashboard-data";
+import { periodStart } from "@/lib/dashboard-metrics";
 import { ProjectSelector } from "@/components/dashboard/project-selector";
 import { ProjectTimeline } from "@/components/dashboard/project-timeline";
 import { QuickActions } from "@/components/dashboard/quick-actions";
@@ -10,7 +14,6 @@ import { SleepCard } from "@/components/sleep-card";
 import { garminConfig } from "@/lib/garmin-config";
 import type { SleepRecord, SleepSettings } from "@/lib/sleep";
 import { WeightChart } from "@/components/weight-chart";
-import { CalorieBalance } from "@/components/calorie-balance";
 import Link from "next/link";
 import {
   Droplets,
@@ -28,14 +31,14 @@ import { LogoutButton } from "@/components/logout-button";
 import { OfflineSnapshot } from "@/components/offline-snapshot";
 import { dashboardPlan } from "@/lib/dashboard-plan";
 import { projectContext } from "@/lib/data";
-import { activityModality, type Entry, type Summary } from "@/lib/records";
+import { type Entry, type Summary } from "@/lib/records";
 import { statusLabel, formatDate, today, isDate, number } from "@/lib/domain";
 export const metadata = { title: "Seu painel" };
 export const dynamic = "force-dynamic";
 export default async function Panel({
   searchParams,
 }: {
-  searchParams: Promise<{ projeto?: string; data?: string }>;
+  searchParams: Promise<{ projeto?: string; data?: string; periodo?: string }>;
 }) {
   const params = await searchParams,
     { selected, active, client, user, projects } = await projectContext(
@@ -47,6 +50,11 @@ export default async function Panel({
       : selected?.ends_on && selected.ends_on < today()
         ? selected.ends_on
         : today();
+  const period = ["7", "30", "90", "project"].includes(params.periodo ?? "")
+    ? params.periodo!
+    : "30";
+  const rangeStart = periodStart(date, period, selected?.starts_on ?? date);
+  let extra: DashboardDetails | null = null;
   const preferences = await displayPreferences(client, user.id);
   let phase: ProjectPhase | null = null;
   let plannedWorkouts: string[] = [];
@@ -70,17 +78,28 @@ export default async function Panel({
       phaseResult,
       checkinResult,
       planningResult,
+      detailResult,
     ] = await Promise.all([
       client.rpc("project_summary", { p_project: selected.id, p_date: date }),
       dashboardPlan(client, selected.id, date),
-      client
-        .from("weights")
-        .select("*")
-        .eq("project_id", selected.id)
-        .lte("logged_on", date)
-        .order("logged_on", { ascending: false })
-        .limit(30)
-        .returns<Entry[]>(),
+      (async () => {
+        const rows: Entry[] = [];
+        for (let offset = 0; ; offset += 500) {
+          const result = await client
+            .from("weights")
+            .select("*")
+            .eq("project_id", selected.id)
+            .gte("logged_on", rangeStart)
+            .lte("logged_on", date)
+            .order("logged_on", { ascending: false })
+            .range(offset, offset + 499)
+            .returns<Entry[]>();
+          if (result.error) return { data: rows, error: result.error };
+          rows.push(...(result.data ?? []));
+          if ((result.data?.length ?? 0) < 500)
+            return { data: rows, error: null };
+        }
+      })(),
       client
         .from("sleep_records")
         .select("*")
@@ -108,9 +127,11 @@ export default async function Panel({
         .eq("logged_on", date)
         .maybeSingle(),
       currentPhasePlans(client, selected.id, date).catch(() => null),
+      dashboardDetails(client, selected.id, date),
     ]);
     const { data, error } = result;
     diet = comparison;
+    extra = detailResult;
     sleepAvailable = !sleep.error && !settings.error;
     followupAvailable = !phaseResult.error && !checkinResult.error;
     phase = phaseResult.data ?? null;
@@ -144,6 +165,15 @@ export default async function Panel({
       if (!rows || rows.length < 500) break;
     }
   }
+  const hour = Number(
+    new Intl.DateTimeFormat("pt-BR", {
+      hour: "numeric",
+      hourCycle: "h23",
+      timeZone: "America/Sao_Paulo",
+    }).format(new Date()),
+  );
+  const greeting =
+    hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
   const cards = summary
     ? [
         {
@@ -162,7 +192,10 @@ export default async function Panel({
             ? "Seu diário, sem calorias no painel"
             : summary.missing_kcal > 0 && summary.kcal !== null
               ? "Subtotal parcial, faltam valores"
-              : "Valores informados no diário",
+              : diet?.totals.kcal.value != null &&
+                  diet.totals.kcal.missing === 0
+                ? `de ${number(diet.totals.kcal.value)} kcal no plano`
+                : "Valores informados no diário",
         },
         {
           label: "Hidratação",
@@ -179,7 +212,7 @@ export default async function Panel({
               : `Meta vigente: ${number(summary.water_goal, 0)} ml`,
         },
         {
-          label: "Atividades",
+          label: "Treinos",
           module: "atividades",
           empty: activities.length === 0,
           icon: Dumbbell,
@@ -198,7 +231,7 @@ export default async function Panel({
               : `${activities.length} atividades no dia`,
         },
         {
-          label: "Peso",
+          label: "Peso atual",
           module: "peso",
           empty: summary.weight === null,
           icon: ChartNoAxesCombined,
@@ -215,7 +248,7 @@ export default async function Panel({
   return (
     <div className="v2-dashboard" data-photos-hidden={!preferences.show_photos}>
       <section className="welcome dashboard-welcome">
-        <p className="eyebrow">UM DIA DE CADA VEZ</p>
+        <p className="eyebrow">{greeting} 👋</p>
         <h1>
           {date === today()
             ? "Aqui está o seu progresso hoje"
@@ -249,14 +282,7 @@ export default async function Panel({
               active={active}
               date={date}
             />
-            <Link
-              className="v2-date-link"
-              href={`/painel/historico?projeto=${selected.id}&data=${date}`}
-            >
-              <History size={19} aria-hidden="true" />
-              {formatDate(date)}
-              <ArrowRight size={16} aria-hidden="true" />
-            </Link>
+            <DateNavigator date={date} project={selected.id} period={period} />
           </div>
           <section className="project-card dashboard-hero">
             <div className="project-content">
@@ -418,6 +444,17 @@ export default async function Panel({
                             max={selected.sessions_goal || 1}
                             aria-label="Sessões registradas em relação à meta semanal"
                           />
+                          <ProgressRing
+                            value={summary.sessions}
+                            max={selected.sessions_goal}
+                            label="Sessões registradas em relação à meta semanal"
+                          >
+                            <strong className="dz-ring-percent">
+                              {summary.sessions === null
+                                ? "—"
+                                : `${number((Number(summary.sessions) / selected.sessions_goal) * 100, 0)}%`}
+                            </strong>
+                          </ProgressRing>
                         </div>
                       )}
                     {module === "alimentacao" &&
@@ -491,7 +528,13 @@ export default async function Panel({
                           max={summary.water_goal}
                           label="Progresso da meta diária de hidratação"
                         >
-                          <Droplets size={18} aria-hidden="true" />
+                          <strong className="dz-ring-percent">
+                            {number(
+                              (summary.water_ml / summary.water_goal) * 100,
+                              0,
+                            )}
+                            %
+                          </strong>
                         </ProgressRing>
                       )}
                   </Link>
@@ -505,181 +548,20 @@ export default async function Panel({
               selected.status === "ACTIVE" && selected.id === active?.id
             }
           />
-          <div className="v2-insights">
-            {preferences.show_weight && (
-              <section
-                className="content-card v2-weight-panel"
-                aria-labelledby="weight-trend-title"
-              >
-                <div className="section-heading">
-                  <h2 id="weight-trend-title">Evolução do peso</h2>
-                  <Link
-                    href={`/painel/peso?projeto=${selected.id}&data=${date}`}
-                  >
-                    Ver histórico <ArrowRight size={15} aria-hidden="true" />
-                  </Link>
-                </div>
-                <WeightChart rows={weights} />
-                <p className="field-hint">
-                  Últimas {weights.length} medições disponíveis até{" "}
-                  {formatDate(date)}.
-                </p>
-              </section>
-            )}
-            {preferences.show_calories && (
-              <section
-                className="daily-nutrition content-card"
-                aria-label="Resumo alimentar do dia"
-              >
-                <h2>Macronutrientes do dia</h2>
-                <div className="daily-calories">
-                  <span className="icon-box">
-                    <Utensils size={22} aria-hidden="true" />
-                  </span>
-                  <div>
-                    <span className="muted">
-                      Alimentação de {formatDate(date)}
-                    </span>
-                    <p
-                      className={`daily-metric${summary.kcal === null ? " daily-empty" : ""}`}
-                    >
-                      {summary.kcal === null
-                        ? "Não informado"
-                        : number(summary.kcal)}
-                      {summary.kcal !== null && <small> kcal</small>}
-                    </p>
-                    <span className="muted">
-                      {summary.missing_kcal > 0 && summary.kcal !== null
-                        ? "Subtotal parcial"
-                        : "Valores informados no diário"}
-                    </span>
-                  </div>
-                </div>
-                <dl className="daily-macros">
-                  {(
-                    [
-                      ["Proteínas", summary.protein, summary.missing_protein],
-                      ["Carboidratos", summary.carbs, summary.missing_carbs],
-                      ["Gorduras", summary.fat, summary.missing_fat],
-                    ] as const
-                  ).map(([label, value, missing]) => (
-                    <div key={label}>
-                      <dt>{label}</dt>
-                      <dd>
-                        {value === null
-                          ? "Não informado"
-                          : `${number(value)} g`}
-                        {value !== null && missing > 0 && (
-                          <small className="muted"> · subtotal parcial</small>
-                        )}
-                      </dd>
-                    </div>
-                  ))}
-                </dl>
-                {diet && (
-                  <div className="dashboard-diet-comparison">
-                    <h3>Plano e consumo do dia</h3>
-                    <CalorieBalance
-                      consumed={summary.kcal}
-                      planned={diet.totals.kcal.value}
-                      partial={
-                        diet.totals.kcal.missing > 0 || summary.missing_kcal > 0
-                      }
-                    />
-                    <dl className="diet-comparison-grid">
-                      <div>
-                        <dt>Refeições planejadas</dt>
-                        <dd>{diet.plannedMeals}</dd>
-                      </div>
-                      <div>
-                        <dt>Refeições com registros</dt>
-                        <dd>{diet.recordedMeals}</dd>
-                      </div>
-                      <div>
-                        <dt>Refeições vinculadas ao plano</dt>
-                        <dd>{diet.registeredMeals.length}</dd>
-                      </div>
-                    </dl>
-                    <p className="field-hint">
-                      Refeições com registros contam as categorias do diário.
-                      Cópias e lançamentos manuais só contam no plano quando
-                      vinculados a uma refeição dele.
-                    </p>
-                    <Link
-                      className="button-secondary meal-record-link"
-                      href={`/painel/plano?projeto=${selected.id}&data=${date}`}
-                    >
-                      <Utensils size={20} aria-hidden="true" />
-                      <span>Consultar plano alimentar</span>
-                      <ArrowRight size={18} aria-hidden="true" />
-                    </Link>
-                  </div>
-                )}
-              </section>
-            )}
-            <section
-              className="content-card v2-recent-activities"
-              aria-labelledby="recent-activity-title"
-            >
-              <div className="section-heading">
-                <h2 id="recent-activity-title">Atividades do dia</h2>
-                <Link
-                  href={`/painel/atividades?projeto=${selected.id}&data=${date}`}
-                >
-                  Ver tudo <ArrowRight size={15} aria-hidden="true" />
-                </Link>
-              </div>
-              {!activities.length ? (
-                <p className="v2-empty-note">
-                  Seus movimentos aparecem aqui quando você os registra. Cada
-                  dia tem seu ritmo.
-                </p>
-              ) : (
-                <ul>
-                  {activities.slice(0, 4).map((row) => (
-                    <li key={row.id}>
-                      <span className="v2-activity-icon">
-                        <Dumbbell size={21} aria-hidden="true" />
-                      </span>
-                      <Link
-                        href={`/painel/atividades?projeto=${selected.id}&data=${date}#registros-do-dia`}
-                      >
-                        <strong>{row.name || activityModality(row)}</strong>
-                        <span>
-                          {activityModality(row)} ·{" "}
-                          {number(Number(row.duration_min ?? 0))} min
-                          {row.distance_km == null
-                            ? ""
-                            : ` · ${number(Number(row.distance_km), 2)} km`}
-                        </span>
-                      </Link>
-                      <ArrowRight size={16} aria-hidden="true" />
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </section>
-            <section
-              className="content-card v2-project-panel"
-              aria-labelledby="project-progress-title"
-            >
-              <div className="section-heading">
-                <h2 id="project-progress-title">Seu projeto</h2>
-                <Link href="/painel/projetos">
-                  Ver detalhes <ArrowRight size={15} aria-hidden="true" />
-                </Link>
-              </div>
-              <h3>{selected.name}</h3>
-              <p className="muted">
-                {formatDate(selected.starts_on)}
-                {selected.ends_on && ` — ${formatDate(selected.ends_on)}`}
-              </p>
-              <ProjectTimeline project={selected} date={date} />
-              <p className="field-hint">
-                O tempo decorrido não representa aderência ou resultado físico.
-              </p>
-            </section>
-          </div>
+          {extra && (
+            <DashboardInsights
+              project={selected}
+              date={date}
+              period={period}
+              start={rangeStart}
+              weights={weights}
+              details={extra}
+              summary={summary}
+              diet={diet}
+              showWeight={preferences.show_weight}
+              showCalories={preferences.show_calories}
+            />
+          )}
           <details className="v2-followup">
             <summary>
               Planejamento e acompanhamento do dia{" "}

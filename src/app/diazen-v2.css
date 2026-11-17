@@ -1,23 +1,5 @@
 /* Diazen 2.0 — Sprint 1. Scope: authenticated shell and dashboard. */
 .app-shell:has(.panel-shell) {
-  --v2-primary: #ffc12e;
-  --v2-data: #08b8e4;
-  --v2-radius: 20px;
-  --v2-shadow: 0 4px 18px #00000014;
-  --color-bg: #101113;
-  --color-surface: #1c1d20;
-  --color-surface-raised: #26272b;
-  --color-surface-sunken: #151619;
-  --color-border: #34363b;
-  --color-border-strong: #686b73;
-  --color-text: #f6f6f6;
-  --color-text-muted: #a4a6ac;
-  --color-text-subtle: #a4a6ac;
-  --color-accent: #ffc12e;
-  --color-accent-hover: #ffd064;
-  --color-accent-pressed: #edac13;
-  --color-accent-soft: #3c3018;
-  --color-danger: #ff858d;
   max-width: none;
   padding: 0;
   color: var(--color-text);
@@ -766,6 +748,14 @@ body:has(.panel-shell) {
   .v2-dashboard .dashboard-welcome .eyebrow {
     display: block;
   }
+  .v2-dashboard .dashboard-welcome .eyebrow {
+    display: block;
+    color: var(--color-text-muted);
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 15px;
+    margin: 0 0 6px;
+  }
   .v2-dashboard .dashboard-welcome h1 {
     font-size: 28px;
     line-height: 1.2;
@@ -822,24 +812,8 @@ body:has(.panel-shell) {
     background: #f1f2f4;
     color-scheme: light;
   }
-  .app-shell:has(.panel-shell) {
-    --color-bg: #f1f2f4;
-    --color-surface: #fff;
-    --color-surface-raised: #f7f8fa;
-    --color-surface-sunken: #f1f3f6;
-    --color-border: #dce1e8;
-    --color-border-strong: #929baa;
-    --color-text: #151923;
-    --color-text-muted: #596477;
-    --color-text-subtle: #596477;
-    --color-accent: #805600;
-    --color-accent-soft: #fff5dd;
-    --color-success: #167847;
-    --color-danger: #bf2842;
-    --v2-shadow: 0 4px 18px #172a4b08;
-  }
   .v2-sidebar {
-    width: 206px;
+    width: 228px;
     position: fixed;
     inset: 0 auto 0 0;
     z-index: 10;
@@ -870,7 +844,7 @@ body:has(.panel-shell) {
     padding: 12px 14px;
     min-height: 46px;
     border-radius: 12px;
-    font-size: 13px;
+    font-size: 15px;
   }
   .v2-sidebar a[aria-current],
   .v2-sidebar nav a:hover,
@@ -894,10 +868,10 @@ body:has(.panel-shell) {
   }
   .v2-workspace {
     padding: 0 28px 20px;
-    margin-left: 206px;
+    margin-left: 228px;
   }
   .v2-header {
-    min-height: 82px;
+    min-height: 88px;
     padding: 16px 0;
   }
   .v2-header .v2-wordmark {
@@ -917,11 +891,11 @@ body:has(.panel-shell) {
     display: none;
   }
   .app-shell:has(.panel-shell) > .app-footer {
-    margin: 0 28px 0 234px;
+    margin: 0 28px 0 256px;
     color: var(--color-text-muted);
   }
   .v2-dashboard {
-    grid-template-columns: minmax(0, 1fr) minmax(300px, 0.8fr);
+    grid-template-columns: minmax(0, 1fr) minmax(450px, 1fr);
     gap: 20px;
   }
   .v2-dashboard .dashboard-welcome {
@@ -930,12 +904,19 @@ body:has(.panel-shell) {
     align-self: center;
     padding: 4px 0;
   }
-  .v2-dashboard .dashboard-welcome .eyebrow,
   .v2-dashboard .dashboard-welcome .intro {
     display: none;
   }
+  .v2-dashboard .dashboard-welcome .eyebrow {
+    display: block;
+    color: var(--color-text-muted);
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 15px;
+    margin: 0 0 6px;
+  }
   .v2-dashboard .dashboard-welcome h1 {
-    font-size: clamp(23px, 2.1vw, 32px);
+    font-size: clamp(23px, 2.1vw, 34px);
     line-height: 1.2;
   }
   .v2-dashboard-toolbar {
@@ -967,7 +948,7 @@ body:has(.panel-shell) {
   }
   .v2-dashboard .area-card {
     padding: 18px;
-    min-height: 144px;
+    min-height: 122px;
   }
   .v2-dashboard .area-card h2 > span {
     display: none;
@@ -1013,6 +994,7 @@ body:has(.panel-shell) {
     display: none;
   }
   .v2-quick-actions {
+    display: none;
     grid-column: 1/-1;
   }
   .v2-quick-actions h2 {
@@ -1098,15 +1080,16 @@ body:has(.panel-shell) {
     grid-template-columns: minmax(0, 1fr) minmax(440px, 0.9fr);
   }
   .v2-dashboard .area-card {
-    min-height: 130px;
-    padding: 20px 20px 20px 72px;
+    min-height: 122px;
+    padding: 20px 20px 20px 90px;
   }
   .v2-dashboard .metric-card .icon-box {
     position: absolute;
     left: 18px;
     top: 18px;
-    width: 40px;
-    height: 40px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
   }
   .v2-dashboard .metric-agua .metric-value {
     padding-right: 48px;
@@ -1211,15 +1194,12 @@ body:has(.panel-shell) {
     display: none;
   }
   .v2-dashboard .area-card {
-    min-height: 132px;
+    min-height: 122px;
   }
   .v2-dashboard .metric-card .progress-ring {
     width: 54px;
     height: 54px;
     top: 24px;
-  }
-  .v2-dashboard .metric-alimentacao:has(.progress-ring) {
-    padding-right: 72px;
   }
   .v2-dashboard .daily-calories .icon-box {
     width: 44px;

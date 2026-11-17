@@ -1,8 +1,14 @@
 "use client";
+import "./shell/desktop-tools.css";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import {
+  AccountMenu,
+  CommandSearch,
+  DesktopThemeControl,
+} from "./shell/desktop-tools";
 import {
   Home,
   FolderOpen,
@@ -45,8 +51,21 @@ const more = [
   { href: "/painel/historico", label: "Histórico geral", icon: History },
   { href: "/painel/perfil", label: "Minha conta", icon: Settings },
 ];
-export function PanelShell({ children }: { children: React.ReactNode }) {
+export function PanelShell({
+  children,
+  initialTheme = "light",
+  accountName,
+}: {
+  children: React.ReactNode;
+  initialTheme?: "light" | "dark";
+  accountName?: string;
+}) {
   const pathname = usePathname();
+  const [theme, setTheme] = useState(initialTheme);
+  const changeTheme = (next: "light" | "dark") => {
+    setTheme(next);
+    document.cookie = `diazen-desktop-theme=${next}; Path=/; Max-Age=31536000; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`;
+  };
   const menu = useRef<HTMLDetailsElement>(null);
   useEffect(() => {
     const closeOutside = (event: PointerEvent) => {
@@ -76,7 +95,7 @@ export function PanelShell({ children }: { children: React.ReactNode }) {
             ? ["/painel/projetos", "/painel/fases"].includes(pathname)
             : pathname === href || pathname.startsWith(href + "/");
   return (
-    <div className="panel-shell">
+    <div className="panel-shell" data-desktop-theme={theme}>
       <a className="skip-link" href="#panel-content">
         Pular para o conteúdo
       </a>
@@ -125,6 +144,11 @@ export function PanelShell({ children }: { children: React.ReactNode }) {
             dia<span>zen.</span>
           </Link>
           <span className="v2-tagline">Sua rotina. Sua evolução.</span>
+          <div className="dz-desktop-tools">
+            <CommandSearch />
+            <DesktopThemeControl theme={theme} onChange={changeTheme} />
+            <AccountMenu name={accountName} />
+          </div>
           <Link
             className="v2-account"
             href="/painel/perfil"

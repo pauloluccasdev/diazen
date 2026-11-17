@@ -1,3 +1,4 @@
+import Form from "next/form";
 import { CalendarDays, FolderOpen } from "lucide-react";
 import type { Project } from "@/lib/domain";
 import { statusLabel } from "@/lib/domain";
@@ -22,7 +23,7 @@ export function ProjectSelector({
     ).values(),
   ];
   return (
-    <details className="v2-project-selector">
+    <details className="v2-project-selector" key={`${selected.id}-${date}`}>
       <summary>
         <FolderOpen size={19} aria-hidden="true" />
         <span>
@@ -34,7 +35,7 @@ export function ProjectSelector({
           <strong>{selected.name}</strong>
         </span>
       </summary>
-      <form action="/painel" className="v2-query-form">
+      <Form action="/painel" className="v2-query-form">
         <label>
           Projeto para consultar
           <select name="projeto" defaultValue={selected.id}>
@@ -59,7 +60,7 @@ export function ProjectSelector({
         <button className="button-primary" type="submit">
           Consultar projeto
         </button>
-      </form>
+      </Form>
     </details>
   );
 }

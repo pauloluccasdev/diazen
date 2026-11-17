@@ -3,6 +3,7 @@ import Link from "next/link";
 import localFont from "next/font/local";
 import { Pwa } from "@/components/pwa";
 import "./globals.css";
+import "../styles/diazen-v2/tokens.css";
 import "./diazen-v2.css";
 
 const inter = localFont({

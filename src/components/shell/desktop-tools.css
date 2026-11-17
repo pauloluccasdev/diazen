@@ -1,0 +1,247 @@
+.dz-desktop-tools {
+  display: none;
+}
+.dz-command-dialog {
+  width: min(560px, calc(100% - 32px));
+  max-height: 80dvh;
+  padding: 24px;
+  border: 1px solid var(--color-border);
+  border-radius: 22px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: 0 20px 70px #0006;
+}
+.dz-command-dialog::backdrop {
+  background: #0008;
+}
+.dz-dialog-heading {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.dz-dialog-heading h2 {
+  font-size: 20px;
+  margin: 0;
+}
+.dz-dialog-heading button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--color-surface-raised);
+}
+.dz-command-dialog ul {
+  list-style: none;
+  padding: 0;
+  margin: 18px 0 0;
+}
+.dz-command-dialog li a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px;
+  border-radius: 12px;
+}
+.dz-command-dialog li a:hover {
+  background: var(--color-surface-raised);
+}
+.dz-command-dialog li a span {
+  display: grid;
+  gap: 4px;
+}
+.dz-command-dialog small {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+.dz-account-menu {
+  position: relative;
+}
+.dz-account-menu summary {
+  cursor: pointer;
+}
+.dz-account-menu summary::-webkit-details-marker {
+  display: none;
+}
+.dz-account-menu .v2-account {
+  list-style: none;
+}
+.dz-account-popover {
+  position: absolute;
+  z-index: 30;
+  right: 0;
+  top: calc(100% + 12px);
+  width: 250px;
+  padding: 10px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  box-shadow: var(--v2-shadow);
+}
+.dz-account-popover a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+.dz-account-popover a:hover {
+  background: var(--color-surface-raised);
+}
+.dz-account-popover form {
+  margin: 0;
+  padding: 8px;
+  background: none;
+  border: 0;
+}
+.dz-account-popover .logout {
+  margin: 0;
+}
+.dz-date-navigator {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  min-height: 60px;
+  padding: 4px;
+}
+.dz-date-navigator > a {
+  min-width: 36px;
+  min-height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+}
+.dz-date-navigator > a:hover {
+  background: var(--color-surface-raised);
+}
+.dz-date-navigator details {
+  position: relative;
+  flex: 1;
+}
+.dz-date-navigator summary {
+  padding: 0;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 44px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+.dz-date-navigator summary::-webkit-details-marker {
+  display: none;
+}
+.dz-date-form {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 12px);
+  z-index: 20;
+  width: 250px;
+  padding: 18px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  box-shadow: var(--v2-shadow);
+}
+@media (min-width: 1024px) {
+  .dz-desktop-tools {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 20px;
+  }
+  .dz-search-trigger {
+    width: min(400px, 45%);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 44px;
+    padding: 8px 16px;
+    border-radius: 16px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    text-align: left;
+    font-size: 13px;
+  }
+  .dz-search-trigger kbd {
+    margin-left: auto;
+    border-radius: 6px;
+    background: var(--color-surface-raised);
+    padding: 3px 6px;
+    font-size: 11px;
+  }
+  .dz-theme-control {
+    margin-left: auto;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    background: none;
+    border-radius: 50%;
+  }
+  .dz-theme-control:hover {
+    background: var(--color-surface);
+  }
+  .dz-account-menu summary {
+    display: flex;
+  }
+  .dz-account-menu .v2-account {
+    font-size: 14px;
+    gap: 12px;
+  }
+  .dz-account-menu small {
+    font-size: 12px;
+  }
+  .v2-header > .v2-account,
+  .v2-header > .v2-tagline {
+    display: none;
+  }
+  body:has(.panel-shell[data-desktop-theme="dark"]) {
+    background: #101113;
+    color-scheme: dark;
+  }
+  .panel-shell[data-desktop-theme="dark"] .v2-sidebar a[aria-current],
+  .panel-shell[data-desktop-theme="dark"] .v2-sidebar nav a:hover,
+  .panel-shell[data-desktop-theme="dark"] .v2-sidebar-bottom a:hover {
+    color: #151923;
+  }
+  .panel-shell .project-list-card.project-active {
+    color: var(--color-text);
+    background: var(--color-surface);
+  }
+  .panel-shell .project-list-card.project-active::before {
+    display: none;
+  }
+}
+
+.dz-account-menu > summary {
+  background: none;
+  border: 0;
+  padding: 0;
+}
+
+.dz-date-navigator summary > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dz-date-navigator summary > svg {
+  flex-shrink: 0;
+}
+
+@media (min-width: 1024px) {
+  .v2-dashboard-toolbar .dz-date-navigator {
+    min-width: 240px;
+  }
+}

@@ -11,9 +11,12 @@ const user = {
 };
 const encode = (value) =>
   Buffer.from(JSON.stringify(value)).toString("base64url");
-const token = `${encode({ alg: "HS256", typ: "JWT" })}.${encode({ sub: user.id, exp: Math.floor(Date.now() / 1000) + 3600, aud: "authenticated" })}.assinatura-de-teste`;
 
 const users = [
+  {
+    id: "00000000-0000-4000-8000-000000000053",
+    email: "desktop-v2@example.test",
+  },
   {
     id: "00000000-0000-4000-8000-000000000052",
     email: "redesign@example.test",
@@ -115,11 +118,13 @@ const users = [
     email: "acessibilidade@example.test",
   },
 ];
-const tokenFor = (u) =>
-  u.id === user.id
-    ? token
-    : `${encode({ alg: "HS256", typ: "JWT" })}.${encode({ sub: u.id, exp: Math.floor(Date.now() / 1000) + 3600, aud: "authenticated" })}.assinatura-de-teste`;
-const tokens = new Map(users.map((u) => [tokenFor(u), u]));
+const tokens = new Map();
+const tokenFor = (u) => {
+  const issued = `${encode({ alg: "HS256", typ: "JWT" })}.${encode({ sub: u.id, exp: Math.floor(Date.now() / 1000) + 3600, aud: "authenticated" })}.assinatura-de-teste`;
+  tokens.set(issued, u);
+  return issued;
+};
+users.forEach(tokenFor);
 const files = new Map();
 const failPhotoReplies = new Set();
 const failReads = new Set();
@@ -362,9 +367,7 @@ createServer(async (request, response) => {
     if (account && credentials.password === "senha-de-teste-123") {
       return response.end(
         JSON.stringify({
-          access_token: [...tokens.entries()].find(
-            ([, u]) => u.id === account.id,
-          )[0],
+          access_token: tokenFor(account),
           refresh_token: "refresh-de-teste",
           token_type: "bearer",
           expires_in: 3600,

@@ -1,5 +1,7 @@
 # Diazen 2.0 — plano de reconstrução visual e funcional
 
+> Execução aprovada posteriormente para todas as fases, sem pausas entre entregas. Acompanhar [progresso e autorização vigente](execution-status.md). Os gates abaixo registram a proposta original da Fase 0; segurança, integridade e exclusões de escopo continuam válidas.
+
 17/11/2026 · Fase 0 · **aguarda aprovação**. Base: `develop@b7d718c`. Este plano substitui a sequência anterior de sprints para trabalhos futuros. A entrega anterior permanece registrada em [sprint-1-report.md](sprint-1-report.md) e no histórico Git; não constitui homologação de alta fidelidade.
 
 ## 1. Escopo desta entrega e precedência

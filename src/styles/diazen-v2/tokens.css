@@ -1,0 +1,55 @@
+/* Semantic theme tokens. Layout breakpoints: tablet 768px, desktop 1024px. */
+.app-shell:has(.panel-shell) {
+  --v2-primary: #ffc12e;
+  --v2-data: #08b8e4;
+  --v2-data-stroke: #08b8e4;
+  --v2-data-text: #55d8f4;
+  --v2-radius: 22px;
+  --v2-shadow: 0 6px 20px #0000002e;
+  --color-bg: #101113;
+  --color-surface: #1c1d20;
+  --color-surface-raised: #26272b;
+  --color-surface-sunken: #151619;
+  --color-border: #34363b;
+  --color-border-strong: #747780;
+  --color-text: #f6f6f6;
+  --color-text-muted: #a4a6ac;
+  --color-text-subtle: #a4a6ac;
+  --color-accent: #ffc12e;
+  --color-accent-hover: #ffd064;
+  --color-accent-pressed: #edac13;
+  --color-accent-soft: #3c3018;
+  --color-success: #69d99a;
+  --color-danger: #ff858d;
+  --dz-space-1: 4px;
+  --dz-space-2: 8px;
+  --dz-space-3: 12px;
+  --dz-space-4: 16px;
+  --dz-space-5: 20px;
+  --dz-space-6: 24px;
+  --dz-space-8: 32px;
+  --dz-radius-control: 14px;
+  --dz-radius-hero: 28px;
+  --dz-control-height: 48px;
+  --dz-duration: 160ms;
+}
+@media (min-width: 1024px) {
+  .app-shell:has(.panel-shell:not([data-desktop-theme="dark"])) {
+    --color-bg: #f1f2f4;
+    --color-surface: #fff;
+    --color-surface-raised: #f7f8fa;
+    --color-surface-sunken: #f1f3f6;
+    --color-border: #dee3eb;
+    --color-border-strong: #7e8795;
+    --color-text: #151923;
+    --color-text-muted: #596477;
+    --color-text-subtle: #596477;
+    --color-accent: #805600;
+    --color-accent-soft: #fff5dd;
+    --color-success: #176a3b;
+    --color-danger: #b7203b;
+    --v2-shadow: 0 8px 24px #1519230f;
+    --v2-data-stroke: #0098bd;
+    --v2-data-text: #006b85;
+  }
+}
