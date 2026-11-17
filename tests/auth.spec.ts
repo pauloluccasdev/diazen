@@ -23,9 +23,7 @@ test("login válido, painel privado e logout", async ({ page }) => {
   await expect(page).toHaveURL(/\/painel$/);
   const response = await page.reload();
   expect(response?.headers()["cache-control"]).toContain("no-store");
-  await expect(
-    page.getByRole("heading", { name: "Olá, vamos cuidar de você?" }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   await page.getByRole("button", { name: "Sair da conta" }).click();
   await expect(page).toHaveURL(/\/entrar$/);
   await page.goto("/painel");

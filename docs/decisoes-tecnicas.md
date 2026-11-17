@@ -618,3 +618,9 @@ Migração incremental 018 acrescenta tabelas e políticas RLS, imagens no bucke
 ## 15/11/2026 — Inicialização segura do editor de planos
 
 A regressão WebKit identificou perda do nome digitado entre a renderização do HTML e a ativação do formulário React, deixando o campo obrigatório vazio e impedindo o salvamento. O editor de planos permanece desabilitado no HTML inicial e habilita os campos somente após a inicialização do cliente. Não há aumento de timeout ou repetição automática para contornar a falha. O teste retém os scripts da página, verifica o bloqueio inicial e, após liberá-los, preenche e salva a versão preservando o nome. O CI também preserva traces de falhas por três dias, usando somente os dados sintéticos da suíte.
+
+## 16/11/2026 — Diazen 2.0, estrutura visual e dashboard
+
+O proprietário aprovou novo desenho mobile Dark Premium com navegação inferior e desktop Light Premium com sidebar amarela, substituindo as restrições visuais correspondentes do baseline 0.1. A execução autorizada nesta etapa é somente Sprint 1, após auditoria e planejamento em `docs/design/diazen-v2/implementation-plan.md`. Protótipos fornecidos em Downloads ficam preservados em `references/`. Não há autorização para alterar backend, banco, APIs, autenticação, cálculos, destino dos registros ou privacidade; sprints posteriores exigem aprovação. Dados e componentes funcionais existentes serão reutilizados. Elementos ilustrativos sem suporte real serão adaptados, sem métricas ou controles de fachada.
+
+A checagem de console da Sprint 1 identificou divergência de hidratação nos títulos SVG dos pontos do WeightChart ao montar a nova estrutura protegida. O título passa a ser uma única string, preservando texto, datas, valores e cálculo do gráfico. O teste do redesign exige ausência de exceções, além de verificar as gravações e consultas. Não há supressão de erro de hidratação nem mudança de fonte de dados.

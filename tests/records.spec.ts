@@ -256,7 +256,8 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
   await expect(page.locator(".dashboard-hero")).toBeVisible();
   await expect(page.locator(".area-card.metric-agua")).toBeVisible();
   await page.setViewportSize({ width: 1280, height: 844 });
-  await expect(page.getByLabel("Data da consulta")).toHaveCount(0);
+  await expect(page.getByLabel("Data da consulta")).toBeHidden();
+  await expect(page.locator(".v2-project-selector > summary")).toBeVisible();
   await page.waitForFunction(
     () => sessionStorage.getItem("diazen-dashboard") !== null,
   );
@@ -293,7 +294,8 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
   await expect(page.locator(".dashboard-hero")).toBeVisible();
   await expect(page.locator(".area-card.metric-agua")).toBeVisible();
   await page.setViewportSize({ width: 1280, height: 844 });
-  await expect(page.getByLabel("Data da consulta")).toHaveCount(0);
+  await expect(page.getByLabel("Data da consulta")).toBeHidden();
+  await expect(page.locator(".v2-project-selector > summary")).toBeVisible();
   await page.waitForFunction(
     () => sessionStorage.getItem("diazen-dashboard") !== null,
   );

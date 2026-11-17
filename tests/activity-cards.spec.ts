@@ -163,7 +163,7 @@ test("semana de atividades e cards expansíveis preservam métricas e edição",
     const weightBox = await weightCard.boundingBox();
     expect(activityBox).not.toBeNull();
     expect(weightBox).not.toBeNull();
-    expect(Math.abs(activityBox!.y - weightBox!.y)).toBeLessThan(2);
+    expect(weightBox!.y).toBeGreaterThan(activityBox!.y + activityBox!.height);
     expect(Math.abs(activityBox!.width - weightBox!.width)).toBeLessThan(2);
   }).toPass();
   await page

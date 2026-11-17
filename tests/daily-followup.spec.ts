@@ -27,6 +27,7 @@ test("fases, check-in opcional, contexto sem consumo e indicadores ocultos prese
     .click();
   await expect(page.getByRole("status")).toContainText("Projeto criado");
   await page.goto("/painel");
+  await page.locator(".v2-followup > summary").click();
   await page.getByRole("link", { name: "Configurar fases" }).click();
   await page.getByText("Adicionar fase", { exact: true }).click();
   const phase = page.locator("form").filter({
@@ -46,6 +47,7 @@ test("fases, check-in opcional, contexto sem consumo e indicadores ocultos prese
     .getByRole("button", { name: "Continuar", exact: true })
     .click();
   await page.goto("/painel");
+  await page.locator(".v2-followup > summary").click();
   await expect(page.locator(".day-phase")).toContainText("Base e rotina");
   await expect(page.locator(".day-phase")).toContainText("Primeira revisão");
   await page.locator(".day-checkin-link").click();
@@ -129,8 +131,15 @@ test("fases, check-in opcional, contexto sem consumo e indicadores ocultos prese
     .getByRole("button", { name: "Continuar", exact: true })
     .click();
   await page.goto("/painel");
+  await page.locator(".v2-followup > summary").click();
   await expect(page.locator(".metric-peso")).toHaveCount(0);
   await expect(page.locator(".daily-nutrition")).toHaveCount(0);
+  await expect(
+    page.getByRole("link", { name: "Fotos", exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("link", { name: "Fotos privadas", exact: true }),
+  ).toHaveCount(0);
   await expect(
     page.getByRole("link", { name: "Fotografias privadas", exact: true }),
   ).toHaveCount(0);

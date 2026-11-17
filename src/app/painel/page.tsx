@@ -1,3 +1,6 @@
+import { ProjectSelector } from "@/components/dashboard/project-selector";
+import { ProjectTimeline } from "@/components/dashboard/project-timeline";
+import { QuickActions } from "@/components/dashboard/quick-actions";
 import { currentPhasePlans } from "@/lib/phase-plan-data";
 import type { StrengthPlan } from "@/lib/phase-plans";
 import { DayOverview } from "@/components/daily/day-overview";
@@ -25,7 +28,7 @@ import { LogoutButton } from "@/components/logout-button";
 import { OfflineSnapshot } from "@/components/offline-snapshot";
 import { dashboardPlan } from "@/lib/dashboard-plan";
 import { projectContext } from "@/lib/data";
-import type { Entry, Summary } from "@/lib/records";
+import { activityModality, type Entry, type Summary } from "@/lib/records";
 import { statusLabel, formatDate, today, isDate, number } from "@/lib/domain";
 export const metadata = { title: "Seu painel" };
 export const dynamic = "force-dynamic";
@@ -35,7 +38,9 @@ export default async function Panel({
   searchParams: Promise<{ projeto?: string; data?: string }>;
 }) {
   const params = await searchParams,
-    { selected, active, client, user } = await projectContext(params.projeto);
+    { selected, active, client, user, projects } = await projectContext(
+      params.projeto,
+    );
   const date =
     params.data && isDate(params.data)
       ? params.data
@@ -208,11 +213,15 @@ export default async function Panel({
       ]
     : [];
   return (
-    <>
+    <div className="v2-dashboard" data-photos-hidden={!preferences.show_photos}>
       <section className="welcome dashboard-welcome">
-        <p className="eyebrow">SEU ESPAÇO</p>
-        <h1>Olá, vamos cuidar de você?</h1>
-        <p className="intro">Consistência hoje para um amanhã melhor.</p>
+        <p className="eyebrow">UM DIA DE CADA VEZ</p>
+        <h1>
+          {date === today()
+            ? "Aqui está o seu progresso hoje"
+            : `Seu progresso em ${formatDate(date)}`}
+        </h1>
+        <p className="intro">Sua rotina, no seu ritmo.</p>
       </section>
       <Link
         className="dashboard-preferences"
@@ -233,18 +242,22 @@ export default async function Panel({
       </Link>
       {selected && summary ? (
         <>
-          <DayOverview
-            date={date}
-            project={selected.id}
-            projectName={selected.name}
-            plannedWorkouts={plannedWorkouts}
-            phase={phase}
-            checkin={checkinRecorded}
-            available={followupAvailable}
-            editable={
-              selected.status === "ACTIVE" && selected.id === active?.id
-            }
-          />
+          <div className="v2-dashboard-toolbar">
+            <ProjectSelector
+              projects={projects}
+              selected={selected}
+              active={active}
+              date={date}
+            />
+            <Link
+              className="v2-date-link"
+              href={`/painel/historico?projeto=${selected.id}&data=${date}`}
+            >
+              <History size={19} aria-hidden="true" />
+              {formatDate(date)}
+              <ArrowRight size={16} aria-hidden="true" />
+            </Link>
+          </div>
           <section className="project-card dashboard-hero">
             <div className="project-content">
               <span className="status">
@@ -258,17 +271,7 @@ export default async function Panel({
                 Desde {formatDate(selected.starts_on)}
                 {selected.ends_on && ` até ${formatDate(selected.ends_on)}`}
               </p>
-              {preferences.show_weight && (
-                <p className="intro">
-                  {selected.weight_mode === "target"
-                    ? `Peso alvo: ${number(selected.weight_min!, 2)} kg`
-                    : selected.weight_mode === "range"
-                      ? `Faixa de peso: ${number(selected.weight_min!, 2)} a ${number(selected.weight_max!, 2)} kg`
-                      : selected.weight_mode === "track"
-                        ? "Peso em acompanhamento, sem alvo numérico."
-                        : "Meta de peso não configurada."}
-                </p>
-              )}
+              <ProjectTimeline project={selected} date={date} />
               <Link
                 className="button-secondary dashboard-manage"
                 href="/painel/projetos"
@@ -289,97 +292,11 @@ export default async function Panel({
                 : "Ative um projeto para começar a registrar."}
             </p>
           )}
-          {preferences.show_calories && (
-            <section
-              className="daily-nutrition content-card"
-              aria-label="Resumo alimentar do dia"
-            >
-              <div className="daily-calories">
-                <span className="icon-box">
-                  <Utensils size={22} aria-hidden="true" />
-                </span>
-                <div>
-                  <span className="muted">
-                    Alimentação de {formatDate(date)}
-                  </span>
-                  <p
-                    className={`daily-metric${summary.kcal === null ? " daily-empty" : ""}`}
-                  >
-                    {summary.kcal === null
-                      ? "Não informado"
-                      : number(summary.kcal)}
-                    {summary.kcal !== null && <small> kcal</small>}
-                  </p>
-                  <span className="muted">
-                    {summary.missing_kcal > 0 && summary.kcal !== null
-                      ? "Subtotal parcial"
-                      : "Valores informados no diário"}
-                  </span>
-                </div>
-              </div>
-              <dl className="daily-macros">
-                {(
-                  [
-                    ["Proteínas", summary.protein, summary.missing_protein],
-                    ["Carboidratos", summary.carbs, summary.missing_carbs],
-                    ["Gorduras", summary.fat, summary.missing_fat],
-                  ] as const
-                ).map(([label, value, missing]) => (
-                  <div key={label}>
-                    <dt>{label}</dt>
-                    <dd>
-                      {value === null ? "Não informado" : `${number(value)} g`}
-                      {value !== null && missing > 0 && (
-                        <small className="muted"> · subtotal parcial</small>
-                      )}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-              {diet && (
-                <div className="dashboard-diet-comparison">
-                  <h3>Plano e consumo do dia</h3>
-                  <CalorieBalance
-                    consumed={summary.kcal}
-                    planned={diet.totals.kcal.value}
-                    partial={
-                      diet.totals.kcal.missing > 0 || summary.missing_kcal > 0
-                    }
-                  />
-                  <dl className="diet-comparison-grid">
-                    <div>
-                      <dt>Refeições planejadas</dt>
-                      <dd>{diet.plannedMeals}</dd>
-                    </div>
-                    <div>
-                      <dt>Refeições com registros</dt>
-                      <dd>{diet.recordedMeals}</dd>
-                    </div>
-                    <div>
-                      <dt>Refeições vinculadas ao plano</dt>
-                      <dd>{diet.registeredMeals.length}</dd>
-                    </div>
-                  </dl>
-                  <p className="field-hint">
-                    Refeições com registros contam as categorias do diário.
-                    Cópias e lançamentos manuais só contam no plano quando
-                    vinculados a uma refeição dele.
-                  </p>
-                  <Link
-                    className="button-secondary meal-record-link"
-                    href={`/painel/plano?projeto=${selected.id}&data=${date}`}
-                  >
-                    <Utensils size={20} aria-hidden="true" />
-                    <span>Consultar plano alimentar</span>
-                    <ArrowRight size={18} aria-hidden="true" />
-                  </Link>
-                </div>
-              )}
-            </section>
-          )}
           <section className="areas-section" aria-labelledby="daily-title">
             <div className="section-heading">
-              <h2 id="daily-title">Seu dia, por inteiro</h2>
+              <h1 id="daily-title">
+                {date === today() ? "Visão de hoje" : "Visão do dia"}
+              </h1>
               <span>{formatDate(date)}</span>
             </div>
             <div className="area-grid">
@@ -396,16 +313,39 @@ export default async function Panel({
                     <span className="icon-box">
                       <Icon size={22} aria-hidden="true" />
                     </span>
-                    <h3>
+                    <h2>
                       {label}
                       <span aria-hidden="true">›</span>
-                    </h3>
+                    </h2>
                     <p
                       className={`metric-value${empty ? " metric-empty" : ""}`}
                     >
                       {value}
                     </p>
                     <p>{detail}</p>
+                    {module === "alimentacao" && preferences.show_calories && (
+                      <dl className="v2-card-macros">
+                        {(
+                          [
+                            ["P", summary.protein, summary.missing_protein],
+                            ["C", summary.carbs, summary.missing_carbs],
+                            ["G", summary.fat, summary.missing_fat],
+                          ] as const
+                        ).map(([label, value, missing]) => (
+                          <div key={label}>
+                            <dt>{label}</dt>
+                            <dd>
+                              {value === null
+                                ? "—"
+                                : `${number(Number(value))} g`}
+                              {value !== null && missing > 0 && (
+                                <small> parcial</small>
+                              )}
+                            </dd>
+                          </div>
+                        ))}
+                      </dl>
+                    )}
                     {module === "peso" && weights.length >= 2 && (
                       <>
                         <p className="metric-comparison">
@@ -493,6 +433,56 @@ export default async function Panel({
                             : `${number(diet.totals.kcal.value)} kcal planejadas`}
                         </p>
                       )}
+                    {module === "alimentacao" &&
+                      preferences.show_calories &&
+                      diet &&
+                      diet.totals.kcal.value !== null &&
+                      diet.totals.kcal.value > 0 &&
+                      summary.kcal !== null &&
+                      summary.missing_kcal === 0 &&
+                      diet.totals.kcal.missing === 0 && (
+                        <ProgressRing
+                          value={summary.kcal}
+                          max={diet.totals.kcal.value}
+                          label="Consumo registrado em relação ao plano alimentar"
+                        >
+                          <strong>
+                            {number(
+                              Math.round(
+                                (summary.kcal / diet.totals.kcal.value) * 100,
+                              ),
+                              0,
+                            )}
+                            %
+                          </strong>
+                        </ProgressRing>
+                      )}
+                    {module === "agua" &&
+                      summary.water_ml !== null &&
+                      summary.water_goal !== null &&
+                      summary.water_goal > 0 &&
+                      summary.water_ml > 0 && (
+                        <svg
+                          className="v2-water-wave"
+                          viewBox="0 0 160 50"
+                          preserveAspectRatio="none"
+                          aria-hidden="true"
+                          style={{
+                            height: `${12 + Math.min(1, summary.water_ml / summary.water_goal) * 36}px`,
+                          }}
+                        >
+                          <path
+                            d="M0 18 Q40 0 80 18 T160 18 V50 H0Z"
+                            fill="currentColor"
+                            fillOpacity=".3"
+                          />
+                          <path
+                            d="M0 10 Q40 35 80 16 T160 10 V50 H0Z"
+                            fill="currentColor"
+                            fillOpacity=".5"
+                          />
+                        </svg>
+                      )}
                     {module === "agua" &&
                       summary.water_ml !== null &&
                       summary.water_goal !== null && (
@@ -508,6 +498,206 @@ export default async function Panel({
                 ))}
             </div>
           </section>
+          <QuickActions
+            project={selected.id}
+            date={date}
+            editable={
+              selected.status === "ACTIVE" && selected.id === active?.id
+            }
+          />
+          <div className="v2-insights">
+            {preferences.show_weight && (
+              <section
+                className="content-card v2-weight-panel"
+                aria-labelledby="weight-trend-title"
+              >
+                <div className="section-heading">
+                  <h2 id="weight-trend-title">Evolução do peso</h2>
+                  <Link
+                    href={`/painel/peso?projeto=${selected.id}&data=${date}`}
+                  >
+                    Ver histórico <ArrowRight size={15} aria-hidden="true" />
+                  </Link>
+                </div>
+                <WeightChart rows={weights} />
+                <p className="field-hint">
+                  Últimas {weights.length} medições disponíveis até{" "}
+                  {formatDate(date)}.
+                </p>
+              </section>
+            )}
+            {preferences.show_calories && (
+              <section
+                className="daily-nutrition content-card"
+                aria-label="Resumo alimentar do dia"
+              >
+                <h2>Macronutrientes do dia</h2>
+                <div className="daily-calories">
+                  <span className="icon-box">
+                    <Utensils size={22} aria-hidden="true" />
+                  </span>
+                  <div>
+                    <span className="muted">
+                      Alimentação de {formatDate(date)}
+                    </span>
+                    <p
+                      className={`daily-metric${summary.kcal === null ? " daily-empty" : ""}`}
+                    >
+                      {summary.kcal === null
+                        ? "Não informado"
+                        : number(summary.kcal)}
+                      {summary.kcal !== null && <small> kcal</small>}
+                    </p>
+                    <span className="muted">
+                      {summary.missing_kcal > 0 && summary.kcal !== null
+                        ? "Subtotal parcial"
+                        : "Valores informados no diário"}
+                    </span>
+                  </div>
+                </div>
+                <dl className="daily-macros">
+                  {(
+                    [
+                      ["Proteínas", summary.protein, summary.missing_protein],
+                      ["Carboidratos", summary.carbs, summary.missing_carbs],
+                      ["Gorduras", summary.fat, summary.missing_fat],
+                    ] as const
+                  ).map(([label, value, missing]) => (
+                    <div key={label}>
+                      <dt>{label}</dt>
+                      <dd>
+                        {value === null
+                          ? "Não informado"
+                          : `${number(value)} g`}
+                        {value !== null && missing > 0 && (
+                          <small className="muted"> · subtotal parcial</small>
+                        )}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+                {diet && (
+                  <div className="dashboard-diet-comparison">
+                    <h3>Plano e consumo do dia</h3>
+                    <CalorieBalance
+                      consumed={summary.kcal}
+                      planned={diet.totals.kcal.value}
+                      partial={
+                        diet.totals.kcal.missing > 0 || summary.missing_kcal > 0
+                      }
+                    />
+                    <dl className="diet-comparison-grid">
+                      <div>
+                        <dt>Refeições planejadas</dt>
+                        <dd>{diet.plannedMeals}</dd>
+                      </div>
+                      <div>
+                        <dt>Refeições com registros</dt>
+                        <dd>{diet.recordedMeals}</dd>
+                      </div>
+                      <div>
+                        <dt>Refeições vinculadas ao plano</dt>
+                        <dd>{diet.registeredMeals.length}</dd>
+                      </div>
+                    </dl>
+                    <p className="field-hint">
+                      Refeições com registros contam as categorias do diário.
+                      Cópias e lançamentos manuais só contam no plano quando
+                      vinculados a uma refeição dele.
+                    </p>
+                    <Link
+                      className="button-secondary meal-record-link"
+                      href={`/painel/plano?projeto=${selected.id}&data=${date}`}
+                    >
+                      <Utensils size={20} aria-hidden="true" />
+                      <span>Consultar plano alimentar</span>
+                      <ArrowRight size={18} aria-hidden="true" />
+                    </Link>
+                  </div>
+                )}
+              </section>
+            )}
+            <section
+              className="content-card v2-recent-activities"
+              aria-labelledby="recent-activity-title"
+            >
+              <div className="section-heading">
+                <h2 id="recent-activity-title">Atividades do dia</h2>
+                <Link
+                  href={`/painel/atividades?projeto=${selected.id}&data=${date}`}
+                >
+                  Ver tudo <ArrowRight size={15} aria-hidden="true" />
+                </Link>
+              </div>
+              {!activities.length ? (
+                <p className="v2-empty-note">
+                  Seus movimentos aparecem aqui quando você os registra. Cada
+                  dia tem seu ritmo.
+                </p>
+              ) : (
+                <ul>
+                  {activities.slice(0, 4).map((row) => (
+                    <li key={row.id}>
+                      <span className="v2-activity-icon">
+                        <Dumbbell size={21} aria-hidden="true" />
+                      </span>
+                      <Link
+                        href={`/painel/atividades?projeto=${selected.id}&data=${date}#registros-do-dia`}
+                      >
+                        <strong>{row.name || activityModality(row)}</strong>
+                        <span>
+                          {activityModality(row)} ·{" "}
+                          {number(Number(row.duration_min ?? 0))} min
+                          {row.distance_km == null
+                            ? ""
+                            : ` · ${number(Number(row.distance_km), 2)} km`}
+                        </span>
+                      </Link>
+                      <ArrowRight size={16} aria-hidden="true" />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+            <section
+              className="content-card v2-project-panel"
+              aria-labelledby="project-progress-title"
+            >
+              <div className="section-heading">
+                <h2 id="project-progress-title">Seu projeto</h2>
+                <Link href="/painel/projetos">
+                  Ver detalhes <ArrowRight size={15} aria-hidden="true" />
+                </Link>
+              </div>
+              <h3>{selected.name}</h3>
+              <p className="muted">
+                {formatDate(selected.starts_on)}
+                {selected.ends_on && ` — ${formatDate(selected.ends_on)}`}
+              </p>
+              <ProjectTimeline project={selected} date={date} />
+              <p className="field-hint">
+                O tempo decorrido não representa aderência ou resultado físico.
+              </p>
+            </section>
+          </div>
+          <details className="v2-followup">
+            <summary>
+              Planejamento e acompanhamento do dia{" "}
+              <ArrowRight size={18} aria-hidden="true" />
+            </summary>
+            <DayOverview
+              date={date}
+              project={selected.id}
+              projectName={selected.name}
+              plannedWorkouts={plannedWorkouts}
+              phase={phase}
+              checkin={checkinRecorded}
+              available={followupAvailable}
+              editable={
+                selected.status === "ACTIVE" && selected.id === active?.id
+              }
+            />
+          </details>
           {!sleepAvailable && (
             <p role="status" className="readonly-note">
               O sono está temporariamente indisponível. Seus outros registros
@@ -565,7 +755,7 @@ export default async function Panel({
         </>
       ) : (
         <div className="content-card">
-          <h2>Vamos preparar seu primeiro projeto?</h2>
+          <h1>Vamos preparar seu primeiro projeto?</h1>
           <p className="intro">
             Escolha pelo menos uma meta de água, peso ou sessões para começar.
           </p>
@@ -575,6 +765,6 @@ export default async function Panel({
         </div>
       )}
       <LogoutButton />
-    </>
+    </div>
   );
 }

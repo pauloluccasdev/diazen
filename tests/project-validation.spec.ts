@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 test("projetos mostram metas condicionais, explicam início futuro e destacam navegação", async ({
   page,
 }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/entrar");
   await page
     .getByLabel("E-mail", { exact: true })
@@ -12,9 +13,11 @@ test("projetos mostram metas condicionais, explicam início futuro e destacam na
   await expect(page).toHaveURL(/\/painel$/);
   const nav = page.getByRole("navigation", { name: "Navegação do painel" });
   await expect(
-    nav.getByRole("link", { name: "Dashboard", exact: true }),
+    nav.getByRole("link", { name: "Início", exact: true }),
   ).toHaveAttribute("aria-current", "page");
+  await nav.getByText("Mais", { exact: true }).click();
   await nav.getByRole("link", { name: "Minha conta", exact: true }).click();
+  await nav.getByText("Mais", { exact: true }).click();
   await expect(
     nav.getByRole("link", { name: "Minha conta", exact: true }),
   ).toHaveAttribute("aria-current", "page");
@@ -23,7 +26,7 @@ test("projetos mostram metas condicionais, explicam início futuro e destacam na
   await expect(active).toHaveAttribute("aria-current", "page");
   expect(await active.evaluate((el) => getComputedStyle(el).color)).not.toBe(
     await nav
-      .getByRole("link", { name: "Dashboard", exact: true })
+      .getByRole("link", { name: "Início", exact: true })
       .evaluate((el) => getComputedStyle(el).color),
   );
   const form = page.locator(".project-create form");

@@ -70,7 +70,7 @@ export function WeightChart({ rows }: { rows: Entry[] }) {
         {coordinates.map(({ x, y, row }) => (
           <circle key={row.id} cx={x} cy={y} r="4" fill="#FF9F24">
             <title>
-              {formatDate(row.logged_on)}: {number(row.kg!)} kg
+              {`${formatDate(row.logged_on)}: ${number(row.kg!)} kg`}
             </title>
           </circle>
         ))}
