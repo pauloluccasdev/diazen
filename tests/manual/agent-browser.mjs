@@ -128,7 +128,7 @@ async function goto(path) {
   });
 }
 async function clickText(value, tag = "button", scope = "document") {
-  const code = `(() => { const root=${scope}; const e=[...root.querySelectorAll(${JSON.stringify(tag)})].find(e=>e.textContent.trim()===${JSON.stringify(value)} && e.getClientRects().length && !e.matches(':disabled')); if(!root || !e || (['button','summary'].includes(${JSON.stringify(tag)}) && !Object.keys(e).some(k=>k.startsWith('__reactProps'))))return false; document.querySelectorAll('[data-qa-target]').forEach(e=>e.removeAttribute('data-qa-target'));e.setAttribute('data-qa-target','yes');return true;})()`;
+  const code = `(() => { const root=${scope}; const e=[...root.querySelectorAll(${JSON.stringify(tag)})].find(e=>e.textContent.trim()===${JSON.stringify(value)} && e.getClientRects().length && !e.matches(':disabled') && (!e.closest('details:not([open])') || e.matches('summary'))); if(!root || !e || (['button','summary'].includes(${JSON.stringify(tag)}) && !Object.keys(e).some(k=>k.startsWith('__reactProps'))))return false; document.querySelectorAll('[data-qa-target]').forEach(e=>e.removeAttribute('data-qa-target'));e.setAttribute('data-qa-target','yes');return true;})()`;
   await until(code);
   if (tag === "summary" || tag === "button") {
     // Resolve the hydrated target again after pagination. Scroll instantly so
@@ -282,7 +282,9 @@ async function login(email) {
 }
 async function logout() {
   await goto("/painel/perfil");
-  await clickText("Sair da conta");
+  // The account menu also contains this action, inside a closed details.
+  // Exercise the visible profile action rather than the header's duplicate.
+  await clickText("Sair da conta", "button", "document.querySelector('main')");
   await ab("wait", "--url", "**/entrar");
 }
 async function project(name) {
@@ -1430,6 +1432,10 @@ try {
     report.failureBody = await evaluate(
       "document.querySelector('main')?.innerText",
     );
+    if (!hosted)
+      report.failureControls = await evaluate(
+        "[...document.querySelectorAll('main button')].map(e=>({text:e.textContent.trim(),rects:e.getClientRects().length,disabled:e.matches(':disabled'),hydrated:Object.keys(e).some(k=>k.startsWith('__reactProps'))}))",
+      );
     await ab(
       "screenshot",
       new URL(`${run}-failure.png`, output).pathname,

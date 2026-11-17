@@ -32,8 +32,8 @@ Após o discovery, o proprietário autorizou seguir por todas as fases sem pausa
 - [x] Nova composição peso/macros e três painéis inferiores, com dados reais e estados parciais.
 - [x] Testes de cálculo: nulos, zero, proporções energéticas e datas.
 - [x] Build de produção.
-- [ ] Revisão visual final contra R01 em notebook/amplo, light/dark.
-- [ ] Chromium/WebKit e regressão dos fluxos pertinentes.
-- [ ] Evidências, commit e integração na develop.
+- [x] Revisão visual contra R01 em notebook/amplo, light/dark; diferenças funcionais documentadas.
+- [x] Jornadas direcionadas Chromium/WebKit e fluxos pertinentes; seis cenários WebKit aprovados.
+- [ ] CI completa e integração na develop; implementação enviada em `350f774`.
 
 Uma fase só muda para concluída com evidência de implementação e verificação. Séries realizadas/tonelagem e demais extensões condicionais da matriz não são contabilizadas como entregues pelo simples redesign de suas regiões.

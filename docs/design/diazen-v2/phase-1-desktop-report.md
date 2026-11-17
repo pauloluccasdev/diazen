@@ -26,7 +26,7 @@ Fluxo verificado: interface → consultas/autenticação no servidor → Postgre
 - Três testes de cálculo: dias bissextos/períodos, zero/nulo/subtotal por data e proporções energéticas, aprovados.
 - Jornadas Chromium direcionadas de alimentação, porção zero, atividades, acompanhamento e dashboard passaram durante a implementação. A revisão completa identificou acessibilidade do rótulo da data e alvo de toque em1024px; corrigidos sem relaxar o axe.
 - Última execução direcionada Chromium: os dois cenários de dashboard passaram (20,6s), incluindo Light/Dark, HTML inicial do tema, busca/Escape, períodos, datas, ausência de exceções e exportação inalterada.
-- WebKit e CI completa ficam registrados nos checks do commit da branch; o estado corrente de integração é mantido no quadro de execução. Não declarar homologação em iPhone físico.
+- Última execução direcionada WebKit: seis cenários aprovados (1,5min), cobrindo desktop/responsividade, alimentação/porção zero, atividades e acompanhamento. CI completa em execução no commit `350f774`: [Qualidade](https://github.com/pauloluccasdev/diazen/actions/runs/44109073955). Não declarar homologação em iPhone físico.
 
 React: efeitos somente para atalhos e fechamento externo, com cleanup; estado de tema inicial vem do servidor; leituras independentes em paralelo, sem cliente administrativo; dados de saúde não entram em índice global de busca ou cookie. SVG usa strings únicas nos títulos e papéis explícitos nos pontos focáveis, preservando correções de hidratação e compatibilidade WebKit.
 
