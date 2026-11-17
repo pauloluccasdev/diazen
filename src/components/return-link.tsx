@@ -5,12 +5,18 @@ import type { ReactNode } from "react";
 export function ReturnLink({
   href,
   children,
+  ariaLabel,
 }: {
   href: string;
   children: ReactNode;
+  ariaLabel?: string;
 }) {
   return (
-    <Link className="button-secondary return-link" href={href}>
+    <Link
+      className="button-secondary return-link"
+      href={href}
+      aria-label={ariaLabel}
+    >
       <ArrowLeft size={20} aria-hidden="true" />
       <span>{children}</span>
     </Link>

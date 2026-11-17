@@ -4,6 +4,10 @@
   --v2-data: #08b8e4;
   --v2-data-stroke: #08b8e4;
   --v2-data-text: #55d8f4;
+  --dz-data-soft: #12343c;
+  --dz-protein: #f16769;
+  --dz-carbs: #08b8e4;
+  --dz-fat: #a25cef;
   --v2-radius: 22px;
   --v2-shadow: 0 6px 20px #0000002e;
   --color-bg: #101113;
@@ -20,6 +24,7 @@
   --color-accent-pressed: #edac13;
   --color-accent-soft: #3c3018;
   --color-success: #69d99a;
+  --dz-success-soft: #183629;
   --color-danger: #ff858d;
   --dz-space-1: 4px;
   --dz-space-2: 8px;
@@ -47,9 +52,11 @@
     --color-accent: #805600;
     --color-accent-soft: #fff5dd;
     --color-success: #176a3b;
+    --dz-success-soft: #e2f4e9;
     --color-danger: #b7203b;
     --v2-shadow: 0 8px 24px #1519230f;
     --v2-data-stroke: #0098bd;
     --v2-data-text: #006b85;
+    --dz-data-soft: #d9f4fc;
   }
 }

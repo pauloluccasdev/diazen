@@ -1,3 +1,4 @@
+import { openManualMealRecorder } from "./helpers/food-diary";
 import { expect, test, type Page } from "@playwright/test";
 import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
@@ -126,7 +127,7 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
   ).toBeVisible();
   await capture("atividades");
   await page.goto("/painel/alimentacao");
-  await page.locator(".record-create > summary").click();
+  await openManualMealRecorder(page);
   const meal = form(page, "Salvar registro");
   await meal
     .getByLabel("Alimento", { exact: true })
@@ -142,7 +143,7 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
     page.locator(".nutrition-grid").getByText("Não informado", { exact: true }),
   ).toHaveCount(4);
   await expect(
-    page.getByText("Parcial: o diário", { exact: false }),
+    page.getByText("Sem plano para comparar.", { exact: false }),
   ).toBeVisible();
   const savedMeal = page.getByRole("dialog", {
     name: "Registro salvo",
@@ -154,7 +155,9 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
     .click();
   await expect(savedMeal).toHaveCount(0);
   await expect(meal.getByLabel("Alimento", { exact: true })).toHaveValue("");
-  await page.locator(".meal-record-group > summary").click();
+  await page
+    .locator(".meal-record-group[data-recorded=true] > summary")
+    .click();
   await page
     .getByRole("article", { includeHidden: true })
     .locator(".food-record-details > summary")
@@ -175,7 +178,7 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
     page.locator(".nutrition-grid").getByText("0 kcal", { exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByText("Parcial: o diário", { exact: false }),
+    page.getByText("Sem plano para comparar.", { exact: false }),
   ).toBeVisible();
   await expect(page.locator(".food-calendar")).toHaveCount(0);
   await expect(page.locator(".module-page > form.filter-form")).toHaveCount(0);

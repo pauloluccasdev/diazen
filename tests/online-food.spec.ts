@@ -1,3 +1,4 @@
+import { openManualMealRecorder } from "./helpers/food-diary";
 import { test, expect } from "@playwright/test";
 import { dietPdf } from "./fixtures/diet-pdf.mjs";
 import AxeBuilder from "@axe-core/playwright";
@@ -231,7 +232,7 @@ test("alimento tem resumo, troca explícita e referência online automática e e
         .locator(".record-create")
         .evaluate((e) => (e as HTMLDetailsElement).open))
     )
-      await page.locator(".record-create > summary").click();
+      await openManualMealRecorder(page);
     const form = page.locator("form").filter({
       has: page.getByRole("button", { name: "Salvar registro", exact: true }),
     });

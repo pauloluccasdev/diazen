@@ -1,5 +1,5 @@
-import { MealDeleteDialog } from "@/components/meal-delete-dialog";
-import { ClearOfflineData } from "@/components/offline-snapshot";
+import { FoodDiary } from "@/components/nutrition/food-diary";
+import { foodDayEntries } from "@/lib/food-day-data";
 import { ActivityRecordCard } from "@/components/activity-record-card";
 import { ActivityWeekSummary } from "@/components/activity-week-summary";
 import { weekBounds } from "@/lib/records";
@@ -7,14 +7,10 @@ import { GarminConnection } from "@/components/garmin-connection";
 import { garminConfig } from "@/lib/garmin-config";
 import type { ReactNode } from "react";
 import { dashboardPlan } from "@/lib/dashboard-plan";
-import { ManualMealRecorder } from "@/components/manual-meal-recorder";
-import { PlanMealRecorder } from "@/components/plan-meal-recorder";
 import { ActionDisclosure } from "@/components/action-disclosure";
 import {
   PencilLine,
   Trash2,
-  FileUp,
-  FileText,
   ChevronRight,
   ChevronDown,
   History,
@@ -38,7 +34,6 @@ import {
 } from "@/lib/records";
 import { ActionForm } from "@/components/forms/action-form";
 import { RecordFields } from "@/components/forms/record-fields";
-import { FoodConveniences } from "@/components/food-conveniences";
 import { ProgressRing } from "@/components/progress-ring";
 import { Droplets } from "lucide-react";
 import { WeightChart } from "@/components/weight-chart";
@@ -108,6 +103,7 @@ export default async function Records({
     pagina?: string;
     refeicao_excluida?: string;
     registrar?: string;
+    refeicao?: string;
   }>;
 }) {
   const { modulo } = await params;
@@ -119,7 +115,7 @@ export default async function Records({
     Math.max(1, Math.floor(Number(filters.pagina) || 1)),
   );
   const context = await projectContext(filters.projeto),
-    { selected, active, client, user } = context;
+    { selected, active, client, user, projects } = context;
   if (!selected)
     return (
       <section className="welcome">
@@ -142,47 +138,53 @@ export default async function Records({
   if (daily || modulo === "atividades" || filters.data)
     query = query.eq("logged_on", date);
   const week = weekBounds(date);
-  const [entries, totals, graph, diet, weekCounts] = await Promise.all([
-    query.returns<Entry[]>(),
-    client.rpc("project_summary", {
-      p_project: selected.id,
-      p_date: date,
-    }),
-    modulo === "peso"
-      ? client
-          .from("weights")
-          .select("*")
-          .eq("project_id", selected.id)
-          .lte("logged_on", date)
-          .order("logged_on", { ascending: false })
-          .limit(30)
-          .returns<Entry[]>()
-      : Promise.resolve({ data: [] as Entry[], error: null }),
-    modulo === "alimentacao"
-      ? dashboardPlan(client, selected.id, date)
-      : Promise.resolve(null),
-    modulo === "atividades"
-      ? (async () => {
-          const counts: Record<string, number> = {};
-          for (let offset = 0; ; offset += 1000) {
-            const result = await client
-              .from("activities")
-              .select("logged_on")
-              .eq("project_id", selected.id)
-              .gte("logged_on", week.start)
-              .lte("logged_on", week.end)
-              .order("id")
-              .range(offset, offset + 999);
-            if (result.error)
-              throw Error("Não foi possível carregar a semana de atividades.");
-            for (const row of result.data ?? [])
-              counts[row.logged_on] = (counts[row.logged_on] ?? 0) + 1;
-            if ((result.data?.length ?? 0) < 1000) break;
-          }
-          return counts;
-        })()
-      : Promise.resolve({} as Record<string, number>),
-  ]);
+  const [entries, totals, graph, diet, weekCounts, allFoods] =
+    await Promise.all([
+      query.returns<Entry[]>(),
+      client.rpc("project_summary", {
+        p_project: selected.id,
+        p_date: date,
+      }),
+      modulo === "peso"
+        ? client
+            .from("weights")
+            .select("*")
+            .eq("project_id", selected.id)
+            .lte("logged_on", date)
+            .order("logged_on", { ascending: false })
+            .limit(30)
+            .returns<Entry[]>()
+        : Promise.resolve({ data: [] as Entry[], error: null }),
+      modulo === "alimentacao"
+        ? dashboardPlan(client, selected.id, date)
+        : Promise.resolve(null),
+      modulo === "atividades"
+        ? (async () => {
+            const counts: Record<string, number> = {};
+            for (let offset = 0; ; offset += 1000) {
+              const result = await client
+                .from("activities")
+                .select("logged_on")
+                .eq("project_id", selected.id)
+                .gte("logged_on", week.start)
+                .lte("logged_on", week.end)
+                .order("id")
+                .range(offset, offset + 999);
+              if (result.error)
+                throw Error(
+                  "Não foi possível carregar a semana de atividades.",
+                );
+              for (const row of result.data ?? [])
+                counts[row.logged_on] = (counts[row.logged_on] ?? 0) + 1;
+              if ((result.data?.length ?? 0) < 1000) break;
+            }
+            return counts;
+          })()
+        : Promise.resolve({} as Record<string, number>),
+      modulo === "alimentacao"
+        ? foodDayEntries(client, selected.id, date)
+        : Promise.resolve([] as Entry[]),
+    ]);
   if (entries.error) throw new Error("Falha ao carregar registros");
   if (totals.error) throw new Error("Falha ao carregar totais");
   if (graph.error) throw new Error("Falha no gráfico");
@@ -266,6 +268,25 @@ export default async function Records({
       </RecordPresentation>
     </article>
   );
+  if (modulo === "alimentacao")
+    return (
+      <FoodDiary
+        client={client}
+        projects={projects}
+        selected={selected}
+        active={active}
+        date={date}
+        summary={summary}
+        diet={diet}
+        page={page}
+        rows={rows}
+        allRows={allFoods}
+        hasMore={hasMore}
+        filters={filters}
+        renderRecord={renderRecord}
+      />
+    );
+
   return (
     <div className={`module-page module-${modulo}`}>
       <section className="welcome module-welcome">
@@ -308,42 +329,8 @@ export default async function Records({
           <Link href={`/painel/fotos?projeto=${selected.id}`}>Fotos</Link>
         </nav>
       )}
-      {modulo === "alimentacao" && (
-        <Link
-          className="plan-entry"
-          href={`/painel/plano?projeto=${selected.id}&data=${date}`}
-        >
-          <span className="plan-entry-icon" aria-hidden="true">
-            {diet ? <FileText size={24} /> : <FileUp size={24} />}
-          </span>
-          <span className="plan-entry-content">
-            <strong>Meu plano alimentar</strong>
-            <span>
-              {diet
-                ? "Plano salvo · consulte as refeições ou revise o planejamento."
-                : "Importe seu PDF e confira calorias e nutrientes."}
-            </span>
-          </span>
-          <ChevronRight
-            className="plan-entry-chevron"
-            size={20}
-            aria-hidden="true"
-          />
-        </Link>
-      )}
-      {editable && modulo === "alimentacao" && (
-        <ManualMealRecorder
-          initiallyOpen={filters.registrar === "1"}
-          date={date}
-          min={selected.starts_on}
-          max={
-            selected.ends_on && selected.ends_on < today()
-              ? selected.ends_on
-              : today()
-          }
-        />
-      )}
-      {editable && modulo !== "alimentacao" && (
+
+      {editable && (
         <details
           id="novo-registro"
           open={filters.registrar === "1"}
@@ -394,38 +381,7 @@ export default async function Records({
       </Link>
 
       {modulo === "atividades" && garminConfig(user.id) && <GarminConnection />}
-      {modulo === "alimentacao" && diet && (
-        <section className="planned-meals" aria-label="Refeições do plano">
-          <h2>Suas refeições planejadas</h2>
-          <p className="intro">
-            Data consultada: {formatDate(date)}. Abra uma refeição do plano para
-            registrar o que consumiu ou ajustar as porções. Para incluir outros
-            alimentos, use “Registrar refeição”. Esses ajustes alteram apenas
-            seu diário; o plano da nutricionista fica preservado.
-          </p>
-          {diet.document.meals.map(
-            (meal, index) =>
-              meal.enabled && (
-                <PlanMealRecorder
-                  key={`${diet.id}-${index}-${date}`}
-                  plan={diet.id}
-                  index={index}
-                  meal={meal}
-                  date={date}
-                  min={selected.starts_on}
-                  max={
-                    selected.ends_on && selected.ends_on < today()
-                      ? selected.ends_on
-                      : today()
-                  }
-                  registered={diet.registeredMeals.includes(index)}
-                  actual={diet.mealActuals[index]}
-                  editable={editable}
-                />
-              ),
-          )}
-        </section>
-      )}
+
       {modulo === "agua" && (
         <section className="content-card hydration-summary">
           <ProgressRing
@@ -500,67 +456,7 @@ export default async function Records({
           today={today()}
         />
       )}
-      {modulo === "alimentacao" && (
-        <>
-          <section className="content-card">
-            <h2>Totais de {formatDate(date)}</h2>
-            <div className="nutrition-grid">
-              {Object.entries(nutrients).map(([key, label]) => {
-                const k = key as keyof typeof nutrients,
-                  v = summary[k],
-                  missing = Number(summary[`missing_${k}`]);
-                return (
-                  <div key={key}>
-                    <span className="muted">{label}</span>
-                    <strong
-                      className={v === null ? "nutrition-empty" : undefined}
-                    >
-                      {v === null
-                        ? "Não informado"
-                        : `${number(v)} ${key === "kcal" ? "kcal" : "g"}`}
-                    </strong>
-                    {missing > 0 && v !== null && (
-                      <span className="muted">
-                        Subtotal parcial · {missing} sem valor
-                      </span>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-            <p className="intro">
-              {diet?.complete
-                ? "Completo: todas as refeições do plano foram registradas."
-                : Number(summary.food_count) > 0
-                  ? "Parcial: o diário ainda não contém todas as refeições do plano."
-                  : "Sem registros neste dia."}
-            </p>
-            <p className="field-hint">
-              O status é atualizado automaticamente pelos registros. Sem plano
-              salvo, não é possível determinar se todas as refeições foram
-              feitas.
-            </p>
-          </section>
-        </>
-      )}
-      {modulo === "alimentacao" && (
-        <FoodConveniences
-          client={client}
-          project={selected.id}
-          date={date}
-          activeName={active?.name}
-          activeProject={active?.id}
-        />
-      )}
-      {modulo === "alimentacao" && filters.refeicao_excluida === "1" && (
-        <>
-          <ClearOfflineData />
-          <p role="status" className="form-success">
-            Refeição excluída. Todos os alimentos desse grupo foram removidos
-            dos registros da data.
-          </p>
-        </>
-      )}
+
       <section
         id="registros-do-dia"
         className="records-section"
@@ -579,69 +475,8 @@ export default async function Records({
               : "Sem registros para esta consulta."}
           </p>
         )}
-        {modulo === "alimentacao" && (
-          <p className="intro">
-            {summary.food_count} alimentos neste dia. Abra uma refeição para ver
-            os alimentos. Selecione um alimento para conferir a composição,
-            editar ou excluir.
-          </p>
-        )}
-        {modulo === "alimentacao"
-          ? Object.entries(categories).map(([category, label]) => {
-              const items = rows.filter((row) => row.category === category);
-              if (!items.length) return null;
-              const known = items.filter((row) => row.kcal != null);
-              const kcal = known.reduce(
-                (sum, row) =>
-                  sum +
-                  (Number(row.kcal) * Number(row.amount)) /
-                    Number(row.reference_amount),
-                0,
-              );
-              const partial =
-                known.length !== items.length || hasMore || page > 1;
-              return (
-                <details
-                  key={category}
-                  className="content-card meal-record-group"
-                >
-                  <summary>
-                    <span>
-                      <strong>{label}</strong>
-                      <small>
-                        {items.length}{" "}
-                        {items.length === 1 ? "alimento" : "alimentos"}
-                        {hasMore || page > 1 ? " nesta página" : ""}
-                      </small>
-                    </span>
-                    <span className="food-record-calories">
-                      {known.length ? (
-                        <span className="meal-calorie-value">
-                          {number(kcal)} kcal
-                        </span>
-                      ) : (
-                        "Calorias não informadas"
-                      )}
-                      {partial && known.length > 0 && (
-                        <small>Subtotal parcial</small>
-                      )}
-                    </span>
-                    <ChevronDown size={20} aria-hidden="true" />
-                  </summary>
-                  {editable && (
-                    <MealDeleteDialog
-                      project={selected.id}
-                      date={date}
-                      category={category as keyof typeof categories}
-                    />
-                  )}
-                  <div className="meal-record-items">
-                    {items.map(renderRecord)}
-                  </div>
-                </details>
-              );
-            })
-          : rows.map(renderRecord)}
+
+        {rows.map(renderRecord)}
       </section>
       <nav className="panel-nav" aria-label="Paginação">
         {page > 1 && <Link href={link(page - 1)}>Anteriores</Link>}

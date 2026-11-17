@@ -1,0 +1,1085 @@
+/* R03/R04 — authenticated food diary. */
+.dz-module-context {
+  display: none;
+}
+.module-alimentacao {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.module-alimentacao > * {
+  margin: 0;
+}
+.panel-shell:has(.module-alimentacao) .v2-header {
+  display: none;
+}
+.dz-module-heading-wrap {
+  order: 0;
+}
+.dz-module-heading {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 20px 0 18px;
+}
+.dz-module-heading .return-link {
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  border-radius: 14px;
+}
+.dz-module-heading .return-link span {
+  display: none;
+}
+.dz-module-heading h1 {
+  font-size: 24px;
+  line-height: 1.2;
+  letter-spacing: -0.7px;
+  margin: 0;
+}
+.dz-module-project {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  margin-top: 5px;
+}
+.dz-module-description {
+  display: none;
+}
+.dz-module-calendar {
+  margin-left: auto;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+.dz-module-heading-action {
+  display: none;
+}
+.dz-module-heading-wrap .dz-date-navigator {
+  min-height: 44px;
+  padding: 0 4px;
+  border-radius: 14px;
+  gap: 4px;
+  width: 100%;
+}
+.dz-module-heading-wrap .dz-date-navigator details {
+  margin: 0;
+}
+.dz-module-heading-wrap .dz-date-navigator summary {
+  width: 100%;
+  min-height: 44px;
+  padding: 0;
+  background: none;
+  font-size: 12px;
+  gap: 8px;
+}
+.dz-module-heading-wrap .dz-date-navigator > a {
+  background: var(--color-surface-raised);
+  min-width: 36px;
+}
+.food-nutrition-overview {
+  order: 10;
+}
+.module-alimentacao .food-nutrition-summary {
+  display: grid;
+  grid-template-columns: minmax(100px, 0.85fr) minmax(0, 1.4fr);
+  gap: 14px;
+  padding: 18px 14px;
+  margin: 0;
+  border-radius: 20px;
+  align-items: center;
+}
+.food-energy {
+  position: relative;
+  min-width: 0;
+}
+.food-energy .progress-ring {
+  width: 100%;
+  height: auto;
+  max-width: 132px;
+  aspect-ratio: 1;
+  margin: auto;
+}
+.food-energy .ring-fill {
+  stroke: var(--v2-primary);
+}
+.food-energy .ring-track {
+  stroke: var(--color-border);
+}
+.food-energy .ring-content {
+  gap: 4px;
+  font-size: 11px;
+}
+.food-energy-value {
+  display: grid;
+  gap: 3px;
+  text-align: center;
+}
+.food-energy-value strong {
+  font-size: 19px;
+  font-weight: 750;
+  color: var(--color-text);
+  line-height: 1.15;
+}
+.food-energy-value > span {
+  font-size: 10px;
+  color: var(--color-text-muted);
+}
+.food-energy-percent {
+  font-size: 19px;
+  font-weight: 750;
+  color: var(--color-accent);
+}
+.food-partial {
+  display: block;
+  margin-top: 7px;
+  font-size: 10px;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+.food-macro-goals {
+  margin: 0;
+  padding-left: 14px;
+  border-left: 1px solid var(--color-border);
+  display: grid;
+  gap: 13px;
+}
+.food-macro {
+  --macro-color: var(--dz-protein);
+  font-size: 11px;
+}
+.food-macro-carbs {
+  --macro-color: var(--dz-carbs);
+}
+.food-macro-fat {
+  --macro-color: var(--dz-fat);
+}
+.food-macro dt {
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.food-macro dd {
+  margin: 0;
+  font-size: 10px;
+}
+.food-macro dd strong {
+  font-size: 10px;
+  color: var(--color-text);
+}
+.food-macro dd > span {
+  color: var(--color-text-muted);
+}
+.food-macro progress,
+.food-macro-track {
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border: 0;
+  border-radius: 999px;
+  overflow: hidden;
+  display: block;
+  margin-top: 5px;
+  background: var(--color-border);
+  accent-color: var(--macro-color);
+}
+.food-macro progress::-webkit-progress-bar {
+  background: var(--color-border);
+}
+.food-macro progress::-webkit-progress-value {
+  background: var(--macro-color);
+  border-radius: 999px;
+}
+.food-macro progress::-moz-progress-bar {
+  background: var(--macro-color);
+  border-radius: 999px;
+}
+.food-macro small {
+  display: block;
+  font-size: 9px;
+  color: var(--color-text-muted);
+  margin-top: 3px;
+}
+.food-goal-card {
+  display: none;
+}
+.food-diary-state {
+  order: 11;
+  color: var(--color-text-muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+.food-diary-state > span {
+  display: none;
+}
+.module-alimentacao > .records-section {
+  order: 20;
+  margin: 0;
+}
+.module-alimentacao .records-section > h2 {
+  font-size: 20px;
+  margin: 0 0 14px;
+  letter-spacing: -0.5px;
+}
+.module-alimentacao .records-section > .intro {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin: 0 0 12px;
+}
+.food-group-list {
+  display: grid;
+  gap: 8px;
+}
+.food-meal-row {
+  position: relative;
+  border-radius: 16px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  overflow: hidden;
+}
+.food-meal-row[data-recorded="true"] {
+  border-left: 4px solid var(--v2-primary);
+}
+.module-alimentacao .food-meal-row .meal-record-group {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+.module-alimentacao .food-meal-row .meal-record-group > summary {
+  display: grid;
+  grid-template-columns: 36px minmax(85px, 1fr) minmax(0, 1fr) 18px;
+  grid-template-rows: auto auto;
+  gap: 3px 10px;
+  min-height: 78px;
+  width: 100%;
+  padding: 12px 10px;
+  border: 0;
+  border-radius: 0;
+  margin: 0;
+  background: transparent;
+  list-style: none;
+}
+.food-meal-state,
+.food-meal-thumbnail {
+  display: none;
+}
+.food-meal-icon {
+  grid-column: 1;
+  grid-row: 1/3;
+  display: grid;
+  place-items: center;
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+  width: 36px;
+  height: 42px;
+  border-radius: 10px;
+  align-self: center;
+}
+.food-meal-row[data-recorded="false"] .food-meal-icon {
+  background: var(--color-surface-raised);
+  color: var(--color-text-muted);
+}
+.food-meal-identity {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: end;
+}
+.module-alimentacao .food-meal-identity strong {
+  font-size: 12px;
+  line-height: 1.3;
+  display: block;
+}
+.module-alimentacao .food-meal-identity small {
+  display: none;
+}
+.module-alimentacao .food-meal-row .food-meal-energy {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: start;
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  min-width: 0;
+  color: var(--color-text-muted);
+  text-align: left;
+  font-size: 11px;
+  font-weight: 400;
+}
+.module-alimentacao .food-meal-row .food-meal-energy .meal-calorie-value {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  font-weight: 400;
+  white-space: normal;
+}
+.food-meal-energy small {
+  font-size: 9px;
+}
+.food-meal-preview {
+  grid-column: 3;
+  grid-row: 1/3;
+  border-left: 1px solid var(--color-border);
+  padding-left: 10px;
+  align-self: center;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+  min-width: 0;
+}
+.food-preview-line {
+  display: inline;
+}
+.food-preview-line + .food-preview-line::before {
+  content: ", ";
+}
+.food-preview-amount,
+.food-preview-kcal,
+.food-meal-preview > small {
+  display: none;
+}
+.food-meal-chevron {
+  grid-column: 4;
+  grid-row: 1/3;
+  align-self: center;
+  color: var(--color-text-muted);
+}
+.food-meal-row[data-recorded="false"] .food-meal-chevron {
+  visibility: hidden;
+}
+.food-meal-actions {
+  display: none;
+}
+.food-meal-actions-empty {
+  display: flex;
+  position: absolute;
+  right: 8px;
+  top: 20px;
+  transform: none;
+}
+.food-icon-action {
+  min-width: 36px;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text);
+  border-radius: 10px;
+}
+.food-empty-add {
+  min-width: 32px;
+  min-height: 36px;
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent);
+}
+.food-empty-add > span {
+  display: none;
+}
+.food-meal-row:has(> .meal-record-group[open])
+  > .food-meal-actions:not(.food-meal-actions-empty) {
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--color-border);
+  justify-content: flex-end;
+}
+.food-meal-actions .meal-delete-trigger {
+  min-width: 40px;
+  min-height: 40px;
+  width: 40px;
+  margin: 0;
+  padding: 0;
+}
+.module-alimentacao .meal-record-items {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+  border-top: 1px solid var(--color-border);
+}
+.food-page-note {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.food-page-note a {
+  color: var(--color-accent);
+  text-decoration: underline;
+}
+.food-add-in-group {
+  justify-self: start;
+  margin: 0;
+  font-size: 12px;
+}
+.module-alimentacao > .manual-meal-recorder {
+  order: 30;
+  margin: 0;
+}
+.module-alimentacao > .manual-meal-recorder:not([open]) {
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+.module-alimentacao > .manual-meal-recorder:not([open]) > summary {
+  width: 100%;
+  justify-content: center;
+  min-height: 52px;
+  margin: 0;
+  font-size: 16px;
+  border-radius: 16px;
+}
+.module-alimentacao > .food-conveniences {
+  order: 40;
+}
+.module-alimentacao > .plan-entry {
+  order: 50;
+}
+.module-alimentacao > .planned-meals {
+  order: 60;
+}
+.module-alimentacao > .meal-record-link {
+  order: 70;
+}
+.module-alimentacao > nav[aria-label="Paginação"] {
+  order: 21;
+}
+.module-alimentacao .food-list-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.food-list-heading h2 {
+  font-size: 20px;
+  margin: 0;
+}
+.food-list-total,
+.food-desktop-add {
+  display: none;
+}
+@media (max-width: 359px) {
+  .dz-module-heading h1 {
+    font-size: 21px;
+  }
+  .module-alimentacao .food-nutrition-summary {
+    grid-template-columns: minmax(90px, 0.9fr) minmax(0, 1.2fr);
+    gap: 10px;
+    padding: 14px 10px;
+  }
+  .food-macro-goals {
+    padding-left: 10px;
+  }
+  .food-energy-value strong {
+    font-size: 16px;
+  }
+  .food-energy-value > span {
+    font-size: 9px;
+  }
+  .module-alimentacao .food-meal-row .meal-record-group > summary {
+    grid-template-columns: 30px minmax(75px, 1fr) minmax(0, 0.9fr) 16px;
+    gap: 3px 7px;
+    padding: 10px 8px;
+  }
+  .food-meal-icon {
+    width: 30px;
+    height: 38px;
+  }
+  .food-meal-icon svg {
+    width: 22px;
+  }
+  .module-alimentacao .food-meal-identity strong {
+    font-size: 11px;
+  }
+  .food-meal-preview {
+    font-size: 10px;
+    padding-left: 7px;
+  }
+}
+@media (min-width: 1024px) {
+  .panel-shell:has(.module-alimentacao) .v2-workspace {
+    position: relative;
+  }
+  .panel-shell:has(.module-alimentacao) .v2-header {
+    display: flex;
+    min-height: 76px;
+    height: 76px;
+    padding-block: 12px;
+  }
+  .panel-shell:has(.module-alimentacao) .dz-search-trigger {
+    display: none;
+  }
+  .panel-shell:has(.module-alimentacao) .dz-desktop-tools {
+    width: auto;
+    margin-left: auto;
+  }
+  .dz-module-context {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    top: 16px;
+    left: 28px;
+    width: min(720px, calc(100% - 360px));
+    z-index: 4;
+    margin: 0;
+  }
+  .dz-module-context > .v2-project-selector {
+    flex: 0 1 280px;
+    background: var(--color-surface-raised);
+    border: 0;
+    border-radius: 14px;
+  }
+  .dz-module-context .v2-project-selector > summary {
+    min-height: 44px;
+    padding: 8px 12px;
+    width: 100%;
+  }
+  .dz-module-context .v2-project-selector small,
+  .dz-module-context .project-mobile-dates,
+  .dz-module-context .project-mobile-progress {
+    display: none;
+  }
+  .dz-module-context .v2-project-selector strong {
+    font-size: 14px;
+  }
+  .dz-module-context > span {
+    color: var(--color-text-muted);
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .dz-module-context .v2-query-form {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    width: 350px;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    background: var(--color-surface);
+    padding: 16px;
+    box-shadow: var(--v2-shadow);
+  }
+  .dz-module-heading {
+    padding: 18px 0 20px;
+  }
+  .dz-module-heading .return-link,
+  .dz-module-calendar,
+  .dz-module-project {
+    display: none;
+  }
+  .dz-module-heading h1 {
+    font-size: 34px;
+    letter-spacing: -1px;
+  }
+  .dz-module-description {
+    display: block;
+    color: var(--color-text-muted);
+    font-size: 14px;
+    margin-top: 5px;
+  }
+  .dz-module-heading-action {
+    display: block;
+    margin-left: auto;
+  }
+  .dz-module-heading-action > a {
+    min-height: 44px;
+    font-size: 13px;
+    padding: 8px 16px;
+    margin: 0;
+  }
+  .dz-module-heading-wrap .dz-date-navigator {
+    width: 390px;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    gap: 12px;
+  }
+  .dz-module-heading-wrap .dz-date-navigator > a {
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+  }
+  .dz-module-heading-wrap .dz-date-navigator details {
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    background: var(--color-surface);
+  }
+  .food-nutrition-overview {
+    display: grid;
+    grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+    gap: 16px;
+  }
+  .module-alimentacao .food-nutrition-summary {
+    display: grid;
+    grid-template-columns: 270px minmax(0, 1fr);
+    padding: 16px 20px;
+    gap: 14px;
+    min-height: 126px;
+  }
+  .food-energy {
+    min-height: 94px;
+  }
+  .food-energy .progress-ring {
+    width: 94px;
+    height: 94px;
+    margin: 0;
+  }
+  .food-energy .ring-content {
+    overflow: visible;
+  }
+  .food-energy-value {
+    position: absolute;
+    left: 118px;
+    top: 20px;
+    width: 150px;
+    text-align: left;
+  }
+  .food-energy-value strong {
+    font-size: 24px;
+    white-space: nowrap;
+  }
+  .food-energy-value > span {
+    font-size: 13px;
+  }
+  .food-energy-percent {
+    font-size: 24px;
+    color: var(--color-text);
+  }
+  .food-partial {
+    position: absolute;
+    left: 118px;
+    top: 70px;
+    width: 150px;
+    margin: 0;
+    text-align: left;
+  }
+  .food-macro-goals {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    align-self: stretch;
+    align-content: center;
+  }
+  .food-macro dt {
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+  .food-macro dd {
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 11px;
+  }
+  .food-macro dd strong {
+    font-size: 11px;
+  }
+  .food-macro progress,
+  .food-macro-track {
+    order: -1;
+    margin: 0 0 8px;
+    height: 7px;
+    flex-basis: 100%;
+  }
+  .food-goal-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 20px;
+    border: 2px solid var(--color-surface);
+    background: var(--dz-data-soft);
+    border-radius: 20px;
+    color: var(--color-text);
+  }
+  .food-goal-card > svg {
+    color: var(--v2-data-text);
+    flex-shrink: 0;
+  }
+  .food-goal-card > span:first-of-type {
+    display: grid;
+    gap: 6px;
+    font-size: 13px;
+  }
+  .food-goal-card strong {
+    font-size: 22px;
+    white-space: nowrap;
+  }
+  .food-goal-macros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-left: 16px;
+    border-left: 1px solid var(--color-border-strong);
+    font-size: 11px;
+  }
+  .food-diary-state {
+    font-size: 11px;
+  }
+
+  .module-alimentacao > .records-section {
+    background: var(--color-surface);
+    border-radius: 20px;
+    box-shadow: var(--v2-shadow);
+    padding: 20px 24px;
+  }
+  .module-alimentacao .food-list-heading {
+    margin: 0 0 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .food-list-heading h2 {
+    font-size: 24px;
+  }
+  .food-list-total {
+    display: block;
+    font-size: 14px;
+    margin-left: auto;
+  }
+  .food-desktop-add {
+    display: inline-flex;
+    margin: 0 0 0 20px;
+    min-height: 44px;
+    font-size: 13px;
+  }
+  .food-group-list {
+    display: block;
+  }
+  .food-meal-row,
+  .food-meal-row[data-recorded="true"] {
+    border: 0;
+    border-bottom: 1px solid var(--color-border);
+    border-radius: 0;
+    background: transparent;
+    overflow: visible;
+  }
+  .food-meal-row:last-child {
+    border-bottom: 0;
+  }
+  .module-alimentacao .food-meal-row .meal-record-group > summary {
+    grid-template-columns:
+      26px 86px minmax(150px, 0.8fr) minmax(220px, 1.8fr)
+      100px;
+    grid-template-rows: auto;
+    gap: 16px;
+    min-height: 82px;
+    padding: 10px 104px 10px 0;
+  }
+  .food-meal-state {
+    display: grid;
+    place-items: center;
+    grid-column: 1;
+    grid-row: 1;
+    width: 24px;
+    height: 26px;
+    border: 1px solid var(--color-border-strong);
+    border-radius: 7px;
+  }
+  .food-meal-state.is-recorded {
+    background: var(--dz-success-soft);
+    color: var(--color-success);
+    border-color: transparent;
+  }
+  .food-meal-thumbnail {
+    display: grid;
+    place-items: center;
+    grid-column: 2;
+    grid-row: 1;
+    width: 86px;
+    height: 62px;
+    overflow: hidden;
+    background: var(--color-surface-raised);
+    border-radius: 14px;
+    color: var(--color-text-muted);
+  }
+  .food-meal-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .food-meal-icon,
+  .food-meal-chevron {
+    display: none;
+  }
+  .food-meal-identity {
+    grid-column: 3;
+    grid-row: 1;
+    align-self: center;
+  }
+  .module-alimentacao .food-meal-identity strong {
+    font-size: 15px;
+  }
+  .module-alimentacao .food-meal-identity small {
+    display: block;
+    font-size: 11px;
+    color: var(--color-text-muted);
+    margin-top: 5px;
+  }
+  .food-meal-preview {
+    grid-column: 4;
+    grid-row: 1;
+    padding-left: 20px;
+    font-size: 12px;
+  }
+  .food-preview-line {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 100px 70px;
+    gap: 10px;
+    margin-block: 0;
+  }
+  .food-preview-line + .food-preview-line::before {
+    content: none;
+  }
+  .food-preview-amount,
+  .food-preview-kcal {
+    display: block;
+    font-size: 11px;
+  }
+  .food-preview-kcal {
+    text-align: right;
+  }
+  .food-meal-preview > small {
+    display: block;
+    font-size: 10px;
+  }
+  .module-alimentacao .food-meal-row .food-meal-energy {
+    grid-column: 5;
+    grid-row: 1;
+    align-self: center;
+    text-align: center;
+  }
+  .module-alimentacao .food-meal-row .food-meal-energy .meal-calorie-value {
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 650;
+    color: var(--color-text);
+    background: var(--color-surface-raised);
+    padding: 7px 10px;
+    border-radius: 12px;
+  }
+  .food-meal-actions,
+  .food-meal-row:has(> .meal-record-group[open])
+    > .food-meal-actions:not(.food-meal-actions-empty) {
+    display: flex;
+    gap: 8px;
+    position: absolute;
+    top: 21px;
+    right: 0;
+    padding: 0;
+    border: 0;
+  }
+  .food-meal-actions-empty {
+    top: 22px;
+    transform: none;
+  }
+  .food-empty-add {
+    padding: 0 12px;
+    gap: 6px;
+    border: 1px solid var(--color-border-strong);
+    color: var(--color-text);
+    font-size: 12px;
+  }
+  .food-empty-add > span {
+    display: block;
+  }
+  .module-alimentacao .meal-record-items {
+    padding: 16px 0;
+  }
+  .module-alimentacao > .manual-meal-recorder:not([open]) {
+    display: none;
+  }
+}
+@media (min-width: 1024px) and (max-width: 1399px) {
+  .food-nutrition-overview {
+    grid-template-columns: 1fr;
+  }
+  .food-goal-card {
+    min-height: 76px;
+    padding: 12px 20px;
+  }
+  .food-goal-macros {
+    margin-left: auto;
+  }
+  .dz-module-context > span {
+    display: none;
+  }
+  .module-alimentacao .food-meal-row .meal-record-group > summary {
+    grid-template-columns: 24px 68px minmax(140px, 0.9fr) minmax(0, 1.4fr) 90px;
+    gap: 10px;
+    padding-right: 96px;
+  }
+  .food-meal-thumbnail {
+    width: 68px;
+    height: 56px;
+  }
+  .food-preview-line {
+    grid-template-columns: minmax(0, 1fr) 70px;
+    gap: 8px;
+  }
+  .food-preview-kcal {
+    display: none;
+  }
+}
+.food-energy .food-energy-percent {
+  font-size: 19px;
+  font-weight: 750;
+  color: var(--color-accent);
+}
+.food-energy .food-energy-value strong {
+  font-size: 22px;
+}
+.food-macro {
+  position: relative;
+}
+.food-macro dt {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+}
+.food-macro dd {
+  text-align: right;
+}
+.food-list-heading h2 {
+  font-weight: 700;
+}
+.food-list-heading h2 > span {
+  font-size: 18px;
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+.module-alimentacao .food-meal-actions .meal-delete-trigger {
+  border: 0;
+  background: none;
+  color: var(--color-text);
+}
+.module-alimentacao .food-meal-actions .meal-delete-trigger:hover {
+  color: var(--color-danger);
+  background: var(--color-surface-raised);
+}
+@media (max-width: 1023px) {
+  .food-calorie-unit {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .food-macro-goals {
+    gap: 12px;
+  }
+  .module-alimentacao .food-nutrition-summary {
+    padding-block: 16px;
+  }
+  .food-energy .ring-content {
+    inset: 12%;
+  }
+  .food-energy .food-energy-value strong {
+    font-size: 22px;
+  }
+  .food-macro dt {
+    font-size: 11px;
+  }
+  .food-macro dd strong,
+  .food-macro dd > span {
+    font-size: 10px;
+  }
+}
+@media (max-width: 359px) {
+  .food-macro dt {
+    font-size: 10px;
+  }
+  .food-macro dd strong,
+  .food-macro dd > span {
+    font-size: 9px;
+  }
+  .food-energy .food-energy-value strong {
+    font-size: 19px;
+  }
+}
+@media (min-width: 1024px) {
+  .dz-module-heading h1 {
+    font-size: 40px;
+    font-weight: 800;
+  }
+  .food-energy .food-energy-percent {
+    font-size: 24px;
+    color: var(--color-text);
+  }
+  .food-energy .food-energy-value strong {
+    font-size: 24px;
+  }
+  .food-macro {
+    position: static;
+  }
+  .food-macro dt {
+    position: static;
+    margin-bottom: 8px;
+  }
+  .food-macro dd {
+    text-align: left;
+  }
+}
+
+.module-alimentacao .food-nutrition-summary {
+  position: relative;
+  padding-bottom: 30px;
+}
+.module-alimentacao .food-diary-state {
+  position: absolute;
+  bottom: 6px;
+  left: 14px;
+  right: 14px;
+  font-size: 10px;
+  line-height: 1.3;
+  margin: 0;
+}
+@media (min-width: 1024px) {
+  .dz-module-heading {
+    padding-bottom: 13px;
+  }
+  .food-energy-value {
+    left: 106px;
+    top: 6px;
+  }
+  .food-energy-value > span {
+    font-size: 14px;
+  }
+  .food-preview-line {
+    font-size: 13px;
+  }
+  .food-preview-amount,
+  .food-preview-kcal {
+    font-size: 12px;
+  }
+  .module-alimentacao .food-diary-state {
+    left: 20px;
+    right: 20px;
+  }
+}
+
+.food-energy .food-calorie-unit {
+  font-size: 0.8em;
+}
+.food-energy-unknown .food-energy-value strong {
+  font-size: 15px;
+}
+
+.food-nutrition-summary strong,
+.food-meal-energy,
+.food-preview-kcal {
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 1023px) {
+  .food-macro-empty .food-macro-reference {
+    display: block;
+    margin-top: 2px;
+    font-size: 9px;
+  }
+}

@@ -631,25 +631,25 @@ summary {
   color: var(--color-text-muted);
   text-align: center;
 }
-.nutrition-grid {
+.nutrition-grid:where(:not(.food-nutrition-summary)) {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
   margin-top: 24px;
 }
-.nutrition-grid > div {
+.nutrition-grid:where(:not(.food-nutrition-summary)) > div {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
-.nutrition-grid strong {
+.nutrition-grid:where(:not(.food-nutrition-summary)) strong {
   font-size: 22px;
 }
-.nutrition-grid span {
+.nutrition-grid:where(:not(.food-nutrition-summary)) span {
   font-size: 12px;
 }
 @media (max-width: 600px) {
-  .nutrition-grid {
+  .nutrition-grid:where(:not(.food-nutrition-summary)) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .food-calendar {
@@ -1228,16 +1228,16 @@ body {
   background: var(--color-accent-soft);
   color: var(--color-accent);
 }
-.nutrition-grid > div {
+.nutrition-grid:where(:not(.food-nutrition-summary)) > div {
   padding: 12px;
   background: var(--color-surface-sunken);
   border-radius: 14px;
   border-bottom: 3px solid var(--color-border-strong);
 }
-.nutrition-grid > div:first-child {
+.nutrition-grid:where(:not(.food-nutrition-summary)) > div:first-child {
   border-bottom-color: var(--color-accent);
 }
-.nutrition-grid strong {
+.nutrition-grid:where(:not(.food-nutrition-summary)) strong {
   font-variant-numeric: tabular-nums;
 }
 .weight-chart {
@@ -1599,7 +1599,7 @@ body {
   background: var(--color-accent);
   border-radius: 999px;
 }
-.nutrition-grid .nutrition-empty {
+.nutrition-grid:where(:not(.food-nutrition-summary)) .nutrition-empty {
   font-size: 14px;
   line-height: 21px;
   font-weight: 600;
@@ -2092,11 +2092,11 @@ input[type="date"]::-webkit-datetime-edit {
 .plan-import-copy p {
   margin: 0;
 }
-.plan-workspace .nutrition-grid {
+.plan-workspace .nutrition-grid:where(:not(.food-nutrition-summary)) {
   margin-top: 4px;
   gap: 16px;
 }
-.plan-workspace .nutrition-grid > div {
+.plan-workspace .nutrition-grid:where(:not(.food-nutrition-summary)) > div {
   gap: 10px;
 }
 .plan-file,

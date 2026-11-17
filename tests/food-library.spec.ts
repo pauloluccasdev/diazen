@@ -128,7 +128,7 @@ test("alimentos próprios, receitas, favoritos, recentes e cópia preservam o di
     2,
   );
   await expect(
-    page.getByText("Parcial: o diário", { exact: false }),
+    page.getByText("Sem plano para comparar.", { exact: false }),
   ).toBeVisible();
   await page.getByText("Copiar refeição", { exact: true }).click();
   const copy = form(page, "Confirmar cópia da refeição");
@@ -156,7 +156,7 @@ test("alimentos próprios, receitas, favoritos, recentes e cópia preservam o di
     4,
   );
   await expect(
-    page.getByText("Parcial: o diário", { exact: false }),
+    page.getByText("Sem plano para comparar.", { exact: false }),
   ).toBeVisible();
   await page.reload();
   await expect(page.getByRole("article", { includeHidden: true })).toHaveCount(

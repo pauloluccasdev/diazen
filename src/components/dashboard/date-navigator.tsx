@@ -1,3 +1,4 @@
+"use client";
 import Link from "next/link";
 import Form from "next/form";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
@@ -13,15 +14,22 @@ export function DateNavigator({
   project,
   path = "/painel",
   period,
+  calendarId,
+  onCalendarToggle,
+  format = "compact",
 }: {
   date: string;
   project: string;
   path?: string;
   period?: string;
+  calendarId?: string;
+  onCalendarToggle?: (open: boolean) => void;
+  format?: "compact" | "long";
 }) {
   const shortDate = new Intl.DateTimeFormat("pt-BR", {
     day: "numeric",
-    month: "short",
+    month: format === "long" ? "long" : "short",
+    ...(format === "long" ? { weekday: "short" as const } : {}),
     timeZone: "UTC",
     ...(date.slice(0, 4) !== today().slice(0, 4)
       ? { year: "numeric" as const }
@@ -36,12 +44,22 @@ export function DateNavigator({
       <Link href={href(shift(date, -1))} aria-label="Dia anterior">
         <ChevronLeft size={21} aria-hidden="true" />
       </Link>
-      <details key={`${project}-${date}`}>
+      <details
+        id={calendarId}
+        key={`${project}-${date}`}
+        onToggle={(event) => onCalendarToggle?.(event.currentTarget.open)}
+        onKeyDown={(event) => {
+          if (event.key === "Escape") {
+            event.currentTarget.open = false;
+            event.currentTarget.querySelector("summary")?.focus();
+          }
+        }}
+      >
         <summary title={formatDate(date)}>
           <CalendarDays size={20} aria-hidden="true" />
           <span>
-            {date === today() ? "Hoje, " : ""}
-            {shortDate}
+            {date === today() && format === "compact" ? "Hoje, " : ""}
+            {shortDate.charAt(0).toUpperCase() + shortDate.slice(1)}
           </span>
         </summary>
         <Form action={path} className="dz-date-form">

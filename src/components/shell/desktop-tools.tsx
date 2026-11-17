@@ -118,7 +118,11 @@ export function CommandSearch() {
         <ul aria-label="Resultados da busca">
           {matches.map(([title, href, keywords]) => (
             <li key={href}>
-              <Link href={href} onClick={() => dialog.current?.close()}>
+              <Link
+                prefetch={false}
+                href={href}
+                onClick={() => dialog.current?.close()}
+              >
                 <span>
                   <strong>{title}</strong>
                   <small>{keywords}</small>
@@ -209,6 +213,7 @@ export function AccountMenu({ name }: { name?: string }) {
       </summary>
       <div className="dz-account-popover">
         <Link
+          prefetch={false}
           href="/painel/perfil"
           onClick={() => {
             if (menu.current) menu.current.open = false;
@@ -217,7 +222,7 @@ export function AccountMenu({ name }: { name?: string }) {
           <Settings size={18} aria-hidden="true" />
           Perfil e configurações
         </Link>
-        <Link href="/privacidade">
+        <Link prefetch={false} href="/privacidade">
           <ShieldCheck size={18} aria-hidden="true" />
           Privacidade
         </Link>

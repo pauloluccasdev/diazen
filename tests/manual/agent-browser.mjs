@@ -173,6 +173,26 @@ async function field(name, value, scope = "", type = "fill") {
 const form = (button) =>
   `[...document.querySelectorAll('form')].find(f=>!f.closest('details:not([open])') && f.getClientRects().length && [...f.querySelectorAll('button')].some(b=>b.textContent.trim()===${JSON.stringify(button)}))`;
 async function markForm(button) {
+  if (
+    button === "Salvar registro" &&
+    (await evaluate(
+      "location.pathname === '/painel/alimentacao' && Boolean(document.querySelector('.manual-meal-recorder:not([open])'))",
+    ))
+  ) {
+    const visible = await evaluate(
+      "Boolean(document.querySelector('.manual-meal-recorder > summary')?.getClientRects().length)",
+    );
+    if (!visible) {
+      await clickText(
+        "Adicionar alimento",
+        "a",
+        "document.querySelector('.food-list-heading')",
+      );
+      await until(
+        "document.querySelector('.manual-meal-recorder')?.open === true",
+      );
+    }
+  }
   const closedCreateTitle = await evaluate(
     `(() => { const d=[...document.querySelectorAll('details.record-create:not([open]), details.form-disclosure:not([open])')].find(d=>[...d.querySelectorAll('button')].some(b=>b.textContent.trim()===${JSON.stringify(button)})); return d?.querySelector(':scope > summary')?.textContent.trim() ?? null; })()`,
   );
@@ -783,7 +803,7 @@ try {
         ),
         4,
       );
-      await text("Parcial: o diário");
+      await text("Sem plano para comparar.");
       for (const selector of [
         ".meal-record-group > summary",
         "article .food-record-details > summary",
@@ -799,7 +819,7 @@ try {
         "document.querySelector('article')",
       );
       await save("Salvar alteração", { kcal: 0 }, "0 kcal");
-      await text("Parcial: o diário");
+      await text("Sem plano para comparar.");
       await ab("reload");
       await ab("wait", "input[name=amount]");
       await save(

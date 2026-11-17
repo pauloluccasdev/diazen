@@ -101,6 +101,7 @@ export function PanelShell({
       </a>
       <aside className="v2-sidebar">
         <Link
+          prefetch={false}
           className="v2-wordmark"
           href="/painel"
           aria-label="Diazen, início"
@@ -110,6 +111,7 @@ export function PanelShell({
         <nav aria-label="Navegação principal">
           {destinations.map(({ href, label, icon: Icon }) => (
             <Link
+              prefetch={false}
               href={href}
               key={href}
               aria-current={isCurrent(href) ? "page" : undefined}
@@ -121,13 +123,14 @@ export function PanelShell({
         </nav>
         <div className="v2-sidebar-bottom">
           <Link
+            prefetch={false}
             href="/painel/perfil"
             aria-current={isCurrent("/painel/perfil") ? "page" : undefined}
           >
             <Settings size={21} aria-hidden="true" />
             Configurações
           </Link>
-          <Link href="/privacidade">
+          <Link prefetch={false} href="/privacidade">
             <ShieldCheck size={21} aria-hidden="true" />
             Privacidade
           </Link>
@@ -137,6 +140,7 @@ export function PanelShell({
       <div className="v2-workspace">
         <header className="v2-header">
           <Link
+            prefetch={false}
             className="v2-wordmark"
             href="/painel"
             aria-label="Diazen, início"
@@ -150,6 +154,7 @@ export function PanelShell({
             <AccountMenu name={accountName} />
           </div>
           <Link
+            prefetch={false}
             className="v2-account"
             href="/painel/perfil"
             aria-label="Minha conta e configurações"
@@ -183,6 +188,7 @@ export function PanelShell({
           },
         ].map(({ href, label, icon: Icon }) => (
           <Link
+            prefetch={false}
             href={href}
             key={href}
             aria-current={isCurrent(href) ? "page" : undefined}
@@ -228,6 +234,7 @@ export function PanelShell({
             <strong>Seu Diazen</strong>
             {more.map(({ href, label, icon: Icon }) => (
               <Link
+                prefetch={false}
                 href={href}
                 key={href}
                 aria-current={isCurrent(href) ? "page" : undefined}

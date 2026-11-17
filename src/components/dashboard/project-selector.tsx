@@ -9,11 +9,13 @@ export function ProjectSelector({
   selected,
   active,
   date,
+  path = "/painel",
 }: {
   projects: Project[];
   selected: Project;
   active: Project | null;
   date: string;
+  path?: string;
 }) {
   const options = [
     ...new Map(
@@ -41,7 +43,7 @@ export function ProjectSelector({
           <ProjectTimeline project={selected} date={date} compact />
         </span>
       </summary>
-      <Form action="/painel" className="v2-query-form">
+      <Form action={path} className="v2-query-form">
         <label>
           Projeto para consultar
           <select name="projeto" defaultValue={selected.id}>

@@ -12,13 +12,13 @@ Em 17/11/2026, o proprietário aprovou recipientes de água salvos e perfil com 
 
 ## Quadro geral
 
-**2 de 11 fases concluídas (18%).** Percentual por quantidade de fases, não estimativa de horas ou esforço.
+**3 de 11 fases concluídas (27%).** Percentual por quantidade de fases, não estimativa de horas ou esforço.
 
 | Fase | Entrega                         | Estado                |
 | ---- | ------------------------------- | --------------------- |
 | 0    | Discovery técnico e visual      | Concluída — `997afe0` |
 | 1    | Dashboard desktop, claro/escuro | Concluída — `2c94fc7` |
-| 2    | Dashboard mobile e tablet       | Em execução           |
+| 2    | Dashboard mobile e tablet       | Concluída — `8454f8c` |
 | 3    | Alimentação                     | Em execução           |
 | 4    | Hidratação                      | Pendente              |
 | 5    | Treinos                         | Pendente              |
@@ -42,7 +42,7 @@ Em 17/11/2026, o proprietário aprovou recipientes de água salvos e perfil com 
 
 Uma fase só muda para concluída com evidência de implementação e verificação. Séries realizadas/tonelagem e demais extensões condicionais da matriz não são contabilizadas como entregues pelo simples redesign de suas regiões.
 
-## Fase 2 — verificação em andamento
+## Fase 2 — verificada
 
 - [x] Referência R02 e composição mobile/tablet revisadas.
 - [x] Hero/seletor único, calendário, cartões e quatro atalhos funcionais.
@@ -53,4 +53,4 @@ Uma fase só muda para concluída com evidência de implementação e verificaç
 - [x] Capturas e relatório [phase-2-mobile-report.md](phase-2-mobile-report.md).
 - [x] CI completa do commit `e7f5ca0` aprovada ([44118454686](https://github.com/pauloluccasdev/diazen/actions/runs/44118454686)).
 - [x] Ajuste adicional de tablet: build, dois cenários Chromium e dois WebKit aprovados; integração na develop nesta entrega.
-- [ ] CI do ajuste final de tablet, antes de contabilizar a fase como concluída.
+- [x] CI do ajuste final `8454f8c` aprovada ([44124581261](https://github.com/pauloluccasdev/diazen/actions/runs/44124581261)); integrado e enviado à develop.

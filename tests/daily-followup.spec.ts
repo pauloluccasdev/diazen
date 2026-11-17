@@ -1,3 +1,4 @@
+import { openManualMealRecorder } from "./helpers/food-diary";
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 test.use({ serviceWorkers: "block" });
@@ -175,7 +176,7 @@ test("fases, check-in opcional, contexto sem consumo e indicadores ocultos prese
   ).toBeDisabled();
   await context.setOffline(false);
   await page.goto("/painel/alimentacao");
-  await page.locator(".manual-meal-recorder > summary").click();
+  await openManualMealRecorder(page);
   const manual = page.locator(".manual-meal-recorder");
   await manual.getByLabel("Alimento", { exact: true }).fill("Arroz branco");
   await manual.getByLabel("Quantidade consumida", { exact: true }).fill("100");

@@ -31,10 +31,7 @@
   .v2-dashboard .metric-peso.area-card:has(.weight-chart) {
     padding-right: 35px;
   }
-  .v2-more {
-    margin: 0;
-  }
-  .v2-tagline {
+  .panel-shell:has(.v2-dashboard) .v2-tagline {
     line-height: 16px;
   }
   .v2-dashboard .v2-dashboard-toolbar {
@@ -334,7 +331,7 @@
     gap: 4px 10px;
     margin: 5px 0 0;
   }
-  .v2-header {
+  .panel-shell:has(.v2-dashboard) .v2-header {
     padding: 16px 0 10px;
     gap: 0 12px;
   }

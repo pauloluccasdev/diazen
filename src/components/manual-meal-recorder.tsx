@@ -244,11 +244,13 @@ export function ManualMealRecorder({
   min,
   max,
   initiallyOpen = false,
+  initialCategory = "breakfast",
 }: {
   date: string;
   min: string;
   max: string;
   initiallyOpen?: boolean;
+  initialCategory?: keyof typeof categories;
 }) {
   const form = useRef<HTMLFormElement>(null),
     request = useRef("");
@@ -284,7 +286,7 @@ export function ManualMealRecorder({
       open={initiallyOpen}
       className="content-card record-create manual-meal-recorder"
     >
-      <summary>Registrar refeição</summary>
+      <summary>Adicionar alimento</summary>
       <p className="intro">
         Informe os alimentos e as porções que você consumiu. A composição
         encontrada pode ser revisada antes de salvar.
@@ -380,7 +382,7 @@ export function ManualMealRecorder({
           </label>
           <label>
             Refeição
-            <select name="category" defaultValue="breakfast">
+            <select name="category" defaultValue={initialCategory}>
               {Object.entries(categories).map(([value, label]) => (
                 <option value={value} key={value}>
                   {label}

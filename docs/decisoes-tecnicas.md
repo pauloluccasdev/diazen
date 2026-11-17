@@ -640,3 +640,11 @@ O proprietário também solicitou acompanhamento do progresso. O quadro em `docs
 ## 17/11/2026 — Recipientes salvos e perfil privado aprovados
 
 O proprietário aprovou explicitamente as duas ampliações propostas no diagnóstico (§5 B/C de `functional-gap-analysis.md`): recipientes de água salvos, com nome e volume, e perfil com nome opcional e avatar privado. A implementação será feita nas fases de Hidratação e Perfil, por migrações aditivas versionadas, com RLS por proprietário e integração à exportação, exclusão e backup. Selecionar recipiente copia seus dados ao lançamento; editar/excluir recipiente não altera o histórico. Avatar será validado, otimizado, sem metadados sensíveis e servido apenas mediante autorização; substituição/exclusão inclui limpeza do objeto. Não foram aprovados telefone, nascimento, autenticação social, dados fictícios nem migrações destrutivas. A aprovação não significa que as funcionalidades já foram implementadas.
+
+## Decisão — Diário alimentar v2 — 17/11/2026
+
+- **Autorização:** execução das fases do redesign, preservando dados e regras. Referências R03/R04 orientam desktop claro/escuro e mobile.
+- **Decisão:** extrair a apresentação alimentar da rota genérica em componentes próprios, manter seis categorias fixas, inclusão contextual e cálculos/ações existentes. Totais do dia consultam todas as páginas autenticadas; a paginação de formulários não limita os indicadores.
+- **Integridade:** nenhum schema ou contrato público alterado. Nulos, zero e totais parciais continuam distintos; registro não significa aderência. Formulários continuam limitados ao projeto ativo, com destino e proprietário validados no servidor.
+- **Privacidade e navegação:** desativar pré-carregamento automático dos links globais do painel, evitando leituras antecipadas de módulos privados e cancelamentos na recarga WebKit; navegação por clique permanece funcional.
+- **Requisitos:** RF-006 a RF-009, RNF-011; relatório e evidências em `docs/design/diazen-v2/phase-3-food-report.md`.

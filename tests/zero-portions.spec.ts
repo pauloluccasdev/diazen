@@ -139,7 +139,7 @@ test("porção zero exclui apenas o alimento não consumido e permite salvar os 
     2,
   );
   await expect(
-    page.getByText("Completo: todas as refeições do plano foram registradas."),
+    page.getByText("Todas as refeições do plano têm registros."),
   ).toBeVisible();
   await page.goto("/painel");
   const metrics = page.locator(".diet-comparison-grid");

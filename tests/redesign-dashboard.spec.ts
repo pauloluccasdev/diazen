@@ -1,3 +1,4 @@
+import { openManualMealRecorder } from "./helpers/food-diary";
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { mkdir } from "node:fs/promises";
@@ -25,7 +26,7 @@ test("Diazen v2: shell responsivo, dados persistidos, consulta e navegação por
         Hidratação: "Hidratação.",
         Evolução: "Peso.",
         Treinos: "Atividades.",
-        Diário: "Alimentação.",
+        Diário: "Alimentação",
       };
       await expect(
         page.getByRole("heading", {
@@ -114,7 +115,7 @@ test("Diazen v2: shell responsivo, dados persistidos, consulta e navegação por
     "Registro adicionado",
   );
   await navigate("Diário");
-  await page.locator(".manual-meal-recorder > summary").click();
+  await openManualMealRecorder(page);
   const meal = page.locator(".manual-meal-recorder");
   await meal.getByLabel("Alimento", { exact: true }).fill("Arroz branco");
   await meal.getByLabel("Quantidade consumida", { exact: true }).fill("100");

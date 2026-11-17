@@ -127,6 +127,9 @@ body:has(.panel-shell) {
   border-radius: 12px;
   cursor: pointer;
 }
+.v2-more {
+  margin: 0;
+}
 .v2-bottom-nav > a[aria-current],
 .v2-bottom-nav a:hover,
 .v2-more[open] > summary {

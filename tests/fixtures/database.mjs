@@ -190,14 +190,32 @@ export async function rest(
           : projection.split(",").map(identifier).join(",");
       sql = `select ${columns} from public.${identifier(table)}${where}${order ? " order by " + order : ""} limit ${Math.min(limit, 1000)} offset ${offset}`;
     } else if (request.method === "POST") {
-      const pairs = Object.entries(payload);
+      // PostgREST bulk inserts remain one SQL statement: actual constraints,
+      // triggers and RLS apply to every row and failures stay atomic.
+      const records = Array.isArray(payload) ? payload : [payload];
+      if (!records.length || records.length > 2000)
+        throw Error("Unsupported batch size");
+      const pairs = Object.entries(records[0]);
+      const keys = pairs.map(([key]) => key);
+      if (
+        records.some(
+          (record) =>
+            Object.keys(record).length !== keys.length ||
+            keys.some((key) => !Object.hasOwn(record, key)),
+        )
+      )
+        throw Error("Bulk rows must share the same fields");
       values.length = 0;
-      sql = `insert into public.${identifier(table)}(${pairs.map(([k]) => identifier(k)).join(",")}) values(${pairs
-        .map(([, v], i) => {
-          values.push(v);
-          return "$" + (i + 1);
-        })
-        .join(",")})`;
+      const tuples = records.map(
+        (record) =>
+          `(${keys
+            .map((key) => {
+              values.push(record[key]);
+              return "$" + values.length;
+            })
+            .join(",")})`,
+      );
+      sql = `insert into public.${identifier(table)}(${keys.map(identifier).join(",")}) values${tuples.join(",")}`;
       const conflict = url.searchParams.get("on_conflict");
       if (conflict)
         sql += ` on conflict(${conflict.split(",").map(identifier).join(",")}) do update set ${pairs
