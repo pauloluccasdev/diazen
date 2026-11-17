@@ -272,6 +272,7 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
+  await page.locator(".meal-delete-trigger:visible").first().hover();
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   await page.screenshot({
     path: "artifacts/meal-registration/food-page-320.png",

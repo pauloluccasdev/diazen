@@ -17,6 +17,7 @@
   --color-accent-hover: #ffd064;
   --color-accent-pressed: #edac13;
   --color-accent-soft: #3c3018;
+  --color-danger: #ff858d;
   max-width: none;
   padding: 0;
   color: var(--color-text);

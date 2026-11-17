@@ -52,3 +52,5 @@ Risco operacional preexistente: `npm audit --omit=dev` aponta um aviso moderado 
 Sprint 2 — Alimentação, somente após aprovação explícita: inspecionar seus dois protótipos, redesenhar diário/seis categorias fixas/resumo/busca/registro/edição/exclusão, preservando snapshots, unidades e composição. Nenhuma implementação dessa sprint foi iniciada.
 
 A auditoria agent-browser também foi executada localmente, incluindo ausência de exceções, dados desconhecidos/zero, offline, exportação, privacidade, histórico fechado e isolamento de outra conta. O relatório de execução fica em `artifacts/agent-browser/`.
+
+A verificação CI identificou contraste 4,45:1 no hover da exclusão de grupo alimentar com o tom de erro herdado do baseline. O token de erro do tema escuro foi refinado para `#FF858D`, mantendo o vermelho escuro do desktop. O cenário alimentar agora provoca o hover antes do axe; esse cenário e o dashboard foram repetidos localmente com sucesso, sem relaxar a regra de contraste.
