@@ -41,6 +41,13 @@ body:has(.panel-shell) {
 .panel-shell * {
   min-width: 0;
 }
+/* Theme foregrounds and surfaces must change together at the desktop breakpoint. */
+.panel-shell .button-primary,
+.panel-shell .button-secondary,
+.panel-shell .metric-card,
+.panel-shell .plan-entry {
+  transition-property: border-color;
+}
 .panel-shell a,
 .panel-shell button,
 .panel-shell summary,

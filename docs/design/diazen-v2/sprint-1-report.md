@@ -54,3 +54,5 @@ Sprint 2 — Alimentação, somente após aprovação explícita: inspecionar se
 A auditoria agent-browser também foi executada localmente, incluindo ausência de exceções, dados desconhecidos/zero, offline, exportação, privacidade, histórico fechado e isolamento de outra conta. O relatório de execução fica em `artifacts/agent-browser/`.
 
 A verificação CI identificou contraste 4,45:1 no hover da exclusão de grupo alimentar com o tom de erro herdado do baseline. O token de erro do tema escuro foi refinado para `#FF858D`, mantendo o vermelho escuro do desktop. O cenário alimentar agora provoca o hover antes do axe; esse cenário e o dashboard foram repetidos localmente com sucesso, sem relaxar a regra de contraste.
+
+O WebKit na CI também detectou contraste transitório ao atravessar 1024 px: textos adotavam o tema claro enquanto superfícies herdavam uma animação de background de 160 ms do baseline. No shell autenticado, botões, cards de métricas e entradas de plano agora animam somente a borda; texto e superfície mudam juntos. A verificação de acessibilidade por breakpoint foi preservada, sem esperas artificiais ou exclusões de regras.
