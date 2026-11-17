@@ -21,7 +21,7 @@ Branch `feat/diazen-v2-mobile-fiel`, criada da develop atualizada após integra�
 - Build de produção aprovado. O aviso de segurança preexistente do framework, documentado no discovery, permanece separado desta alteração visual.
 - Chromium: três cenários direcionados aprovados na última execução (21,2s), incluindo navegação real, registros, consulta, Light/Dark, exportação inalterada e ausência de exceções.
 - Capturas e axe nos tamanhos 320, 390, 430 e 768 px; regressão de overflow/teclado em 1024/1440 e desktop amplo no teste compartilhado. Formulários dos atalhos de água/refeição verificados abertos e visíveis.
-- WebKit final: os três cenários aprovados (55,2s). CI completa será registrada antes da integração.
+- WebKit final: os três cenários aprovados (55,2s). A primeira CI identificou duas referências ao antigo `.dashboard-hero` no teste de registros; trocadas pelo seletor/indicador temporal visíveis, preservando toda a jornada de integridade e offline. Esse cenário completo passou localmente em 15,9s. CI completa será registrada antes da integração.
 - TypeScript, ESLint e formatação executados; resultados registrados nos logs locais da fase.
 
 ## Capturas e limites
@@ -31,3 +31,5 @@ Branch `feat/diazen-v2-mobile-fiel`, criada da develop atualizada após integra�
 - [Tablet768](screenshots/phase-2-mobile/tablet-768.png)
 
 Capturas de conta sintética no laboratório, com dados reais persistidos naquele ambiente isolado. Comparação visual realizada contra R02; adaptações refletem métricas disponíveis e metas reais. Sem notificações de fachada, avatar fictício ou status de treino presumido. Não houve homologação em aparelho físico, medição pixel a pixel ou aprovação visual do proprietário. As telas completas dos demais módulos continuam pertencendo às próximas fases.
+
+Prévia do commit de interface `f4c8743`: deployment Vercel READY, `/api/saude` e `/entrar` retornaram 200, `/painel` sem sessão redirecionou a `/entrar` (307). Verificação apenas de leitura, sem autenticar conta do proprietário nem gravar registros reais.

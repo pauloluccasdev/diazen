@@ -253,7 +253,8 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
   await expect(
     page.getByRole("link", { name: "Gerenciar projetos" }),
   ).toBeHidden();
-  await expect(page.locator(".dashboard-hero")).toBeVisible();
+  await expect(page.locator(".v2-project-selector > summary")).toBeVisible();
+  await expect(page.locator(".project-mobile-progress")).toBeVisible();
   await expect(page.locator(".area-card.metric-agua")).toBeVisible();
   await page.setViewportSize({ width: 1280, height: 844 });
   await expect(page.getByLabel("Data da consulta")).toBeHidden();
@@ -291,7 +292,8 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
   await expect(
     page.getByRole("link", { name: "Gerenciar projetos" }),
   ).toBeHidden();
-  await expect(page.locator(".dashboard-hero")).toBeVisible();
+  await expect(page.locator(".v2-project-selector > summary")).toBeVisible();
+  await expect(page.locator(".project-mobile-progress")).toBeVisible();
   await expect(page.locator(".area-card.metric-agua")).toBeVisible();
   await page.setViewportSize({ width: 1280, height: 844 });
   await expect(page.getByLabel("Data da consulta")).toBeHidden();
