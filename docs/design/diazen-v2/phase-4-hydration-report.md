@@ -1,6 +1,6 @@
-# Fase 4 — Hidratação (em desenvolvimento)
+# Fase 4 — Hidratação
 
-Branch `feat/diazen-v2-hidratacao-fiel`, criada da develop `ddbe1a1`. Referências R05/R06 abertas antes da implementação. Esta fase ainda não está contabilizada como concluída.
+Branch `feat/diazen-v2-hidratacao-fiel`, criada da develop `ddbe1a1`. Referências R05/R06 abertas antes da implementação. Entrega concluída no commit `0ed58fb`, integrada e enviada à develop.
 
 ## Implementação
 
@@ -37,6 +37,6 @@ Aplicação remota verificada: RLS, CRUD autenticado, negação anônima, policy
 
 Comparação visual contra R05/R06, sem molduras de aparelho. O percentual mantém o arredondamento real (2500/4000 = 62,5%, exibido como 63%); não copia o 62% inconsistente do mockup. Datas, horários, ausência de dados e versões de meta vêm dos registros. Imagens são decorativas e não recipientes pessoais.
 
-Sem homologação em aparelho físico, medição pixel a pixel ou aprovação visual do proprietário. A prévia e a CI remota ainda serão verificadas; a fase só será contabilizada como concluída após essa confirmação. Main não recebe merge automático.
+Sem homologação em aparelho físico, medição pixel a pixel ou aprovação visual do proprietário. A CI completa foi aprovada ([44215004775](https://github.com/pauloluccasdev/diazen/actions/runs/44215004775)): banco, build, tipos, lint, formatação, Chromium, WebKit e agent-browser. A prévia exata de `0ed58fb` está READY; `/api/saude` retornou 200 e `/painel/agua/recipientes` sem sessão redirecionou (307), sem acessar dados ou autenticar a conta do proprietário. Main não recebe merge automático.
 
 O cadastro também está disponível em `/painel/agua/recipientes`, sem exigir projeto ativo. No histórico de projetos, a tela mantém registros operacionais somente leitura e oferece acesso explícito ao cadastro da conta em página separada.

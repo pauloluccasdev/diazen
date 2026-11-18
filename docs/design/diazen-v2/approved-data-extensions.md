@@ -1,6 +1,6 @@
 # Ampliações de dados aprovadas — Diazen 2.0
 
-Aprovação explícita do proprietário em 17/11/2026: **“Aprovar as duas ampliações”**, em resposta à proposta de recipientes de água salvos e perfil com nome opcional/avatar privado. Recipientes: migração aditiva `202611170019` aplicada e verificada no Supabase; interface da Fase 4 ainda em validação. Perfil/avatar: implementação futura na Fase 9.
+Aprovação explícita do proprietário em 17/11/2026: **“Aprovar as duas ampliações”**, em resposta à proposta de recipientes de água salvos e perfil com nome opcional/avatar privado. Recipientes: migração aditiva `202611170019` aplicada e verificada no Supabase; interface da Fase 4 concluída e verificada em CI. Perfil/avatar: implementação futura na Fase 9.
 
 ## Recipientes — Fase 4
 

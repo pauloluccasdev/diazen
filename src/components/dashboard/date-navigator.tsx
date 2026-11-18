@@ -41,7 +41,11 @@ export function DateNavigator({
     `${path}?${new URLSearchParams({ projeto: project, data: value, ...(period ? { periodo: period } : {}) })}`;
   return (
     <nav className="dz-date-navigator" aria-label="Data da visualização">
-      <Link href={href(shift(date, -1))} aria-label="Dia anterior">
+      <Link
+        prefetch={false}
+        href={href(shift(date, -1))}
+        aria-label="Dia anterior"
+      >
         <ChevronLeft size={21} aria-hidden="true" />
       </Link>
       <details
@@ -62,7 +66,7 @@ export function DateNavigator({
             {shortDate.charAt(0).toUpperCase() + shortDate.slice(1)}
           </span>
         </summary>
-        <Form action={path} className="dz-date-form">
+        <Form prefetch={false} action={path} className="dz-date-form">
           <input type="hidden" name="projeto" value={project} />
           {period && <input type="hidden" name="periodo" value={period} />}
           <label>
@@ -74,7 +78,11 @@ export function DateNavigator({
           </button>
         </Form>
       </details>
-      <Link href={href(shift(date, 1))} aria-label="Próximo dia">
+      <Link
+        prefetch={false}
+        href={href(shift(date, 1))}
+        aria-label="Próximo dia"
+      >
         <ChevronRight size={21} aria-hidden="true" />
       </Link>
     </nav>

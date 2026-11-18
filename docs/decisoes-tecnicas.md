@@ -657,3 +657,11 @@ O proprietário aprovou explicitamente as duas ampliações propostas no diagnó
 - **Privacidade:** exportação paginada inclui a tabela; FK integra a exclusão de conta e dump completo inclui o cadastro. PostgreSQL nativo confirmou restauração e reaplicação de exclusão com recipientes sintéticos.
 - **Migração:** `202611170019_water_containers.sql` aplicada incrementalmente e verificada no Supabase após validar dependências e histórico, sem reset nem alteração de lançamentos. Não preenche silenciosamente lacunas anteriores de migrações. Hash e resultados no relatório da Fase 4.
 - **Requisitos:** RF-010/011, RF-019/020, RNF-002/004/011; invariantes de soma, vigência, dados ausentes e isolamento mantidas. Nenhuma prescrição ou ajuste automático de hidratação.
+
+## Decisão — Correção compatível de dependências e leitura privada sob demanda — 17/11/2026
+
+- **Contexto:** auditoria atualizada identificou avisos do framework e do tooling durante a execução autorizada do redesign. A correção preserva a stack e os contratos existentes.
+- **Decisão:** Next.js e eslint-config-next 16.4.5 com versões exatas/lockfile; typescript-eslint transitivo 8.73.0 usa minimatch 11 na faixa declarada pelo mantenedor. Sem `audit fix --force`, downgrade de framework ou nova biblioteca de UI.
+- **Navegação:** links e formulários GET privados do dashboard, calendário e seletor deixam de fazer leituras antecipadas. O trace WebKit confirmou prefetch cancelado em troca rápida de data; requisições reais, permissões e asserções de erro permanecem ativas.
+- **Limite conhecido:** produção sem avisos conhecidos na auditoria posterior; tooling ainda possui avisos transitivos de picomatch sem correção publicada, detalhados no relatório de dependências. Não equivale a auditoria completa zerada.
+- **Requisitos:** RNF-002/009/011, sem alterações de regras de negócio ou schema. Ver `docs/design/diazen-v2/dependency-review.md` e CI da entrega.

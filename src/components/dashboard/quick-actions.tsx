@@ -26,6 +26,7 @@ export function QuickActions({
           { path: "peso", label: "Evolução", icon: ChartNoAxesCombined },
         ].map(({ path, label, icon: Icon }) => (
           <Link
+            prefetch={false}
             key={path}
             href={`/painel/${path}?projeto=${project}&data=${date}${editable ? "&registrar=1#novo-registro" : ""}`}
           >

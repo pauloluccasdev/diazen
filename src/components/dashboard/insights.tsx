@@ -87,6 +87,7 @@ export function DashboardInsights({
             <div className="section-heading">
               <h2 id="weight-trend-title">Evolução do peso</h2>
               <Form
+                prefetch={false}
                 action="/painel"
                 className="dz-period-form"
                 key={`${project.id}-${date}-${period}`}
@@ -144,7 +145,7 @@ export function DashboardInsights({
         >
           <div className="section-heading">
             <h2 id="recent-activity-title">Últimas atividades</h2>
-            <Link href="/painel/historico">
+            <Link prefetch={false} href="/painel/historico">
               Ver tudo <ArrowRight size={15} aria-hidden="true" />
             </Link>
           </div>
@@ -166,7 +167,7 @@ export function DashboardInsights({
                       <Dumbbell size={23} aria-hidden="true" />
                     )}
                   </span>
-                  <Link href={event.href}>
+                  <Link prefetch={false} href={event.href}>
                     <strong>{event.title}</strong>
                     <small>{event.detail}</small>
                   </Link>
@@ -191,7 +192,7 @@ export function DashboardInsights({
         >
           <div className="section-heading">
             <h2 id="project-progress-title">Progresso do projeto</h2>
-            <Link href="/painel/projetos">
+            <Link prefetch={false} href="/painel/projetos">
               Ver detalhes <ArrowRight size={15} aria-hidden="true" />
             </Link>
           </div>
@@ -276,6 +277,7 @@ export function DashboardInsights({
             explícitos e não indicam aderência.
           </p>
           <Link
+            prefetch={false}
             className="button-secondary"
             href={`/painel/plano?projeto=${project.id}&data=${date}`}
           >

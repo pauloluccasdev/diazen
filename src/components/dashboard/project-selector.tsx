@@ -43,7 +43,7 @@ export function ProjectSelector({
           <ProjectTimeline project={selected} date={date} compact />
         </span>
       </summary>
-      <Form action={path} className="v2-query-form">
+      <Form prefetch={false} action={path} className="v2-query-form">
         <label>
           Projeto para consultar
           <select name="projeto" defaultValue={selected.id}>

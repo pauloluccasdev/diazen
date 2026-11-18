@@ -8,11 +8,11 @@ Após o discovery, o proprietário autorizou seguir por todas as fases sem pausa
 
 ## Ampliações aprovadas
 
-Em 17/11/2026, o proprietário aprovou recipientes de água salvos e perfil com nome opcional/avatar privado, conforme §5 B/C da matriz funcional. Execução aditiva nas fases 4 e 9, com RLS e ciclo completo de privacidade. Migração dos recipientes `202611170019` aplicada e verificada; interface da Fase 4 em validação. Perfil/avatar permanecem pendentes.
+Em 17/11/2026, o proprietário aprovou recipientes de água salvos e perfil com nome opcional/avatar privado, conforme §5 B/C da matriz funcional. Execução aditiva nas fases 4 e 9, com RLS e ciclo completo de privacidade. Migração dos recipientes `202611170019` aplicada e verificada; interface da Fase 4 concluída e verificada. Perfil/avatar permanecem pendentes.
 
 ## Quadro geral
 
-**4 de 11 fases concluídas (36%).** Percentual por quantidade de fases, não estimativa de horas ou esforço.
+**5 de 11 fases concluídas (45%).** Percentual por quantidade de fases, não estimativa de horas ou esforço.
 
 | Fase | Entrega                         | Estado                |
 | ---- | ------------------------------- | --------------------- |
@@ -20,7 +20,7 @@ Em 17/11/2026, o proprietário aprovou recipientes de água salvos e perfil com 
 | 1    | Dashboard desktop, claro/escuro | Concluída — `2c94fc7` |
 | 2    | Dashboard mobile e tablet       | Concluída — `8454f8c` |
 | 3    | Alimentação                     | Concluída — `ddbe1a1` |
-| 4    | Hidratação                      | Em execução           |
+| 4    | Hidratação                      | Concluída — `0ed58fb` |
 | 5    | Treinos                         | Pendente              |
 | 6    | Evolução corporal               | Pendente              |
 | 7    | Fotos de evolução               | Pendente              |
@@ -64,3 +64,16 @@ Uma fase só muda para concluída com evidência de implementação e verificaç
 - [x] Build, tipos, lint e formatação aprovados; regressão final Chromium 3/3 e WebKit 2/2.
 - [x] CI completa do commit `ddbe1a1` aprovada ([44186765025](https://github.com/pauloluccasdev/diazen/actions/runs/44186765025)); integrado e enviado à develop.
 - [x] Relatório e capturas em [phase-3-food-report.md](phase-3-food-report.md).
+
+## Fase 4 — verificada
+
+- [x] R05/R06, desktop claro/escuro, mobile/tablet, metas temporais e gráficos reais.
+- [x] Recipientes da conta, consumo, edição/exclusão, atalhos e reset de formulário.
+- [x] Migração `202611170019` aplicada e verificada; exportação, RLS e cascade.
+- [x] 88 testes de banco/unidade, 26 cenários agent-browser e ensaio PostgreSQL de restauração aprovados.
+- [x] Capturas, axe e overflow; edição em 320 px e registros consecutivos no WebKit.
+- [x] Build, tipos, lint e formatação locais.
+- [x] CI completa de `0ed58fb` aprovada ([44215004775](https://github.com/pauloluccasdev/diazen/actions/runs/44215004775)); integrado e enviado à develop.
+- [x] Prévia READY, saúde 200 e rota privada sem sessão redireciona (307); verificação somente de leitura.
+
+Manutenção de dependências em execução antes da Fase 5; não conta como uma fase adicional.

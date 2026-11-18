@@ -258,12 +258,14 @@ export default async function Panel({
         <p className="intro">Sua rotina, no seu ritmo.</p>
       </section>
       <Link
+        prefetch={false}
         className="dashboard-preferences"
         href="/painel/perfil#display-title"
       >
         Escolher indicadores do painel
       </Link>
       <Link
+        prefetch={false}
         className="button-secondary meal-record-link dashboard-history"
         href="/painel/historico"
       >
@@ -306,6 +308,7 @@ export default async function Panel({
                 )
                 .map(({ label, module, icon: Icon, value, detail, empty }) => (
                   <Link
+                    prefetch={false}
                     className={`area-card metric-card metric-${module}`}
                     key={module}
                     href={`/painel/${module}?projeto=${selected.id}&data=${date}`}
@@ -647,6 +650,7 @@ export default async function Panel({
           )}
           <nav className="evolution-actions" aria-label="Evolução corporal">
             <Link
+              prefetch={false}
               className="button-secondary"
               href={`/painel/medidas?projeto=${selected.id}`}
             >
@@ -658,6 +662,7 @@ export default async function Panel({
             </Link>
             {preferences.show_photos && (
               <Link
+                prefetch={false}
                 className="button-secondary"
                 href={`/painel/fotos?projeto=${selected.id}`}
               >
@@ -688,7 +693,11 @@ export default async function Panel({
           <p className="intro">
             Escolha pelo menos uma meta de água, peso ou sessões para começar.
           </p>
-          <Link className="button-primary" href="/painel/projetos">
+          <Link
+            prefetch={false}
+            className="button-primary"
+            href="/painel/projetos"
+          >
             Configurar meu primeiro projeto
           </Link>
         </div>
