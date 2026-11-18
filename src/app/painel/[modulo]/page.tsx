@@ -1,3 +1,8 @@
+import { WaterDiary } from "@/components/hydration/water-diary";
+import { WaterRecordCard } from "@/components/hydration/water-record-card";
+import { ContainerManager } from "@/components/hydration/container-manager";
+import { waterContainers, hydrationEntries } from "@/lib/hydration-data";
+import { hydrationWeek } from "@/lib/hydration-metrics";
 import { FoodDiary } from "@/components/nutrition/food-diary";
 import { foodDayEntries } from "@/lib/food-day-data";
 import { ActivityRecordCard } from "@/components/activity-record-card";
@@ -34,21 +39,27 @@ import {
 } from "@/lib/records";
 import { ActionForm } from "@/components/forms/action-form";
 import { RecordFields } from "@/components/forms/record-fields";
-import { ProgressRing } from "@/components/progress-ring";
-import { Droplets } from "lucide-react";
 import { WeightChart } from "@/components/weight-chart";
 import { saveRecord, deleteRecord } from "./actions";
 function RecordPresentation({
   kind,
   row,
   children,
+  editable,
 }: {
   kind: Module;
   row: Entry;
   children: ReactNode;
+  editable: boolean;
 }) {
   if (kind === "atividades")
     return <ActivityRecordCard row={row}>{children}</ActivityRecordCard>;
+  if (kind === "agua")
+    return (
+      <WaterRecordCard row={row} editable={editable}>
+        {children}
+      </WaterRecordCard>
+    );
   if (kind !== "alimentacao") return <>{children}</>;
   const kcal =
     row.kcal == null
@@ -104,6 +115,7 @@ export default async function Records({
     refeicao_excluida?: string;
     registrar?: string;
     refeicao?: string;
+    volume?: string;
   }>;
 }) {
   const { modulo } = await params;
@@ -116,6 +128,8 @@ export default async function Records({
   );
   const context = await projectContext(filters.projeto),
     { selected, active, client, user, projects } = context;
+  const containersPromise =
+    modulo === "agua" ? waterContainers(client) : Promise.resolve([]);
   if (!selected)
     return (
       <section className="welcome">
@@ -124,6 +138,9 @@ export default async function Records({
         <Link className="button-primary" href="/painel/projetos">
           Configurar projeto
         </Link>
+        {modulo === "agua" && (
+          <ContainerManager containers={await containersPromise} />
+        )}
       </section>
     );
   const editable = selected.status === "ACTIVE" && selected.id === active?.id;
@@ -131,60 +148,76 @@ export default async function Records({
   let query = client
     .from(modules[modulo].table)
     .select("*")
-    .eq("project_id", selected.id)
-    .order("logged_on", { ascending: false })
-    .order("id", { ascending: false })
-    .range((page - 1) * 20, page * 20);
+    .eq("project_id", selected.id);
+  query =
+    modulo === "agua"
+      ? query
+          .order("logged_time", { ascending: true, nullsFirst: false })
+          .order("id", { ascending: false })
+      : query
+          .order("logged_on", { ascending: false })
+          .order("id", { ascending: false });
+  query = query.range((page - 1) * 20, page * 20);
   if (daily || modulo === "atividades" || filters.data)
     query = query.eq("logged_on", date);
   const week = weekBounds(date);
-  const [entries, totals, graph, diet, weekCounts, allFoods] =
-    await Promise.all([
-      query.returns<Entry[]>(),
-      client.rpc("project_summary", {
-        p_project: selected.id,
-        p_date: date,
-      }),
-      modulo === "peso"
-        ? client
-            .from("weights")
-            .select("*")
-            .eq("project_id", selected.id)
-            .lte("logged_on", date)
-            .order("logged_on", { ascending: false })
-            .limit(30)
-            .returns<Entry[]>()
-        : Promise.resolve({ data: [] as Entry[], error: null }),
-      modulo === "alimentacao"
-        ? dashboardPlan(client, selected.id, date)
-        : Promise.resolve(null),
-      modulo === "atividades"
-        ? (async () => {
-            const counts: Record<string, number> = {};
-            for (let offset = 0; ; offset += 1000) {
-              const result = await client
-                .from("activities")
-                .select("logged_on")
-                .eq("project_id", selected.id)
-                .gte("logged_on", week.start)
-                .lte("logged_on", week.end)
-                .order("id")
-                .range(offset, offset + 999);
-              if (result.error)
-                throw Error(
-                  "Não foi possível carregar a semana de atividades.",
-                );
-              for (const row of result.data ?? [])
-                counts[row.logged_on] = (counts[row.logged_on] ?? 0) + 1;
-              if ((result.data?.length ?? 0) < 1000) break;
-            }
-            return counts;
-          })()
-        : Promise.resolve({} as Record<string, number>),
-      modulo === "alimentacao"
-        ? foodDayEntries(client, selected.id, date)
-        : Promise.resolve([] as Entry[]),
-    ]);
+  const [
+    entries,
+    totals,
+    graph,
+    diet,
+    weekCounts,
+    allFoods,
+    containers,
+    waterRows,
+  ] = await Promise.all([
+    query.returns<Entry[]>(),
+    client.rpc("project_summary", {
+      p_project: selected.id,
+      p_date: date,
+    }),
+    modulo === "peso"
+      ? client
+          .from("weights")
+          .select("*")
+          .eq("project_id", selected.id)
+          .lte("logged_on", date)
+          .order("logged_on", { ascending: false })
+          .limit(30)
+          .returns<Entry[]>()
+      : Promise.resolve({ data: [] as Entry[], error: null }),
+    modulo === "alimentacao"
+      ? dashboardPlan(client, selected.id, date)
+      : Promise.resolve(null),
+    modulo === "atividades"
+      ? (async () => {
+          const counts: Record<string, number> = {};
+          for (let offset = 0; ; offset += 1000) {
+            const result = await client
+              .from("activities")
+              .select("logged_on")
+              .eq("project_id", selected.id)
+              .gte("logged_on", week.start)
+              .lte("logged_on", week.end)
+              .order("id")
+              .range(offset, offset + 999);
+            if (result.error)
+              throw Error("Não foi possível carregar a semana de atividades.");
+            for (const row of result.data ?? [])
+              counts[row.logged_on] = (counts[row.logged_on] ?? 0) + 1;
+            if ((result.data?.length ?? 0) < 1000) break;
+          }
+          return counts;
+        })()
+      : Promise.resolve({} as Record<string, number>),
+    modulo === "alimentacao"
+      ? foodDayEntries(client, selected.id, date)
+      : Promise.resolve([] as Entry[]),
+    containersPromise,
+    modulo === "agua"
+      ? hydrationEntries(client, selected.id, date)
+      : Promise.resolve([] as Entry[]),
+  ]);
   if (entries.error) throw new Error("Falha ao carregar registros");
   if (totals.error) throw new Error("Falha ao carregar totais");
   if (graph.error) throw new Error("Falha no gráfico");
@@ -200,16 +233,16 @@ export default async function Records({
       id={modulo === "atividades" ? `atividade-${row.id}` : undefined}
       className={`content-card${modulo === "alimentacao" ? " food-record" : modulo === "atividades" ? " activity-record" : ""}`}
     >
-      <RecordPresentation kind={modulo} row={row}>
+      <RecordPresentation kind={modulo} row={row} editable={editable}>
         {modulo !== "atividades" && (
           <p className="eyebrow">
             {formatDate(row.logged_on)}
             {row.category && ` · ${categories[row.category]}`}
           </p>
         )}
-        {modulo !== "alimentacao" && modulo !== "atividades" && (
-          <h3>{entryText(modulo, row)}</h3>
-        )}
+        {modulo !== "alimentacao" &&
+          modulo !== "atividades" &&
+          modulo !== "agua" && <h3>{entryText(modulo, row)}</h3>}
         {row.notes && <p className="intro">{row.notes}</p>}
         {modulo === "alimentacao" && (
           <>
@@ -287,6 +320,31 @@ export default async function Records({
       />
     );
 
+  if (modulo === "agua") {
+    const volume = Number(filters.volume);
+    return (
+      <WaterDiary
+        projects={projects}
+        selected={selected}
+        active={active}
+        date={date}
+        summary={summary}
+        rows={rows}
+        page={page}
+        hasMore={hasMore}
+        containers={containers}
+        days={hydrationWeek(waterRows, date, context.goals)}
+        registrar={filters.registrar}
+        preset={
+          Number.isInteger(volume) && volume >= 1 && volume <= 5000
+            ? volume
+            : undefined
+        }
+        renderRecord={renderRecord}
+      />
+    );
+  }
+
   return (
     <div className={`module-page module-${modulo}`}>
       <section className="welcome module-welcome">
@@ -341,9 +399,7 @@ export default async function Records({
               ? "Registrar ou atualizar peso"
               : modulo === "medidas"
                 ? "Registrar medidas"
-                : modulo === "agua"
-                  ? "Adicionar consumo"
-                  : "Registrar atividade"}
+                : "Registrar atividade"}
           </summary>
           <p className="intro">
             Este registro será salvo no projeto ativo “{active?.name}”.
@@ -382,53 +438,6 @@ export default async function Records({
 
       {modulo === "atividades" && garminConfig(user.id) && <GarminConnection />}
 
-      {modulo === "agua" && (
-        <section className="content-card hydration-summary">
-          <ProgressRing
-            value={summary.water_ml}
-            max={summary.water_goal}
-            label="Progresso da hidratação na data consultada"
-          >
-            <Droplets size={24} aria-hidden="true" />
-            <strong>
-              {summary.water_ml === null
-                ? "Sem registros"
-                : `${number(summary.water_ml / 1000, 2)} L`}
-            </strong>
-            <span>
-              {summary.water_goal === null
-                ? "Sem meta"
-                : `de ${number(summary.water_goal / 1000, 2)} L`}
-            </span>
-          </ProgressRing>
-          <div className="hydration-detail">
-            <h2>
-              {summary.water_ml === null
-                ? "Sem registros"
-                : `${number(summary.water_ml, 0)} ml`}
-            </h2>
-            <p className="intro">
-              {summary.water_goal === null
-                ? "Meta não configurada"
-                : `Meta de ${number(summary.water_goal, 0)} ml em ${formatDate(date)}`}
-            </p>
-            {summary.water_ml !== null && summary.water_goal !== null && (
-              <>
-                <progress
-                  className="water-progress"
-                  value={Math.min(summary.water_ml, summary.water_goal)}
-                  max={summary.water_goal}
-                  aria-label="Progresso da hidratação"
-                />
-                <p>
-                  {number((summary.water_ml / summary.water_goal) * 100, 0)}% da
-                  meta
-                </p>
-              </>
-            )}
-          </div>
-        </section>
-      )}
       {modulo === "peso" && (
         <section className="content-card">
           <h2>

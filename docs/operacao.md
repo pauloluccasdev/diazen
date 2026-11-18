@@ -134,3 +134,9 @@ Primeiro snapshot real e ledger cifrados, criados e verificados em 22/10/2026 na
 - Aprovar visual das telas reais e selecionar definitivamente os requisitos de prioridade Média; RF-009 teve inclusão aprovada em 22/10/2026.
 - Confirmar limites de upload, custos, matriz de navegadores e monitoramento; manter restrição ao uso pessoal inicial.
 - Guardar evidências de homologação e aprovação no projeto, sem dados sensíveis. O PR final fica com o proprietário.
+
+### Recipientes da conta — 17/11/2026
+
+A migração incremental `202611170019_water_containers.sql` foi aplicada e verificada no ambiente hospedado, sem alterar lançamentos. O histórico remoto encontrado contém 001–012 e 016–018 antes desta aplicação; esta entrega não reaplicou nem declarou instaladas as versões 013–015. A tabela de recipientes depende apenas dos objetos de Auth, guarda de proprietário e auditoria já presentes. Migrações futuras devem conferir o histórico e suas dependências explicitamente, sem reaplicar o bundle.
+
+O cadastro integra a exportação JSON, o dump de `public` e a exclusão por FK Auth/cascade. O ensaio `npm run test:restore` agora inclui recipientes sintéticos e verificou restauração, RLS e reaplicação de exclusão em PostgreSQL 17.11. O cenário de serviços Supabase locais também foi ampliado, mas ainda não foi reexecutado nesta fase; não confundir o ensaio nativo com uma restauração hospedada.

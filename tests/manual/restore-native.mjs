@@ -110,7 +110,7 @@ try {
           : "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
     sql(
       source,
-      `set role authenticated;select set_config('request.jwt.claim.sub','${owner}',false);insert into water_entries(logged_on,volume_ml) values('${today}',300);select save_weight('${today}',80);insert into photos(id,logged_on,category,storage_key,thumbnail_key) values('${photo}','${today}','front','${owner}/${project}/${photo}.webp','${owner}/${project}/${photo}-thumb.webp');`,
+      `set role authenticated;select set_config('request.jwt.claim.sub','${owner}',false);insert into water_entries(logged_on,volume_ml) values('${today}',300);insert into water_containers(name,volume_ml) values('Copo sintético',300);select save_weight('${today}',80);insert into photos(id,logged_on,category,storage_key,thumbnail_key) values('${photo}','${today}','front','${owner}/${project}/${photo}.webp','${owner}/${project}/${photo}-thumb.webp');`,
     );
   }
   const sharp = (await import("sharp")).default;
@@ -148,6 +148,10 @@ try {
   assert.equal(sql(destination, "select count(*) from public.projects;"), "2");
   assert.equal(sql(destination, "select count(*) from public.photos;"), "2");
   assert.equal(sql(destination, "select count(*) from public.weights;"), "2");
+  assert.equal(
+    sql(destination, "select count(*) from public.water_containers;"),
+    "2",
+  );
   assert.equal(
     sql(destination, "select sum(volume_ml) from public.water_entries;"),
     "600",
@@ -197,6 +201,10 @@ try {
   assert.equal(sql(destination, "select count(*) from storage.objects;"), "2");
   assert.equal(sql(destination, "select count(*) from public.weights;"), "1");
   assert.equal(
+    sql(destination, "select count(*) from public.water_containers;"),
+    "1",
+  );
+  assert.equal(
     sql(destination, "select sum(volume_ml) from public.water_entries;"),
     "300",
   );
@@ -221,6 +229,15 @@ try {
     .split("\n")
     .at(-1);
   assert.equal(own, "1");
+  assert.equal(
+    sql(
+      destination,
+      `set role authenticated;select set_config('request.jwt.claim.sub','${bob}',false);select count(*) from water_containers;`,
+    )
+      .split("\n")
+      .at(-1),
+    "1",
+  );
   const foreign = sql(
     destination,
     `set role authenticated;select set_config('request.jwt.claim.sub','${bob}',false);select count(*) from projects where user_id='${alice}';`,

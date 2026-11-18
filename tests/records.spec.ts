@@ -55,12 +55,17 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
   await water
     .getByRole("button", { name: "Salvar registro", exact: true })
     .click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Continuar", exact: true })
+    .click();
   await expect(
-    page.getByRole("heading", { name: "300 ml", exact: true, level: 2 }),
+    page.getByRole("heading", { name: "300 ml", exact: true, level: 3 }),
   ).toBeVisible();
   const item = page.getByRole("article", { includeHidden: true }).filter({
     has: page.getByRole("heading", { name: "300 ml", exact: true }),
   });
+  await item.locator(".water-record-menu > summary").click();
   await item.getByText("Editar registro", { exact: true }).click();
   await item.getByLabel("Volume (ml)").fill("450");
   await item

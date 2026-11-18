@@ -19,6 +19,7 @@ export async function GET() {
     "daily_checkins",
     "eating_context_events",
     "water_goals",
+    "water_containers",
     "water_entries",
     "weights",
     "measurements",

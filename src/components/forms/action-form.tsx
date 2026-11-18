@@ -33,6 +33,8 @@ export function ActionForm({
   initiallyOpen = true,
   feedbackMode = "inline",
   fieldsKey = "",
+  disabled = false,
+  onFeedbackClose,
 }: {
   action: FormAction;
   children: React.ReactNode;
@@ -43,6 +45,8 @@ export function ActionForm({
   initiallyOpen?: boolean;
   feedbackMode?: "inline" | "modal";
   fieldsKey?: string;
+  disabled?: boolean;
+  onFeedbackClose?: (result: FormResult) => void;
 }) {
   const [state, dispatch, pending] = useActionState(
     async (
@@ -74,7 +78,7 @@ export function ActionForm({
   const fields = (
     <fieldset
       key={`${fieldsKey}-${state.resetVersion}`}
-      disabled={pending || !online}
+      disabled={pending || !online || disabled}
     >
       {children}
       <button type="submit" className="button-primary">
@@ -88,7 +92,7 @@ export function ActionForm({
       action={dispatch}
       onSubmit={(event) => {
         event.preventDefault();
-        if (!navigator.onLine || pending) return;
+        if (!navigator.onLine || pending || disabled) return;
         const form = new FormData(event.currentTarget);
         startTransition(() => dispatch(form));
       }}
@@ -123,7 +127,10 @@ export function ActionForm({
           <RecordFeedbackDialog
             error={Boolean(state.error)}
             message={state.error || state.message}
-            onClose={() => setDismissed(state.feedbackVersion)}
+            onClose={() => {
+              setDismissed(state.feedbackVersion);
+              onFeedbackClose?.(state);
+            }}
           />
         )}
       {!online && (

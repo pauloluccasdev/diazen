@@ -8,19 +8,19 @@ Após o discovery, o proprietário autorizou seguir por todas as fases sem pausa
 
 ## Ampliações aprovadas
 
-Em 17/11/2026, o proprietário aprovou recipientes de água salvos e perfil com nome opcional/avatar privado, conforme §5 B/C da matriz funcional. Execução aditiva nas fases 4 e 9, com RLS e ciclo completo de privacidade; não implementadas ainda.
+Em 17/11/2026, o proprietário aprovou recipientes de água salvos e perfil com nome opcional/avatar privado, conforme §5 B/C da matriz funcional. Execução aditiva nas fases 4 e 9, com RLS e ciclo completo de privacidade. Migração dos recipientes `202611170019` aplicada e verificada; interface da Fase 4 em validação. Perfil/avatar permanecem pendentes.
 
 ## Quadro geral
 
-**3 de 11 fases concluídas (27%).** Percentual por quantidade de fases, não estimativa de horas ou esforço.
+**4 de 11 fases concluídas (36%).** Percentual por quantidade de fases, não estimativa de horas ou esforço.
 
 | Fase | Entrega                         | Estado                |
 | ---- | ------------------------------- | --------------------- |
 | 0    | Discovery técnico e visual      | Concluída — `997afe0` |
 | 1    | Dashboard desktop, claro/escuro | Concluída — `2c94fc7` |
 | 2    | Dashboard mobile e tablet       | Concluída — `8454f8c` |
-| 3    | Alimentação                     | Em execução           |
-| 4    | Hidratação                      | Pendente              |
+| 3    | Alimentação                     | Concluída — `ddbe1a1` |
+| 4    | Hidratação                      | Em execução           |
 | 5    | Treinos                         | Pendente              |
 | 6    | Evolução corporal               | Pendente              |
 | 7    | Fotos de evolução               | Pendente              |
@@ -54,3 +54,13 @@ Uma fase só muda para concluída com evidência de implementação e verificaç
 - [x] CI completa do commit `e7f5ca0` aprovada ([44118454686](https://github.com/pauloluccasdev/diazen/actions/runs/44118454686)).
 - [x] Ajuste adicional de tablet: build, dois cenários Chromium e dois WebKit aprovados; integração na develop nesta entrega.
 - [x] CI do ajuste final `8454f8c` aprovada ([44124581261](https://github.com/pauloluccasdev/diazen/actions/runs/44124581261)); integrado e enviado à develop.
+
+## Fase 3 — verificada
+
+- [x] R03/R04, seis categorias, desktop claro/escuro, mobile e calendário.
+- [x] Busca/registro, edição, exclusão, cópia, plano e valores parciais preservados.
+- [x] Totais completos com 1005 lançamentos, paginação e consulta somente leitura.
+- [x] 83 testes de banco/unidade e 26 cenários agent-browser aprovados localmente.
+- [x] Build, tipos, lint e formatação aprovados; regressão final Chromium 3/3 e WebKit 2/2.
+- [x] CI completa do commit `ddbe1a1` aprovada ([44186765025](https://github.com/pauloluccasdev/diazen/actions/runs/44186765025)); integrado e enviado à develop.
+- [x] Relatório e capturas em [phase-3-food-report.md](phase-3-food-report.md).

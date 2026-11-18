@@ -1,12 +1,12 @@
 # Ampliações de dados aprovadas — Diazen 2.0
 
-Aprovação explícita do proprietário em 17/11/2026: **“Aprovar as duas ampliações”**, em resposta à proposta de recipientes de água salvos e perfil com nome opcional/avatar privado. Este documento detalha a implementação futura; não declara migrações aplicadas.
+Aprovação explícita do proprietário em 17/11/2026: **“Aprovar as duas ampliações”**, em resposta à proposta de recipientes de água salvos e perfil com nome opcional/avatar privado. Recipientes: migração aditiva `202611170019` aplicada e verificada no Supabase; interface da Fase 4 ainda em validação. Perfil/avatar: implementação futura na Fase 9.
 
 ## Recipientes — Fase 4
 
-Tabela candidata `water_containers`: UUID, `user_id` com FK Auth/cascade, nome obrigatório de 1–80 caracteres, volume inteiro de 1–5000 ml, data de criação. Cadastro pertence à conta, não a projeto encerrado; selecionar recipiente no formulário de consumo copia nome/volume para o lançamento existente e preserva sua data. Alterações posteriores no cadastro nunca reescrevem lançamentos. Formulário de consumo continua resolvendo o projeto ACTIVE no servidor.
+Tabela `water_containers`: UUID, `user_id` com FK Auth/cascade, nome obrigatório de 1–60 caracteres, compatível com `container_label` dos lançamentos existentes, volume inteiro de 1–5000 ml, data de criação. Cadastro pertence à conta, não a projeto encerrado; selecionar recipiente no formulário de consumo copia nome/volume para o lançamento existente e preserva sua data. Alterações posteriores no cadastro nunca reescrevem lançamentos. Formulário de consumo continua resolvendo o projeto ACTIVE no servidor.
 
-RLS deve exigir proprietário e conta habilitada, com grants mínimos e validação equivalente no servidor. Definir limite de cadastro e paginação antes de escrever a migração; ausência de recipiente não impede consumo manual/atalhos. Incluir na exportação paginada, no inventário de backup/restauração e na exclusão por FK. Testar limites, CRUD, histórico após renomear/excluir, segunda conta, conta em exclusão e bloqueio offline.
+RLS deve exigir proprietário e conta habilitada, com grants mínimos e validação equivalente no servidor. Refinamento da Fase 4: limite de 50 por conta, serializado no banco, com leitura ordenada de todos os cadastros até esse limite; ausência de recipiente não impede consumo manual/atalhos. Incluir na exportação paginada, no inventário de backup/restauração e na exclusão por FK. Testar limites, CRUD, histórico após renomear/excluir, segunda conta, conta em exclusão e bloqueio offline.
 
 ## Perfil — Fase 9
 

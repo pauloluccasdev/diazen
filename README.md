@@ -171,3 +171,7 @@ Planejamento, limites e critérios por sprint em [implementation-plan](docs/desi
 ## Diazen 2.0 — discovery de alta fidelidade (17/11/2026)
 
 A nova sequência começa por discovery, sem alterar produção: [auditoria visual/técnica](docs/design/diazen-v2/visual-audit.md), [inventário e lacunas funcionais](docs/design/diazen-v2/functional-gap-analysis.md), [proposta de Design System](docs/design/diazen-v2/design-system.md) e [plano atualizado](docs/design/diazen-v2/implementation-plan.md). Os 13 protótipos foram inspecionados; a opção de desktop claro/escuro integra a proposta. A Sprint 1 anterior é histórica, sem homologação de alta fidelidade. A próxima entrega proposta é Dashboard desktop, exclusivamente após aprovação do proprietário; não iniciar outros módulos automaticamente.
+
+### Diazen 2.0 — recipientes de água
+
+A migração aditiva `202611170019_water_containers.sql` cria recipientes salvos por conta, com RLS, limite de 50, volume de 1–5000 ml e exclusão em cascata. O nome e o volume são copiados para novos lançamentos; alterar ou excluir o cadastro preserva o consumo anterior. A exportação inclui `water_containers`. O cadastro é acessível em `/painel/agua/recipientes`, inclusive sem projeto ativo. Confira o [relatório da Hidratação](docs/design/diazen-v2/phase-4-hydration-report.md) para o estado da entrega, aplicação hospedada e verificações. Nunca reaplique o bundle em um ambiente existente.

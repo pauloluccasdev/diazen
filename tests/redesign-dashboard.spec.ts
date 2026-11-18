@@ -23,7 +23,7 @@ test("Diazen v2: shell responsivo, dados persistidos, consulta e navegação por
     else {
       const headings: Record<string, string> = {
         Projetos: "Meus projetos.",
-        Hidratação: "Hidratação.",
+        Hidratação: "Hidratação",
         Evolução: "Peso.",
         Treinos: "Atividades.",
         Diário: "Alimentação",
@@ -82,6 +82,10 @@ test("Diazen v2: shell responsivo, dados persistidos, consulta e navegação por
     .getByRole("button", { name: "Salvar registro", exact: true })
     .click();
   await expect(water.getByRole("status")).toContainText("Registro adicionado");
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Continuar", exact: true })
+    .click();
   for (const [day, kg] of [
     [shifted(-7), "95"],
     [date, "94"],

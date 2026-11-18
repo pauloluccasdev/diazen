@@ -19,3 +19,7 @@ As cinco imagens de `public/images/meals/` foram geradas com imagegen em 17/11/2
 | dinner.webp          | 29.436 bytes |
 
 Composição: prato branco, fundo neutro e enquadramento superior, conforme a linguagem das referências R03/R04. Os originais gerados permanecem nos artefatos locais da sessão; não foram extraídas fotografias pessoais dos protótipos.
+
+## Hidratação
+
+`hydration-dark-v2.webp` (34.082 bytes, 218×685 px) e `hydration-light-v2.webp` (43.764 bytes, 258×688 px), em `public/images/`, são garrafas editoriais geradas com imagegen em 17/11/2026. Os originais de 480×720 px foram recortados pelas margens transparentes, preservando o objeto e o alpha, e são usados como fundos decorativos nas composições R05/R06. Não representam recipientes cadastrados pelo usuário e não determinam volumes. O cadastro real é independente dessas ilustrações.

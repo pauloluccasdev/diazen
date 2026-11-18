@@ -1,0 +1,209 @@
+/* Shared authenticated module heading/context. */
+
+.dz-module-context {
+  display: none;
+}
+.panel-shell:has(.dz-module-heading-wrap) .v2-header {
+  display: none;
+}
+.dz-module-heading-wrap {
+  order: 0;
+}
+.dz-module-heading {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 20px 0 18px;
+}
+.dz-module-heading .return-link {
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  border-radius: 14px;
+}
+.dz-module-heading .return-link span {
+  display: none;
+}
+.dz-module-heading h1 {
+  font-size: 24px;
+  line-height: 1.2;
+  letter-spacing: -0.7px;
+  margin: 0;
+}
+.dz-module-project {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  margin-top: 5px;
+}
+.dz-module-description {
+  display: none;
+}
+.dz-module-calendar {
+  margin-left: auto;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+.dz-module-heading-action {
+  display: none;
+}
+.dz-module-heading-wrap .dz-date-navigator {
+  min-height: 44px;
+  padding: 0 4px;
+  border-radius: 14px;
+  gap: 4px;
+  width: 100%;
+}
+.dz-module-heading-wrap .dz-date-navigator details {
+  margin: 0;
+}
+.dz-module-heading-wrap .dz-date-navigator summary {
+  width: 100%;
+  min-height: 44px;
+  padding: 0;
+  background: none;
+  font-size: 12px;
+  gap: 8px;
+}
+.dz-module-heading-wrap .dz-date-navigator > a {
+  background: var(--color-surface-raised);
+  min-width: 36px;
+}
+@media (max-width: 359px) {
+  .dz-module-heading h1 {
+    font-size: 21px;
+  }
+}
+@media (min-width: 1024px) {
+  .panel-shell:has(.dz-module-heading-wrap) .v2-workspace {
+    position: relative;
+  }
+  .panel-shell:has(.dz-module-heading-wrap) .v2-header {
+    display: flex;
+    min-height: 76px;
+    height: 76px;
+    padding-block: 12px;
+  }
+  .panel-shell:has(.dz-module-heading-wrap) .dz-search-trigger {
+    display: none;
+  }
+  .panel-shell:has(.dz-module-heading-wrap) .dz-desktop-tools {
+    width: auto;
+    margin-left: auto;
+  }
+  .dz-module-context {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    top: 16px;
+    left: 28px;
+    width: min(720px, calc(100% - 360px));
+    z-index: 4;
+    margin: 0;
+  }
+  .dz-module-context > .v2-project-selector {
+    flex: 0 1 280px;
+    background: var(--color-surface-raised);
+    border: 0;
+    border-radius: 14px;
+  }
+  .dz-module-context .v2-project-selector > summary {
+    min-height: 44px;
+    padding: 8px 12px;
+    width: 100%;
+  }
+  .dz-module-context .v2-project-selector small,
+  .dz-module-context .project-mobile-dates,
+  .dz-module-context .project-mobile-progress {
+    display: none;
+  }
+  .dz-module-context .v2-project-selector strong {
+    font-size: 14px;
+  }
+  .dz-module-context > span {
+    color: var(--color-text-muted);
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .dz-module-context .v2-query-form {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    width: 350px;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    background: var(--color-surface);
+    padding: 16px;
+    box-shadow: var(--v2-shadow);
+  }
+  .dz-module-heading {
+    padding: 18px 0 20px;
+  }
+  .dz-module-heading .return-link,
+  .dz-module-calendar,
+  .dz-module-project {
+    display: none;
+  }
+  .dz-module-heading h1 {
+    font-size: 34px;
+    letter-spacing: -1px;
+  }
+  .dz-module-description {
+    display: block;
+    color: var(--color-text-muted);
+    font-size: 14px;
+    margin-top: 5px;
+  }
+  .dz-module-heading-action {
+    display: block;
+    margin-left: auto;
+  }
+  .dz-module-heading-action > a {
+    min-height: 44px;
+    font-size: 13px;
+    padding: 8px 16px;
+    margin: 0;
+  }
+  .dz-module-heading-wrap .dz-date-navigator {
+    width: 390px;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    gap: 12px;
+  }
+  .dz-module-heading-wrap .dz-date-navigator > a {
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+  }
+  .dz-module-heading-wrap .dz-date-navigator details {
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    background: var(--color-surface);
+  }
+}
+@media (min-width: 1024px) and (max-width: 1399px) {
+  .dz-module-context > span {
+    display: none;
+  }
+}
+@media (min-width: 1024px) {
+  .dz-module-heading h1 {
+    font-size: 40px;
+    font-weight: 800;
+  }
+}
+@media (min-width: 1024px) {
+  .dz-module-heading {
+    padding-bottom: 13px;
+  }
+}

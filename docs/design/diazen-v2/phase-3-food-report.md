@@ -1,6 +1,6 @@
 # Fase 3 — Alimentação
 
-Branch `feat/diazen-v2-alimentacao-fiel`, a partir da develop `8454f8c`. Referências R03/R04 abertas antes da implementação. Entrega em validação; ainda não contabilizada como fase concluída.
+Branch `feat/diazen-v2-alimentacao-fiel`, a partir da develop `8454f8c`. Referências R03/R04 abertas antes da implementação. Entrega concluída no commit `ddbe1a1`, integrada e enviada à develop.
 
 ## Interface e comportamento
 
@@ -22,13 +22,13 @@ Edição e exclusão individual e por grupo utilizam as ações e confirmações
 
 Relacionamento: RF-006 a RF-009 e RNF-011, com preservação das regras de proprietário, projeto ativo, leitura histórica e valores desconhecidos.
 
-## Validação em andamento
+## Validação
 
 A primeira execução completa Chromium passou em 50 cenários, com um cenário opcional ignorado. No WebKit, a primeira execução completa teve 49 aprovados, um ignorado e uma falha na asserção final de ausência de exceções: pré-carregamentos de páginas privadas foram cancelados durante uma recarga. A navegação foi ajustada para não fazer esses pré-carregamentos. Os dois cenários direcionados finais (Alimentação e dashboard responsivo) passaram em 55,1s, mantendo a recarga e todas as asserções de erro.
 
 O cenário novo persiste dados sintéticos em PostgreSQL isolado e cobre seis categorias, inclusão, calendário, Light/Dark, acessibilidade com axe, larguras 320/390/430/768/1366/1536, histórico somente leitura, exportação sem alterações e 1005 registros em um único dia. Os totais correspondem aos dados de teste, inclusive quando os números do protótipo não fecham entre si. Não são dados fictícios no fluxo de produção.
 
-Build, TypeScript, ESLint e formatação locais aprovados após o ajuste. Os 83 testes de banco/unidade passaram, incluindo agregação com zero, desconhecidos, proporções e mais de mil registros. Os três cenários Chromium finais (Alimentação, dashboard desktop e responsividade) passaram em 30,9s. Os 26 cenários da jornada agent-browser foram aprovados, incluindo isolamento entre usuários, exportação, exclusão de conta, fotos e leitura offline. A CI remota ainda está pendente.
+Build, TypeScript, ESLint e formatação locais aprovados após o ajuste. Os 83 testes de banco/unidade passaram, incluindo agregação com zero, desconhecidos, proporções e mais de mil registros. Os três cenários Chromium finais (Alimentação, dashboard desktop e responsividade) passaram em 30,9s. Os 26 cenários da jornada agent-browser foram aprovados, incluindo isolamento entre usuários, exportação, exclusão de conta, fotos e leitura offline. A CI remota completa foi aprovada no commit `ddbe1a1` ([44186765025](https://github.com/pauloluccasdev/diazen/actions/runs/44186765025)), incluindo banco, build, tipos, lint, formatação, Chromium, WebKit e agent-browser.
 
 ## Limites
 
@@ -44,3 +44,5 @@ Capturas WebKit com conta sintética, convertidas para WebP e reduzidas à largu
 - [Mobile 320](screenshots/phase-3-food/mobile-320.webp)
 - [Valores parciais](screenshots/phase-3-food/partial-390.webp)
 - [Histórico vazio](screenshots/phase-3-food/empty-history-390.webp)
+
+Prévia do commit `ddbe1a1`: Vercel READY e `/api/saude` respondeu 200 com acesso autenticado da ferramenta à prévia protegida. Verificação somente de leitura, sem usar sessão do proprietário ou gravar dados reais.

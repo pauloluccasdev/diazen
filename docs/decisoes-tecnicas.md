@@ -648,3 +648,12 @@ O proprietário aprovou explicitamente as duas ampliações propostas no diagnó
 - **Integridade:** nenhum schema ou contrato público alterado. Nulos, zero e totais parciais continuam distintos; registro não significa aderência. Formulários continuam limitados ao projeto ativo, com destino e proprietário validados no servidor.
 - **Privacidade e navegação:** desativar pré-carregamento automático dos links globais do painel, evitando leituras antecipadas de módulos privados e cancelamentos na recarga WebKit; navegação por clique permanece funcional.
 - **Requisitos:** RF-006 a RF-009, RNF-011; relatório e evidências em `docs/design/diazen-v2/phase-3-food-report.md`.
+
+## Decisão — Recipientes de água da conta — 17/11/2026
+
+- **Autorização:** aprovação explícita das duas ampliações aditivas; esta entrega executa somente recipientes, mantendo perfil/avatar para a Fase 9.
+- **Modelo:** `water_containers`, proprietário Auth com cascade, UUID, nome de até 60 caracteres compatível com `container_label`, volume 1–5000 ml e criação; máximo de 50 por conta serializado em trigger. RLS exige proprietário e conta habilitada; identidade imutável e auditoria reutilizam os padrões existentes.
+- **Histórico:** selecionar um cadastro copia nome/volume para o formulário; edição/exclusão do cadastro não reescreve consumos. Projeto ativo continua resolvido no servidor para lançamentos. Cadastro independente disponível em `/painel/agua/recipientes`; histórico operacional não recebe editor.
+- **Privacidade:** exportação paginada inclui a tabela; FK integra a exclusão de conta e dump completo inclui o cadastro. PostgreSQL nativo confirmou restauração e reaplicação de exclusão com recipientes sintéticos.
+- **Migração:** `202611170019_water_containers.sql` aplicada incrementalmente e verificada no Supabase após validar dependências e histórico, sem reset nem alteração de lançamentos. Não preenche silenciosamente lacunas anteriores de migrações. Hash e resultados no relatório da Fase 4.
+- **Requisitos:** RF-010/011, RF-019/020, RNF-002/004/011; invariantes de soma, vigência, dados ausentes e isolamento mantidas. Nenhuma prescrição ou ajuste automático de hidratação.

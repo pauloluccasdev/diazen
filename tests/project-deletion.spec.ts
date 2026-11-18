@@ -30,8 +30,12 @@ test("exclusão exige modal, nome e confirmação; cancela, bloqueia offline e r
   await water
     .getByRole("button", { name: "Salvar registro", exact: true })
     .click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Continuar", exact: true })
+    .click();
   await expect(
-    page.getByRole("heading", { name: "250 ml", level: 2, exact: true }),
+    page.getByRole("heading", { name: "250 ml", level: 3, exact: true }),
   ).toBeVisible();
   await page.goto("/painel/fotos");
   await page.getByText("Adicionar foto", { exact: true }).click();

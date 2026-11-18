@@ -1,4 +1,5 @@
 "use client";
+import "./module-frame.css";
 import { useId, useRef, useState, type ReactNode } from "react";
 import { CalendarDays } from "lucide-react";
 import { ReturnLink } from "@/components/return-link";

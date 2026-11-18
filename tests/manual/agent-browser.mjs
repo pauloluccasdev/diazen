@@ -203,6 +203,7 @@ async function markForm(button) {
   return "[data-qa-form=yes]";
 }
 async function save(button, values, expected) {
+  let expectedInFeedback = false;
   const selector = await markForm(button);
   for (const [name, value] of Object.entries(values))
     await field(name, value, selector);
@@ -211,7 +212,7 @@ async function save(button, values, expected) {
     selector &&
     button === "Salvar registro" &&
     (await evaluate(
-      `Boolean(document.querySelector(${JSON.stringify(selector)})?.closest('.manual-meal-recorder'))`,
+      `Boolean(document.querySelector(${JSON.stringify(selector)})?.closest('.manual-meal-recorder, .water-create'))`,
     ))
   ) {
     await until(
@@ -223,6 +224,10 @@ async function save(button, values, expected) {
       ),
       "Registro salvo",
     );
+    if (expected)
+      expectedInFeedback = await evaluate(
+        `document.querySelector('.record-feedback-dialog').textContent.includes(${JSON.stringify(expected)})`,
+      );
     await clickText(
       "Continuar",
       "button",
@@ -231,12 +236,13 @@ async function save(button, values, expected) {
     await until("document.querySelector('.record-feedback-dialog') === null");
     assert.equal(
       await evaluate(
-        `document.querySelector(${JSON.stringify(selector)}).querySelector('[name=name]').value`,
+        `document.querySelector(${JSON.stringify(selector)}).querySelector(location.pathname === '/painel/agua' ? '[name=volume_ml]' : '[name=name]').value`,
       ),
       "",
     );
   }
-  if (expected && expected !== "Refeição registrada.") await text(expected);
+  if (expected && expected !== "Refeição registrada." && !expectedInFeedback)
+    await text(expected);
 }
 async function check(name, action, controlledServerFailure = false) {
   current = name;
@@ -702,14 +708,46 @@ try {
         { volume_ml: 300, container_label: "Copo QA" },
         "300 ml",
       );
-      await save("Salvar registro", { volume_ml: 200 }, "500 ml");
+      await save("Salvar registro", { volume_ml: 200 }, "0,5 L");
       await count(2);
+      await until(
+        `(() => {const e=[...document.querySelectorAll('article')].find(a=>a.querySelector('h3')?.textContent.startsWith('200 ml'))?.querySelector('.water-record-menu > summary');if(!e)return false;e.setAttribute('data-qa-water-menu','yes');return true;})()`,
+      );
+      if (
+        !(await evaluate(
+          "document.querySelector('[data-qa-water-menu=yes]')?.parentElement.open === true",
+        ))
+      ) {
+        await until(
+          "(() => {const e=document.querySelector('[data-qa-water-menu=yes]');if(!e)return false;e.scrollIntoView({block:'center',behavior:'instant'});e.focus({preventScroll:true});return document.activeElement===e;})()",
+        );
+        await ab("press", "Enter");
+      }
+      await evaluate(
+        "document.querySelector('[data-qa-water-menu]')?.removeAttribute('data-qa-water-menu')",
+      );
       await clickText(
         "Editar registro",
         "summary",
         "[...document.querySelectorAll('article')].find(a=>a.querySelector('h3')?.textContent.startsWith('200 ml'))",
       );
-      await save("Salvar alteração", { volume_ml: 450 }, "750 ml");
+      await save("Salvar alteração", { volume_ml: 450 }, "0,75 L");
+      await until(
+        `(() => {const e=[...document.querySelectorAll('article')].find(a=>a.querySelector('h3')?.textContent.startsWith('450 ml'))?.querySelector('.water-record-menu > summary');if(!e)return false;e.setAttribute('data-qa-water-menu','yes');return true;})()`,
+      );
+      if (
+        !(await evaluate(
+          "document.querySelector('[data-qa-water-menu=yes]')?.parentElement.open === true",
+        ))
+      ) {
+        await until(
+          "(() => {const e=document.querySelector('[data-qa-water-menu=yes]');if(!e)return false;e.scrollIntoView({block:'center',behavior:'instant'});e.focus({preventScroll:true});return document.activeElement===e;})()",
+        );
+        await ab("press", "Enter");
+      }
+      await evaluate(
+        "document.querySelector('[data-qa-water-menu]')?.removeAttribute('data-qa-water-menu')",
+      );
       await clickText(
         "Excluir registro",
         "summary",
@@ -733,7 +771,7 @@ try {
         "Meta de água salva com sua data de vigência.",
       );
       await goto("/painel/agua");
-      await text("Meta de 2.500 ml");
+      await text("2,5 L");
     },
   );
   await check("RF014/RB06 weight replaces same day and chart", async () => {
@@ -926,7 +964,7 @@ try {
       await goto("/painel/agua?data=2026-01-02");
       await count(1);
       await text("100 ml");
-      await text("Meta de 2.000 ml");
+      await text("2 L");
       const s = await markForm("Salvar registro");
       await field("logged_on", "2099-01-01", s);
       assert.equal(
@@ -960,7 +998,7 @@ try {
         await text("Não foi possível carregar.");
         await fetch(hook + "off");
         await clickText("Tentar novamente");
-        await text("Hidratação.");
+        await text("Hidratação");
         await text("300 ml");
         await count(1);
         // Retire the interrupted React root inside this fault scenario. A retry

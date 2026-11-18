@@ -99,7 +99,10 @@ export function RecordFields({
       {kind === "agua" && (
         <>
           <div className="form-grid">
-            <WaterVolumePicker initial={entry?.volume_ml ?? ""} />
+            <WaterVolumePicker
+              initial={entry?.volume_ml ?? ""}
+              initialLabel={entry?.container_label ?? ""}
+            />
             <label>
               Horário (opcional)
               <input
@@ -109,15 +112,6 @@ export function RecordFields({
               />
             </label>
           </div>
-          <label>
-            Recipiente (opcional)
-            <input
-              name="container_label"
-              maxLength={60}
-              placeholder="Ex.: Copo"
-              defaultValue={entry?.container_label ?? ""}
-            />
-          </label>
         </>
       )}
       {kind === "peso" && (
