@@ -27,6 +27,7 @@ Nome opcional do cadastro usa a validação do perfil e metadata Auth como inici
 - Suíte integral Chromium: 62 aprovados e uma amostra privada local ignorada.
 - Suíte integral WebKit: 62 aprovados e uma amostra privada local ignorada. O teste de comparação de fotos passou a aguardar a URL com as duas seleções antes de abrir o menu de exclusão; o trace comprovou a navegação ainda pendente. Todas as verificações de privacidade foram mantidas.
 - Banco: 136 testes aprovados.
+- Agent-browser: 26 jornadas aprovadas no ambiente local isolado, incluindo autorização, histórico, registros, privacidade e offline.
 - Restauração PostgreSQL 17 aprovada: nome inicial em metadata Auth preservado no dump/restore e removido ao reaplicar exclusão; perfil/avatar, RLS e arquivos anteriores continuam verificados. Ensaio sintético local, sem alegar restauração do serviço Storage hospedado.
 - Capturas locais `artifacts/diazen-v2/auth-fiel/`, mobile/desktop claro/escuro e estados de sucesso. R13 comparada sem molduras; capturas selecionadas estão em `screenshots/phase-10-auth/` (WebP, dados sintéticos).
 
@@ -34,6 +35,10 @@ Nome opcional do cadastro usa a validação do perfil e metadata Auth como inici
 
 Conexão já aprovada da develop e URL canônica configuradas somente para a nova branch. A lista de retorno do Supabase recebeu apenas os dois callbacks exatos desse alias controlado, preservando todos os anteriores, o site de produção, confirmação de e-mail e política de senha. Não foram acionados envios de cadastro/recuperação externos por automação; entrega efetiva de e-mail não é certificada por essa verificação.
 
+## Preview verificado
+
+Commit `5ee56d2`, preview READY: login real com e-mail/senha no Supabase, erro preservando campos, identidade da metadata confirmada, remoção do nome persistida, confirmação de senha rejeitada antes de chamar atualização e logout. Nenhuma exceção JavaScript. Conta sintética removida integralmente, sem tocar na conta do proprietário ou enviar e-mails de cadastro/recuperação. Evidência local privada: `artifacts/diazen-v2/auth-hosted-ui-check.json`.
+
 ## Pendências para concluir
 
-Finalizar agent-browser, revisão transversal dos módulos, conferência do preview no commit final e CI. Integrar somente com essas evidências; main permanece sob responsabilidade do proprietário.
+Finalizar revisão transversal dos módulos e CI do commit `5ee56d2`. Integrar somente com essas evidências; main permanece sob responsabilidade do proprietário.
