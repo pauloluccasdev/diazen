@@ -127,13 +127,21 @@ test("semana de atividades e cards expansíveis preservam métricas e edição",
   await weight
     .getByRole("button", { name: "Salvar peso", exact: true })
     .click();
-  await expect(weight.getByRole("status")).toContainText("Peso salvo");
+  await expect(page.getByRole("dialog")).toContainText("Peso salvo");
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Continuar", exact: true })
+    .click();
   await weight.locator('input[name="logged_on"]').fill(currentDate);
   await weight.getByLabel("Peso (kg)").fill("92");
   await weight
     .getByRole("button", { name: "Salvar peso", exact: true })
     .click();
-  await expect(weight.getByRole("status")).toContainText("Peso salvo");
+  await expect(page.getByRole("dialog")).toContainText("Peso salvo");
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Continuar", exact: true })
+    .click();
   await page.goto("/painel");
   const activitySummary = page.locator(".metric-atividades");
   await expect(activitySummary).toContainText("30 min");

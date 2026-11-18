@@ -20,6 +20,7 @@ export function RecordFields({
   prefix = "",
   foodSuggestions,
   initialModality,
+  dateReadOnly = false,
 }: {
   kind: Module;
   entry?: Entry;
@@ -30,6 +31,7 @@ export function RecordFields({
   prefix?: string;
   foodSuggestions?: ReactNode;
   initialModality?: Entry["modality"];
+  dateReadOnly?: boolean;
 }) {
   const compositionFields = (
     <>
@@ -89,6 +91,7 @@ export function RecordFields({
             Data
             <input
               name="logged_on"
+              readOnly={dateReadOnly}
               type="date"
               required
               defaultValue={entry?.logged_on ?? date ?? today()}

@@ -55,7 +55,13 @@ export function DateNavigator({
         onKeyDown={(event) => {
           if (event.key === "Escape") {
             event.currentTarget.open = false;
-            event.currentTarget.querySelector("summary")?.focus();
+            const trigger = calendarId
+              ? document.getElementById(`${calendarId}-trigger`)
+              : null;
+            (trigger?.getClientRects().length
+              ? trigger
+              : event.currentTarget.querySelector("summary")
+            )?.focus();
           }
         }}
       >

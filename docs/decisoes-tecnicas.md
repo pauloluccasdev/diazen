@@ -641,3 +641,12 @@ O proprietário aprovou explicitamente as duas ampliações propostas no diagnó
 - **Integridade:** sem schema/contrato público novos. Ações, projeto ativo no servidor, isolamento e consultas somente leitura preservados.
 - **Volume:** sem séries realizadas/repetições/cargas, interface declara indisponibilidade. Ampliação futura precisa de fluxo e modelagem aprovados.
 - **Requisitos:** RF-012/013, RNF-002/011 e regras de projeto/ausência. Evidências em `docs/design/diazen-v2/phase-5-training-report.md`.
+
+## Decisão — Evolução corporal v2 — 18/11/2026
+
+- **Autorização:** continuidade do redesign, referências R09 e leituras autorizadas na matriz, preservando ações e invariantes existentes.
+- **Apresentação:** `EvolutionDiary` para peso/medidas, desktop claro/escuro e mobile, com tabs, período real, gráfico reutilizado, referências opcionais e ações de registro/edição/exclusão. Variante compacta do gráfico mantém eixos legíveis sem alterar a variante padrão do dashboard.
+- **Dados:** leitura paginada do projeto até a data consultada. Períodos são dias de calendário, não número de amostras; snapshots e comparações identificam as datas. Nenhum valor ausente vira zero e nenhuma redução de peso recebe qualificação automática de sucesso.
+- **Integridade:** mesmas RPCs e ações, projeto ativo resolvido no servidor e unicidade por usuário/data/tipo. Sucesso de criação usa modal e reset; edição de peso conserva a data e substitui o valor daquela data. Encerrados e DRAFT não recebem editor.
+- **Limite:** sem altura/método aprovado, não calcular IMC, gordura corporal ou massa magra. As regiões equivalentes apresentam ausência explícita e acesso aos registros disponíveis. Nenhum schema ou contrato público novo.
+- **Requisitos:** RF-014/015/019, RNF-002/004/011 e regras de projeto, privacidade e dados ausentes. Evidências em `docs/design/diazen-v2/phase-6-evolution-report.md`.

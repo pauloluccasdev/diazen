@@ -1,6 +1,6 @@
 # Fase 5 — Treinos
 
-Branch `feat/diazen-v2-treinos-fiel`, criada da develop `496ee51`. Referências R07/R08 abertas antes da implementação. **Em validação; ainda não contabilizada como concluída.**
+Branch `feat/diazen-v2-treinos-fiel`, criada da develop `496ee51`. Referências R07/R08 abertas antes da implementação. Concluída no commit `4b740b4`, integrada e enviada à develop.
 
 ## Implementação
 
@@ -36,7 +36,7 @@ Uma ampliação futura exigiria exercícios/unidades, séries realizadas vincula
 - Chromium completo: 52 aprovados e um ignorado; cobre alimentação, hidratação, Garmin, fotos, projetos, privacidade e falhas recuperáveis.
 - WebKit direcionado: registros, dashboard e nova jornada de Treinos aprovados (3/3), sem exceções inesperadas.
 - 26 cenários agent-browser aprovados: autorização, registros/edição/exclusão, offline, segunda conta, paginação, exportação e exclusão de conta.
-- Ajuste visual final agrupa atalhos e recentes à esquerda do resumo semanal, como R07, e compacta o hero mobile. Jornada Chromium final aprovada (1/1, 17,3 s), com capturas e axe em todos os breakpoints do cenário. Build, tipos, lint e formatação novamente aprovados. CI completa e integração pendentes.
+- Ajuste visual final agrupa atalhos e recentes à esquerda do resumo semanal, como R07, e compacta o hero mobile. Jornada Chromium final aprovada (1/1, 17,3 s), com capturas e axe em todos os breakpoints do cenário. Build, tipos, lint e formatação novamente aprovados. CI completa aprovada ([44304490660](https://github.com/pauloluccasdev/diazen/actions/runs/44304490660)); banco, build, tipos, lint, formatação, Chromium, WebKit e agent-browser. Integrado à develop; prévia correspondente READY.
 
 Capturas usam usuários sintéticos isolados e a área do viewport, sem molduras. Sem homologação em aparelho físico, aprovação visual do proprietário ou medida pixel a pixel. Configurações e consentimentos Garmin hospedados não foram alterados.
 

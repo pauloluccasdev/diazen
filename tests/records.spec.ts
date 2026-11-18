@@ -82,10 +82,19 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
   await weight
     .getByRole("button", { name: "Salvar peso", exact: true })
     .click();
-  await expect(weight.getByRole("status")).toContainText("Peso salvo");
+  await expect(page.getByRole("dialog")).toContainText("Peso salvo");
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Continuar", exact: true })
+    .click();
   await weight.getByLabel("Peso (kg)").fill("89.5");
   await weight
     .getByRole("button", { name: "Salvar peso", exact: true })
+    .click();
+  await expect(page.getByRole("dialog")).toContainText("Peso salvo");
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Continuar", exact: true })
     .click();
   await expect(page.getByRole("article", { includeHidden: true })).toHaveCount(
     1,
@@ -100,6 +109,11 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
   await measure.getByLabel("Cintura (cm)", { exact: true }).fill("90");
   await measure
     .getByRole("button", { name: "Salvar medidas", exact: true })
+    .click();
+  await expect(page.getByRole("dialog")).toContainText("Medidas salvas");
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Continuar", exact: true })
     .click();
   await expect(page.getByRole("article", { includeHidden: true })).toHaveCount(
     1,

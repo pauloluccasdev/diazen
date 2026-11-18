@@ -1,3 +1,6 @@
+import { EvolutionDiary } from "@/components/evolution/evolution-diary";
+import { evolutionEntries } from "@/lib/evolution-data";
+import { evolutionPeriod, evolutionMetrics } from "@/lib/evolution-metrics";
 import { TrainingDiary } from "@/components/training/training-diary";
 import { trainingEntries, recentTraining } from "@/lib/training-data";
 import { trainingMetrics } from "@/lib/training-metrics";
@@ -14,14 +17,7 @@ import { garminConfig } from "@/lib/garmin-config";
 import type { ReactNode } from "react";
 import { dashboardPlan } from "@/lib/dashboard-plan";
 import { ActionDisclosure } from "@/components/action-disclosure";
-import {
-  PencilLine,
-  Trash2,
-  ChevronRight,
-  ChevronDown,
-  History,
-} from "lucide-react";
-import { ReturnLink } from "@/components/return-link";
+import { PencilLine, Trash2, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { projectContext } from "@/lib/data";
@@ -41,7 +37,6 @@ import {
 } from "@/lib/records";
 import { ActionForm } from "@/components/forms/action-form";
 import { RecordFields } from "@/components/forms/record-fields";
-import { WeightChart } from "@/components/weight-chart";
 import { saveRecord, deleteRecord } from "./actions";
 function RecordPresentation({
   kind,
@@ -127,6 +122,7 @@ export default async function Records({
     atividade?: string;
     acao?: string;
     modalidade?: string;
+    periodo?: string;
   }>;
 }) {
   const { modulo } = await params;
@@ -174,29 +170,21 @@ export default async function Records({
   const [
     entries,
     totals,
-    graph,
     diet,
     trainingRows,
     allFoods,
     containers,
     waterRows,
     recentActivities,
+    bodyRows,
   ] = await Promise.all([
-    query.returns<Entry[]>(),
+    modulo === "peso" || modulo === "medidas"
+      ? Promise.resolve({ data: [] as Entry[], error: null })
+      : query.returns<Entry[]>(),
     client.rpc("project_summary", {
       p_project: selected.id,
       p_date: date,
     }),
-    modulo === "peso"
-      ? client
-          .from("weights")
-          .select("*")
-          .eq("project_id", selected.id)
-          .lte("logged_on", date)
-          .order("logged_on", { ascending: false })
-          .limit(30)
-          .returns<Entry[]>()
-      : Promise.resolve({ data: [] as Entry[], error: null }),
     modulo === "alimentacao"
       ? dashboardPlan(client, selected.id, date)
       : Promise.resolve(null),
@@ -213,16 +201,15 @@ export default async function Records({
     modulo === "atividades"
       ? recentTraining(client, selected.id, date)
       : Promise.resolve([] as Entry[]),
+    modulo === "peso" || modulo === "medidas"
+      ? evolutionEntries(client, selected.id, date, modulo)
+      : Promise.resolve([] as Entry[]),
   ]);
   if (entries.error) throw new Error("Falha ao carregar registros");
   if (totals.error) throw new Error("Falha ao carregar totais");
-  if (graph.error) throw new Error("Falha no gráfico");
   const rows = (entries.data ?? []).slice(0, 20),
     hasMore = (entries.data?.length ?? 0) > 20;
   const summary = totals.data as Summary;
-  const link = (nextPage: number) =>
-    `/painel/${modulo}?projeto=${selected.id}&pagina=${nextPage}${daily || filters.data ? `&data=${date}` : ""}`;
-  const chart: Entry[] = graph.data ?? [];
   const renderRecord = (row: Entry) => (
     <article
       key={row.id}
@@ -322,6 +309,22 @@ export default async function Records({
       </RecordPresentation>
     </article>
   );
+  if (modulo === "peso" || modulo === "medidas") {
+    const period = evolutionPeriod(filters.periodo);
+    return (
+      <EvolutionDiary
+        kind={modulo}
+        projects={projects}
+        selected={selected}
+        active={active}
+        date={date}
+        period={period}
+        metrics={evolutionMetrics(bodyRows, selected, date, period)}
+        page={page}
+        registrar={filters.registrar}
+      />
+    );
+  }
   if (modulo === "alimentacao")
     return (
       <FoodDiary
@@ -390,133 +393,5 @@ export default async function Records({
     );
   }
 
-  return (
-    <div className={`module-page module-${modulo}`}>
-      <section className="welcome module-welcome">
-        <ReturnLink href={`/painel?projeto=${selected.id}`}>
-          Voltar ao dashboard
-        </ReturnLink>
-        <p className="eyebrow">{selected.name}</p>
-        <h1>
-          {modules[modulo].title}
-          <span className="accent">.</span>
-        </h1>
-        <p className="intro">{modules[modulo].description}</p>
-      </section>
-      {!editable && (
-        <p className="readonly-note">
-          {selected.status === "DRAFT"
-            ? "Rascunhos não recebem registros."
-            : "Histórico somente leitura."}{" "}
-          {active && (
-            <Link href={`/painel/${modulo}?projeto=${active.id}`}>
-              Registrar no projeto ativo “{active.name}” →
-            </Link>
-          )}
-        </p>
-      )}
-      {(modulo === "peso" || modulo === "medidas") && (
-        <nav className="evolution-tabs" aria-label="Evolução corporal">
-          <Link
-            aria-current={modulo === "peso" ? "page" : undefined}
-            href={`/painel/peso?projeto=${selected.id}`}
-          >
-            Peso
-          </Link>
-          <Link
-            aria-current={modulo === "medidas" ? "page" : undefined}
-            href={`/painel/medidas?projeto=${selected.id}`}
-          >
-            Medidas
-          </Link>
-          <Link href={`/painel/fotos?projeto=${selected.id}`}>Fotos</Link>
-        </nav>
-      )}
-
-      {editable && (
-        <details
-          id="novo-registro"
-          open={filters.registrar === "1"}
-          className="content-card record-create"
-        >
-          <summary>
-            {modulo === "peso"
-              ? "Registrar ou atualizar peso"
-              : modulo === "medidas"
-                ? "Registrar medidas"
-                : "Registrar atividade"}
-          </summary>
-          <p className="intro">
-            Este registro será salvo no projeto ativo “{active?.name}”.
-          </p>
-          <ActionForm
-            action={saveRecord}
-            submit={
-              modulo === "peso"
-                ? "Salvar peso"
-                : modulo === "medidas"
-                  ? "Salvar medidas"
-                  : "Salvar registro"
-            }
-          >
-            <RecordFields
-              kind={modulo}
-              min={selected.starts_on}
-              max={
-                selected.ends_on && selected.ends_on < today()
-                  ? selected.ends_on
-                  : today()
-              }
-              date={date}
-            />
-          </ActionForm>
-        </details>
-      )}
-      <Link
-        className="button-secondary meal-record-link"
-        href="/painel/historico"
-      >
-        <History size={20} aria-hidden="true" />
-        <span>Consultar histórico geral</span>
-        <ChevronRight size={18} aria-hidden="true" />
-      </Link>
-
-      {modulo === "peso" && (
-        <section className="content-card">
-          <h2>
-            {summary.weight === null
-              ? "Sem peso registrado"
-              : `${number(summary.weight, 2)} kg`}
-          </h2>
-          {summary.weight_date && (
-            <p className="intro">
-              Último registro até a data consultada:{" "}
-              {formatDate(summary.weight_date)}
-            </p>
-          )}
-          <WeightChart rows={chart} />
-        </section>
-      )}
-      <section
-        id="registros-do-dia"
-        className="records-section"
-        aria-label="Histórico de registros"
-      >
-        <h2>{daily || filters.data ? "Registros do dia" : "Histórico"}</h2>
-        {!rows.length && (
-          <p className="intro">
-            {!daily && filters.data
-              ? `Nenhum registro em ${formatDate(date)}. O resumo pode mostrar o último registro anterior a essa data. Consulte outras datas no histórico geral.`
-              : "Sem registros para esta consulta."}
-          </p>
-        )}
-
-        {rows.map(renderRecord)}
-      </section>
-      <nav className="panel-nav" aria-label="Paginação">
-        {page > 1 && <Link href={link(page - 1)}>Anteriores</Link>}
-        {hasMore && <Link href={link(page + 1)}>Próximos</Link>}
-      </nav>
-    </div>
-  );
+  return null;
 }

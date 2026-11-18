@@ -210,9 +210,9 @@ async function save(button, values, expected) {
   await clickText(button, "button", form(button));
   if (
     selector &&
-    button === "Salvar registro" &&
+    ["Salvar registro", "Salvar peso", "Salvar medidas"].includes(button) &&
     (await evaluate(
-      `Boolean(document.querySelector(${JSON.stringify(selector)})?.closest('.manual-meal-recorder, .water-create, .training-create'))`,
+      `Boolean(document.querySelector(${JSON.stringify(selector)})?.closest('.manual-meal-recorder, .water-create, .training-create, .body-create'))`,
     ))
   ) {
     await until(
@@ -242,7 +242,7 @@ async function save(button, values, expected) {
     else
       assert.equal(
         await evaluate(
-          `document.querySelector(${JSON.stringify(selector)}).querySelector(location.pathname === '/painel/agua' ? '[name=volume_ml]' : '[name=name]').value`,
+          `document.querySelector(${JSON.stringify(selector)}).querySelector(location.pathname === '/painel/agua' ? '[name=volume_ml]' : location.pathname === '/painel/peso' ? '[name=kg]' : location.pathname === '/painel/medidas' ? ${JSON.stringify(`[name=${Object.keys(values)[0]}]`)} : '[name=name]').value`,
         ),
         "",
       );

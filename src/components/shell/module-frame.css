@@ -15,6 +15,12 @@
   align-items: center;
   padding: 20px 0 18px;
 }
+.dz-module-heading > div:not(.dz-module-heading-action) {
+  min-width: 0;
+}
+.dz-module-project {
+  overflow-wrap: anywhere;
+}
 .dz-module-heading .return-link {
   width: 44px;
   min-width: 44px;

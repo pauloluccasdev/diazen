@@ -12,6 +12,7 @@ export function ModuleHeading({
   date,
   path,
   action,
+  period,
 }: {
   title: string;
   description: string;
@@ -19,6 +20,7 @@ export function ModuleHeading({
   date: string;
   path: string;
   action?: ReactNode;
+  period?: string;
 }) {
   const root = useRef<HTMLDivElement>(null),
     calendarId = useId();
@@ -39,6 +41,7 @@ export function ModuleHeading({
         </div>
         <button
           type="button"
+          id={`${calendarId}-trigger`}
           className="dz-module-calendar"
           aria-label="Escolher data do diário"
           aria-controls={calendarId}
@@ -65,6 +68,7 @@ export function ModuleHeading({
         project={project.id}
         path={path}
         calendarId={calendarId}
+        period={period}
         onCalendarToggle={setCalendarOpen}
         format="long"
       />

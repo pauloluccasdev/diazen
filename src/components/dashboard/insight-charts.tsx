@@ -9,10 +9,12 @@ export function TimeSeriesChart({
   rows,
   start,
   end,
+  compact = false,
 }: {
   rows: Entry[];
   start: string;
   end: string;
+  compact?: boolean;
 }) {
   const gradient = useId();
   if (rows.length < 2)
@@ -26,18 +28,21 @@ export function TimeSeriesChart({
   const max = Math.ceil(Math.max(...values.map((row) => Number(row.kg))) + 1);
   const first = Date.parse(start + "T12:00:00Z"),
     last = Date.parse(end + "T12:00:00Z");
+  const plotWidth = compact ? 282 : 550;
+  const baseline = compact ? 108 : 124;
+  const plotHeight = compact ? 80 : 100;
   const points = values.map((row) => ({
     row,
     x:
       50 +
-      (550 * (Date.parse(row.logged_on + "T12:00:00Z") - first)) /
+      (plotWidth * (Date.parse(row.logged_on + "T12:00:00Z") - first)) /
         Math.max(86400000, last - first),
-    y: 124 - ((Number(row.kg) - min) / (max - min)) * 100,
+    y: baseline - ((Number(row.kg) - min) / (max - min)) * plotHeight,
   }));
   return (
     <figure className="dz-time-chart">
       <svg
-        viewBox="0 0 650 160"
+        viewBox={compact ? "0 0 360 140" : "0 0 650 160"}
         role="img"
         aria-label={`Evolução do peso: ${values.length} medições de ${formatDate(start)} a ${formatDate(end)}`}
       >
@@ -48,10 +53,10 @@ export function TimeSeriesChart({
           </linearGradient>
         </defs>
         {[0, 1, 2, 3, 4].map((index) => {
-          const y = 124 - index * 25;
+          const y = baseline - (index * plotHeight) / 4;
           return (
             <g key={index}>
-              <line x1="50" x2="600" y1={y} y2={y} />
+              <line x1="50" x2={50 + plotWidth} y1={y} y2={y} />
               <text x="40" y={y + 4} textAnchor="end">
                 {number(min + (index * (max - min)) / 4, 1)}
               </text>
@@ -59,7 +64,7 @@ export function TimeSeriesChart({
           );
         })}
         <polygon
-          points={`${points[0].x},124 ${points.map((point) => `${point.x},${point.y}`).join(" ")} ${points.at(-1)!.x},124`}
+          points={`${points[0].x},${baseline} ${points.map((point) => `${point.x},${point.y}`).join(" ")} ${points.at(-1)!.x},${baseline}`}
           fill={`url(#${gradient})`}
         />
         <polyline
@@ -86,8 +91,8 @@ export function TimeSeriesChart({
           return (
             <text
               key={index}
-              x={50 + index * 137.5}
-              y="151"
+              x={50 + (index * plotWidth) / 4}
+              y={baseline + 27}
               textAnchor="middle"
             >
               {date.slice(8)}/{date.slice(5, 7)}

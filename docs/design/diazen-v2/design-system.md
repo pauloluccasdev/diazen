@@ -120,3 +120,7 @@ Usar fixtures sintéticas isoladas e coerentes, com mesmo comprimento de nome, n
 Critério proposto: landmarks estruturais com desvio alvo<=4px na resolução equivalente, sem desalinhamento perceptível sistemático; documentar diferenças de antialiasing/fonte e adaptações funcionais. Esse alvo não é uma medida já obtida nem substitui revisão humana. Pixel diff automatizado é diagnóstico, não aprovação por uma porcentagem arbitrária. Screenshots de regressão do próprio app, gerados após aprovação, detectam mudanças futuras; não certificam fidelidade ao protótipo por si sós.
 
 Nenhuma tela é aprovada nesta fase. Antes de avançar, apresentar capturas, diferenças restantes e adaptações de dados/escopo ao proprietário.
+
+## Atualização de implementação — Fase 6
+
+A fonte implementada é `src/styles/diazen-v2/tokens.css`. O contraste sobre o amarelo principal é centralizado em `--v2-on-primary: #151923`, equivalente ao token proposto `--dz-on-primary`. Evolução corporal usa esse token nos tabs ativos; o texto âmbar em superfície clara continua usando a variante semântica de contraste, sem confundir fundo de CTA com cor de links.

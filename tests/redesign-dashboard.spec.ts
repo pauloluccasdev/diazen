@@ -24,7 +24,7 @@ test("Diazen v2: shell responsivo, dados persistidos, consulta e navegação por
       const headings: Record<string, string> = {
         Projetos: "Meus projetos.",
         Hidratação: "Hidratação",
-        Evolução: "Peso.",
+        Evolução: "Evolução corporal",
         Treinos: "Treinos",
         Diário: "Alimentação",
       };
@@ -101,7 +101,11 @@ test("Diazen v2: shell responsivo, dados persistidos, consulta e navegação por
     await weight
       .getByRole("button", { name: "Salvar peso", exact: true })
       .click();
-    await expect(weight.getByRole("status")).toContainText("Peso salvo");
+    await expect(page.getByRole("dialog")).toContainText("Peso salvo");
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Continuar", exact: true })
+      .click();
   }
   await navigate("Treinos", true);
   await page.locator(".record-create > summary").click();
