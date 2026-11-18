@@ -25,7 +25,7 @@ test("Diazen v2: shell responsivo, dados persistidos, consulta e navegação por
         Projetos: "Meus projetos.",
         Hidratação: "Hidratação",
         Evolução: "Peso.",
-        Treinos: "Atividades.",
+        Treinos: "Treinos",
         Diário: "Alimentação",
       };
       await expect(
@@ -118,6 +118,10 @@ test("Diazen v2: shell responsivo, dados persistidos, consulta e navegação por
   await expect(activity.getByRole("status")).toContainText(
     "Registro adicionado",
   );
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Continuar", exact: true })
+    .click();
   await navigate("Diário");
   await openManualMealRecorder(page);
   const meal = page.locator(".manual-meal-recorder");

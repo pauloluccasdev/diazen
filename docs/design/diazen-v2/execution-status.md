@@ -21,7 +21,7 @@ Em 17/11/2026, o proprietário aprovou recipientes de água salvos e perfil com 
 | 2    | Dashboard mobile e tablet       | Concluída — `8454f8c` |
 | 3    | Alimentação                     | Concluída — `ddbe1a1` |
 | 4    | Hidratação                      | Concluída — `0ed58fb` |
-| 5    | Treinos                         | Pendente              |
+| 5    | Treinos                         | Em execução           |
 | 6    | Evolução corporal               | Pendente              |
 | 7    | Fotos de evolução               | Pendente              |
 | 8    | Projetos                        | Pendente              |
@@ -76,4 +76,4 @@ Uma fase só muda para concluída com evidência de implementação e verificaç
 - [x] CI completa de `0ed58fb` aprovada ([44215004775](https://github.com/pauloluccasdev/diazen/actions/runs/44215004775)); integrado e enviado à develop.
 - [x] Prévia READY, saúde 200 e rota privada sem sessão redireciona (307); verificação somente de leitura.
 
-Manutenção de dependências em execução antes da Fase 5; não conta como uma fase adicional.
+Manutenção de dependências integrada na develop em `496ee51`, com CI completa aprovada ([44218101467](https://github.com/pauloluccasdev/diazen/actions/runs/44218101467)). Não conta como uma fase adicional. Fase 5 em execução.

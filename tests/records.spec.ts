@@ -123,12 +123,21 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
     .getByRole("button", { name: "Salvar registro", exact: true })
     .click();
   await expect(activity.getByRole("alert")).toContainText("exigem distância");
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Voltar ao formulário", exact: true })
+    .click();
+  await expect(activity.getByLabel("Duração (minutos)")).toHaveValue("30");
   await activity.getByLabel("Distância (km)").fill("5");
   await activity
     .getByRole("button", { name: "Salvar registro", exact: true })
     .click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Continuar", exact: true })
+    .click();
   await expect(
-    page.getByRole("heading", { name: "1 sessões na semana" }),
+    page.getByRole("heading", { name: "1 sessão na semana" }),
   ).toBeVisible();
   await capture("atividades");
   await page.goto("/painel/alimentacao");

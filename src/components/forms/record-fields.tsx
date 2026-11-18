@@ -19,6 +19,7 @@ export function RecordFields({
   foodOnly = false,
   prefix = "",
   foodSuggestions,
+  initialModality,
 }: {
   kind: Module;
   entry?: Entry;
@@ -28,6 +29,7 @@ export function RecordFields({
   foodOnly?: boolean;
   prefix?: string;
   foodSuggestions?: ReactNode;
+  initialModality?: Entry["modality"];
 }) {
   const compositionFields = (
     <>
@@ -169,7 +171,7 @@ export function RecordFields({
               defaultValue={entry?.name ?? ""}
             />
           </label>
-          <ModalityPicker initial={entry?.modality} />
+          <ModalityPicker initial={entry?.modality ?? initialModality} />
           <div className="form-grid">
             <label>
               Duração (minutos)

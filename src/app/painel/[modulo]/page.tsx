@@ -1,3 +1,6 @@
+import { TrainingDiary } from "@/components/training/training-diary";
+import { trainingEntries, recentTraining } from "@/lib/training-data";
+import { trainingMetrics } from "@/lib/training-metrics";
 import { WaterDiary } from "@/components/hydration/water-diary";
 import { WaterRecordCard } from "@/components/hydration/water-record-card";
 import { ContainerManager } from "@/components/hydration/container-manager";
@@ -6,8 +9,6 @@ import { hydrationWeek } from "@/lib/hydration-metrics";
 import { FoodDiary } from "@/components/nutrition/food-diary";
 import { foodDayEntries } from "@/lib/food-day-data";
 import { ActivityRecordCard } from "@/components/activity-record-card";
-import { ActivityWeekSummary } from "@/components/activity-week-summary";
-import { weekBounds } from "@/lib/records";
 import { GarminConnection } from "@/components/garmin-connection";
 import { garminConfig } from "@/lib/garmin-config";
 import type { ReactNode } from "react";
@@ -32,6 +33,7 @@ import {
   type Entry,
   type Summary,
   categories,
+  modalities,
   measurements,
   activityModality,
   nutrients,
@@ -46,14 +48,20 @@ function RecordPresentation({
   row,
   children,
   editable,
+  initiallyOpen = false,
 }: {
   kind: Module;
   row: Entry;
   children: ReactNode;
   editable: boolean;
+  initiallyOpen?: boolean;
 }) {
   if (kind === "atividades")
-    return <ActivityRecordCard row={row}>{children}</ActivityRecordCard>;
+    return (
+      <ActivityRecordCard row={row} initiallyOpen={initiallyOpen}>
+        {children}
+      </ActivityRecordCard>
+    );
   if (kind === "agua")
     return (
       <WaterRecordCard row={row} editable={editable}>
@@ -116,6 +124,9 @@ export default async function Records({
     registrar?: string;
     refeicao?: string;
     volume?: string;
+    atividade?: string;
+    acao?: string;
+    modalidade?: string;
   }>;
 }) {
   const { modulo } = await params;
@@ -160,16 +171,16 @@ export default async function Records({
   query = query.range((page - 1) * 20, page * 20);
   if (daily || modulo === "atividades" || filters.data)
     query = query.eq("logged_on", date);
-  const week = weekBounds(date);
   const [
     entries,
     totals,
     graph,
     diet,
-    weekCounts,
+    trainingRows,
     allFoods,
     containers,
     waterRows,
+    recentActivities,
   ] = await Promise.all([
     query.returns<Entry[]>(),
     client.rpc("project_summary", {
@@ -190,32 +201,17 @@ export default async function Records({
       ? dashboardPlan(client, selected.id, date)
       : Promise.resolve(null),
     modulo === "atividades"
-      ? (async () => {
-          const counts: Record<string, number> = {};
-          for (let offset = 0; ; offset += 1000) {
-            const result = await client
-              .from("activities")
-              .select("logged_on")
-              .eq("project_id", selected.id)
-              .gte("logged_on", week.start)
-              .lte("logged_on", week.end)
-              .order("id")
-              .range(offset, offset + 999);
-            if (result.error)
-              throw Error("Não foi possível carregar a semana de atividades.");
-            for (const row of result.data ?? [])
-              counts[row.logged_on] = (counts[row.logged_on] ?? 0) + 1;
-            if ((result.data?.length ?? 0) < 1000) break;
-          }
-          return counts;
-        })()
-      : Promise.resolve({} as Record<string, number>),
+      ? trainingEntries(client, selected.id, date)
+      : Promise.resolve([] as Entry[]),
     modulo === "alimentacao"
       ? foodDayEntries(client, selected.id, date)
       : Promise.resolve([] as Entry[]),
     containersPromise,
     modulo === "agua"
       ? hydrationEntries(client, selected.id, date)
+      : Promise.resolve([] as Entry[]),
+    modulo === "atividades"
+      ? recentTraining(client, selected.id, date)
       : Promise.resolve([] as Entry[]),
   ]);
   if (entries.error) throw new Error("Falha ao carregar registros");
@@ -233,7 +229,12 @@ export default async function Records({
       id={modulo === "atividades" ? `atividade-${row.id}` : undefined}
       className={`content-card${modulo === "alimentacao" ? " food-record" : modulo === "atividades" ? " activity-record" : ""}`}
     >
-      <RecordPresentation kind={modulo} row={row} editable={editable}>
+      <RecordPresentation
+        kind={modulo}
+        row={row}
+        editable={editable}
+        initiallyOpen={modulo === "atividades" && filters.atividade === row.id}
+      >
         {modulo !== "atividades" && (
           <p className="eyebrow">
             {formatDate(row.logged_on)}
@@ -265,6 +266,16 @@ export default async function Records({
             {modulo !== "peso" && (
               <ActionDisclosure
                 title="Editar registro"
+                id={
+                  modulo === "atividades"
+                    ? `edit-activity-${row.id}`
+                    : undefined
+                }
+                initiallyOpen={
+                  modulo === "atividades" &&
+                  filters.atividade === row.id &&
+                  filters.acao === "editar"
+                }
                 icon={PencilLine}
                 className="record-action"
               >
@@ -284,6 +295,16 @@ export default async function Records({
             )}
             <ActionDisclosure
               title="Excluir registro"
+              id={
+                modulo === "atividades"
+                  ? `delete-activity-${row.id}`
+                  : undefined
+              }
+              initiallyOpen={
+                modulo === "atividades" &&
+                filters.atividade === row.id &&
+                filters.acao === "excluir"
+              }
               icon={Trash2}
               className="record-action destructive-action"
             >
@@ -341,6 +362,30 @@ export default async function Records({
             : undefined
         }
         renderRecord={renderRecord}
+      />
+    );
+  }
+
+  if (modulo === "atividades") {
+    const preset =
+      filters.modalidade && Object.hasOwn(modalities, filters.modalidade)
+        ? (filters.modalidade as Entry["modality"])
+        : undefined;
+    return (
+      <TrainingDiary
+        projects={projects}
+        selected={selected}
+        active={active}
+        date={date}
+        metrics={trainingMetrics(trainingRows, date, today())}
+        recent={recentActivities}
+        rows={rows}
+        page={page}
+        hasMore={hasMore}
+        registrar={filters.registrar}
+        preset={preset}
+        renderRecord={renderRecord}
+        connection={garminConfig(user.id) ? <GarminConnection /> : undefined}
       />
     );
   }
@@ -436,8 +481,6 @@ export default async function Records({
         <ChevronRight size={18} aria-hidden="true" />
       </Link>
 
-      {modulo === "atividades" && garminConfig(user.id) && <GarminConnection />}
-
       {modulo === "peso" && (
         <section className="content-card">
           <h2>
@@ -454,33 +497,16 @@ export default async function Records({
           <WeightChart rows={chart} />
         </section>
       )}
-      {modulo === "atividades" && (
-        <ActivityWeekSummary
-          date={date}
-          start={week.start}
-          counts={weekCounts}
-          historyProject={selected.id === active?.id ? undefined : selected.id}
-          total={summary.sessions === null ? null : Number(summary.sessions)}
-          goal={selected.sessions_goal}
-          today={today()}
-        />
-      )}
-
       <section
         id="registros-do-dia"
         className="records-section"
         aria-label="Histórico de registros"
       >
-        <h2>
-          {daily || modulo === "atividades" || filters.data
-            ? "Registros do dia"
-            : "Histórico"}
-        </h2>
-        {modulo === "atividades" && <p className="muted">{formatDate(date)}</p>}
+        <h2>{daily || filters.data ? "Registros do dia" : "Histórico"}</h2>
         {!rows.length && (
           <p className="intro">
             {!daily && filters.data
-              ? `Nenhum registro em ${formatDate(date)}. ${modulo === "atividades" ? "Os dias marcados na semana têm atividades no histórico." : "O resumo pode mostrar o último registro anterior a essa data. Consulte outras datas no histórico geral."}`
+              ? `Nenhum registro em ${formatDate(date)}. O resumo pode mostrar o último registro anterior a essa data. Consulte outras datas no histórico geral.`
               : "Sem registros para esta consulta."}
           </p>
         )}

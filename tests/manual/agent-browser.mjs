@@ -212,34 +212,40 @@ async function save(button, values, expected) {
     selector &&
     button === "Salvar registro" &&
     (await evaluate(
-      `Boolean(document.querySelector(${JSON.stringify(selector)})?.closest('.manual-meal-recorder, .water-create'))`,
+      `Boolean(document.querySelector(${JSON.stringify(selector)})?.closest('.manual-meal-recorder, .water-create, .training-create'))`,
     ))
   ) {
     await until(
       "document.querySelector('.record-feedback-dialog[open]') !== null",
     );
+    const feedbackError = await evaluate(
+      "document.querySelector('.record-feedback-dialog').classList.contains('is-error')",
+    );
     assert.equal(
       await evaluate(
         "document.querySelector('.record-feedback-dialog h2').textContent",
       ),
-      "Registro salvo",
+      feedbackError ? "Não foi possível registrar" : "Registro salvo",
     );
     if (expected)
       expectedInFeedback = await evaluate(
         `document.querySelector('.record-feedback-dialog').textContent.includes(${JSON.stringify(expected)})`,
       );
     await clickText(
-      "Continuar",
+      feedbackError ? "Voltar ao formulário" : "Continuar",
       "button",
       "document.querySelector('.record-feedback-dialog')",
     );
     await until("document.querySelector('.record-feedback-dialog') === null");
-    assert.equal(
-      await evaluate(
-        `document.querySelector(${JSON.stringify(selector)}).querySelector(location.pathname === '/painel/agua' ? '[name=volume_ml]' : '[name=name]').value`,
-      ),
-      "",
-    );
+    if (feedbackError)
+      assert.ok(expectedInFeedback, "Unexpected record failure");
+    else
+      assert.equal(
+        await evaluate(
+          `document.querySelector(${JSON.stringify(selector)}).querySelector(location.pathname === '/painel/agua' ? '[name=volume_ml]' : '[name=name]').value`,
+        ),
+        "",
+      );
   }
   if (expected && expected !== "Refeição registrada." && !expectedInFeedback)
     await text(expected);
@@ -803,7 +809,7 @@ try {
     await save(
       "Salvar registro",
       { duration_min: 30, distance_km: 5 },
-      "1 sessões na semana",
+      "1 sessão na semana",
     );
     for (const [modality, distance] of [
       ["strength", ""],

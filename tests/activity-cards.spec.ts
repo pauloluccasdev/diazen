@@ -43,8 +43,13 @@ test("semana de atividades e cards expansíveis preservam métricas e edição",
   await create
     .getByRole("button", { name: "Salvar registro", exact: true })
     .click();
+  await expect(page.getByRole("dialog")).toContainText("Registro adicionado");
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Continuar", exact: true })
+    .click();
   await expect(
-    page.getByRole("heading", { name: "1 sessões na semana", exact: true }),
+    page.getByRole("heading", { name: "1 sessão na semana", exact: true }),
   ).toBeVisible();
   const card = page
     .locator("article.activity-record")

@@ -55,7 +55,7 @@ export function ActivityWeekSummary({
           <h2 id="activity-week-heading">
             {total === null
               ? "Sem sessões registradas nesta semana"
-              : `${total} sessões na semana`}
+              : `${total} ${total === 1 ? "sessão" : "sessões"} na semana`}
           </h2>
         </div>
       </div>
