@@ -916,3 +916,25 @@
   text-align: center;
   z-index: 1;
 }
+
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .v2-dashboard .dashboard-welcome h1 {
+    font-size: 24px;
+  }
+  .v2-dashboard .dashboard-welcome .eyebrow {
+    font-size: 13px;
+  }
+  .v2-dashboard .metric-card .metric-value {
+    font-size: 18px;
+  }
+  .v2-dashboard .metric-card .metric-empty {
+    font-size: 14px;
+    line-height: 1.4;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+  .v2-sidebar nav a,
+  .v2-sidebar-bottom a {
+    font-size: 14px;
+  }
+}

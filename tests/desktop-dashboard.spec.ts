@@ -210,6 +210,60 @@ test("desktop v2: dados equivalentes, temas persistidos, busca e períodos sem a
         });
     }
   }
+  // Notebook regression: menus must not resize the dashboard grid.
+  for (const height of [636, 768]) {
+    await page.setViewportSize({ width: 1280, height });
+    const sidebar = page.locator(".v2-sidebar");
+    expect(
+      await sidebar.evaluate((node) => node.scrollHeight - node.clientHeight),
+    ).toBeLessThanOrEqual(1);
+    const activeLink = sidebar.getByRole("link", {
+      name: "Dashboard",
+      exact: true,
+    });
+    expect(
+      await activeLink.evaluate((node) => ({
+        color: getComputedStyle(node).color,
+        background: getComputedStyle(node).backgroundColor,
+      })),
+    ).toEqual({ color: "rgb(246, 246, 246)", background: "rgb(28, 29, 32)" });
+    expect(
+      await page
+        .locator(".dashboard-welcome h1")
+        .evaluate((node) => parseFloat(getComputedStyle(node).fontSize)),
+    ).toBeLessThanOrEqual(24);
+    const energy = page.locator(".metric-alimentacao .metric-value");
+    const textRight = await energy.evaluate((node) => {
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      return range.getBoundingClientRect().right;
+    });
+    const ring = await page
+      .locator(".metric-alimentacao > .progress-ring")
+      .boundingBox();
+    expect(textRight).toBeLessThanOrEqual(ring!.x - 4);
+    const cards = page.locator(".v2-dashboard .areas-section");
+    const beforeMenu = await cards.boundingBox();
+    const selector = page.locator(".v2-dashboard-toolbar .v2-project-selector");
+    const trigger = selector.locator(":scope > summary");
+    await trigger.click();
+    await expect(selector.locator("form")).toBeVisible();
+    const afterMenu = await cards.boundingBox();
+    expect(afterMenu!.y).toBeCloseTo(beforeMenu!.y, 1);
+    const menuBox = await selector.locator("form").boundingBox();
+    expect(menuBox!.x).toBeGreaterThanOrEqual(0);
+    expect(menuBox!.x + menuBox!.width).toBeLessThanOrEqual(1280);
+    await page.keyboard.press("Escape");
+    await expect(selector).not.toHaveAttribute("open", "");
+    await expect(trigger).toBeFocused();
+    await trigger.click();
+    await page.locator(".dashboard-welcome h1").click();
+    await expect(selector).not.toHaveAttribute("open", "");
+    await page.screenshot({
+      path: `artifacts/diazen-v2/desktop-fiel/notebook-fix-${height}.png`,
+      animations: "disabled",
+    });
+  }
   await page
     .getByRole("button", { name: "Ativar modo claro no desktop" })
     .click();

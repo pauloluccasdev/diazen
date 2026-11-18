@@ -215,7 +215,8 @@
   .panel-shell[data-desktop-theme="dark"] .v2-sidebar a[aria-current],
   .panel-shell[data-desktop-theme="dark"] .v2-sidebar nav a:hover,
   .panel-shell[data-desktop-theme="dark"] .v2-sidebar-bottom a:hover {
-    color: #151923;
+    color: #f6f6f6;
+    background: #1c1d20;
   }
   .panel-shell .project-list-card.project-active {
     color: var(--color-text);
