@@ -13,6 +13,7 @@ export function ReturnLink({
 }) {
   return (
     <Link
+      prefetch={false}
       className="button-secondary return-link"
       href={href}
       aria-label={ariaLabel}

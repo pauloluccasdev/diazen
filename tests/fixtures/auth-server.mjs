@@ -15,6 +15,11 @@ const encode = (value) =>
 const users = [
   {
     ...user,
+    id: "00000000-0000-4000-8000-000000000059",
+    email: "photos-v2@example.test",
+  },
+  {
+    ...user,
     id: "00000000-0000-4000-8000-000000000058",
     email: "body-volume@example.test",
   },

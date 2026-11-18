@@ -13,6 +13,7 @@ export function ModuleHeading({
   path,
   action,
   period,
+  query,
 }: {
   title: string;
   description: string;
@@ -21,6 +22,7 @@ export function ModuleHeading({
   path: string;
   action?: ReactNode;
   period?: string;
+  query?: Record<string, string>;
 }) {
   const root = useRef<HTMLDivElement>(null),
     calendarId = useId();
@@ -69,6 +71,7 @@ export function ModuleHeading({
         path={path}
         calendarId={calendarId}
         period={period}
+        query={query}
         onCalendarToggle={setCalendarOpen}
         format="long"
       />

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useOnline } from "@/lib/use-online";
 import { today } from "@/lib/domain";
+import { RecordFeedbackDialog } from "@/components/record-feedback-dialog";
 async function prepare(file: File) {
   if (file.size > 25 * 1024 * 1024)
     throw new Error("Escolha uma imagem de até 25 MB.");
@@ -35,7 +36,18 @@ async function prepare(file: File) {
     bitmap.close();
   }
 }
-export function PhotoUploader({ min, max }: { min: string; max: string }) {
+export function PhotoUploader({
+  min,
+  max,
+  date,
+}: {
+  min: string;
+  max: string;
+  date?: string;
+}) {
+  const requestedDate = date ?? today();
+  const initialDate =
+    requestedDate > max ? max : requestedDate < min ? min : requestedDate;
   const [pending, setPending] = useState(false),
     [error, setError] = useState(""),
     [message, setMessage] = useState("");
@@ -91,7 +103,7 @@ export function PhotoUploader({ min, max }: { min: string; max: string }) {
             required
             min={min}
             max={max}
-            defaultValue={today()}
+            defaultValue={initialDate}
           />
         </label>
         <label>
@@ -120,15 +132,16 @@ export function PhotoUploader({ min, max }: { min: string; max: string }) {
           {pending ? "Salvando…" : "Salvar foto"}
         </button>
       </fieldset>
-      {message && (
-        <p role="status" className="form-success">
-          {message}
-        </p>
-      )}
-      {error && (
-        <p role="alert" className="form-error">
-          {error}
-        </p>
+      {pending && message && <p role="status">{message}</p>}
+      {!pending && (message || error) && (
+        <RecordFeedbackDialog
+          message={error || message}
+          error={Boolean(error)}
+          onClose={() => {
+            setMessage("");
+            setError("");
+          }}
+        />
       )}
       {!online && <p role="status">Sem conexão. O envio está bloqueado.</p>}
     </form>

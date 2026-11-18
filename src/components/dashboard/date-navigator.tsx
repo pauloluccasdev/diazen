@@ -14,6 +14,7 @@ export function DateNavigator({
   project,
   path = "/painel",
   period,
+  query,
   calendarId,
   onCalendarToggle,
   format = "compact",
@@ -22,6 +23,7 @@ export function DateNavigator({
   project: string;
   path?: string;
   period?: string;
+  query?: Record<string, string>;
   calendarId?: string;
   onCalendarToggle?: (open: boolean) => void;
   format?: "compact" | "long";
@@ -38,7 +40,7 @@ export function DateNavigator({
     .format(new Date(`${date}T12:00:00Z`))
     .replaceAll(".", "");
   const href = (value: string) =>
-    `${path}?${new URLSearchParams({ projeto: project, data: value, ...(period ? { periodo: period } : {}) })}`;
+    `${path}?${new URLSearchParams({ ...query, projeto: project, data: value, ...(period ? { periodo: period } : {}) })}`;
   return (
     <nav className="dz-date-navigator" aria-label="Data da visualização">
       <Link
@@ -74,6 +76,11 @@ export function DateNavigator({
         </summary>
         <Form prefetch={false} action={path} className="dz-date-form">
           <input type="hidden" name="projeto" value={project} />
+          {Object.entries(query ?? {})
+            .filter(([key]) => !["projeto", "data", "periodo"].includes(key))
+            .map(([key, value]) => (
+              <input key={key} type="hidden" name={key} value={value} />
+            ))}
           {period && <input type="hidden" name="periodo" value={period} />}
           <label>
             Escolher data

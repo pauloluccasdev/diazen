@@ -160,6 +160,36 @@ export async function rest(
         filters.push(`(${expressions.join(" or ")})`);
         continue;
       }
+      if (value.startsWith("in.(") && value.endsWith(")")) {
+        const raw = value.slice(4, -1);
+        if (!raw) {
+          filters.push("false");
+          continue;
+        }
+        const parts = [];
+        let token = "",
+          quoted = false,
+          escaped = false;
+        for (const character of raw) {
+          if (escaped) {
+            token += character;
+            escaped = false;
+          } else if (character === "\\" && quoted) escaped = true;
+          else if (character === '"') quoted = !quoted;
+          else if (character === "," && !quoted) {
+            parts.push(token.trim());
+            token = "";
+          } else token += character;
+        }
+        if (quoted || escaped) throw Error("Invalid IN filter");
+        parts.push(token.trim());
+        const placeholders = parts.map((part) => {
+          values.push(part);
+          return `$${values.length}`;
+        });
+        filters.push(`${identifier(key)} in (${placeholders.join(",")})`);
+        continue;
+      }
       const match = /^(eq|gte|lte|gt|lt|ilike)\.(.*)$/.exec(value);
       if (!match) throw new Error("Unknown filter");
       values.push(match[2]);

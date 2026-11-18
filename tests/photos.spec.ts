@@ -45,6 +45,13 @@ test("fotos privadas: upload, comparação, exclusão e acesso a histórico", as
     await form
       .getByRole("button", { name: "Salvar foto", exact: true })
       .click();
+    await expect(page.getByRole("dialog")).toContainText(
+      "Foto salva com privacidade",
+    );
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Continuar", exact: true })
+      .click();
     await expect(page.getByRole("article")).toHaveCount(i + 1);
   }
   expect(
@@ -66,6 +73,9 @@ test("fotos privadas: upload, comparação, exclusão e acesso a histórico", as
   expect(response.headers()["cache-control"]).toContain("no-store");
   expect(response.headers()["content-type"]).toBe("image/webp");
   expect((await request.get(urls[0])).status()).toBe(401);
+  const controls = page.locator(".photo-comparison-controls");
+  if (!(await controls.evaluate((el) => (el as HTMLDetailsElement).open)))
+    await controls.locator(":scope>summary").click();
   await page
     .getByRole("combobox", { name: "Foto 1", exact: true })
     .selectOption(ids[0]);
@@ -75,6 +85,7 @@ test("fotos privadas: upload, comparação, exclusão e acesso a histórico", as
   await page.getByRole("button", { name: "Comparar", exact: true }).click();
   await expect(page.locator(".comparison-grid img")).toHaveCount(2);
   const first = page.getByRole("article").first();
+  await first.locator(".photo-card-menu>summary").click();
   await first
     .locator("summary")
     .getByText("Excluir foto", { exact: true })

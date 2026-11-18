@@ -94,6 +94,9 @@ export function PanelShell({
           : href === "/painel/projetos"
             ? ["/painel/projetos", "/painel/fases"].includes(pathname)
             : pathname === href || pathname.startsWith(href + "/");
+  const isMobileCurrent = (href: string) =>
+    isCurrent(href) ||
+    (href === "/painel/peso" && pathname === "/painel/fotos");
   return (
     <div className="panel-shell" data-desktop-theme={theme}>
       <a className="skip-link" href="#panel-content">
@@ -191,7 +194,7 @@ export function PanelShell({
             prefetch={false}
             href={href}
             key={href}
-            aria-current={isCurrent(href) ? "page" : undefined}
+            aria-current={isMobileCurrent(href) ? "page" : undefined}
           >
             <Icon size={22} aria-hidden="true" />
             <span>{label}</span>
@@ -222,7 +225,7 @@ export function PanelShell({
                 "/painel/alimentacao",
                 "/painel/projetos",
                 "/painel/peso",
-              ].some(isCurrent)
+              ].some(isMobileCurrent)
                 ? undefined
                 : "page"
             }

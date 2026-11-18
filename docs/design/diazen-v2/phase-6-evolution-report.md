@@ -1,6 +1,6 @@
 # Fase 6 — Evolução corporal
 
-Branch `feat/diazen-v2-evolucao-corporal`, criada da develop `4b740b4`. R09 aberta antes da implementação; reproduzidas as regiões úteis mobile e desktop do composto. **Em execução; ainda não contabilizada como concluída.**
+Branch `feat/diazen-v2-evolucao-corporal`, criada da develop `4b740b4`. R09 aberta antes da implementação; reproduzidas as regiões úteis mobile e desktop do composto. Concluída em `48af335`, integrada e enviada à develop.
 
 ## Implementação
 
@@ -37,7 +37,7 @@ Novos `evolution-data.ts`, `evolution-metrics.ts` e `components/evolution/`. Reu
 - Axe/overflow em 320/390/768/1366/1672, desktop claro/escuro, medidas e rascunho vazio. Capturas sem molduras externas e somente com usuários sintéticos.
 - Capturas finais aguardam a saída do carregamento, fontes prontas e cabeçalho no viewport. As duas jornadas Chromium passaram novamente (21,7 s); estado vazio e nome longo foram inspecionados na tela pronta.
 - Validação final do cabeçalho compartilhado: Evolução (duas jornadas) e Alimentação aprovadas em Chromium (3/3, 23,6 s); inclui nome de projeto de 98 caracteres sem espaços em 320 px.
-- 26 jornadas agent-browser aprovadas: autorização, registros/edição/exclusão, offline, segunda conta, paginação, exportação e exclusão de conta. O roteiro fecha o novo modal de peso/medidas antes de registrar novamente e verifica o reset. CI completa pendente; a fase permanece em execução até concluir as verificações.
+- 26 jornadas agent-browser aprovadas: autorização, registros/edição/exclusão, offline, segunda conta, paginação, exportação e exclusão de conta. O roteiro fecha o novo modal de peso/medidas antes de registrar novamente e verifica o reset. CI completa de `48af335` aprovada ([44319821627](https://github.com/pauloluccasdev/diazen/actions/runs/44319821627)), incluindo banco, build, tipos, lint, formatação, Chromium, WebKit e agent-browser.
 
 ## Capturas
 

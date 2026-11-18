@@ -2,6 +2,8 @@
 .app-shell:has(.panel-shell) {
   --v2-primary: #ffc12e;
   --v2-on-primary: #151923;
+  --v2-media-bg: #151619;
+  --v2-media-text: #f6f6f6;
   --v2-data: #08b8e4;
   --v2-data-stroke: #08b8e4;
   --v2-data-text: #55d8f4;

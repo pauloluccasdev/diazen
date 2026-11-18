@@ -23,7 +23,9 @@ const headers = hosted
   ? { "x-vercel-trusted-oidc-idp-token": process.env.VERCEL_OIDC_TOKEN }
   : {};
 async function appFetch(path) {
-  return fetch(origin + path, { headers });
+  const url = new URL(path, origin);
+  assert.equal(url.origin, new URL(origin).origin);
+  return fetch(url, { headers });
 }
 const output = new URL("../../artifacts/agent-browser/", import.meta.url);
 await mkdir(output, { recursive: true });
@@ -128,7 +130,9 @@ async function goto(path) {
   });
 }
 async function clickText(value, tag = "button", scope = "document") {
-  const code = `(() => { const root=${scope}; const e=[...root.querySelectorAll(${JSON.stringify(tag)})].find(e=>e.textContent.trim()===${JSON.stringify(value)} && e.getClientRects().length && !e.matches(':disabled') && (!e.closest('details:not([open])') || e.matches('summary'))); if(!root || !e || (['button','summary'].includes(${JSON.stringify(tag)}) && !Object.keys(e).some(k=>k.startsWith('__reactProps'))))return false; document.querySelectorAll('[data-qa-target]').forEach(e=>e.removeAttribute('data-qa-target'));e.setAttribute('data-qa-target','yes');return true;})()`;
+  // A native server-rendered summary works before hydration and need not carry
+  // React's client props. Verify real keyboard focus and activation below.
+  const code = `(() => { const root=${scope}; const e=[...root.querySelectorAll(${JSON.stringify(tag)})].find(e=>e.textContent.trim()===${JSON.stringify(value)} && e.getClientRects().length && !e.matches(':disabled') && (!e.closest('details:not([open])') || e.matches('summary'))); if(!root || !e || (${JSON.stringify(tag)}==='button' && !Object.keys(e).some(k=>k.startsWith('__reactProps'))))return false; document.querySelectorAll('[data-qa-target]').forEach(e=>e.removeAttribute('data-qa-target'));e.setAttribute('data-qa-target','yes');return true;})()`;
   await until(code);
   if (tag === "summary" || tag === "button") {
     // Resolve the hydrated target again after pagination. Scroll instantly so
@@ -141,6 +145,9 @@ async function clickText(value, tag = "button", scope = "document") {
 }
 async function field(name, value, scope = "", type = "fill") {
   const selector = `${scope} [name="${name}"]`.trim();
+  // Finish a pending server refresh before opening a native disclosure; its
+  // replacement can otherwise close the control between Enter and selection.
+  if (type === "select") await ab("wait", "--load", "networkidle");
   const closed = await evaluate(
     `document.querySelector(${JSON.stringify(selector)})?.closest('details:not([open])')?.querySelector(':scope > summary')?.textContent.trim() ?? null`,
   );
@@ -153,7 +160,6 @@ async function field(name, value, scope = "", type = "fill") {
 
   // Server actions can replace the filter after its result count is visible.
   // Resolve a hydrated, visible control before taking accessibility references.
-  if (type === "select") await ab("wait", "--load", "networkidle");
   await until(
     `(() => { const e=document.querySelector(${JSON.stringify(selector)}); if(!e?.isConnected || !e.getClientRects().length || e.matches(':disabled') || !Object.keys(e).some(k=>k.startsWith('__reactProps')))return false; e.scrollIntoView({block:'center',behavior:'instant'}); return true; })()`,
   );
@@ -1057,6 +1063,22 @@ try {
           await clickText("Adicionar foto", "summary");
         await ab("upload", "input[type=file]", png.pathname);
         await clickText("Salvar foto");
+        await until(
+          "document.querySelector('.record-feedback-dialog[open]') !== null",
+        );
+        await text("Foto salva com privacidade.");
+        await clickText(
+          "Continuar",
+          "button",
+          "document.querySelector('.record-feedback-dialog')",
+        );
+        await until(
+          "document.querySelector('.record-feedback-dialog') === null",
+        );
+        assert.equal(
+          await evaluate("document.querySelector('input[type=file]').value"),
+          "",
+        );
         await count(i + 1);
       }
       const urls = await evaluate(
@@ -1074,13 +1096,20 @@ try {
         "[...document.querySelectorAll('select')].map(s=>({name:s.name,label:s.labels?.[0]?.textContent}))",
       );
       report.photoSelects = selects;
-      await field("a", ids[0], "", "select");
-      await field("b", ids[1], "", "select");
+      await field("a", ids[0], ".photo-comparison", "select");
+      await field("b", ids[1], ".photo-comparison", "select");
       await clickText("Comparar");
       await until(
         "document.querySelectorAll('.comparison-grid img').length===2",
       );
       await audit("fotos");
+      await until(
+        "(() => { const e=document.querySelector('article .photo-card-menu > summary'); if(!e?.getClientRects().length||!Object.keys(e).some(k=>k.startsWith('__reactProps')))return false; e.scrollIntoView({block:'center',behavior:'instant'}); e.focus({preventScroll:true});return document.activeElement===e;})()",
+      );
+      await ab("press", "Enter");
+      await until(
+        "document.querySelector('article .photo-card-menu').open === true",
+      );
       await clickText(
         "Excluir foto",
         "summary",
@@ -1352,23 +1381,25 @@ try {
         assert.equal(status, 201);
       }
       await goto("/painel/fotos");
-      await count(12);
+      await count(4);
       const ids = await evaluate(
         "[...document.querySelectorAll('article img')].map(e=>e.getAttribute('src').split('/').at(-1).split('?')[0])",
       );
-      await field("a", ids[0], "", "select");
-      await field("b", ids[1], "", "select");
+      await field("a", ids[0], ".photo-comparison", "select");
+      await field("b", ids[1], ".photo-comparison", "select");
       await clickText("Comparar");
       await until(
         "document.querySelectorAll('.comparison-grid img').length===2",
       );
-      await clickText("Próximas", "a");
-      await count(1);
+      for (const expected of [4, 4, 1]) {
+        await clickText("Próximas", "a");
+        await count(expected);
+      }
       const last = await evaluate(
         "document.querySelector('article img').getAttribute('src').split('/').at(-1).split('?')[0]",
       );
       assert.ok(!ids.includes(last));
-      await field("b", last, "", "select");
+      await field("b", last, ".photo-comparison", "select");
       await clickText("Comparar");
       await until(
         `new URL(location.href).searchParams.get('b') === ${JSON.stringify(last)}`,

@@ -650,3 +650,11 @@ O proprietário aprovou explicitamente as duas ampliações propostas no diagnó
 - **Integridade:** mesmas RPCs e ações, projeto ativo resolvido no servidor e unicidade por usuário/data/tipo. Sucesso de criação usa modal e reset; edição de peso conserva a data e substitui o valor daquela data. Encerrados e DRAFT não recebem editor.
 - **Limite:** sem altura/método aprovado, não calcular IMC, gordura corporal ou massa magra. As regiões equivalentes apresentam ausência explícita e acesso aos registros disponíveis. Nenhum schema ou contrato público novo.
 - **Requisitos:** RF-014/015/019, RNF-002/004/011 e regras de projeto, privacidade e dados ausentes. Evidências em `docs/design/diazen-v2/phase-6-evolution-report.md`.
+
+## Decisão — Fotos de evolução v2 — 18/11/2026
+
+- **Autorização:** continuidade do redesign, R10 e leituras da matriz, preservando privacidade e dados existentes.
+- **Apresentação:** galeria, posições, datas, comparação e visualização ampliada; desktop claro/escuro e mobile. Galeria com quatro arquivos por página; totais e seleção não ficam limitados à página.
+- **Dados:** comparação de peso/cintura somente nas datas exatas das fotografias e no mesmo projeto, sem inferir composição corporal. Ausência continua distinta de zero; diferenças são neutras.
+- **Integridade:** mesmas APIs, otimização, remoção de metadados, RLS e armazenamento privado. Rascunhos e encerrados não recebem editor; envio continua resolvendo projeto ativo no servidor. Sem novo modelo ou contrato público.
+- **Requisitos:** RF-016/017/019, RNF-002/004/010/011. Relatório e evidências em `docs/design/diazen-v2/phase-7-photos-report.md`.

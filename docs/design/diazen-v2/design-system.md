@@ -1,5 +1,7 @@
 # Diazen 2.0 — proposta de Design System de alta fidelidade
 
+Nota de execução da Fase 7 (18/11/2026): campos fotográficos usam os tokens implementados `--v2-media-bg: #151619` e `--v2-media-text: #f6f6f6` em ambos os temas. A superfície neutra conserva a fotografia inteira; texto da mensagem de falha não herda a cor escura do tema claro. O visualizador modal usa margem automática para centralização, foco/retorno nativos e tentativa novamente real. Relatório: [Fotos de evolução](phase-7-photos-report.md).
+
 Fase 0 · 17/11/2026 · **especificação para aprovação, ainda não implementada**. Fontes: os 13 rasters do [catálogo visual](visual-audit.md#3-catálogo-dos-13-protótipos-abertos). Não há Figma, fonte vetorial, camadas ou arquivos de fonte originais disponíveis. Medidas e tokens abaixo normalizam a leitura das imagens; não representam extração exata de uma fonte tipográfica ou de dimensões CSS ocultas.
 
 Este documento sucede a direção visual de 0.1 para as fases futuras. Não modifica `docs/design-system.md` ou o JSON gerados do baseline. As regras de integridade e acessibilidade permanecem. O dashboard já entregue é base funcional, não baseline visual aprovado para a nova exigência.
