@@ -9,11 +9,11 @@ import {
   X,
   ArrowRight,
   ChevronDown,
-  UserRound,
   Settings,
   ShieldCheck,
 } from "lucide-react";
 import { LogoutButton } from "@/components/logout-button";
+import { ProfileAvatar } from "@/components/profile/profile-avatar";
 
 const actions = [
   ["Dashboard", "/painel", "Início, progresso, resumo"],
@@ -168,7 +168,15 @@ export function DesktopThemeControl({
   );
 }
 
-export function AccountMenu({ name }: { name?: string }) {
+export function AccountMenu({
+  name,
+  avatarId,
+  unavailable = false,
+}: {
+  name?: string;
+  avatarId?: string | null;
+  unavailable?: boolean;
+}) {
   const menu = useRef<HTMLDetailsElement>(null);
   useEffect(() => {
     const outside = (event: PointerEvent) => {
@@ -202,12 +210,14 @@ export function AccountMenu({ name }: { name?: string }) {
       }}
     >
       <summary className="v2-account" aria-label="Minha conta e configurações">
-        <span className="v2-avatar">
-          <UserRound size={23} aria-hidden="true" />
-        </span>
+        <ProfileAvatar name={name} avatarId={avatarId} />
         <span>
           {name || "Minha conta"}
-          <small>Meu espaço pessoal</small>
+          <small>
+            {unavailable
+              ? "Perfil temporariamente indisponível"
+              : "Meu espaço pessoal"}
+          </small>
         </span>
         <ChevronDown size={18} aria-hidden="true" />
       </summary>

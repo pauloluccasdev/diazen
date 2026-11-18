@@ -4,38 +4,7 @@ import { useRouter } from "next/navigation";
 import { useOnline } from "@/lib/use-online";
 import { today } from "@/lib/domain";
 import { RecordFeedbackDialog } from "@/components/record-feedback-dialog";
-async function prepare(file: File) {
-  if (file.size > 25 * 1024 * 1024)
-    throw new Error("Escolha uma imagem de até 25 MB.");
-  let bitmap: ImageBitmap;
-  try {
-    bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
-  } catch {
-    throw new Error("Não foi possível ler a imagem. Use JPG, PNG ou WebP.");
-  }
-  try {
-    const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
-    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
-    const context = canvas.getContext("2d");
-    if (!context) throw new Error("Não foi possível preparar a imagem.");
-    context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-    const blob = await new Promise<Blob>((resolve, reject) =>
-      canvas.toBlob(
-        (value) =>
-          value ? resolve(value) : reject(new Error("Imagem não suportada.")),
-        "image/webp",
-        0.82,
-      ),
-    );
-    if (blob.size > 3 * 1024 * 1024)
-      throw new Error("Escolha uma imagem menor.");
-    return new File([blob], "foto.webp", { type: "image/webp" });
-  } finally {
-    bitmap.close();
-  }
-}
+import { prepareClientImage } from "@/lib/prepare-client-image";
 export function PhotoUploader({
   min,
   max,
@@ -67,7 +36,7 @@ export function PhotoUploader({
         setError("");
         setMessage("Preparando sua foto…");
         try {
-          form.set("file", await prepare(file));
+          form.set("file", await prepareClientImage(file));
           if (!navigator.onLine)
             throw new Error("Conecte-se à internet para salvar a foto.");
           const response = await fetch("/api/fotos", {

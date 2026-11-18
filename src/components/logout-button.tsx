@@ -2,8 +2,9 @@
 import { useActionState } from "react";
 import { useOnline } from "@/lib/use-online";
 import { signOut } from "@/app/entrar/actions";
+import { LogOut } from "lucide-react";
 
-export function LogoutButton() {
+export function LogoutButton({ icon = false }: { icon?: boolean }) {
   const [state, action, pending] = useActionState(signOut, { error: "" });
   const online = useOnline();
   return (
@@ -19,6 +20,7 @@ export function LogoutButton() {
         disabled={pending || !online}
       >
         {" "}
+        {icon && <LogOut size={20} aria-hidden="true" />}
         {pending ? "Saindo…" : "Sair da conta"}
       </button>
       {state.error && (

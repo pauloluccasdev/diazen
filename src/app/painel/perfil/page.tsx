@@ -1,108 +1,51 @@
-import { DisplaySettings } from "@/components/daily/display-settings";
-import { displayPreferences } from "@/lib/daily-data";
-import Link from "next/link";
-import { PasswordInput } from "@/components/password-input";
-import {
-  UserRound,
-  FolderOpen,
-  Target,
-  ShieldCheck,
-  FileText,
-  KeyRound,
-  ChevronRight,
-} from "lucide-react";
 import { requireAccount } from "@/lib/data";
-import { LogoutButton } from "@/components/logout-button";
-import { ActionForm } from "@/components/forms/action-form";
-import { deleteAccount } from "./actions";
-export const metadata = { title: "Minha conta e privacidade" };
-export default async function Profile() {
-  const { user, client } = await requireAccount();
-  const preferences = await displayPreferences(client, user.id);
+import { accountProfile, profileReferences } from "@/lib/profile-data";
+import { profileIdentity } from "@/lib/profile-values";
+import { displayPreferences } from "@/lib/daily-data";
+import { today } from "@/lib/domain";
+import {
+  ProfileDirectory,
+  profileSections,
+  type ProfileSection,
+} from "@/components/profile/profile-directory";
+export const metadata = { title: "Perfil e configurações" };
+export default async function Profile({
+  searchParams,
+}: {
+  searchParams: Promise<{ secao?: string; foto?: string }>;
+}) {
+  const params = await searchParams;
+  const section: ProfileSection = profileSections.includes(
+    params.secao as (typeof profileSections)[number],
+  )
+    ? (params.secao as (typeof profileSections)[number])
+    : "overview";
+  const { client, user } = await requireAccount();
+  const profile = await accountProfile(client, user.id);
+  const identity = profileIdentity(profile, user.user_metadata?.display_name);
+  const [preferences, references] = await Promise.all([
+    section === "overview" || section === "preferencias"
+      ? displayPreferences(client, user.id)
+          .then((data) => ({ data, error: false }))
+          .catch(() => ({ data: null, error: true }))
+      : Promise.resolve({ data: null, error: false }),
+    section === "overview" || section === "metas"
+      ? profileReferences(client, today())
+          .then((data) => ({ data, error: false }))
+          .catch(() => ({ data: null, error: true }))
+      : Promise.resolve({ data: null, error: false }),
+  ]);
   return (
-    <>
-      <section className="welcome">
-        <p className="eyebrow">SEU ESPAÇO PESSOAL</p>
-        <h1>Conta e privacidade.</h1>
-        <p className="intro">Sua rotina, seus dados e suas preferências.</p>
-      </section>
-      <section className="profile-identity content-card" aria-label="Sua conta">
-        <span className="profile-avatar">
-          <UserRound size={28} aria-hidden="true" />
-        </span>
-        <div>
-          <h2>Sua conta Diazen</h2>
-          <p className="muted">{user.email}</p>
-        </div>
-      </section>
-      <nav
-        className="settings-list content-card"
-        aria-label="Configurações da conta"
-      >
-        {(
-          [
-            ["/painel/projetos", "Projetos", FolderOpen],
-            ["/painel/projetos", "Metas", Target],
-            ["/privacidade", "Dados e privacidade", ShieldCheck],
-            ["/termos", "Termos de uso", FileText],
-            ["/nova-senha", "Alterar senha", KeyRound],
-          ] as const
-        ).map(([href, label, Icon]) => (
-          <Link key={label} href={href}>
-            <Icon size={20} aria-hidden="true" />
-            <span>{label}</span>
-            <ChevronRight size={16} aria-hidden="true" />
-          </Link>
-        ))}
-      </nav>
-      <DisplaySettings initial={preferences} />
-      <section className="content-card">
-        <h2>Seus dados, com você.</h2>
-        <p className="intro">
-          Baixe seus projetos, metas e registros em JSON. As fotografias podem
-          ser salvas pela galeria, em suas versões otimizadas.
-        </p>
-        <a className="button-primary" href="/api/exportar" download>
-          Baixar meus dados
-        </a>
-      </section>
-      <section className="content-card">
-        <h2>Encerrar minha conta</h2>
-        <p className="intro">
-          A solicitação bloqueia o acesso aos seus dados imediatamente.
-          Projetos, registros e fotos serão excluídos com segurança. A política
-          de privacidade descreve o tratamento das cópias de segurança.
-        </p>
-        <details>
-          <summary>Solicitar exclusão da conta</summary>
-          <ActionForm action={deleteAccount} submit="Excluir minha conta">
-            <label htmlFor="deletion-password">Senha atual</label>
-            <PasswordInput
-              id="deletion-password"
-              visibilityLabel="senha atual"
-              name="password"
-              autoComplete="current-password"
-              required
-              maxLength={1024}
-            />
-            <label>
-              Digite EXCLUIR para confirmar
-              <input
-                name="confirmation"
-                required
-                pattern="EXCLUIR"
-                autoComplete="off"
-              />
-            </label>
-            <label className="checkbox-label">
-              <input type="checkbox" name="confirm" required />
-              Entendo que meus dados e fotos serão excluídos e não poderei
-              recuperá-los.
-            </label>
-          </ActionForm>
-        </details>
-      </section>
-      <LogoutButton />
-    </>
+    <ProfileDirectory
+      name={identity.name}
+      email={user.email ?? null}
+      avatarId={identity.avatarId}
+      section={section}
+      preferences={preferences.data}
+      references={references.data}
+      preferencesUnavailable={preferences.error}
+      referencesUnavailable={references.error}
+      avatarOpen={params.foto === "1"}
+    />
   );
 }

@@ -3,13 +3,28 @@ import { garminConfig } from "@/lib/garmin-config";
 import { PanelShell } from "@/components/panel-shell";
 import { requireAccount } from "@/lib/data";
 import { cookies } from "next/headers";
+import { accountProfile } from "@/lib/profile-data";
+import { profileIdentity } from "@/lib/profile-values";
 export const dynamic = "force-dynamic";
 export default async function PanelLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { user } = await requireAccount();
+  const { user, client } = await requireAccount();
+  let identity: ReturnType<typeof profileIdentity> = {
+    name: null,
+    avatarId: null,
+  };
+  let profileUnavailable = false;
+  try {
+    identity = profileIdentity(
+      await accountProfile(client, user.id),
+      user.user_metadata?.display_name,
+    );
+  } catch {
+    profileUnavailable = true;
+  }
   const theme = (await cookies()).get("diazen-desktop-theme")?.value;
   return (
     <>
@@ -18,11 +33,9 @@ export default async function PanelLayout({
       )}
       <PanelShell
         initialTheme={theme === "dark" ? "dark" : "light"}
-        accountName={
-          typeof user.user_metadata?.display_name === "string"
-            ? user.user_metadata.display_name.slice(0, 80)
-            : undefined
-        }
+        accountName={identity.name ?? undefined}
+        accountAvatarId={identity.avatarId}
+        accountProfileUnavailable={profileUnavailable}
       >
         {children}
       </PanelShell>

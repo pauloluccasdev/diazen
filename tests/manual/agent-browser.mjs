@@ -1518,6 +1518,7 @@ try {
       assert.equal(exported.food_library.length, 2);
       assert.equal(exported.photos.length, 1);
       await audit("perfil");
+      await goto("/painel/perfil?secao=conta");
       await clickText("Solicitar exclusão da conta", "summary");
       const s = await markForm("Excluir minha conta");
       await ab("check", s + " [name=confirm]");

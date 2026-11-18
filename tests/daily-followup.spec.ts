@@ -120,7 +120,7 @@ test("fases, check-in opcional, contexto sem consumo e indicadores ocultos prese
       .locator(".history-group")
       .filter({ has: page.locator("summary strong", { hasText: "Check-in" }) }),
   ).toContainText("1 registro");
-  await page.goto("/painel/perfil");
+  await page.goto("/painel/perfil?secao=preferencias");
   const settings = page.locator("section").filter({
     has: page.getByRole("heading", {
       name: "O que quero ver no meu dashboard",

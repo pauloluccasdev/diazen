@@ -126,3 +126,9 @@ Nenhuma tela é aprovada nesta fase. Antes de avançar, apresentar capturas, dif
 ## Atualização de implementação — Fase 6
 
 A fonte implementada é `src/styles/diazen-v2/tokens.css`. O contraste sobre o amarelo principal é centralizado em `--v2-on-primary: #151923`, equivalente ao token proposto `--dz-on-primary`. Evolução corporal usa esse token nos tabs ativos; o texto âmbar em superfície clara continua usando a variante semântica de contraste, sem confundir fundo de CTA com cor de links.
+
+## Atualização de implementação — Fase 9
+
+Avatar ausente apresenta ícone ou iniciais de nome confirmado, nunca fotografia de exemplo. Imagem privada usa a rota autenticada e não entra no cache da PWA. Diretório de configurações mobile e edição interna compartilham os controles e o feedback existentes; desktop conserva identidade/navegação à esquerda e painéis à direita.
+
+As referências estáveis `--v2-surface-light`, `--v2-surface-dark` e `--v2-text-light` centralizam valores já existentes. Os tokens semânticos continuam selecionando o tema. Perfil usa também essas referências no painel e no seletor de aparência desktop para impedir que WebKit preserve a cor herdada de uma região antes oculta ao mudar de breakpoint. A jornada testa a superfície calculada e contraste em 320/390/768/1366/1672, além da alternância de tema. Nenhum teste de contraste foi suprimido.

@@ -4,6 +4,7 @@ import { existsSync } from "node:fs";
 import { mkdir, mkdtemp, readFile, writeFile, rm } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { tmpdir } from "node:os";
+import { isPrivateImageKey } from "../src/lib/private-image-path.ts";
 import {
   cleanupArchiveWorkspace,
   privateKey,
@@ -123,6 +124,19 @@ try {
             )
           ).rows,
         );
+      const hasProfiles = (
+        await client.query(
+          "select to_regclass('public.profiles') is not null as present",
+        )
+      ).rows[0].present;
+      if (hasProfiles)
+        photos.push(
+          ...(
+            await client.query(
+              "select avatar_key as storage_key,null as thumbnail_key from public.profiles where avatar_key is not null order by user_id",
+            )
+          ).rows,
+        );
       const deletions = (
         await client.query(
           "select user_id,requested_at,purged_at from public.deletion_ledger order by user_id",
@@ -191,11 +205,7 @@ try {
           photo.storage_key,
           photo.thumbnail_key,
         ].filter(Boolean)) {
-          if (
-            !/^[0-9a-f-]{36}\/[0-9a-f-]{36}\/[0-9a-f-]{36}(-thumb)?\.webp$/.test(
-              storageKey,
-            )
-          )
+          if (!isPrivateImageKey(storageKey))
             throw Error("Caminho de foto inesperado; backup cancelado.");
           const r = await admin.storage
             .from("body-photos")

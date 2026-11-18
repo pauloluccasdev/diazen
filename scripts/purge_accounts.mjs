@@ -4,6 +4,7 @@ import {
   cleanPhotoJobs,
   cleanPlanAssetJobs,
   reconcilePhotoStorage,
+  cleanAvatarJobs,
 } from "../src/lib/privacy.ts";
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL,
   key = process.env.SUPABASE_SECRET_KEY;
@@ -15,6 +16,7 @@ const admin = createClient(url, key, {
 try {
   const jobs = await cleanPhotoJobs(admin);
   const planJobs = await cleanPlanAssetJobs(admin);
+  const avatarJobs = await cleanAvatarJobs(admin);
   let accounts = 0;
   while (true) {
     const { data, error } = await admin
@@ -33,6 +35,7 @@ try {
       accounts,
       photoJobs: jobs,
       planJobs,
+      avatarJobs,
       orphanFiles: orphans,
     }),
   );

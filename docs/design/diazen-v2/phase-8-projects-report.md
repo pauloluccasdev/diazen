@@ -1,8 +1,8 @@
 # Fase 8 — Projetos
 
-Em execução na branch `feat/diazen-v2-projetos`. Base atualizada com Fotos `a2bca3f`, cuja CI completa foi aprovada antes da integração na develop. R11 aberta e analisada antes da implementação. Esta fase ainda não está concluída.
+Concluída em `8768673`, integrada e enviada à develop. Branch `feat/diazen-v2-projetos`. Base atualizada com Fotos `a2bca3f`, cuja CI completa foi aprovada antes da integração na develop. R11 aberta e analisada antes da implementação.
 
-## Implementação em validação
+## Implementação
 
 Diretório com projeto ativo em destaque, cartões secundários, cinco filtros explícitos (Todos, Ativo, Planejados, Concluídos e Arquivados), contagens reais, paginação e criação. O protótipo mostra mais de um projeto em andamento: a implementação preserva somente um ACTIVE; rascunhos aparecem como Rascunho e têm filtro Planejados. Consultar um cartão abre o dashboard desse projeto, sem ativá-lo.
 
@@ -21,7 +21,7 @@ Feedback centralizado em `ProjectFeedbackProvider`, fora dos cartões: uma mudan
 - Ações e contratos de escrita existentes preservados; novas leituras autenticadas previstas na matriz, sem tabela, comando de escrita ou migração novos. Autenticação, RLS, unicidade ACTIVE e guardas de estado continuam no servidor.
 - Pré-requisitos reais inspecionados somente por metadados: função `delete_project(uuid,text)`, índice único ACTIVE, RLS e política proprietária presentes. O ledger remoto não registra 013, embora a função exista; não reaplicamos/resetamos migrações. Nenhuma linha pessoal foi consultada.
 
-## Evidências parciais
+## Verificação
 
 - Quatro testes novos de métricas aprovados: contagens acima de mil, limites de datas, encerramento no fuso correto e referências opcionais. Suíte de banco/unidade com 108 aprovados.
 - Build, TypeScript, lint e formatação aprovados na implementação atual.
@@ -45,4 +45,4 @@ Capturas após carregamento e fontes prontos, sem molduras e com dados sintétic
 
 As 26 jornadas agent-browser finais passaram, incluindo edição de nome/metas, meta temporal de água, confirmação de conclusão/arquivamento, seleção histórica sem trocar o destino das gravações, paginação, autorização, exportação e exclusão da conta. O roteiro abre diálogos e controles nativos pelo teclado; a abertura automática dos grupos foi limitada ao gerenciamento de Projetos, sem interferir nos menus de água/treinos.
 
-CI completa pendente de envio desta entrega. Não contabilizar a fase como concluída antes desse gate.
+CI completa de `8768673` aprovada ([44368845411](https://github.com/pauloluccasdev/diazen/actions/runs/44368845411)), incluindo banco, build, tipos, lint, formatação, Chromium, WebKit e agent-browser. Integrada e enviada à develop; main permanece sob responsabilidade do proprietário.

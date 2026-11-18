@@ -13,6 +13,7 @@ export async function GET() {
     format_version: 1,
   };
   for (const table of [
+    "profiles",
     "projects",
     "display_preferences",
     "project_phases",
@@ -51,6 +52,7 @@ export async function GET() {
         )
         .order(
           table === "display_preferences" ||
+            table === "profiles" ||
             table === "garmin_sleep_settings" ||
             table === "garmin_sync_settings"
             ? "user_id"

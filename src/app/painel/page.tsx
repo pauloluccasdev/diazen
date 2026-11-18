@@ -260,7 +260,7 @@ export default async function Panel({
       <Link
         prefetch={false}
         className="dashboard-preferences"
-        href="/painel/perfil#display-title"
+        href="/painel/perfil?secao=preferencias#display-title"
       >
         Escolher indicadores do painel
       </Link>

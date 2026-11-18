@@ -75,8 +75,11 @@ test("exclusão confirmada bloqueia acesso e remove dados e fotos de histórico"
   const cookies = (await context.cookies())
     .map((c) => `${c.name}=${c.value}`)
     .join("; ");
-  await page.goto("/painel/perfil");
-  await page.getByText("Solicitar exclusão da conta", { exact: true }).click();
+  await page.goto("/painel/perfil?secao=conta");
+  await page
+    .locator("summary")
+    .filter({ hasText: /^Solicitar exclusão da conta$/ })
+    .click();
   const form = page.locator("form").filter({
     has: page.getByRole("button", {
       name: "Excluir minha conta",

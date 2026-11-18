@@ -667,3 +667,12 @@ O proprietário aprovou explicitamente as duas ampliações propostas no diagnó
 - **Feedback:** confirmação centralizada fora dos cartões para sobreviver a mudanças de estado; criação reseta e erro preserva campos. ActionForm mantém os modos existentes e admite feedback externo para esse fluxo.
 - **Integridade:** mesmas ações, APIs de escrita, guardas, RLS e índice único ACTIVE. Encerrados somente leitura; exclusão histórica mantém confirmação e limpeza autorizadas. Nenhuma migração nesta entrega.
 - **Requisitos:** RF-002 a RF-005, RF-019/020, RNF-002/004/010/011 e invariantes de projeto/dados ausentes. Relatório em `docs/design/diazen-v2/phase-8-projects-report.md`.
+
+## Decisão — Perfil e configurações v2 — 18/11/2026
+
+- **Autorização:** continuidade do redesign e ampliação aprovada de nome opcional/avatar privado. Proposta anterior à implementação em `docs/design/diazen-v2/phase-9-profile-plan.md`; aplicação remota depende das verificações documentadas.
+- **Identidade:** perfil pertence à conta, sem depender de projeto ativo. Nome e avatar usam atualizações independentes. Nome nulo em um perfil existente representa escolha explícita; não restaurar automaticamente um nome antigo do Auth.
+- **Privacidade:** avatar WebP otimizado e sem metadados, no bucket privado existente, com caminho gerado e leitura autenticada do proprietário. Remoção compara a versão confirmada. Fila administrativa preserva o arquivo atual em respostas incertas e substituições concorrentes; exportação, backup e exclusão abrangem o novo namespace.
+- **Apresentação:** diretório mobile e coluna de identidade/painéis desktop conforme R12. Tema desktop compartilha estado e cookie com o cabeçalho; mobile permanece escuro. Metas são referências existentes, com datas, sem prescrição automática. Campos não aprovados do mockup não são simulados.
+- **Preservação:** reusar preferências, senha, exportação e exclusão reautenticada; não duplicar credenciais nem alterar associação dos registros operacionais aos projetos. Apenas migração aditiva 020, sem reexecução de migrações antigas ou reset do histórico.
+- **Requisitos:** RF-019/020, RNF-002/004/010/011 e invariantes de privacidade, autorização, offline e dados ausentes. Evidências e gates em `docs/design/diazen-v2/phase-9-profile-report.md`.

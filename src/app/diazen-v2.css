@@ -91,7 +91,7 @@ body:has(.panel-shell) {
   color: var(--color-accent);
   border: 1px solid var(--color-border);
 }
-.v2-account > span:not(.v2-avatar),
+.v2-account > span:not(.v2-avatar):not(.dz-profile-avatar),
 .v2-account > svg {
   display: none;
 }
@@ -764,7 +764,7 @@ body:has(.panel-shell) {
   .v2-project-panel {
     grid-column: 2;
   }
-  .v2-account > span:not(.v2-avatar),
+  .v2-account > span:not(.v2-avatar):not(.dz-profile-avatar),
   .v2-account > svg {
     display: block;
   }

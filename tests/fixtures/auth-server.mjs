@@ -15,6 +15,26 @@ const encode = (value) =>
 const users = [
   {
     ...user,
+    id: "00000000-0000-4000-8000-000000000061",
+    email: "profile-v2@example.test",
+  },
+  {
+    ...user,
+    id: "00000000-0000-4000-8000-000000000062",
+    email: "profile-other-v2@example.test",
+  },
+  {
+    ...user,
+    id: "00000000-0000-4000-8000-000000000063",
+    email: "avatar-api@example.test",
+  },
+  {
+    ...user,
+    id: "00000000-0000-4000-8000-000000000064",
+    email: "avatar-other-api@example.test",
+  },
+  {
+    ...user,
     id: "00000000-0000-4000-8000-000000000060",
     email: "projects-v2@example.test",
   },
@@ -162,6 +182,8 @@ const tokenFor = (u) => {
 users.forEach(tokenFor);
 const files = new Map();
 const failPhotoReplies = new Set();
+const failAvatarReplies = new Set();
+const failAvatarUploads = new Set();
 const failReads = new Set();
 const closeOnProjectRead = new Set();
 const emailLinks = new Map();
@@ -177,6 +199,14 @@ createServer(async (request, response) => {
   response.setHeader("Content-Type", "application/json");
   response.setHeader("Cache-Control", "no-store");
   if (request.url === "/health") return response.end("{}");
+  if (request.url?.startsWith("/_test/fail-avatar-reply/")) {
+    failAvatarReplies.add(request.url.split("/").at(-1));
+    return response.end("{}");
+  }
+  if (request.url?.startsWith("/_test/fail-avatar-upload/")) {
+    failAvatarUploads.add(request.url.split("/").at(-1));
+    return response.end("{}");
+  }
   if (request.url?.startsWith("/_test/close-on-project-read/")) {
     closeOnProjectRead.add(request.url.split("/").at(-1));
     return response.end("{}");
@@ -271,6 +301,7 @@ createServer(async (request, response) => {
         uid,
         admin,
         () => failPhotoReplies.delete(uid),
+        () => failAvatarReplies.delete(uid),
       );
       const url = new URL(request.url, "http://localhost");
       if (
@@ -322,6 +353,16 @@ createServer(async (request, response) => {
     if (request.method === "POST" && admin && path) {
       const parts = [];
       for await (const part of request) parts.push(part);
+      if (files.has(path) && request.headers["x-upsert"] !== "true") {
+        response.statusCode = 409;
+        return response.end(
+          JSON.stringify({
+            statusCode: "409",
+            error: "Duplicate",
+            message: "Object already exists",
+          }),
+        );
+      }
       files.set(path, Buffer.concat(parts));
       queue = queue.then(async () => {
         await db.exec("reset role");
@@ -331,6 +372,19 @@ createServer(async (request, response) => {
         );
       });
       await queue;
+      if (
+        path.split("/")[1] === "avatars" &&
+        failAvatarUploads.delete(path.split("/")[0])
+      ) {
+        response.statusCode = 503;
+        return response.end(
+          JSON.stringify({
+            statusCode: "503",
+            error: "TEST_REPLY_LOST",
+            message: "Synthetic upload reply lost",
+          }),
+        );
+      }
       return response.end(
         JSON.stringify({ Key: `body-photos/${path}`, Id: crypto.randomUUID() }),
       );

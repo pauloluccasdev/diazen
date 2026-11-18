@@ -22,6 +22,8 @@ export async function createDatabase(users) {
 }
 
 const tables = new Set([
+  "profiles",
+  "avatar_cleanup",
   "projects",
   "phase_plans",
   "plan_assets",
@@ -52,6 +54,9 @@ const tables = new Set([
   "deletion_ledger",
 ]);
 const commands = new Set([
+  "save_profile_name",
+  "set_profile_avatar",
+  "remove_profile_avatar",
   "set_garmin_sleep_sync",
   "garmin_claim_sleep",
   "garmin_store_sleep",
@@ -87,6 +92,7 @@ export async function rest(
   userId,
   admin = false,
   failPhotoReply = () => false,
+  failAvatarReply = () => false,
 ) {
   let payload = null;
   if (request.method !== "GET" && request.method !== "HEAD") {
@@ -136,6 +142,19 @@ export async function rest(
           ),
         )
       ).rows;
+      if (
+        ["set_profile_avatar", "remove_profile_avatar"].includes(table) &&
+        failAvatarReply()
+      ) {
+        response.statusCode = 503;
+        response.end(
+          JSON.stringify({
+            code: "TEST_REPLY_LOST",
+            message: "Synthetic avatar reply lost after commit",
+          }),
+        );
+        return;
+      }
       response.end(JSON.stringify(rows[0]?.result ?? null));
       return;
     }
