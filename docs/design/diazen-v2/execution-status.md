@@ -12,7 +12,7 @@ Em 17/11/2026, o proprietário aprovou recipientes de água salvos e perfil com 
 
 ## Quadro geral
 
-**7 de 11 fases concluídas (64%).** Percentual por quantidade de fases, não estimativa de horas ou esforço.
+**8 de 11 fases concluídas (73%).** Percentual por quantidade de fases, não estimativa de horas ou esforço.
 
 | Fase | Entrega                         | Estado                |
 | ---- | ------------------------------- | --------------------- |
@@ -23,8 +23,8 @@ Em 17/11/2026, o proprietário aprovou recipientes de água salvos e perfil com 
 | 4    | Hidratação                      | Concluída — `0ed58fb` |
 | 5    | Treinos                         | Concluída — `4b740b4` |
 | 6    | Evolução corporal               | Concluída — `48af335` |
-| 7    | Fotos de evolução               | Em execução           |
-| 8    | Projetos                        | Pendente              |
+| 7    | Fotos de evolução               | Concluída — `a2bca3f` |
+| 8    | Projetos                        | Em execução           |
 | 9    | Perfil e configurações          | Pendente              |
 | 10   | Autenticação                    | Pendente              |
 
@@ -76,7 +76,7 @@ Uma fase só muda para concluída com evidência de implementação e verificaç
 - [x] CI completa de `0ed58fb` aprovada ([44215004775](https://github.com/pauloluccasdev/diazen/actions/runs/44215004775)); integrado e enviado à develop.
 - [x] Prévia READY, saúde 200 e rota privada sem sessão redireciona (307); verificação somente de leitura.
 
-Manutenção de dependências integrada na develop em `496ee51`, com CI completa aprovada ([44218101467](https://github.com/pauloluccasdev/diazen/actions/runs/44218101467)). Não conta como uma fase adicional. Fases 5 e 6 concluídas; Fase 7 em execução.
+Manutenção de dependências integrada na develop em `496ee51`, com CI completa aprovada ([44218101467](https://github.com/pauloluccasdev/diazen/actions/runs/44218101467)). Não conta como uma fase adicional. Fases 5, 6 e 7 concluídas; Fase 8 em execução.
 
 ## Fase 5 — verificada
 
@@ -99,3 +99,13 @@ Manutenção de dependências integrada na develop em `496ee51`, com CI completa
 - [x] Capturas finais, estados vazios, nomes longos, axe/overflow e build/tipos/lint/formatação aprovados.
 - [x] CI completa de `48af335` aprovada ([44319821627](https://github.com/pauloluccasdev/diazen/actions/runs/44319821627)); integrado e enviado à develop.
 - [x] Relatório e capturas em [phase-6-evolution-report.md](phase-6-evolution-report.md).
+
+## Fase 7 — verificada
+
+- [x] R10, galeria, posições, datas, comparação e visualizador; desktop claro/escuro e mobile.
+- [x] Fotografias privadas, ampliação, erro recuperável/tentativa novamente, upload/reset e exclusão confirmada.
+- [x] Metadados paginados, seleção entre páginas e peso/cintura nas datas exatas; ausência distinta de zero.
+- [x] 104 testes de banco/unidade, Chromium completo (55 aprovados/1 ignorado), WebKit final (2/2) e 26 jornadas agent-browser locais.
+- [x] Build, tipos, lint, formatação, capturas, axe/overflow e leitura dos metadados privados do Supabase.
+- [x] CI completa de `a2bca3f` aprovada ([44342211657](https://github.com/pauloluccasdev/diazen/actions/runs/44342211657)); integrada e enviada à develop.
+- [x] Relatório e capturas em [phase-7-photos-report.md](phase-7-photos-report.md).

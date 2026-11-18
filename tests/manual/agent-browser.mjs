@@ -130,6 +130,12 @@ async function goto(path) {
   });
 }
 async function clickText(value, tag = "button", scope = "document") {
+  if (tag === "summary") {
+    const dialogId = await evaluate(
+      `(() => { if(location.pathname !== '/painel/projetos') return null; const e=[...document.querySelectorAll('dialog.dz-project-dialog summary')].find(e=>e.textContent.trim()===${JSON.stringify(value)}); const d=e?.closest('dialog');return d&&!d.open?d.id:null; })()`,
+    );
+    if (dialogId) await openProjectDialog(dialogId);
+  }
   // A native server-rendered summary works before hydration and need not carry
   // React's client props. Verify real keyboard focus and activation below.
   const code = `(() => { const root=${scope}; const e=[...root.querySelectorAll(${JSON.stringify(tag)})].find(e=>e.textContent.trim()===${JSON.stringify(value)} && e.getClientRects().length && !e.matches(':disabled') && (!e.closest('details:not([open])') || e.matches('summary'))); if(!root || !e || (${JSON.stringify(tag)}==='button' && !Object.keys(e).some(k=>k.startsWith('__reactProps'))))return false; document.querySelectorAll('[data-qa-target]').forEach(e=>e.removeAttribute('data-qa-target'));e.setAttribute('data-qa-target','yes');return true;})()`;
@@ -142,6 +148,25 @@ async function clickText(value, tag = "button", scope = "document") {
     );
     await ab("press", "Enter");
   } else await ab("click", "[data-qa-target=yes]");
+}
+async function openProjectDialog(id) {
+  await until(
+    `(() => { const id=${JSON.stringify(id)};const trigger=[...document.querySelectorAll('button[aria-controls]')].find(e=>e.getAttribute('aria-controls')===id&&e.getClientRects().length);if(!trigger||!Object.keys(trigger).some(k=>k.startsWith('__reactProps')))return false;trigger.scrollIntoView({block:'center',behavior:'instant'});trigger.focus({preventScroll:true});return document.activeElement===trigger;})()`,
+  );
+  await ab("press", "Enter");
+  await until(`document.getElementById(${JSON.stringify(id)})?.open === true`);
+}
+
+async function acknowledgeProjectFeedback() {
+  await until(
+    "document.querySelector('.record-feedback-dialog[open]') !== null",
+  );
+  await clickText(
+    "Continuar",
+    "button",
+    "document.querySelector('.record-feedback-dialog')",
+  );
+  await until("document.querySelector('.record-feedback-dialog') === null");
 }
 async function field(name, value, scope = "", type = "fill") {
   const selector = `${scope} [name="${name}"]`.trim();
@@ -179,6 +204,10 @@ async function field(name, value, scope = "", type = "fill") {
 const form = (button) =>
   `[...document.querySelectorAll('form')].find(f=>!f.closest('details:not([open])') && f.getClientRects().length && [...f.querySelectorAll('button')].some(b=>b.textContent.trim()===${JSON.stringify(button)}))`;
 async function markForm(button) {
+  const projectDialog = await evaluate(
+    `(() => { if(location.pathname !== '/painel/projetos')return null; const f=[...document.querySelectorAll('dialog.dz-project-dialog form')].find(f=>[...f.querySelectorAll('button')].some(b=>b.textContent.trim()===${JSON.stringify(button)}));const d=f?.closest('dialog');return d&&!d.open?d.id:null;})()`,
+  );
+  if (projectDialog) await openProjectDialog(projectDialog);
   if (
     button === "Salvar registro" &&
     (await evaluate(
@@ -200,7 +229,7 @@ async function markForm(button) {
     }
   }
   const closedCreateTitle = await evaluate(
-    `(() => { const d=[...document.querySelectorAll('details.record-create:not([open]), details.form-disclosure:not([open])')].find(d=>[...d.querySelectorAll('button')].some(b=>b.textContent.trim()===${JSON.stringify(button)})); return d?.querySelector(':scope > summary')?.textContent.trim() ?? null; })()`,
+    `(() => { const d=[...document.querySelectorAll('details.record-create:not([open]), details.form-disclosure:not([open]), dialog.dz-project-dialog[open] details.project-setting:not([open])')].find(d=>[...d.querySelectorAll('button')].some(b=>b.textContent.trim()===${JSON.stringify(button)})); return d?.querySelector(':scope > summary')?.textContent.trim() ?? null; })()`,
   );
   if (closedCreateTitle) await clickText(closedCreateTitle, "summary");
   await until(
@@ -211,16 +240,18 @@ async function markForm(button) {
 async function save(button, values, expected) {
   let expectedInFeedback = false;
   const selector = await markForm(button);
-  for (const [name, value] of Object.entries(values))
-    await field(name, value, selector);
-  await clickText(button, "button", form(button));
-  if (
-    selector &&
+  const projectAction = await evaluate(
+    `Boolean(document.querySelector(${JSON.stringify(selector)})?.closest('dialog.dz-project-dialog'))`,
+  );
+  const recordAction =
     ["Salvar registro", "Salvar peso", "Salvar medidas"].includes(button) &&
     (await evaluate(
       `Boolean(document.querySelector(${JSON.stringify(selector)})?.closest('.manual-meal-recorder, .water-create, .training-create, .body-create'))`,
-    ))
-  ) {
+    ));
+  for (const [name, value] of Object.entries(values))
+    await field(name, value, selector);
+  await clickText(button, "button", form(button));
+  if (selector && (projectAction || recordAction)) {
     await until(
       "document.querySelector('.record-feedback-dialog[open]') !== null",
     );
@@ -245,7 +276,14 @@ async function save(button, values, expected) {
     await until("document.querySelector('.record-feedback-dialog') === null");
     if (feedbackError)
       assert.ok(expectedInFeedback, "Unexpected record failure");
-    else
+    else if (projectAction && button === "Criar projeto")
+      assert.equal(
+        await evaluate(
+          "document.querySelector('#new-project [name=name]').value",
+        ),
+        "",
+      );
+    else if (!projectAction)
       assert.equal(
         await evaluate(
           `document.querySelector(${JSON.stringify(selector)}).querySelector(location.pathname === '/painel/agua' ? '[name=volume_ml]' : location.pathname === '/painel/peso' ? '[name=kg]' : location.pathname === '/painel/medidas' ? ${JSON.stringify(`[name=${Object.keys(values)[0]}]`)} : '[name=name]').value`,
@@ -1223,6 +1261,7 @@ try {
       await until(
         "document.querySelector('article .status')?.textContent === 'Concluído'",
       );
+      await acknowledgeProjectFeedback();
       await goto("/painel/agua");
       await text("Histórico somente leitura.");
       assert.equal(
@@ -1257,7 +1296,9 @@ try {
         null,
       );
       await goto("/painel/projetos?estado=DRAFT");
+      await markForm("Ativar projeto");
       await clickText("Ativar projeto");
+      await acknowledgeProjectFeedback();
       await count(0);
       await goto("/painel/projetos");
       await text("Em andamento");
@@ -1444,6 +1485,7 @@ try {
       const s = await markForm("Confirmar arquivamento");
       await ab("check", s + " [name=confirm]");
       await clickText("Confirmar arquivamento");
+      await acknowledgeProjectFeedback();
       await count(0);
       await goto("/painel/projetos?estado=ARCHIVED");
       await count(1);

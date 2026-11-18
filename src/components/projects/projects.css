@@ -1,0 +1,634 @@
+.dz-projects-page {
+  min-width: 0;
+}
+.dz-projects-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+.dz-projects-heading h1 {
+  margin: 0 0 5px;
+  font-size: 28px;
+  font-weight: 750;
+  letter-spacing: -1px;
+}
+.dz-projects-heading p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+.dz-projects-heading > button {
+  flex-shrink: 0;
+  gap: 9px;
+}
+.dz-project-tabs {
+  display: flex;
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+  margin: 0 0 12px;
+}
+.dz-project-tabs a {
+  gap: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 43px;
+  padding: 10px 17px;
+  white-space: nowrap;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  text-decoration: none;
+}
+.dz-project-tabs a[aria-current="page"] {
+  background: var(--v2-primary);
+  color: var(--v2-on-primary);
+  font-weight: 700;
+  border-radius: 10px;
+}
+.dz-project-filters {
+  margin: 0 0 18px;
+  font-size: 12px;
+}
+.dz-project-filters > summary {
+  background: transparent;
+  border: 0;
+  min-height: 32px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  width: max-content;
+  padding: 5px 0;
+}
+.dz-project-filters .filter-form {
+  margin: 12px 0;
+  padding: 15px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+}
+.dz-project-list {
+  min-width: 0;
+}
+.dz-projects-page .dz-project-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  align-items: start;
+  column-gap: 14px;
+  margin: 0;
+  padding: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  background: var(--color-surface);
+  box-shadow: var(--v2-shadow);
+  min-width: 0;
+}
+.dz-projects-page .dz-project-card.project-active {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+}
+.dz-project-cover {
+  width: 88px;
+  height: 105px;
+  background: var(--v2-media-bg);
+  border-radius: 11px;
+  overflow: hidden;
+}
+.dz-project-cover > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  margin: 0;
+}
+.dz-project-content {
+  min-width: 0;
+  padding-right: 25px;
+}
+.dz-project-status {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 12px;
+  background: var(--color-surface-raised);
+  color: var(--color-text-muted);
+  font-size: 10px;
+  line-height: 1.2;
+}
+.dz-project-status.status-active {
+  color: var(--color-success);
+  background: color-mix(
+    in srgb,
+    var(--color-success) 12%,
+    var(--color-surface)
+  );
+}
+.dz-project-status .status-dot {
+  width: 6px;
+  height: 6px;
+}
+.dz-project-content h2 {
+  margin: 8px 0 6px;
+  font-size: 17px;
+  line-height: 1.25;
+  font-weight: 750;
+  overflow-wrap: anywhere;
+}
+.dz-project-content h2 a {
+  color: var(--color-text);
+  text-decoration: none;
+}
+.dz-project-dates {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+.dz-project-dates > svg {
+  flex-shrink: 0;
+}
+.dz-project-content .dz-project-menu {
+  position: absolute;
+  right: 12px;
+  top: 13px;
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border-radius: 9px;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+.dz-project-timing {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 5px 10px;
+  align-items: center;
+  margin-top: 13px;
+}
+.dz-project-timing progress {
+  width: 100%;
+  height: 9px;
+  appearance: none;
+  overflow: hidden;
+  border: 0;
+  border-radius: 8px;
+  background: var(--color-surface-raised);
+}
+.dz-project-timing progress::-webkit-progress-bar {
+  background: var(--color-surface-raised);
+  border-radius: 8px;
+}
+.dz-project-timing progress::-webkit-progress-value {
+  background: var(--v2-primary);
+  border-radius: 8px;
+}
+.dz-project-timing progress::-moz-progress-bar {
+  background: var(--v2-primary);
+  border-radius: 8px;
+}
+.dz-project-timing strong {
+  font-size: 12px;
+}
+.dz-project-timing small {
+  grid-column: 1/-1;
+  color: var(--color-text-muted);
+  font-size: 10px;
+}
+.dz-project-consult {
+  grid-column: 1/-1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 13px;
+  color: var(--color-text-muted);
+  font-size: 11px;
+  text-decoration: none;
+}
+.dz-projects-page .dz-project-card.is-featured {
+  padding: 0;
+  display: block;
+  overflow: hidden;
+}
+.is-featured > .dz-project-cover {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 48%;
+  height: 205px;
+  border-radius: 0;
+  background: transparent;
+}
+.is-featured > .dz-project-cover > img {
+  object-fit: contain;
+  object-position: right top;
+}
+.is-featured > .dz-project-cover::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: linear-gradient(90deg, var(--color-surface), transparent 80%);
+}
+.is-featured > .dz-project-content {
+  position: relative;
+  padding: 22px 20px;
+  min-height: 185px;
+}
+.is-featured .dz-project-content h2 {
+  max-width: 75%;
+  font-size: 23px;
+}
+.is-featured .dz-project-content .dz-project-status {
+  margin-bottom: 5px;
+}
+.is-featured .dz-project-dates {
+  color: var(--color-text);
+}
+.is-featured .dz-project-content .dz-project-menu {
+  right: 14px;
+  top: 14px;
+}
+.is-featured .dz-project-timing {
+  margin-top: 20px;
+}
+.dz-project-description {
+  display: none;
+}
+.dz-project-metrics {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 18px 12px;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+.dz-project-metrics > div {
+  display: grid;
+  grid-template-rows: 25px auto auto;
+  justify-items: center;
+  gap: 5px;
+  min-width: 0;
+  padding: 0 7px;
+}
+.dz-project-metrics:not(.has-reference) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.dz-project-metrics > div + div {
+  border-left: 1px solid var(--color-border);
+}
+.dz-project-metrics > div:last-child {
+  display: none;
+}
+.dz-project-metrics svg {
+  color: var(--color-accent);
+}
+.dz-project-metrics strong {
+  font-size: 15px;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.dz-project-metrics small {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+.is-featured > .dz-project-consult {
+  position: relative;
+  margin: 0;
+  padding: 10px 18px;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+.dz-other-projects-title {
+  margin: 25px 0 14px;
+  font-size: 20px;
+  font-weight: 700;
+}
+.dz-project-secondary-grid {
+  display: grid;
+  gap: 14px;
+}
+.dz-project-empty {
+  text-align: center;
+  padding: 35px 20px;
+  margin: 0;
+}
+.dz-project-empty > svg {
+  margin: 0 auto 15px;
+  color: var(--color-accent);
+}
+.dz-project-empty h2 {
+  margin: 0 0 10px;
+  font-size: 22px;
+  font-weight: 700;
+}
+.dz-project-empty p {
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+.dz-project-pagination {
+  margin: 18px 0;
+}
+.dz-project-create-cta {
+  margin: 24px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 22px;
+}
+.dz-project-create-cta > span {
+  width: 50px;
+  height: 50px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+  flex-shrink: 0;
+}
+.dz-project-create-cta h2 {
+  margin: 0 0 5px;
+  font-size: 18px;
+  font-weight: 700;
+}
+.dz-project-create-cta p {
+  color: var(--color-text-muted);
+  margin: 0;
+  font-size: 12px;
+}
+.dz-project-create-cta > button {
+  margin-left: auto;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.dz-projects-note {
+  margin: 20px 0 0;
+  color: var(--color-text-muted);
+  font-size: 11px;
+  line-height: 1.7;
+}
+.dz-project-dialog {
+  margin: auto;
+  width: min(650px, calc(100vw - 28px));
+  max-height: calc(100dvh - 30px);
+  padding: 0;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  box-shadow: var(--v2-shadow);
+  overflow: auto;
+}
+.dz-project-dialog::backdrop {
+  background: #000b;
+}
+.dz-project-dialog > header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--color-surface);
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--color-border);
+}
+.dz-project-dialog > header > h2 {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.dz-project-dialog-close.button-secondary {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  min-height: 38px;
+  flex-shrink: 0;
+  padding: 0;
+  border-radius: 10px;
+}
+.dz-project-dialog-body {
+  padding: 20px;
+}
+.dz-project-dialog .project-settings {
+  margin-top: 0;
+}
+.dz-project-dialog .data-form {
+  margin: 15px 0;
+}
+.dz-project-dialog .project-setting-body {
+  padding-top: 5px;
+}
+.dz-project-dialog .project-state-action {
+  padding: 20px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.dz-project-dialog .project-delete-trigger {
+  margin-top: 20px;
+}
+.dz-project-dialog .data-form .intro {
+  margin-bottom: 20px;
+}
+@media (max-width: 767px) {
+  .dz-projects-heading {
+    padding-top: 20px;
+  }
+  .dz-projects-desktop-copy {
+    display: none;
+  }
+  .dz-project-card:not(.is-featured) > .dz-project-consult {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    width: 32px;
+    height: 32px;
+    min-height: 32px;
+    margin: 0;
+    justify-content: center;
+  }
+  .dz-project-card:not(.is-featured) > .dz-project-consult > span {
+    display: none;
+  }
+  .panel-shell:has(.dz-projects-page) .v2-header {
+    display: none;
+  }
+  .dz-projects-heading {
+    margin-bottom: 24px;
+  }
+  .dz-projects-heading h1 {
+    font-size: 24px;
+  }
+  .dz-projects-heading p {
+    font-size: 12px;
+  }
+  .dz-projects-heading > button {
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+    padding: 0;
+    font-size: 0;
+    gap: 0;
+    border-radius: 12px;
+  }
+  .dz-projects-heading > button > svg {
+    width: 26px;
+    height: 26px;
+  }
+  .dz-project-tabs {
+    width: 100%;
+  }
+  .dz-project-tabs a {
+    padding: 10px 15px;
+  }
+  .dz-project-tabs a > span {
+    display: none;
+  }
+  .dz-project-create-cta {
+    padding: 0;
+    border: 0;
+    box-shadow: none;
+    background: transparent;
+  }
+  .dz-project-create-cta > span,
+  .dz-project-create-cta > div {
+    display: none;
+  }
+  .dz-project-create-cta > button {
+    width: 100%;
+    margin: 0;
+    min-height: 52px;
+    border-radius: 18px;
+    font-size: 16px;
+  }
+  .dz-project-dialog {
+    align-self: end;
+    margin: auto auto 12px;
+    border-radius: 22px;
+    width: calc(100vw - 20px);
+  }
+}
+@media (min-width: 768px) {
+  .dz-project-secondary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .dz-project-metrics:not(.has-reference) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .dz-projects-heading h1 {
+    font-size: 32px;
+  }
+  .dz-projects-page .dz-project-card.is-featured {
+    display: grid;
+    grid-template-columns: 230px minmax(0, 1fr);
+    gap: 0 23px;
+    padding: 16px;
+  }
+  .is-featured > .dz-project-cover {
+    position: relative;
+    top: auto;
+    right: auto;
+    width: 230px;
+    height: 195px;
+    border-radius: 12px;
+    background: var(--v2-media-bg);
+  }
+  .is-featured > .dz-project-cover > img {
+    object-position: center 15%;
+  }
+  .is-featured > .dz-project-cover::after {
+    display: none;
+  }
+  .is-featured > .dz-project-content {
+    min-height: 0;
+    padding: 0 15px 0 0;
+  }
+  .is-featured .dz-project-content h2 {
+    font-size: 29px;
+    max-width: 100%;
+    padding-right: 35px;
+  }
+  .is-featured .dz-project-content .dz-project-menu {
+    top: 0;
+    right: 0;
+  }
+  .is-featured .dz-project-dates {
+    font-size: 13px;
+  }
+  .dz-project-description {
+    display: block;
+    color: var(--color-text-muted);
+    font-size: 13px;
+    margin: 11px 0 0;
+  }
+  .is-featured .dz-project-timing {
+    margin-top: 18px;
+  }
+  .is-featured .dz-project-timing progress {
+    height: 12px;
+  }
+  .is-featured .dz-project-timing strong {
+    font-size: 18px;
+  }
+  .dz-project-metrics {
+    grid-column: 1/-1;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-top: 16px;
+    padding: 18px 0 4px;
+  }
+  .dz-project-metrics > div {
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    justify-items: start;
+    gap: 3px 10px;
+    padding: 0 20px;
+  }
+  .dz-project-metrics > div:last-child {
+    display: grid;
+  }
+  .dz-project-metrics svg {
+    grid-row: 1/3;
+    align-self: center;
+    color: var(--color-text);
+  }
+  .dz-project-metrics strong {
+    text-align: left;
+    font-size: 19px;
+  }
+  .dz-project-metrics small {
+    grid-column: 2;
+    text-align: left;
+    font-size: 11px;
+  }
+  .is-featured > .dz-project-consult {
+    grid-column: 1/-1;
+    border: 0;
+    padding: 12px 0 0;
+  }
+  .dz-project-content h2 {
+    font-size: 20px;
+  }
+  .dz-project-cover {
+    width: 110px;
+    height: 118px;
+  }
+  .dz-projects-page .dz-project-card {
+    grid-template-columns: 110px minmax(0, 1fr);
+  }
+}

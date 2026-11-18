@@ -1,3 +1,7 @@
+import {
+  openProjectCreate,
+  dismissProjectFeedback,
+} from "./helpers/project-ui";
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 test("semana de atividades e cards expansíveis preservam métricas e edição", async ({
@@ -12,6 +16,7 @@ test("semana de atividades e cards expansíveis preservam métricas e edição",
   await page.getByRole("button", { name: "Entrar", exact: true }).click();
   await expect(page).toHaveURL(/\/painel$/);
   await page.goto("/painel/projetos");
+  await openProjectCreate(page);
   await page
     .getByLabel("Nome do projeto", { exact: true })
     .fill("Semana de atividades QA");
@@ -23,9 +28,11 @@ test("semana de atividades e cards expansíveis preservam métricas e edição",
   const previousDate = previous.toISOString().slice(0, 10);
   await startInput.fill(previousDate);
   await page
+    .locator("#new-project")
     .getByRole("button", { name: "Criar projeto", exact: true })
     .click();
   await expect(page.getByRole("status")).toContainText("Projeto criado");
+  await dismissProjectFeedback(page);
   await page.goto("/painel/atividades");
   await page.locator(".record-create > summary").click();
   const create = page.locator("form").filter({

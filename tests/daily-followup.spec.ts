@@ -1,3 +1,7 @@
+import {
+  openProjectCreate,
+  dismissProjectFeedback,
+} from "./helpers/project-ui";
 import { openManualMealRecorder } from "./helpers/food-diary";
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
@@ -13,6 +17,7 @@ test("fases, check-in opcional, contexto sem consumo e indicadores ocultos prese
   await page.getByRole("button", { name: "Entrar", exact: true }).click();
   await expect(page).toHaveURL(/\/painel$/);
   await page.goto("/painel/projetos");
+  await openProjectCreate(page);
   await page
     .getByLabel("Nome do projeto", { exact: true })
     .fill("Acompanhamento QA");
@@ -24,9 +29,11 @@ test("fases, check-in opcional, contexto sem consumo e indicadores ocultos prese
     return d.toISOString().slice(0, 10);
   };
   await page
+    .locator("#new-project")
     .getByRole("button", { name: "Criar projeto", exact: true })
     .click();
   await expect(page.getByRole("status")).toContainText("Projeto criado");
+  await dismissProjectFeedback(page);
   await page.goto("/painel");
   await page.locator(".v2-followup > summary").click();
   await page.getByRole("link", { name: "Configurar fases" }).click();

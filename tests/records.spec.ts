@@ -1,3 +1,7 @@
+import {
+  openProjectCreate,
+  dismissProjectFeedback,
+} from "./helpers/project-ui";
 import { openManualMealRecorder } from "./helpers/food-diary";
 import { expect, test, type Page } from "@playwright/test";
 import { mkdir } from "node:fs/promises";
@@ -37,12 +41,15 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
   await page.getByRole("button", { name: "Entrar", exact: true }).click();
   await expect(page).toHaveURL(/\/painel$/);
   await page.goto("/painel/projetos");
+  await openProjectCreate(page);
   await page.getByLabel("Nome do projeto", { exact: true }).fill("Diário E2E");
   await page.getByLabel("Meta diária de água (ml)").fill("2000");
   await page
+    .locator("#new-project")
     .getByRole("button", { name: "Criar projeto", exact: true })
     .click();
   await expect(page.getByRole("status")).toContainText("Projeto criado");
+  await dismissProjectFeedback(page);
   await page.goto("/painel/agua");
   await expect(page.locator(".module-page > form.filter-form")).toHaveCount(0);
   await page.locator(".record-create > summary").click();

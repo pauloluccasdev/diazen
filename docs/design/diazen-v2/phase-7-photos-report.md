@@ -1,6 +1,6 @@
 # Fase 7 — Fotos de evolução
 
-Branch `feat/diazen-v2-fotos-evolucao`, criada da develop `48af335`. Referência R10 aberta antes da implementação. Em validação final; ainda não contabilizada como concluída.
+Branch `feat/diazen-v2-fotos-evolucao`, criada da develop `48af335`. Referência R10 aberta antes da implementação. Concluída em `a2bca3f`, integrada e enviada à develop.
 
 ## Implementação
 
@@ -50,4 +50,4 @@ Novos `components/photos/`, `photo-data.ts` e `photo-metrics.ts`. Reuso de Modul
 
 As 26 jornadas agent-browser finais passaram: envio privado, comparação e seleção entre páginas, confirmação de exclusão, isolamento, exportação e exclusão da conta. O roteiro usa URLs relativas ou absolutas do mesmo host e seleciona os campos de comparação dentro do formulário correto, sem confundi-los com os campos ocultos do calendário. Mantém foco e ativação reais pelo teclado, sem force-click, aumento de timeout ou remoção das asserções.
 
-CI completa pendente de envio desta entrega. A fase ainda não foi contabilizada como concluída.
+CI completa de `a2bca3f` aprovada ([44342211657](https://github.com/pauloluccasdev/diazen/actions/runs/44342211657)), incluindo banco, build, tipos, lint, formatação, Chromium, WebKit e agent-browser. Integrada e enviada à develop; main permanece sob responsabilidade do proprietário.

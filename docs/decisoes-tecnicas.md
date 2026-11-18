@@ -658,3 +658,12 @@ O proprietário aprovou explicitamente as duas ampliações propostas no diagnó
 - **Dados:** comparação de peso/cintura somente nas datas exatas das fotografias e no mesmo projeto, sem inferir composição corporal. Ausência continua distinta de zero; diferenças são neutras.
 - **Integridade:** mesmas APIs, otimização, remoção de metadados, RLS e armazenamento privado. Rascunhos e encerrados não recebem editor; envio continua resolvendo projeto ativo no servidor. Sem novo modelo ou contrato público.
 - **Requisitos:** RF-016/017/019, RNF-002/004/010/011. Relatório e evidências em `docs/design/diazen-v2/phase-7-photos-report.md`.
+
+## Decisão — Diretório de projetos v2 — 18/11/2026
+
+- **Autorização:** continuidade do redesign e R11, preservando os estados e regras de negócio. Não reproduzir dois projetos simultaneamente ativos do mockup.
+- **Apresentação:** ACTIVE destacado, filtros e contagens de todos os projetos autorizados, cartões paginados, criação e gerenciamento em diálogos. Rascunhos aparecem como planejados/rascunhos, sem ativação automática. Imagens editoriais decorativas, sem novo cadastro de capa ou descrição pessoal.
+- **Dados:** tempo cronológico inclusivo, limitado ao período e congelado no encerramento. Peso e diferença usam somente registros do projeto, identificados por data; referências opcionais não são inventadas e redução de peso não recebe classificação automática de sucesso.
+- **Feedback:** confirmação centralizada fora dos cartões para sobreviver a mudanças de estado; criação reseta e erro preserva campos. ActionForm mantém os modos existentes e admite feedback externo para esse fluxo.
+- **Integridade:** mesmas ações, APIs de escrita, guardas, RLS e índice único ACTIVE. Encerrados somente leitura; exclusão histórica mantém confirmação e limpeza autorizadas. Nenhuma migração nesta entrega.
+- **Requisitos:** RF-002 a RF-005, RF-019/020, RNF-002/004/010/011 e invariantes de projeto/dados ausentes. Relatório em `docs/design/diazen-v2/phase-8-projects-report.md`.

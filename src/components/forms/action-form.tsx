@@ -43,7 +43,7 @@ export function ActionForm({
   resetOnSuccess?: boolean;
   disclosureTitle?: string;
   initiallyOpen?: boolean;
-  feedbackMode?: "inline" | "modal";
+  feedbackMode?: "inline" | "modal" | "external";
   fieldsKey?: string;
   disabled?: boolean;
   onFeedbackClose?: (result: FormResult) => void;

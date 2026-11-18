@@ -1,3 +1,7 @@
+import {
+  openProjectCreate,
+  dismissProjectFeedback,
+} from "./helpers/project-ui";
 import { expect, test } from "@playwright/test";
 
 for (const [route, suffix, save] of [
@@ -16,14 +20,17 @@ for (const [route, suffix, save] of [
     await page.getByRole("button", { name: "Entrar", exact: true }).click();
     await expect(page).toHaveURL(/\/painel$/);
     await page.goto("/painel/projetos");
+    await openProjectCreate(page);
     await page
       .getByLabel("Nome do projeto", { exact: true })
       .fill(`Concorrência ${route}`);
     await page.getByLabel("Meta diária de água (ml)").fill("2000");
     await page
+      .locator("#new-project")
       .getByRole("button", { name: "Criar projeto", exact: true })
       .click();
     await expect(page.getByRole("status")).toContainText("Projeto criado");
+    await dismissProjectFeedback(page);
     await request.get(
       `http://127.0.0.1:54329/_test/close-on-project-read/00000000-0000-4000-8000-00000000000${suffix}`,
     );
@@ -64,10 +71,10 @@ test("tentar novamente refaz a leitura do servidor após indisponibilidade", asy
       .getByRole("button", { name: "Tentar novamente", exact: true })
       .click();
     await expect(
-      page.getByRole("heading", { name: "Meus projetos." }),
+      page.getByRole("heading", { name: "Projetos", exact: true, level: 1 }),
     ).toBeVisible();
     await expect(
-      page.getByRole("button", { name: "Criar projeto", exact: true }),
+      page.getByRole("button", { name: "Criar novo projeto", exact: true }),
     ).toBeEnabled();
   } finally {
     await request.get(hook + "off");

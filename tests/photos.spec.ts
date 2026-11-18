@@ -1,3 +1,7 @@
+import {
+  openProjectCreate,
+  dismissProjectFeedback,
+} from "./helpers/project-ui";
 import { expect, test } from "@playwright/test";
 import sharp from "sharp";
 test("fotos privadas: upload, comparação, exclusão e acesso a histórico", async ({
@@ -11,12 +15,15 @@ test("fotos privadas: upload, comparação, exclusão e acesso a histórico", as
   await page.getByRole("button", { name: "Entrar", exact: true }).click();
   await expect(page).toHaveURL(/\/painel$/);
   await page.goto("/painel/projetos");
+  await openProjectCreate(page);
   await page.getByLabel("Nome do projeto", { exact: true }).fill("Fotos E2E");
   await page.getByLabel("Meta diária de água (ml)").fill("2000");
   await page
+    .locator("#new-project")
     .getByRole("button", { name: "Criar projeto", exact: true })
     .click();
   await expect(page.getByRole("status")).toContainText("Projeto criado");
+  await dismissProjectFeedback(page);
   await page.goto("/painel/fotos");
   await page.getByText("Adicionar foto", { exact: true }).click();
   const form = page.locator("form").filter({
@@ -100,6 +107,7 @@ test("fotos privadas: upload, comparação, exclusão e acesso a histórico", as
   const project = page.getByRole("article").filter({
     has: page.getByRole("heading", { name: "Fotos E2E", exact: true }),
   });
+  await project.locator(".dz-project-menu").click();
   await project
     .getByLabel("Entendo que o projeto ficará somente leitura.")
     .first()
@@ -108,6 +116,7 @@ test("fotos privadas: upload, comparação, exclusão e acesso a histórico", as
     .getByRole("button", { name: "Concluir projeto", exact: true })
     .click();
   await expect(project.getByText("Concluído", { exact: true })).toBeVisible();
+  await dismissProjectFeedback(page);
   await page.goto("/painel/fotos");
   await expect(
     page.getByText("Projeto somente leitura.", { exact: false }),

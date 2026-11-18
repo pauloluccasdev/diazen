@@ -1,3 +1,7 @@
+import {
+  openProjectCreate,
+  dismissProjectFeedback,
+} from "./helpers/project-ui";
 import { openManualMealRecorder } from "./helpers/food-diary";
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
@@ -22,7 +26,7 @@ test("Diazen v2: shell responsivo, dados persistidos, consulta e navegação por
       await expect(page.locator(".v2-dashboard")).toBeVisible();
     else {
       const headings: Record<string, string> = {
-        Projetos: "Meus projetos.",
+        Projetos: "Projetos",
         Hidratação: "Hidratação",
         Evolução: "Evolução corporal",
         Treinos: "Treinos",
@@ -54,6 +58,7 @@ test("Diazen v2: shell responsivo, dados persistidos, consulta e navegação por
     fullPage: true,
   });
   await navigate("Projetos");
+  await openProjectCreate(page);
   await page
     .getByLabel("Nome do projeto", { exact: true })
     .fill("Projeto Consistência");
@@ -69,9 +74,11 @@ test("Diazen v2: shell responsivo, dados persistidos, consulta e navegação por
   await start.fill(shifted(-7));
   await page.getByLabel("Fim previsto (opcional)").fill(shifted(90));
   await page
+    .locator("#new-project")
     .getByRole("button", { name: "Criar projeto", exact: true })
     .click();
   await expect(page.getByRole("status")).toContainText("Projeto criado");
+  await dismissProjectFeedback(page);
   await navigate("Hidratação", true);
   await page.locator(".record-create > summary").click();
   const water = page.locator("form").filter({
