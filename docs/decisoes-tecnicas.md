@@ -372,28 +372,23 @@ A confirmação grava um lote de itens em transação. A origem é identificada 
 
 O registro manual aceita vários alimentos por refeição e mostra o total antes de salvar. Referências locais preenchem composição por quantidade de referência; o usuário pode buscar TACO, solicitar consulta online e revisar dados próprios. Ausência permanece distinta de zero e escrita offline é bloqueada. O dashboard mantém a contagem por categorias com registros e acrescenta a contagem explícita das refeições da versão do plano registradas. Importações e simples consultas continuam sem gerar consumo. RF-007/009/018; RB de projeto ativo/destino e histórico; RNF-002/004/007/008/009/011/014/016. Migração incremental 011, sem reset ou serviço pago.
 
-
 ## Decisão — Dashboard mobile focado no dia — 24/10/2026
 
 Por solicitação do proprietário, em larguras de até 767 px o dashboard oculta o controle “Alterar projeto ou data da consulta” e o link “Gerenciar projetos”. Mantém o resumo do projeto visualizado, os indicadores do dia e os atalhos de alimentação, hidratação, atividades e evolução corporal; a navegação principal continua oferecendo Projetos. Consultas de histórico por links existentes preservam a identificação e o estado somente leitura. Os controles permanecem disponíveis no desktop. Ajuste de apresentação relativo a RF-018 e RNF-004/007/008, sem alteração de dados ou regras de gravação.
-
 
 ## Decisão — Refeições e diário alimentar compactos — 24/10/2026
 
 O proprietário solicitou reduzir a extensão da página alimentar. As refeições planejadas passam a iniciar recolhidas, com nome, estado de registro e calorias planejadas no resumo. A orientação distingue o ajuste de porções consumidas e a inclusão manual de alimentos da versão preservada do plano. Os registros do dia exibem alimento, porção, categoria e calorias em resumos expansíveis; composição, fonte e ações ficam dentro de cada registro. Fontes permanecem disponíveis integralmente. Os acessos ao plano no dashboard e aos registros na refeição usam botões com ícones e área de toque. Apresentação relativa a RF-007/009/018 e RNF-004/007/008; nenhuma mudança em composição, autorização ou gravação.
 
-
 ## Decisão — Agrupar registros do dia por refeição — 24/10/2026
 
 A pedido do proprietário, o diário alimentar passa a agrupar alimentos nas categorias já existentes (café da manhã, lanches, almoço, jantar e ceia), em ordem de refeição. Cada grupo começa recolhido e informa quantidade de alimentos e soma das calorias conhecidas. Itens internos usam linhas sem cartões ou bordas duplicadas; composição e edição continuam expansíveis por alimento. Paginação permanece preservada: em consultas paginadas a quantidade indica “nesta página” e a soma é identificada como subtotal parcial, assim como quando há nutrientes ausentes. Ausência de calorias não vira zero. Ajuste de apresentação de RF-007/009 e RNF-004/007/008/011, sem alteração de persistência.
-
 
 ## Decisão — Status alimentar automático e registro visual de água — 24/10/2026
 
 O proprietário substituiu explicitamente a conclusão manual do dia prevista no fluxo anterior (RF-008). O botão deixa de ser exibido e o status é derivado dos registros: completo quando todos os alimentos selecionados de todas as refeições habilitadas da versão do plano da data possuem registro de origem; parcial quando existem registros sem completar o plano; sem registros quando não há consumo informado. Sem plano não se presume uma quantidade de refeições. Alterações e exclusões refletem-se na próxima leitura, inclusive em datas anteriores; não é necessário cron nem uma gravação automática à meia-noite. Importar não confirma consumo. Dados legados de confirmação permanecem preservados, mas não comandam o status apresentado. O status descreve registro, não aderência. Sem migração do banco.
 
 A hidratação oferece volumes de copo de 100 a 600 ml e quantidade personalizada, mantendo os campos, limites e gravação explícita existentes. Selecionar volume não salva consumo. O link de configuração da meta foi removido dessa tela, conforme solicitação; a gestão continua em Projetos. No dashboard, o indicador circular compara calorias registradas ao plano e mostra quanto falta ou excede; não inventa gasto energético. A comparação fica indisponível quando há dados ausentes/parciais, preservando zero conhecido. RF-007/008/010/018 e RNF-004/007/008/011.
-
 
 ## Decisão — Histórico geral centralizado — 24/10/2026
 
@@ -403,20 +398,17 @@ A paginação combina deterministicamente as fontes por data, ID e tipo, em pág
 
 Peso, medidas e atividades passam a encaminhar a escolha de período ao histórico geral, mantendo seus formulários de registro. Consultas por links com data continuam suportadas. No peso, o gráfico é limitado à data consultada e a ausência de registro no dia exato é diferenciada do último peso conhecido mostrado no resumo. Os filtros diários de alimentação/água permanecem necessários à consulta do diário e ao registro retroativo. RF-014/015/018/019; RNF-002/004/007/008/011.
 
-
 ## Decisão — Calendário diário do projeto ativo no histórico — 24/10/2026
 
 O proprietário substituiu os filtros gerais de projeto/tipo/período por um calendário mensal aberto, limitado ao projeto ativo. A seleção de dia exibe um accordion da data (aberto ao selecionar), com subgrupos recolhidos por refeição e por hidratação, atividades, peso, medidas e fotos. A mesma refeição deixa de aparecer intercalada com outras áreas. O usuário pode navegar entre meses, voltar a hoje e recolher os detalhes. Datas futuras não são selecionáveis.
 
 O servidor resolve o ACTIVE da conta e restringe todas as consultas a esse projeto e à data selecionada; parâmetros antigos de projeto/tipo/período não selecionam outra fonte. Sem ACTIVE, a página orienta a visitar Projetos. Consultar projetos encerrados continua disponível por Projetos e não muda o destino das gravações. Paginação de 20 itens preserva data/mês e identifica contagens limitadas à página. Nenhuma alteração de dados ou migração. RF-018/019; RB de ACTIVE único e isolamento por proprietário; RNF-002/004/007/008/011. Esta decisão substitui a seleção de todos os projetos na versão anterior do histórico central.
 
-
 ## Decisão — Consultas por data somente no histórico e feedback de navegação — 25/10/2026
 
 O proprietário solicitou retirar os componentes de data/consulta das páginas de registro e centralizar essa navegação no Histórico geral. Foram removidos os filtros de consulta diários de Alimentação e Hidratação, a faixa de dias da Alimentação, o seletor de projeto/data do dashboard e a data de comparação da tela do plano. A escolha de versões do plano permanece disponível como “Abrir versão salva”. Os campos de data dos formulários de gravação continuam necessários ao registro retroativo; links com data do histórico também preservam o contexto selecionado. Esta decisão substitui a permanência anterior dos filtros diários.
 
 As buscas de calendário alimentar e as comparações auxiliares de cada dia da faixa deixam de ser executadas, reduzindo chamadas desnecessárias nessa tela. No histórico, links de navegação usam o estado pendente real do App Router (`useLinkStatus`), com logo, fundo opaco e mensagem acessível “Carregando registros…”, sem temporizador artificial ou alteração antecipada dos dados. O indicador some quando a navegação conclui. Teste de navegador retém temporariamente a resposta para comprovar o feedback durante a espera e sua remoção ao apresentar o dia selecionado. RF-018/019; RNF-004/007/008/011. Sem alteração de banco.
-
 
 ## Decisão — Consulta de atividades Strava vinculada à conta — 25/10/2026
 
@@ -426,7 +418,6 @@ A política oficial consultada nesta data mantém a proibição de combinar dado
 
 Foi atualizado o aviso de privacidade. Logout limpa os cookies, desconexão solicita revogação e limpa a sessão local, e exclusão de conta tenta revogar sem impedir a exclusão na indisponibilidade do provedor. Os resultados não entram em exportação, backups ou offline e expiram da memória da tela em quinze minutos. Configuração temporária limitada à prévia da develop; rotação exige nova configuração e reconexão. OAuth não usa tokens copiados manualmente do painel Strava. Ver [integração Strava](integracao-strava.md) para operação, limites e testes. Extensão explicitamente autorizada do backlog Strava, relacionada a RF-012/013/018/020/022; RNF-002/004/007/008/011 e isolamento por proprietário.
 
-
 ## Decisão — Substituição por Garmin Personal API — 25/10/2026
 
 Após a recusa do callback pelo Strava mesmo com ID/domínio conferidos, o proprietário autorizou substituir a conexão pela Garmin Personal API e forneceu uma chave pessoal para configurar no servidor. A consulta fica limitada à própria conta Diazen, por UUID explicitamente configurado em variável privada, verificado antes de acessar o provedor. Não há chave compartilhada entre usuários. A modalidade Personal atende ao uso pessoal; disponibilização comercial multiusuário depende do programa Business e de nova implementação.
@@ -435,11 +426,9 @@ A rota autenticada POST valida origem, disponibilidade da conta e proprietário,
 
 As rotas, componentes e credenciais configuradas do Strava são removidos; limpeza de cookies legados permanece no logout/exclusão. Resultados Garmin ficam em memória da tela por até quinze minutos, sem banco, exportação, backup ou offline. Testes usam dados sintéticos, incluindo isolamento, CSRF, ausência/zero, limites, falhas e acessibilidade mobile. A chave real foi aceita no endpoint de token e a listagem respondeu HTTP 200, sem registrar valores de atividades. RF-012/018/020/022; RB-04/10/11; RNF-002/003/005/007/008/009/012/014/016. Ver [operação Garmin](integracao-garmin.md).
 
-
 ## Correção — Repetição da consulta Garmin sem perder resultados — 25/10/2026
 
 O proprietário reportou a mensagem de espera após uma consulta bem-sucedida. Os logs de status da hospedagem confirmaram HTTP 200 seguido por 429 do limitador interno. A atualização também limpava a lista antes de receber a próxima resposta. Esse limitador foi substituído por reaproveitamento privado do resultado por até um minuto na instância, vinculado ao usuário e à impressão da chave, após revalidar autorização a cada solicitação. Solicitações simultâneas compartilham a leitura; falhas liberam nova tentativa, e rotação invalida o resultado anterior. Nenhuma credencial fica na resposta. A interface preserva atividades durante atualização e falhas temporárias, reiniciando o prazo de exibição somente no sucesso. Ausência de autorização limpa a lista. Limitação real do provedor continua comunicada. Política de privacidade e operação atualizadas para informar a breve retenção em memória do servidor. Testes reproduzem repetição, concorrência, expiração, rotação e falha de atualização sem perda dos resultados. RF-012/018; RNF-002/003/005/006/008/012/014.
-
 
 ## Decisão — Importação seletiva e automática da Garmin — 25/10/2026
 
@@ -459,13 +448,11 @@ O Supabase executa gatilhos de privilégios mesmo ao receber CREATE EXTENSION IF
 
 A CI apresentou um diagnóstico recuperável React 419 da simulação intencional de falha de leitura durante a etapa seguinte de fotos, embora os testes Chromium/WebKit e o mesmo roteiro local passassem. O cenário de falha passa a usar sessão de navegador separada, encerrada antes de retornar à sessão normal. A auditoria continua exigindo ausência de exceções nas demais etapas, sem ampliar filtros ou ignorar erros de fotos. O roteiro completo passou localmente com o isolamento. Não altera código ou comportamento do aplicativo.
 
-
 ## Decisão — Accordion Garmin e cards de atividades — 25/10/2026
 
 O proprietário solicitou recolher a apresentação da Garmin a partir da segunda visita e usar cards de sessões inspirados nas referências visuais enviadas. Corrigiu explicitamente o termo inicial “carousel” para “accordion”; a implementação usa disclosures nativos, sem carrossel. A primeira apresentação abre no navegador; nas visitas seguintes começa fechada, com reabertura por toque ou teclado. Um único marcador visual local registra que ela já foi vista, sem conta, credenciais ou atividades; indisponibilidade do armazenamento não bloqueia o acesso. A sincronização continua independente dessa apresentação.
 
 O resumo semanal exibe sessões versus meta quando definida e os dias com registros, com navegação ao histórico central. Projetos encerrados preservam seu contexto somente leitura nos links. As contagens diárias são consultadas com cliente autenticado, projeto selecionado, intervalo semanal e paginação; não derivam da página limitada de registros. Dias sem marca indicam ausência de lançamento, sem inferir ausência de exercício. Os registros usam cards com título, modalidade, duração, distância, calorias disponíveis e origem; ações de edição/exclusão ficam dentro do accordion. Dados ausentes continuam distintos de zero. Mantêm-se tokens grafite/âmbar e métricas de 34 px, sem reproduzir cores ou inventar métricas das referências. RF-012/013/018; RNF-002/004/007/008/011. Sem migração, serviços ou mudanças na importação.
-
 
 ## Ajuste — Consulta semanal na própria tela e comparações no dashboard — 25/10/2026
 
@@ -473,18 +460,15 @@ O proprietário corrigiu a navegação dos dias no resumo de atividades: cada di
 
 Os cards do dashboard comparam alimentação registrada com plano quando disponível, água com meta vigente e sessões com meta semanal. Peso ocupa a largura da grade, reutiliza o gráfico existente das últimas trinta medições até a data selecionada e informa a diferença entre a primeira e a última desse período, sem juízo de aderência ou sucesso. Sem duas medições, permanece o último peso conhecido sem inventar tendência. Consultas autenticadas filtradas pelo projeto, sem migração ou alteração do destino dos registros. RF-012/014/018/019; RNF-002/004/007/008/011.
 
-
 ## Ajuste — Cards de peso e sessões compactos — 25/10/2026
 
 Por solicitação do proprietário, o card Peso volta a ocupar uma coluna da grade, alinhado aos demais, mantendo comparação e gráfico compacto. O card Atividades com meta mostra apenas sessões registradas versus meta e barra âmbar, removendo o título numérico e textos repetidos; sem meta mantém a informação de sessões e ausência de configuração. RF-018; RNF-007/008/011. Sem mudanças de consultas ou banco.
-
 
 ## Aceite — Homologação aprovada pelo proprietário — 25/10/2026
 
 O proprietário declarou ter homologado tudo e confirmou o funcionamento da versão atual, optando por corrigir eventuais bugs ao longo do uso. Registra-se o aceite funcional e visual, incluindo os fluxos de uso da lista de homologação, sem atribuir novas evidências automatizadas, medições de desempenho ou testes específicos à declaração geral. A homologação deixa de bloquear a versão aceita; problemas posteriores seguem como manutenção.
 
 O aceite não executa publicação em produção, merge na main, configuração de domínio ou agendamento de backups. Frequência e retenção de backups continuam sem valores escolhidos; não se presume aprovação dos parâmetros propostos. O PR final e o code review de develop para main permanecem com o proprietário. RF-001 a RF-022 no recorte implementado e autorizado; critérios de aceite de lançamento e controle de mudanças.
-
 
 ## Escopo autorizado — Exclusão integral de projeto — 26/10/2026
 
@@ -496,18 +480,15 @@ O modal exige nome digitado e checkbox, informa irreversibilidade no aplicativo 
 
 RF-003/004/012/014/018/020/022; RB de proprietário, projeto ativo e somente leitura com exceção autorizada; RNF-002/005/007/008/011/013/014. Migração versionada para revisão/aplicação controlada; nenhum projeto real é excluído por testes. Não aplicar bundle de migrações nem resetar banco existente.
 
-
 ## Ajuste visual — Ações e confirmação de exclusão de projeto — 26/10/2026
 
 O proprietário solicitou melhorar os botões Concluir/Excluir e a hierarquia tipográfica do modal, mantendo o processo hotfix a partir de main e PR pelo proprietário. As ações da lista passam a ter largura completa e altura mínima de 48 px, com conclusão em âmbar discreto e exclusão em contorno vermelho. O modal deixa de herdar o estilo de confirmação de plano salvo e apresenta título, identificação do projeto, lista de dados afetados, preservação da conta/outros projetos e impacto de excluir o ACTIVE em blocos separados. O título e os controles finais permanecem visíveis, com rolagem apenas do conteúdo central. Os controles têm gap de 12 px, labels persistentes e foco seguro em Cancelar sem rolar o conteúdo inicial. As confirmações de nome/checkbox, autorização, offline, fila de fotos e RPC permanecem inalteradas. RF-003/004/020/022; RNF-007/008/011. Sem nova migração ou alteração remota de dados.
-
 
 ## Correção operacional — Ativar RPC de exclusão no Supabase — 26/10/2026
 
 O proprietário reportou erro ao excluir após publicar as hotfixes de exclusão e layout na main. A verificação somente leitura confirmou ausência da função delete_project(uuid,text): o deploy de código não aplica migrações SQL. Por autorização do pedido de correção, foi aplicada somente a migração incremental 013 já revisada/publicada, sem reset, bundle ou exclusão de projetos reais. A primeira tentativa retornou erro temporário HTTP 500; consulta posterior confirmou ausência da função antes da repetição, que concluiu com HTTP 201. Conferidos owner postgres, SECURITY DEFINER, execução para authenticated e bloqueio de anon; solicitado reload do schema PostgREST.
 
 Nova hotfix a partir de main melhora o feedback: função ausente/indisponibilidade não acusa nome incorreto; apenas a exceção explícita de confirmação sugere conferir o nome. O fluxo de nome/checkbox e a autorização permanecem inalterados. O proprietário abre o PR para main; a correção de banco é operacional e já vale para o código publicado. RF-003/004/020; RNF-002/005/008/014.
-
 
 ## Correção — Porções zero no registro de refeições do plano — 26/10/2026
 
@@ -517,13 +498,11 @@ As referências originais são preservadas durante o ajuste; as calorias dos ali
 
 O editor apresenta nome e calorias/estado ao lado de um campo com borda, foco visível, unidade separada, altura de toque e teclado decimal. Labels acessíveis conservam o nome do alimento. Testes sintéticos cobrem zero parcial, todos zerados, valores inválidos, restauração da porção, total, persistência, plano preservado, dashboard e layout/acessibilidade em 320 px. RF-006/007/018/022; RNF-002/004/007/008/011. Sem nova migração ou alteração remota de dados.
 
-
 ## Extensão da hotfix — Excluir grupo de refeição — 26/10/2026
 
 O proprietário solicitou excluir todo um grupo do diário (por exemplo, Café da manhã) e reiterou o problema de porções zero. A verificação do GitHub confirmou que a correção de zero estava no PR 6 ainda aberto, enquanto main/produção mantinham o comportamento anterior. A extensão permanece na mesma hotfix/PR para revisão pelo proprietário, sem merge automático.
 
 O grupo passa a oferecer exclusão integral com modal, identificação da categoria/data e checkbox obrigatório. O servidor valida os parâmetros, usa cliente autenticado e DELETE único filtrado por projeto/data/categoria. RLS e guardas existentes limitam ao proprietário e ACTIVE; dados de outras categorias/datas/projetos permanecem intactos e históricos encerrados não aceitam exclusão. A operação não depende dos vinte itens visíveis na página; o modal informa que inclui outras páginas. O plano alimentar não é removido. Após sucesso, revalida indicadores, invalida resumo offline e mostra confirmação. Testes verificam lote de 25 itens, isolamento, datas/categorias preservadas, somente leitura, cancelamento, acessibilidade e persistência. RF-006/007/018/022; RNF-002/004/007/008/011. Sem nova migração ou alteração de dados reais.
-
 
 ## Correção — Destino explícito da cópia e conferência dos vínculos do plano — 27/10/2026
 
@@ -535,11 +514,9 @@ O dashboard passa a rotular “Refeições vinculadas ao plano” e explicar a d
 
 Os testes exercitam cópia para Jantar, histórico agrupado em categorias distintas, dois vínculos no dashboard, porções zero, total de calorias preservado, seleção obrigatória e exclusão posterior com status parcial. Sem nova migração. Registros pessoais anteriores não são reclassificados pela hotfix: qualquer correção desses dados depende da confirmação do proprietário sobre o destino e vínculo desejados. RF-006/007/009/018/019/022; RNF-002/004/007/008/011/014.
 
-
 ## Estabilidade da CI — Leitura da exportação no WebKit — 27/10/2026
 
 O check do PR 7 apresentou ECONNRESET em APIRequestContext.get('/api/exportar') no cenário de PDF/compatibilidade Safari, com 44 testes WebKit aprovados e sem resposta HTTP nessa requisição. O teste passa a permitir uma única repetição do GET somente para ECONNRESET, usando maxRetries nativo do Playwright; erros HTTP não são repetidos. A resposta deve ser HTTP 200 e todas as verificações de conteúdo, isolamento e ausência de consumo automático permanecem. Não há retry de gravações, repetição global de testes ou alteração no endpoint/aplicativo. RF-020; RNF-005/014.
-
 
 ## Extensão autorizada — Sincronização de sono Garmin — 27/10/2026
 
@@ -551,11 +528,9 @@ As migrações incrementais 014 (modelo/RLS/RPCs) e 015 (serialização do conse
 
 Extensão RF-SONO-01 a RF-SONO-05 detalhada em [sono Garmin](sono-garmin.md), relacionada a RF-004/018/019/020/022 e RNF-002/004/005/007/008/011/013/014. A hotfix parte da main; o proprietário realiza PR/review e publicação. A automação de sono em produção depende da publicação dessa versão e da ativação pelo usuário.
 
-
 ### Conferência de revisões feitas pelo agendador
 
 A revisão final incluiu teste de uma gravação externa simulando o cron enquanto o app permanece aberto. A API de sincronização informa uma revisão mínima do último registro; o componente em primeiro plano compara essa revisão e renova o painel mesmo quando a consulta ao provedor foi dispensada pela lease/intervalo. O marcador fica em ref de memória, sem cache offline ou payload de saúde. O teste confirma atualização de duração/pontuação sem navegação ou recarga manual. Isso evita que o cron atualize o banco enquanto o card permaneça desatualizado.
-
 
 ## 27/10/2026 — Acabamento das listas de alimentação
 
@@ -563,13 +538,11 @@ Refinamento visual solicitado pelo proprietário: alimentos recentes usam linhas
 
 Validação: build, lint e cenários Chromium de biblioteca/reutilização e registro de refeições, incluindo acessibilidade, largura móvel, altura das linhas recentes e separação entre os grupos. Capturas locais em `artifacts/food-recent-320.png` e `artifacts/meal-registration/food-page-320.png`.
 
-
 ## 27/10/2026 — Métricas diárias de atividades no dashboard
 
 Por solicitação do proprietário, o card de atividades passa a destacar a duração, o título quando há uma única atividade e os totais de distância e calorias dos registros do projeto e da data consultados. A meta semanal permanece como comparação secundária compacta. A consulta autenticada respeita RLS e pagina todos os registros do dia. Valores ausentes não viram zero: totais incompletos são identificados como subtotais parciais; zero informado permanece zero. Não se calculam calorias a partir de duração ou modalidade. O detalhe continua acessível pelo card. Refinamento de apresentação dos indicadores de atividades existentes, sem nova modelagem ou alteração de sincronização.
 
 Verificação: `npm run build`, `npm run lint` e `npx playwright test tests/activity-cards.spec.ts --project=chromium`. O cenário valida duração, distância, calorias zero, isolamento por data e layout móvel com acessibilidade.
-
 
 ## 28/10/2026 — Campo único para consulta de composição alimentar
 
@@ -577,14 +550,11 @@ No registro manual de refeições, o campo Alimento oferece sugestões locais da
 
 Verificação: build, lint e testes Chromium de registro de refeições e referência online. O cenário cobre ausência de resultado, nova descrição, segunda requisição com o termo novo, orientação de unidade incompatível e seleção TACO pelo campo único preservando quantidade.
 
-
 ### Auditoria do novo layout de alimentos recentes
 
 A auditoria `test:agent-browser` ainda localizava a receita pela concatenação antiga de nome, porção e data. Após a separação visual desses campos, o seletor passou a identificar o nome no título do item recente, preservando as verificações de reutilização, quantidade de registros e cópia aditiva confirmada. Não foram ampliados timeouts ou removidos cenários.
 
-
 A execução integral também identificou um defeito no resumo diário de atividades com métricas parcialmente ausentes: o aviso de subtotal estava fora da definição semântica e valores decimais retornados como texto podiam concatenar e produzir NaN. O aviso foi colocado dentro de `dd` e a soma converte explicitamente os valores numéricos. Mantidas as distinções entre ausência e zero.
-
 
 ## 28/10/2026 — Confirmação e limpeza do registro manual de alimentação
 
@@ -592,12 +562,9 @@ O formulário de registro manual de refeições mostra sucesso ou erro em diálo
 
 Aplicação nesta alteração: registro manual de alimentação mostrado pelo proprietário. O componente de diálogo é reutilizável para expansão posterior aos demais formulários. Sem migração ou alteração no destino dos registros. Verificação: build, lint, cenários Chromium de refeições e composição online, incluindo falha simulada seguida de nova tentativa, preservação de dados no erro, reset no sucesso, reabertura vazia, acessibilidade do modal e registros consecutivos.
 
-
 A regressão geral `tests/records.spec.ts` também foi atualizada para confirmar e dispensar o modal de sucesso antes de abrir os alimentos persistidos. O cenário verifica que o campo Alimento está vazio após a confirmação. O modal mantém seu bloqueio de interação com o conteúdo ao fundo; os testes seguem o fluxo real de fechamento da confirmação.
 
-
 A validação Garmin no WebKit identificou uma disputa entre navegações completas artificiais do teste e a atualização automática do sono ao montar o painel. O cenário passa a usar o link de histórico do card e o link Voltar ao dashboard do histórico, verificando a URL e os dados renderizados em cada destino. Isso preserva o layout e o marcador de revisão, como no uso normal da aplicação. Foi removida a navegação redundante antes do logout; os cookies de sessão legada continuam inseridos e sua limpeza continua verificada. Não foram adicionados retries ou tempos de espera arbitrários nem desativada a sincronização.
-
 
 A auditoria agent-browser também passa a dispensar explicitamente o modal após o registro manual de alimentação, validando o título de sucesso e o campo Alimento vazio antes de editar ou consultar registros. Os demais formulários mantêm as verificações existentes.
 
@@ -618,3 +585,98 @@ Migração incremental 018 acrescenta tabelas e políticas RLS, imagens no bucke
 ## 15/11/2026 — Inicialização segura do editor de planos
 
 A regressão WebKit identificou perda do nome digitado entre a renderização do HTML e a ativação do formulário React, deixando o campo obrigatório vazio e impedindo o salvamento. O editor de planos permanece desabilitado no HTML inicial e habilita os campos somente após a inicialização do cliente. Não há aumento de timeout ou repetição automática para contornar a falha. O teste retém os scripts da página, verifica o bloqueio inicial e, após liberá-los, preenche e salva a versão preservando o nome. O CI também preserva traces de falhas por três dias, usando somente os dados sintéticos da suíte.
+
+## 16/11/2026 — Diazen 2.0, estrutura visual e dashboard
+
+O proprietário aprovou novo desenho mobile Dark Premium com navegação inferior e desktop Light Premium com sidebar amarela, substituindo as restrições visuais correspondentes do baseline 0.1. A execução autorizada nesta etapa é somente Sprint 1, após auditoria e planejamento em `docs/design/diazen-v2/implementation-plan.md`. Protótipos fornecidos em Downloads ficam preservados em `references/`. Não há autorização para alterar backend, banco, APIs, autenticação, cálculos, destino dos registros ou privacidade; sprints posteriores exigem aprovação. Dados e componentes funcionais existentes serão reutilizados. Elementos ilustrativos sem suporte real serão adaptados, sem métricas ou controles de fachada.
+
+A checagem de console da Sprint 1 identificou divergência de hidratação nos títulos SVG dos pontos do WeightChart ao montar a nova estrutura protegida. O título passa a ser uma única string, preservando texto, datas, valores e cálculo do gráfico. O teste do redesign exige ausência de exceções, além de verificar as gravações e consultas. Não há supressão de erro de hidratação nem mudança de fonte de dados.
+
+## 17/11/2026 — Discovery de alta fidelidade e opção dark no desktop
+
+O proprietário solicitou substituir a aproximação visual anterior por reprodução de alta fidelidade das 13 referências, com funcionalidades reais e aprovação entre entregas. A execução atual é exclusivamente Fase 0: auditoria visual/técnica, inventário/matriz funcional, proposta de Design System e plano em `docs/design/diazen-v2/`. Não há autorização para iniciar código de produção nesta etapa. Refatorações futuras não dispensam apresentação prévia de backend/banco, preservação dos dados e aprovação específica de migrações; social login, assinatura e outras exclusões expressas continuam fora da execução automática.
+
+Durante o discovery, foi solicitada opção de tema dark no desktop. A proposta mantém light padrão, permite alternar Light/Dark com persistência de aparência por navegador e aplicação desde o SSR, preservando mobile dark. Não requer schema na proposta inicial e não foi implementada nesta fase. O plano anterior passa a ser histórico da Sprint 1; a próxima entrega proposta é somente Dashboard desktop, após aprovação. Documentos baseline derivados dos DOCX e código de produção permanecem inalterados.
+
+## 17/11/2026 — Execução de todas as fases autorizada
+
+Após o discovery, o proprietário autorizou seguir por todas as fases e concluir o trabalho sem pausas entre entregas, avisando quando uma decisão for necessária. Essa instrução posterior substitui os gates de aprovação intermediária do plano. A execução continua incremental, com verificação e integração na develop, sem merge na main. As propostas documentadas orientam a evolução; ficam preservadas as exclusões, autorização, isolamento, integridade, privacidade e necessidade de aprovação específica para migrações destrutivas.
+
+O proprietário também solicitou acompanhamento do progresso. O quadro em `docs/design/diazen-v2/execution-status.md` registra fases concluídas e evidências, sem apresentar a contagem de fases como estimativa de horas. Na Fase 1, a preferência de tema desktop pertence ao navegador, não à saúde da conta; consultas agregadas usam cliente autenticado e não alteram snapshots ou comandos de gravação.
+
+## 17/11/2026 — Recipientes salvos e perfil privado aprovados
+
+O proprietário aprovou explicitamente as duas ampliações propostas no diagnóstico (§5 B/C de `functional-gap-analysis.md`): recipientes de água salvos, com nome e volume, e perfil com nome opcional e avatar privado. A implementação será feita nas fases de Hidratação e Perfil, por migrações aditivas versionadas, com RLS por proprietário e integração à exportação, exclusão e backup. Selecionar recipiente copia seus dados ao lançamento; editar/excluir recipiente não altera o histórico. Avatar será validado, otimizado, sem metadados sensíveis e servido apenas mediante autorização; substituição/exclusão inclui limpeza do objeto. Não foram aprovados telefone, nascimento, autenticação social, dados fictícios nem migrações destrutivas. A aprovação não significa que as funcionalidades já foram implementadas.
+
+## Decisão — Diário alimentar v2 — 17/11/2026
+
+- **Autorização:** execução das fases do redesign, preservando dados e regras. Referências R03/R04 orientam desktop claro/escuro e mobile.
+- **Decisão:** extrair a apresentação alimentar da rota genérica em componentes próprios, manter seis categorias fixas, inclusão contextual e cálculos/ações existentes. Totais do dia consultam todas as páginas autenticadas; a paginação de formulários não limita os indicadores.
+- **Integridade:** nenhum schema ou contrato público alterado. Nulos, zero e totais parciais continuam distintos; registro não significa aderência. Formulários continuam limitados ao projeto ativo, com destino e proprietário validados no servidor.
+- **Privacidade e navegação:** desativar pré-carregamento automático dos links globais do painel, evitando leituras antecipadas de módulos privados e cancelamentos na recarga WebKit; navegação por clique permanece funcional.
+- **Requisitos:** RF-006 a RF-009, RNF-011; relatório e evidências em `docs/design/diazen-v2/phase-3-food-report.md`.
+
+## Decisão — Recipientes de água da conta — 17/11/2026
+
+- **Autorização:** aprovação explícita das duas ampliações aditivas; esta entrega executa somente recipientes, mantendo perfil/avatar para a Fase 9.
+- **Modelo:** `water_containers`, proprietário Auth com cascade, UUID, nome de até 60 caracteres compatível com `container_label`, volume 1–5000 ml e criação; máximo de 50 por conta serializado em trigger. RLS exige proprietário e conta habilitada; identidade imutável e auditoria reutilizam os padrões existentes.
+- **Histórico:** selecionar um cadastro copia nome/volume para o formulário; edição/exclusão do cadastro não reescreve consumos. Projeto ativo continua resolvido no servidor para lançamentos. Cadastro independente disponível em `/painel/agua/recipientes`; histórico operacional não recebe editor.
+- **Privacidade:** exportação paginada inclui a tabela; FK integra a exclusão de conta e dump completo inclui o cadastro. PostgreSQL nativo confirmou restauração e reaplicação de exclusão com recipientes sintéticos.
+- **Migração:** `202611170019_water_containers.sql` aplicada incrementalmente e verificada no Supabase após validar dependências e histórico, sem reset nem alteração de lançamentos. Não preenche silenciosamente lacunas anteriores de migrações. Hash e resultados no relatório da Fase 4.
+- **Requisitos:** RF-010/011, RF-019/020, RNF-002/004/011; invariantes de soma, vigência, dados ausentes e isolamento mantidas. Nenhuma prescrição ou ajuste automático de hidratação.
+
+## Decisão — Correção compatível de dependências e leitura privada sob demanda — 17/11/2026
+
+- **Contexto:** auditoria atualizada identificou avisos do framework e do tooling durante a execução autorizada do redesign. A correção preserva a stack e os contratos existentes.
+- **Decisão:** Next.js e eslint-config-next 16.4.5 com versões exatas/lockfile; typescript-eslint transitivo 8.73.0 usa minimatch 11 na faixa declarada pelo mantenedor. Sem `audit fix --force`, downgrade de framework ou nova biblioteca de UI.
+- **Navegação:** links e formulários GET privados do dashboard, calendário e seletor deixam de fazer leituras antecipadas. O trace WebKit confirmou prefetch cancelado em troca rápida de data; requisições reais, permissões e asserções de erro permanecem ativas.
+- **Limite conhecido:** produção sem avisos conhecidos na auditoria posterior; tooling ainda possui avisos transitivos de picomatch sem correção publicada, detalhados no relatório de dependências. Não equivale a auditoria completa zerada.
+- **Requisitos:** RNF-002/009/011, sem alterações de regras de negócio ou schema. Ver `docs/design/diazen-v2/dependency-review.md` e CI da entrega.
+
+## Decisão — Treinos v2 — 18/11/2026
+
+- **Autorização:** execução do redesign, referências R07/R08 e manutenção dos fluxos existentes.
+- **Apresentação:** `TrainingDiary`, desktop claro/escuro e mobile, cinco modalidades, atalhos reais, recentes e comparação semanal.
+- **Dados:** duas semanas autenticadas paginadas; listagem não limita totais. Calorias ausentes, zero e parciais permanecem distintos. Comparações usam intervalos equivalentes e não qualificam desempenho.
+- **Integridade:** sem schema/contrato público novos. Ações, projeto ativo no servidor, isolamento e consultas somente leitura preservados.
+- **Volume:** sem séries realizadas/repetições/cargas, interface declara indisponibilidade. Ampliação futura precisa de fluxo e modelagem aprovados.
+- **Requisitos:** RF-012/013, RNF-002/011 e regras de projeto/ausência. Evidências em `docs/design/diazen-v2/phase-5-training-report.md`.
+
+## Decisão — Evolução corporal v2 — 18/11/2026
+
+- **Autorização:** continuidade do redesign, referências R09 e leituras autorizadas na matriz, preservando ações e invariantes existentes.
+- **Apresentação:** `EvolutionDiary` para peso/medidas, desktop claro/escuro e mobile, com tabs, período real, gráfico reutilizado, referências opcionais e ações de registro/edição/exclusão. Variante compacta do gráfico mantém eixos legíveis sem alterar a variante padrão do dashboard.
+- **Dados:** leitura paginada do projeto até a data consultada. Períodos são dias de calendário, não número de amostras; snapshots e comparações identificam as datas. Nenhum valor ausente vira zero e nenhuma redução de peso recebe qualificação automática de sucesso.
+- **Integridade:** mesmas RPCs e ações, projeto ativo resolvido no servidor e unicidade por usuário/data/tipo. Sucesso de criação usa modal e reset; edição de peso conserva a data e substitui o valor daquela data. Encerrados e DRAFT não recebem editor.
+- **Limite:** sem altura/método aprovado, não calcular IMC, gordura corporal ou massa magra. As regiões equivalentes apresentam ausência explícita e acesso aos registros disponíveis. Nenhum schema ou contrato público novo.
+- **Requisitos:** RF-014/015/019, RNF-002/004/011 e regras de projeto, privacidade e dados ausentes. Evidências em `docs/design/diazen-v2/phase-6-evolution-report.md`.
+
+## Decisão — Fotos de evolução v2 — 18/11/2026
+
+- **Autorização:** continuidade do redesign, R10 e leituras da matriz, preservando privacidade e dados existentes.
+- **Apresentação:** galeria, posições, datas, comparação e visualização ampliada; desktop claro/escuro e mobile. Galeria com quatro arquivos por página; totais e seleção não ficam limitados à página.
+- **Dados:** comparação de peso/cintura somente nas datas exatas das fotografias e no mesmo projeto, sem inferir composição corporal. Ausência continua distinta de zero; diferenças são neutras.
+- **Integridade:** mesmas APIs, otimização, remoção de metadados, RLS e armazenamento privado. Rascunhos e encerrados não recebem editor; envio continua resolvendo projeto ativo no servidor. Sem novo modelo ou contrato público.
+- **Requisitos:** RF-016/017/019, RNF-002/004/010/011. Relatório e evidências em `docs/design/diazen-v2/phase-7-photos-report.md`.
+
+## Decisão — Diretório de projetos v2 — 18/11/2026
+
+- **Autorização:** continuidade do redesign e R11, preservando os estados e regras de negócio. Não reproduzir dois projetos simultaneamente ativos do mockup.
+- **Apresentação:** ACTIVE destacado, filtros e contagens de todos os projetos autorizados, cartões paginados, criação e gerenciamento em diálogos. Rascunhos aparecem como planejados/rascunhos, sem ativação automática. Imagens editoriais decorativas, sem novo cadastro de capa ou descrição pessoal.
+- **Dados:** tempo cronológico inclusivo, limitado ao período e congelado no encerramento. Peso e diferença usam somente registros do projeto, identificados por data; referências opcionais não são inventadas e redução de peso não recebe classificação automática de sucesso.
+- **Feedback:** confirmação centralizada fora dos cartões para sobreviver a mudanças de estado; criação reseta e erro preserva campos. ActionForm mantém os modos existentes e admite feedback externo para esse fluxo.
+- **Integridade:** mesmas ações, APIs de escrita, guardas, RLS e índice único ACTIVE. Encerrados somente leitura; exclusão histórica mantém confirmação e limpeza autorizadas. Nenhuma migração nesta entrega.
+- **Requisitos:** RF-002 a RF-005, RF-019/020, RNF-002/004/010/011 e invariantes de projeto/dados ausentes. Relatório em `docs/design/diazen-v2/phase-8-projects-report.md`.
+
+## Decisão — Perfil e configurações v2 — 18/11/2026
+
+- **Autorização:** continuidade do redesign e ampliação aprovada de nome opcional/avatar privado. Proposta anterior à implementação em `docs/design/diazen-v2/phase-9-profile-plan.md`; aplicação remota depende das verificações documentadas.
+- **Identidade:** perfil pertence à conta, sem depender de projeto ativo. Nome e avatar usam atualizações independentes. Nome nulo em um perfil existente representa escolha explícita; não restaurar automaticamente um nome antigo do Auth.
+- **Privacidade:** avatar WebP otimizado e sem metadados, no bucket privado existente, com caminho gerado e leitura autenticada do proprietário. Remoção compara a versão confirmada. Fila administrativa preserva o arquivo atual em respostas incertas e substituições concorrentes; exportação, backup e exclusão abrangem o novo namespace.
+- **Apresentação:** diretório mobile e coluna de identidade/painéis desktop conforme R12. Tema desktop compartilha estado e cookie com o cabeçalho; mobile permanece escuro. Metas são referências existentes, com datas, sem prescrição automática. Campos não aprovados do mockup não são simulados.
+- **Preservação:** reusar preferências, senha, exportação e exclusão reautenticada; não duplicar credenciais nem alterar associação dos registros operacionais aos projetos. Apenas migração aditiva 020, sem reexecução de migrações antigas ou reset do histórico.
+- **Requisitos:** RF-019/020, RNF-002/004/010/011 e invariantes de privacidade, autorização, offline e dados ausentes. Evidências e gates em `docs/design/diazen-v2/phase-9-profile-report.md`.
+
+### Complemento — Relógio da fila de avatar
+
+Ensaio hospedado com contas sintéticas identificou desvio entre os relógios da aplicação e do PostgreSQL. A migração aditiva 021 centraliza no banco o prazo de novos uploads e a seleção administrativa de trabalhos disponíveis. A RPC é restrita a `service_role`, com filtro opcional de proprietário e limite máximo de 100. Nenhum prazo de registro existente foi reescrito; a 020 permanece imutável. Testes incluem aplicação atrasada, atraso seguro, proteção do avatar atual, permissões e exclusão real dos arquivos/contas sintéticas. Proposta e evidências no plano/relatório da Fase 9.

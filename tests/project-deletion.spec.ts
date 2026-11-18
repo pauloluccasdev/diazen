@@ -1,3 +1,7 @@
+import {
+  openProjectCreate,
+  dismissProjectFeedback,
+} from "./helpers/project-ui";
 import { test, expect } from "@playwright/test";
 import sharp from "sharp";
 import AxeBuilder from "@axe-core/playwright";
@@ -15,12 +19,15 @@ test("exclusão exige modal, nome e confirmação; cancela, bloqueia offline e r
   await page.getByRole("button", { name: "Entrar", exact: true }).click();
   await expect(page).toHaveURL(/\/painel$/);
   await page.goto("/painel/projetos");
+  await openProjectCreate(page);
   await page.getByLabel("Nome do projeto", { exact: true }).fill("Excluir QA");
   await page.getByLabel("Meta diária de água (ml)").fill("2000");
   await page
+    .locator("#new-project")
     .getByRole("button", { name: "Criar projeto", exact: true })
     .click();
   await expect(page.getByRole("status")).toContainText("Projeto criado");
+  await dismissProjectFeedback(page);
   await page.goto("/painel/agua");
   await page.locator(".record-create > summary").click();
   const water = page.locator("form").filter({
@@ -30,8 +37,12 @@ test("exclusão exige modal, nome e confirmação; cancela, bloqueia offline e r
   await water
     .getByRole("button", { name: "Salvar registro", exact: true })
     .click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Continuar", exact: true })
+    .click();
   await expect(
-    page.getByRole("heading", { name: "250 ml", level: 2, exact: true }),
+    page.getByRole("heading", { name: "250 ml", level: 3, exact: true }),
   ).toBeVisible();
   await page.goto("/painel/fotos");
   await page.getByText("Adicionar foto", { exact: true }).click();
@@ -64,6 +75,7 @@ test("exclusão exige modal, nome e confirmação; cancela, bloqueia offline e r
   const projectId = new URL(projectHref!, "http://localhost").searchParams.get(
     "projeto",
   );
+  await card.locator(".dz-project-menu").click();
   await card
     .getByRole("button", { name: "Excluir projeto", exact: true })
     .click();

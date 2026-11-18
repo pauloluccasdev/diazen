@@ -1,3 +1,7 @@
+import {
+  openProjectCreate,
+  dismissProjectFeedback,
+} from "./helpers/project-ui";
 import { expect, test } from "@playwright/test";
 import sharp from "sharp";
 test("fotos privadas: upload, comparação, exclusão e acesso a histórico", async ({
@@ -11,12 +15,15 @@ test("fotos privadas: upload, comparação, exclusão e acesso a histórico", as
   await page.getByRole("button", { name: "Entrar", exact: true }).click();
   await expect(page).toHaveURL(/\/painel$/);
   await page.goto("/painel/projetos");
+  await openProjectCreate(page);
   await page.getByLabel("Nome do projeto", { exact: true }).fill("Fotos E2E");
   await page.getByLabel("Meta diária de água (ml)").fill("2000");
   await page
+    .locator("#new-project")
     .getByRole("button", { name: "Criar projeto", exact: true })
     .click();
   await expect(page.getByRole("status")).toContainText("Projeto criado");
+  await dismissProjectFeedback(page);
   await page.goto("/painel/fotos");
   await page.getByText("Adicionar foto", { exact: true }).click();
   const form = page.locator("form").filter({
@@ -45,6 +52,13 @@ test("fotos privadas: upload, comparação, exclusão e acesso a histórico", as
     await form
       .getByRole("button", { name: "Salvar foto", exact: true })
       .click();
+    await expect(page.getByRole("dialog")).toContainText(
+      "Foto salva com privacidade",
+    );
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Continuar", exact: true })
+      .click();
     await expect(page.getByRole("article")).toHaveCount(i + 1);
   }
   expect(
@@ -66,6 +80,9 @@ test("fotos privadas: upload, comparação, exclusão e acesso a histórico", as
   expect(response.headers()["cache-control"]).toContain("no-store");
   expect(response.headers()["content-type"]).toBe("image/webp");
   expect((await request.get(urls[0])).status()).toBe(401);
+  const controls = page.locator(".photo-comparison-controls");
+  if (!(await controls.evaluate((el) => (el as HTMLDetailsElement).open)))
+    await controls.locator(":scope>summary").click();
   await page
     .getByRole("combobox", { name: "Foto 1", exact: true })
     .selectOption(ids[0]);
@@ -73,8 +90,14 @@ test("fotos privadas: upload, comparação, exclusão e acesso a histórico", as
     .getByRole("combobox", { name: "Foto 2", exact: true })
     .selectOption(ids[1]);
   await page.getByRole("button", { name: "Comparar", exact: true }).click();
+  await expect(page).toHaveURL(
+    (url) =>
+      url.searchParams.get("a") === ids[0] &&
+      url.searchParams.get("b") === ids[1],
+  );
   await expect(page.locator(".comparison-grid img")).toHaveCount(2);
   const first = page.getByRole("article").first();
+  await first.locator(".photo-card-menu>summary").click();
   await first
     .locator("summary")
     .getByText("Excluir foto", { exact: true })
@@ -89,6 +112,7 @@ test("fotos privadas: upload, comparação, exclusão e acesso a histórico", as
   const project = page.getByRole("article").filter({
     has: page.getByRole("heading", { name: "Fotos E2E", exact: true }),
   });
+  await project.locator(".dz-project-menu").click();
   await project
     .getByLabel("Entendo que o projeto ficará somente leitura.")
     .first()
@@ -97,6 +121,7 @@ test("fotos privadas: upload, comparação, exclusão e acesso a histórico", as
     .getByRole("button", { name: "Concluir projeto", exact: true })
     .click();
   await expect(project.getByText("Concluído", { exact: true })).toBeVisible();
+  await dismissProjectFeedback(page);
   await page.goto("/painel/fotos");
   await expect(
     page.getByText("Projeto somente leitura.", { exact: false }),

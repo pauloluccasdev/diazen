@@ -23,7 +23,9 @@ const headers = hosted
   ? { "x-vercel-trusted-oidc-idp-token": process.env.VERCEL_OIDC_TOKEN }
   : {};
 async function appFetch(path) {
-  return fetch(origin + path, { headers });
+  const url = new URL(path, origin);
+  assert.equal(url.origin, new URL(origin).origin);
+  return fetch(url, { headers });
 }
 const output = new URL("../../artifacts/agent-browser/", import.meta.url);
 await mkdir(output, { recursive: true });
@@ -128,7 +130,15 @@ async function goto(path) {
   });
 }
 async function clickText(value, tag = "button", scope = "document") {
-  const code = `(() => { const root=${scope}; const e=[...root.querySelectorAll(${JSON.stringify(tag)})].find(e=>e.textContent.trim()===${JSON.stringify(value)} && e.getClientRects().length && !e.matches(':disabled')); if(!root || !e || (['button','summary'].includes(${JSON.stringify(tag)}) && !Object.keys(e).some(k=>k.startsWith('__reactProps'))))return false; document.querySelectorAll('[data-qa-target]').forEach(e=>e.removeAttribute('data-qa-target'));e.setAttribute('data-qa-target','yes');return true;})()`;
+  if (tag === "summary") {
+    const dialogId = await evaluate(
+      `(() => { if(location.pathname !== '/painel/projetos') return null; const e=[...document.querySelectorAll('dialog.dz-project-dialog summary')].find(e=>e.textContent.trim()===${JSON.stringify(value)}); const d=e?.closest('dialog');return d&&!d.open?d.id:null; })()`,
+    );
+    if (dialogId) await openProjectDialog(dialogId);
+  }
+  // A native server-rendered summary works before hydration and need not carry
+  // React's client props. Verify real keyboard focus and activation below.
+  const code = `(() => { const root=${scope}; const e=[...root.querySelectorAll(${JSON.stringify(tag)})].find(e=>e.textContent.trim()===${JSON.stringify(value)} && e.getClientRects().length && !e.matches(':disabled') && (!e.closest('details:not([open])') || e.matches('summary'))); if(!root || !e || (${JSON.stringify(tag)}==='button' && !Object.keys(e).some(k=>k.startsWith('__reactProps'))))return false; document.querySelectorAll('[data-qa-target]').forEach(e=>e.removeAttribute('data-qa-target'));e.setAttribute('data-qa-target','yes');return true;})()`;
   await until(code);
   if (tag === "summary" || tag === "button") {
     // Resolve the hydrated target again after pagination. Scroll instantly so
@@ -139,8 +149,30 @@ async function clickText(value, tag = "button", scope = "document") {
     await ab("press", "Enter");
   } else await ab("click", "[data-qa-target=yes]");
 }
+async function openProjectDialog(id) {
+  await until(
+    `(() => { const id=${JSON.stringify(id)};const trigger=[...document.querySelectorAll('button[aria-controls]')].find(e=>e.getAttribute('aria-controls')===id&&e.getClientRects().length);if(!trigger||!Object.keys(trigger).some(k=>k.startsWith('__reactProps')))return false;trigger.scrollIntoView({block:'center',behavior:'instant'});trigger.focus({preventScroll:true});return document.activeElement===trigger;})()`,
+  );
+  await ab("press", "Enter");
+  await until(`document.getElementById(${JSON.stringify(id)})?.open === true`);
+}
+
+async function acknowledgeProjectFeedback() {
+  await until(
+    "document.querySelector('.record-feedback-dialog[open]') !== null",
+  );
+  await clickText(
+    "Continuar",
+    "button",
+    "document.querySelector('.record-feedback-dialog')",
+  );
+  await until("document.querySelector('.record-feedback-dialog') === null");
+}
 async function field(name, value, scope = "", type = "fill") {
   const selector = `${scope} [name="${name}"]`.trim();
+  // Finish a pending server refresh before opening a native disclosure; its
+  // replacement can otherwise close the control between Enter and selection.
+  if (type === "select") await ab("wait", "--load", "networkidle");
   const closed = await evaluate(
     `document.querySelector(${JSON.stringify(selector)})?.closest('details:not([open])')?.querySelector(':scope > summary')?.textContent.trim() ?? null`,
   );
@@ -153,7 +185,6 @@ async function field(name, value, scope = "", type = "fill") {
 
   // Server actions can replace the filter after its result count is visible.
   // Resolve a hydrated, visible control before taking accessibility references.
-  if (type === "select") await ab("wait", "--load", "networkidle");
   await until(
     `(() => { const e=document.querySelector(${JSON.stringify(selector)}); if(!e?.isConnected || !e.getClientRects().length || e.matches(':disabled') || !Object.keys(e).some(k=>k.startsWith('__reactProps')))return false; e.scrollIntoView({block:'center',behavior:'instant'}); return true; })()`,
   );
@@ -173,8 +204,32 @@ async function field(name, value, scope = "", type = "fill") {
 const form = (button) =>
   `[...document.querySelectorAll('form')].find(f=>!f.closest('details:not([open])') && f.getClientRects().length && [...f.querySelectorAll('button')].some(b=>b.textContent.trim()===${JSON.stringify(button)}))`;
 async function markForm(button) {
+  const projectDialog = await evaluate(
+    `(() => { if(location.pathname !== '/painel/projetos')return null; const f=[...document.querySelectorAll('dialog.dz-project-dialog form')].find(f=>[...f.querySelectorAll('button')].some(b=>b.textContent.trim()===${JSON.stringify(button)}));const d=f?.closest('dialog');return d&&!d.open?d.id:null;})()`,
+  );
+  if (projectDialog) await openProjectDialog(projectDialog);
+  if (
+    button === "Salvar registro" &&
+    (await evaluate(
+      "location.pathname === '/painel/alimentacao' && Boolean(document.querySelector('.manual-meal-recorder:not([open])'))",
+    ))
+  ) {
+    const visible = await evaluate(
+      "Boolean(document.querySelector('.manual-meal-recorder > summary')?.getClientRects().length)",
+    );
+    if (!visible) {
+      await clickText(
+        "Adicionar alimento",
+        "a",
+        "document.querySelector('.food-list-heading')",
+      );
+      await until(
+        "document.querySelector('.manual-meal-recorder')?.open === true",
+      );
+    }
+  }
   const closedCreateTitle = await evaluate(
-    `(() => { const d=[...document.querySelectorAll('details.record-create:not([open]), details.form-disclosure:not([open])')].find(d=>[...d.querySelectorAll('button')].some(b=>b.textContent.trim()===${JSON.stringify(button)})); return d?.querySelector(':scope > summary')?.textContent.trim() ?? null; })()`,
+    `(() => { const d=[...document.querySelectorAll('details.record-create:not([open]), details.form-disclosure:not([open]), dialog.dz-project-dialog[open] details.project-setting:not([open])')].find(d=>[...d.querySelectorAll('button')].some(b=>b.textContent.trim()===${JSON.stringify(button)})); return d?.querySelector(':scope > summary')?.textContent.trim() ?? null; })()`,
   );
   if (closedCreateTitle) await clickText(closedCreateTitle, "summary");
   await until(
@@ -183,40 +238,61 @@ async function markForm(button) {
   return "[data-qa-form=yes]";
 }
 async function save(button, values, expected) {
+  let expectedInFeedback = false;
   const selector = await markForm(button);
+  const projectAction = await evaluate(
+    `Boolean(document.querySelector(${JSON.stringify(selector)})?.closest('dialog.dz-project-dialog'))`,
+  );
+  const recordAction =
+    ["Salvar registro", "Salvar peso", "Salvar medidas"].includes(button) &&
+    (await evaluate(
+      `Boolean(document.querySelector(${JSON.stringify(selector)})?.closest('.manual-meal-recorder, .water-create, .training-create, .body-create'))`,
+    ));
   for (const [name, value] of Object.entries(values))
     await field(name, value, selector);
   await clickText(button, "button", form(button));
-  if (
-    selector &&
-    button === "Salvar registro" &&
-    (await evaluate(
-      `Boolean(document.querySelector(${JSON.stringify(selector)})?.closest('.manual-meal-recorder'))`,
-    ))
-  ) {
+  if (selector && (projectAction || recordAction)) {
     await until(
       "document.querySelector('.record-feedback-dialog[open]') !== null",
+    );
+    const feedbackError = await evaluate(
+      "document.querySelector('.record-feedback-dialog').classList.contains('is-error')",
     );
     assert.equal(
       await evaluate(
         "document.querySelector('.record-feedback-dialog h2').textContent",
       ),
-      "Registro salvo",
+      feedbackError ? "Não foi possível registrar" : "Registro salvo",
     );
+    if (expected)
+      expectedInFeedback = await evaluate(
+        `document.querySelector('.record-feedback-dialog').textContent.includes(${JSON.stringify(expected)})`,
+      );
     await clickText(
-      "Continuar",
+      feedbackError ? "Voltar ao formulário" : "Continuar",
       "button",
       "document.querySelector('.record-feedback-dialog')",
     );
     await until("document.querySelector('.record-feedback-dialog') === null");
-    assert.equal(
-      await evaluate(
-        `document.querySelector(${JSON.stringify(selector)}).querySelector('[name=name]').value`,
-      ),
-      "",
-    );
+    if (feedbackError)
+      assert.ok(expectedInFeedback, "Unexpected record failure");
+    else if (projectAction && button === "Criar projeto")
+      assert.equal(
+        await evaluate(
+          "document.querySelector('#new-project [name=name]').value",
+        ),
+        "",
+      );
+    else if (!projectAction)
+      assert.equal(
+        await evaluate(
+          `document.querySelector(${JSON.stringify(selector)}).querySelector(location.pathname === '/painel/agua' ? '[name=volume_ml]' : location.pathname === '/painel/peso' ? '[name=kg]' : location.pathname === '/painel/medidas' ? ${JSON.stringify(`[name=${Object.keys(values)[0]}]`)} : '[name=name]').value`,
+        ),
+        "",
+      );
   }
-  if (expected && expected !== "Refeição registrada.") await text(expected);
+  if (expected && expected !== "Refeição registrada." && !expectedInFeedback)
+    await text(expected);
 }
 async function check(name, action, controlledServerFailure = false) {
   current = name;
@@ -282,7 +358,9 @@ async function login(email) {
 }
 async function logout() {
   await goto("/painel/perfil");
-  await clickText("Sair da conta");
+  // The account menu also contains this action, inside a closed details.
+  // Exercise the visible profile action rather than the header's duplicate.
+  await clickText("Sair da conta", "button", "document.querySelector('main')");
   await ab("wait", "--url", "**/entrar");
 }
 async function project(name) {
@@ -479,7 +557,7 @@ try {
     await check("RF001 recovery, new password and invalid link", async () => {
       await goto("/recuperar-senha");
       await save(
-        "Enviar instruções",
+        "Enviar link",
         { email: "teste@example.test" },
         "Se houver uma conta",
       );
@@ -504,7 +582,7 @@ try {
       async () => {
         await goto("/recuperar-senha");
         await save(
-          "Enviar instruções",
+          "Enviar link",
           { email: "teste@example.test" },
           "Se houver uma conta",
         );
@@ -680,14 +758,46 @@ try {
         { volume_ml: 300, container_label: "Copo QA" },
         "300 ml",
       );
-      await save("Salvar registro", { volume_ml: 200 }, "500 ml");
+      await save("Salvar registro", { volume_ml: 200 }, "0,5 L");
       await count(2);
+      await until(
+        `(() => {const e=[...document.querySelectorAll('article')].find(a=>a.querySelector('h3')?.textContent.startsWith('200 ml'))?.querySelector('.water-record-menu > summary');if(!e)return false;e.setAttribute('data-qa-water-menu','yes');return true;})()`,
+      );
+      if (
+        !(await evaluate(
+          "document.querySelector('[data-qa-water-menu=yes]')?.parentElement.open === true",
+        ))
+      ) {
+        await until(
+          "(() => {const e=document.querySelector('[data-qa-water-menu=yes]');if(!e)return false;e.scrollIntoView({block:'center',behavior:'instant'});e.focus({preventScroll:true});return document.activeElement===e;})()",
+        );
+        await ab("press", "Enter");
+      }
+      await evaluate(
+        "document.querySelector('[data-qa-water-menu]')?.removeAttribute('data-qa-water-menu')",
+      );
       await clickText(
         "Editar registro",
         "summary",
         "[...document.querySelectorAll('article')].find(a=>a.querySelector('h3')?.textContent.startsWith('200 ml'))",
       );
-      await save("Salvar alteração", { volume_ml: 450 }, "750 ml");
+      await save("Salvar alteração", { volume_ml: 450 }, "0,75 L");
+      await until(
+        `(() => {const e=[...document.querySelectorAll('article')].find(a=>a.querySelector('h3')?.textContent.startsWith('450 ml'))?.querySelector('.water-record-menu > summary');if(!e)return false;e.setAttribute('data-qa-water-menu','yes');return true;})()`,
+      );
+      if (
+        !(await evaluate(
+          "document.querySelector('[data-qa-water-menu=yes]')?.parentElement.open === true",
+        ))
+      ) {
+        await until(
+          "(() => {const e=document.querySelector('[data-qa-water-menu=yes]');if(!e)return false;e.scrollIntoView({block:'center',behavior:'instant'});e.focus({preventScroll:true});return document.activeElement===e;})()",
+        );
+        await ab("press", "Enter");
+      }
+      await evaluate(
+        "document.querySelector('[data-qa-water-menu]')?.removeAttribute('data-qa-water-menu')",
+      );
       await clickText(
         "Excluir registro",
         "summary",
@@ -711,7 +821,7 @@ try {
         "Meta de água salva com sua data de vigência.",
       );
       await goto("/painel/agua");
-      await text("Meta de 2.500 ml");
+      await text("2,5 L");
     },
   );
   await check("RF014/RB06 weight replaces same day and chart", async () => {
@@ -743,7 +853,7 @@ try {
     await save(
       "Salvar registro",
       { duration_min: 30, distance_km: 5 },
-      "1 sessões na semana",
+      "1 sessão na semana",
     );
     for (const [modality, distance] of [
       ["strength", ""],
@@ -781,7 +891,7 @@ try {
         ),
         4,
       );
-      await text("Parcial: o diário");
+      await text("Sem plano para comparar.");
       for (const selector of [
         ".meal-record-group > summary",
         "article .food-record-details > summary",
@@ -797,7 +907,7 @@ try {
         "document.querySelector('article')",
       );
       await save("Salvar alteração", { kcal: 0 }, "0 kcal");
-      await text("Parcial: o diário");
+      await text("Sem plano para comparar.");
       await ab("reload");
       await ab("wait", "input[name=amount]");
       await save(
@@ -904,7 +1014,7 @@ try {
       await goto("/painel/agua?data=2026-01-02");
       await count(1);
       await text("100 ml");
-      await text("Meta de 2.000 ml");
+      await text("2 L");
       const s = await markForm("Salvar registro");
       await field("logged_on", "2099-01-01", s);
       assert.equal(
@@ -938,7 +1048,7 @@ try {
         await text("Não foi possível carregar.");
         await fetch(hook + "off");
         await clickText("Tentar novamente");
-        await text("Hidratação.");
+        await text("Hidratação");
         await text("300 ml");
         await count(1);
         // Retire the interrupted React root inside this fault scenario. A retry
@@ -991,6 +1101,22 @@ try {
           await clickText("Adicionar foto", "summary");
         await ab("upload", "input[type=file]", png.pathname);
         await clickText("Salvar foto");
+        await until(
+          "document.querySelector('.record-feedback-dialog[open]') !== null",
+        );
+        await text("Foto salva com privacidade.");
+        await clickText(
+          "Continuar",
+          "button",
+          "document.querySelector('.record-feedback-dialog')",
+        );
+        await until(
+          "document.querySelector('.record-feedback-dialog') === null",
+        );
+        assert.equal(
+          await evaluate("document.querySelector('input[type=file]').value"),
+          "",
+        );
         await count(i + 1);
       }
       const urls = await evaluate(
@@ -1008,13 +1134,20 @@ try {
         "[...document.querySelectorAll('select')].map(s=>({name:s.name,label:s.labels?.[0]?.textContent}))",
       );
       report.photoSelects = selects;
-      await field("a", ids[0], "", "select");
-      await field("b", ids[1], "", "select");
+      await field("a", ids[0], ".photo-comparison", "select");
+      await field("b", ids[1], ".photo-comparison", "select");
       await clickText("Comparar");
       await until(
         "document.querySelectorAll('.comparison-grid img').length===2",
       );
       await audit("fotos");
+      await until(
+        "(() => { const e=document.querySelector('article .photo-card-menu > summary'); if(!e?.getClientRects().length||!Object.keys(e).some(k=>k.startsWith('__reactProps')))return false; e.scrollIntoView({block:'center',behavior:'instant'}); e.focus({preventScroll:true});return document.activeElement===e;})()",
+      );
+      await ab("press", "Enter");
+      await until(
+        "document.querySelector('article .photo-card-menu').open === true",
+      );
       await clickText(
         "Excluir foto",
         "summary",
@@ -1128,6 +1261,7 @@ try {
       await until(
         "document.querySelector('article .status')?.textContent === 'Concluído'",
       );
+      await acknowledgeProjectFeedback();
       await goto("/painel/agua");
       await text("Histórico somente leitura.");
       assert.equal(
@@ -1162,7 +1296,9 @@ try {
         null,
       );
       await goto("/painel/projetos?estado=DRAFT");
+      await markForm("Ativar projeto");
       await clickText("Ativar projeto");
+      await acknowledgeProjectFeedback();
       await count(0);
       await goto("/painel/projetos");
       await text("Em andamento");
@@ -1286,23 +1422,25 @@ try {
         assert.equal(status, 201);
       }
       await goto("/painel/fotos");
-      await count(12);
+      await count(4);
       const ids = await evaluate(
         "[...document.querySelectorAll('article img')].map(e=>e.getAttribute('src').split('/').at(-1).split('?')[0])",
       );
-      await field("a", ids[0], "", "select");
-      await field("b", ids[1], "", "select");
+      await field("a", ids[0], ".photo-comparison", "select");
+      await field("b", ids[1], ".photo-comparison", "select");
       await clickText("Comparar");
       await until(
         "document.querySelectorAll('.comparison-grid img').length===2",
       );
-      await clickText("Próximas", "a");
-      await count(1);
+      for (const expected of [4, 4, 1]) {
+        await clickText("Próximas", "a");
+        await count(expected);
+      }
       const last = await evaluate(
         "document.querySelector('article img').getAttribute('src').split('/').at(-1).split('?')[0]",
       );
       assert.ok(!ids.includes(last));
-      await field("b", last, "", "select");
+      await field("b", last, ".photo-comparison", "select");
       await clickText("Comparar");
       await until(
         `new URL(location.href).searchParams.get('b') === ${JSON.stringify(last)}`,
@@ -1347,6 +1485,7 @@ try {
       const s = await markForm("Confirmar arquivamento");
       await ab("check", s + " [name=confirm]");
       await clickText("Confirmar arquivamento");
+      await acknowledgeProjectFeedback();
       await count(0);
       await goto("/painel/projetos?estado=ARCHIVED");
       await count(1);
@@ -1379,6 +1518,7 @@ try {
       assert.equal(exported.food_library.length, 2);
       assert.equal(exported.photos.length, 1);
       await audit("perfil");
+      await goto("/painel/perfil?secao=conta");
       await clickText("Solicitar exclusão da conta", "summary");
       const s = await markForm("Excluir minha conta");
       await ab("check", s + " [name=confirm]");
@@ -1430,6 +1570,10 @@ try {
     report.failureBody = await evaluate(
       "document.querySelector('main')?.innerText",
     );
+    if (!hosted)
+      report.failureControls = await evaluate(
+        "[...document.querySelectorAll('main button')].map(e=>({text:e.textContent.trim(),rects:e.getClientRects().length,disabled:e.matches(':disabled'),hydrated:Object.keys(e).some(k=>k.startsWith('__reactProps'))}))",
+      );
     await ab(
       "screenshot",
       new URL(`${run}-failure.png`, output).pathname,

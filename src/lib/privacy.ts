@@ -129,6 +129,35 @@ export async function reconcilePhotoStorage(
     if (!deleted && !account?.user)
       throw new Error("Proprietário indisponível");
     for (const project of await list(folder.name)) {
+      if (project.id === null && project.name === "avatars") {
+        const prefix = `${folder.name}/avatars`;
+        const { data: profile, error: profileError } = deleted
+          ? { data: null, error: null }
+          : await admin
+              .from("profiles")
+              .select("avatar_key")
+              .eq("user_id", folder.name)
+              .maybeSingle();
+        if (profileError)
+          throw Error("Falha ao verificar referência de avatar");
+        for (const file of await list(prefix)) {
+          if (!file.id || !/^[0-9a-f-]{36}\.webp$/i.test(file.name)) continue;
+          const path = `${prefix}/${file.name}`;
+          if (!deleted) {
+            if (profile?.avatar_key === path || !file.created_at) continue;
+            const created = Date.parse(file.created_at);
+            if (
+              !Number.isFinite(created) ||
+              now - created < 24 * 60 * 60 * 1000
+            )
+              continue;
+          }
+          const { error } = await bucket.remove([path]);
+          if (error) throw Error("Falha ao remover avatar órfão");
+          removed++;
+        }
+        continue;
+      }
       if (project.id !== null || !/^[0-9a-f-]{36}$/i.test(project.name))
         continue;
       const prefix = `${folder.name}/${project.name}`;
@@ -170,6 +199,50 @@ export async function reconcilePhotoStorage(
     }
   }
   return removed;
+}
+
+export async function cleanAvatarJobs(
+  admin: SupabaseClient,
+  userId?: string,
+  maxJobs = 100,
+) {
+  let count = 0;
+  while (count < maxJobs) {
+    const { data, error } = await admin.rpc("due_avatar_jobs", {
+      p_user_id: userId ?? null,
+      p_limit: Math.min(50, maxJobs - count),
+    });
+    if (error) throw Error("Falha ao consultar limpeza de avatar");
+    if (!data?.length) break;
+    for (const job of data) {
+      const { data: current, error: verificationError } = await admin
+        .from("profiles")
+        .select("avatar_id,avatar_key")
+        .eq("user_id", job.user_id)
+        .maybeSingle();
+      if (verificationError) throw Error("Falha ao verificar avatar atual");
+      if (
+        current?.avatar_id !== job.avatar_id ||
+        current?.avatar_key !== job.storage_key
+      ) {
+        const { error: removalError } = await admin.storage
+          .from("body-photos")
+          .remove([job.storage_key]);
+        if (removalError) throw Error("Falha ao remover avatar antigo");
+      }
+      // Uma substituição pode ter reaberto o trabalho enquanto consultávamos
+      // o perfil. Não apagar essa nova revisão da fila por uma leitura antiga.
+      const { error: completionError } = await admin
+        .from("avatar_cleanup")
+        .delete()
+        .eq("user_id", job.user_id)
+        .eq("avatar_id", job.avatar_id)
+        .eq("revision", job.revision);
+      if (completionError) throw Error("Falha ao concluir limpeza de avatar");
+      count++;
+    }
+  }
+  return count;
 }
 
 export async function cleanPlanAssetJobs(

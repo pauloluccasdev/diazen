@@ -1,3 +1,7 @@
+import {
+  openProjectCreate,
+  dismissProjectFeedback,
+} from "./helpers/project-ui";
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 test("semana de atividades e cards expansíveis preservam métricas e edição", async ({
@@ -12,6 +16,7 @@ test("semana de atividades e cards expansíveis preservam métricas e edição",
   await page.getByRole("button", { name: "Entrar", exact: true }).click();
   await expect(page).toHaveURL(/\/painel$/);
   await page.goto("/painel/projetos");
+  await openProjectCreate(page);
   await page
     .getByLabel("Nome do projeto", { exact: true })
     .fill("Semana de atividades QA");
@@ -23,9 +28,11 @@ test("semana de atividades e cards expansíveis preservam métricas e edição",
   const previousDate = previous.toISOString().slice(0, 10);
   await startInput.fill(previousDate);
   await page
+    .locator("#new-project")
     .getByRole("button", { name: "Criar projeto", exact: true })
     .click();
   await expect(page.getByRole("status")).toContainText("Projeto criado");
+  await dismissProjectFeedback(page);
   await page.goto("/painel/atividades");
   await page.locator(".record-create > summary").click();
   const create = page.locator("form").filter({
@@ -43,8 +50,13 @@ test("semana de atividades e cards expansíveis preservam métricas e edição",
   await create
     .getByRole("button", { name: "Salvar registro", exact: true })
     .click();
+  await expect(page.getByRole("dialog")).toContainText("Registro adicionado");
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Continuar", exact: true })
+    .click();
   await expect(
-    page.getByRole("heading", { name: "1 sessões na semana", exact: true }),
+    page.getByRole("heading", { name: "1 sessão na semana", exact: true }),
   ).toBeVisible();
   const card = page
     .locator("article.activity-record")
@@ -122,13 +134,21 @@ test("semana de atividades e cards expansíveis preservam métricas e edição",
   await weight
     .getByRole("button", { name: "Salvar peso", exact: true })
     .click();
-  await expect(weight.getByRole("status")).toContainText("Peso salvo");
+  await expect(page.getByRole("dialog")).toContainText("Peso salvo");
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Continuar", exact: true })
+    .click();
   await weight.locator('input[name="logged_on"]').fill(currentDate);
   await weight.getByLabel("Peso (kg)").fill("92");
   await weight
     .getByRole("button", { name: "Salvar peso", exact: true })
     .click();
-  await expect(weight.getByRole("status")).toContainText("Peso salvo");
+  await expect(page.getByRole("dialog")).toContainText("Peso salvo");
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Continuar", exact: true })
+    .click();
   await page.goto("/painel");
   const activitySummary = page.locator(".metric-atividades");
   await expect(activitySummary).toContainText("30 min");
@@ -140,8 +160,13 @@ test("semana de atividades e cards expansíveis preservam métricas e edição",
   await expect(weightCard).toContainText("94 → 92 kg");
   await expect(weightCard).toContainText("-2 kg no período");
   await expect(
-    weightCard.getByRole("img", { name: /Peso nas últimas 2 medições/ }),
+    page
+      .locator(".dz-weight-panel")
+      .getByRole("img", { name: /Evolução do peso: 2 medições/ }),
   ).toBeVisible();
+  await expect(weightCard.locator(".mobile-weight-change strong")).toHaveText(
+    "-2 kg",
+  );
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
@@ -163,7 +188,7 @@ test("semana de atividades e cards expansíveis preservam métricas e edição",
     const weightBox = await weightCard.boundingBox();
     expect(activityBox).not.toBeNull();
     expect(weightBox).not.toBeNull();
-    expect(Math.abs(activityBox!.y - weightBox!.y)).toBeLessThan(2);
+    expect(weightBox!.y).toBeGreaterThan(activityBox!.y + activityBox!.height);
     expect(Math.abs(activityBox!.width - weightBox!.width)).toBeLessThan(2);
   }).toPass();
   await page

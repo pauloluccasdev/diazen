@@ -19,6 +19,8 @@ export function RecordFields({
   foodOnly = false,
   prefix = "",
   foodSuggestions,
+  initialModality,
+  dateReadOnly = false,
 }: {
   kind: Module;
   entry?: Entry;
@@ -28,6 +30,8 @@ export function RecordFields({
   foodOnly?: boolean;
   prefix?: string;
   foodSuggestions?: ReactNode;
+  initialModality?: Entry["modality"];
+  dateReadOnly?: boolean;
 }) {
   const compositionFields = (
     <>
@@ -87,6 +91,7 @@ export function RecordFields({
             Data
             <input
               name="logged_on"
+              readOnly={dateReadOnly}
               type="date"
               required
               defaultValue={entry?.logged_on ?? date ?? today()}
@@ -99,7 +104,10 @@ export function RecordFields({
       {kind === "agua" && (
         <>
           <div className="form-grid">
-            <WaterVolumePicker initial={entry?.volume_ml ?? ""} />
+            <WaterVolumePicker
+              initial={entry?.volume_ml ?? ""}
+              initialLabel={entry?.container_label ?? ""}
+            />
             <label>
               Horário (opcional)
               <input
@@ -109,15 +117,6 @@ export function RecordFields({
               />
             </label>
           </div>
-          <label>
-            Recipiente (opcional)
-            <input
-              name="container_label"
-              maxLength={60}
-              placeholder="Ex.: Copo"
-              defaultValue={entry?.container_label ?? ""}
-            />
-          </label>
         </>
       )}
       {kind === "peso" && (
@@ -175,7 +174,7 @@ export function RecordFields({
               defaultValue={entry?.name ?? ""}
             />
           </label>
-          <ModalityPicker initial={entry?.modality} />
+          <ModalityPicker initial={entry?.modality ?? initialModality} />
           <div className="form-grid">
             <label>
               Duração (minutos)

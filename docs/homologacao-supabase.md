@@ -57,3 +57,7 @@ Os dois PDFs pessoais foram lidos apenas no laboratório local. A extração pre
 ## Exclusão de projetos — Migração 013 — 26/10/2026
 
 Aplicada incrementalmente, após autorização do proprietário para corrigir o erro da funcionalidade publicada. A ausência da RPC foi confirmada antes da aplicação. Função instalada com owner postgres, SECURITY DEFINER e EXECUTE somente para authenticated (anon negado), com atualização do cache de schema. Não foram excluídos projetos reais nem executado reset/bundle. A confirmação do fluxo destrutivo permanece sob controle do usuário no modal. Os testes locais com dados sintéticos cobrem cascata, isolamento, fotos e confirmação.
+
+## Recipientes salvos — 17/11/2026
+
+Aplicação incremental de `202611170019_water_containers.sql`, SHA-256 `8698544a01e4b0628cd02c9bb930445062f674a40e12d83f34ac720722ffba8e`. Pré-condições de Auth, proprietário, auditoria e histórico verificadas antes da transação. Após commit: RLS habilitada, acesso anônimo negado, CRUD autenticado disponível sob policy de proprietário, triggers, checks de valores e exclusão em cascata verificados. Nenhum lançamento existente foi modificado, sem reset. Ver [relatório da Fase 4](design/diazen-v2/phase-4-hydration-report.md) para o estado da interface e testes; isso ainda não declara homologação visual final em dispositivo físico.

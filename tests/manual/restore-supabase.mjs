@@ -156,6 +156,11 @@ try {
     await check(
       c.from("water_entries").insert({ logged_on: today, volume_ml: 300 }),
     );
+    await check(
+      c
+        .from("water_containers")
+        .insert({ name: "Copo sintético", volume_ml: 300 }),
+    );
     await check(c.rpc("save_weight", { p_date: today, p_kg: 80 }));
     const photo = randomUUID(),
       key = `${id}/${project}/${photo}.webp`,
@@ -306,6 +311,10 @@ try {
     }),
   );
   assert.equal(summary.water_ml, 300);
+  const containers = await check(
+    restoredBob.from("water_containers").select("name,volume_ml"),
+  );
+  assert.deepEqual(containers, [{ name: "Copo sintético", volume_ml: 300 }]);
   assert.equal(summary.weight, 80);
   for (const file of files.filter((f) => f.owner === bob.id)) {
     const object = await check(

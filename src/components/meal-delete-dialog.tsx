@@ -9,6 +9,7 @@ type Props = {
   project: string;
   date: string;
   category: keyof typeof categories;
+  compact?: boolean;
 };
 export function MealDeleteDialog(props: Props) {
   const [open, setOpen] = useState(false);
@@ -17,10 +18,18 @@ export function MealDeleteDialog(props: Props) {
       <button
         type="button"
         className="button-secondary project-delete-trigger meal-delete-trigger"
+        aria-label={
+          props.compact
+            ? `Excluir refeição inteira: ${categories[props.category]}`
+            : undefined
+        }
+        title={
+          props.compact ? `Excluir ${categories[props.category]}` : undefined
+        }
         onClick={() => setOpen(true)}
       >
         <Trash2 size={18} aria-hidden="true" />
-        Excluir refeição inteira
+        {!props.compact && "Excluir refeição inteira"}
       </button>
       {open && <Confirmation {...props} close={() => setOpen(false)} />}
     </>

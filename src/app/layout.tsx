@@ -3,6 +3,8 @@ import Link from "next/link";
 import localFont from "next/font/local";
 import { Pwa } from "@/components/pwa";
 import "./globals.css";
+import "../styles/diazen-v2/tokens.css";
+import "./diazen-v2.css";
 
 const inter = localFont({
   src: "../../public/fonts/inter-latin-variable.woff2",
@@ -34,7 +36,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" data-scroll-behavior="smooth">
       <body className={inter.variable}>
         <Pwa />
         <a className="skip-link" href="#conteudo">

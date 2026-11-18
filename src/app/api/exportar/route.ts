@@ -1,4 +1,5 @@
 import { apiAccount } from "@/lib/api-account";
+import { profileIdentity, type AccountProfile } from "@/lib/profile-values";
 export const runtime = "nodejs";
 export async function GET() {
   const account = await apiAccount();
@@ -13,12 +14,14 @@ export async function GET() {
     format_version: 1,
   };
   for (const table of [
+    "profiles",
     "projects",
     "display_preferences",
     "project_phases",
     "daily_checkins",
     "eating_context_events",
     "water_goals",
+    "water_containers",
     "water_entries",
     "weights",
     "measurements",
@@ -50,6 +53,7 @@ export async function GET() {
         )
         .order(
           table === "display_preferences" ||
+            table === "profiles" ||
             table === "garmin_sleep_settings" ||
             table === "garmin_sync_settings"
             ? "user_id"
@@ -68,6 +72,15 @@ export async function GET() {
     }
     result[table] = all;
   }
+  const profiles = result.profiles as AccountProfile[];
+  result.account = {
+    id: account.user.id,
+    email: account.user.email,
+    display_name: profileIdentity(
+      profiles[0] ?? null,
+      account.user.user_metadata?.display_name,
+    ).name,
+  };
   return Response.json(result, {
     headers: {
       "Content-Disposition": 'attachment; filename="diazen-dados.json"',

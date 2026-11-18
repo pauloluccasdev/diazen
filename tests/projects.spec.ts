@@ -1,3 +1,8 @@
+import {
+  openProjectCreate,
+  dismissProjectFeedback,
+  filterProjectState,
+} from "./helpers/project-ui";
 import { expect, test } from "@playwright/test";
 
 test("onboarding cria projeto, mantém histórico e exige confirmação de encerramento", async ({
@@ -9,16 +14,20 @@ test("onboarding cria projeto, mantém histórico e exige confirmação de encer
   await page.getByRole("button", { name: "Entrar", exact: true }).click();
   await expect(page).toHaveURL(/\/painel$/);
   await page.getByRole("link", { name: "Projetos", exact: true }).click();
+  await openProjectCreate(page);
   await page.getByLabel("Nome do projeto", { exact: true }).fill("Projeto E2E");
   await page.getByLabel("Meta diária de água (ml)").fill("2200");
   await page
+    .locator("#new-project")
     .getByRole("button", { name: "Criar projeto", exact: true })
     .click();
   await expect(page.getByRole("status")).toContainText("Projeto criado");
+  await dismissProjectFeedback(page);
   const card = page.getByRole("article").filter({
     has: page.getByRole("heading", { name: "Projeto E2E", exact: true }),
   });
   await expect(card.getByText("Em andamento", { exact: true })).toBeVisible();
+  await card.locator(".dz-project-menu").click();
   await card
     .getByLabel("Entendo que o projeto ficará somente leitura.")
     .first()
@@ -27,6 +36,7 @@ test("onboarding cria projeto, mantém histórico e exige confirmação de encer
     .getByRole("button", { name: "Concluir projeto", exact: true })
     .click();
   await expect(card.getByText("Concluído", { exact: true })).toBeVisible();
+  await dismissProjectFeedback(page);
   await expect(
     card.getByRole("button", { name: "Concluir projeto", exact: true }),
   ).toHaveCount(0);
@@ -35,23 +45,25 @@ test("onboarding cria projeto, mantém histórico e exige confirmação de encer
     page.getByText("Histórico somente leitura.", { exact: false }),
   ).toBeVisible();
   await page.goto("/painel/projetos");
-  await page.locator(".form-disclosure > summary").click();
+  await openProjectCreate(page);
   await page
     .getByLabel("Nome do projeto", { exact: true })
     .fill("Rascunho ajustável");
   await page.getByLabel("Meta diária de água (ml)").fill("2000");
   await page.getByLabel("Salvar como rascunho, sem ativar").check();
   await page
+    .locator("#new-project")
     .getByRole("button", { name: "Criar projeto", exact: true })
     .click();
   await expect(page.getByRole("status")).toContainText("Projeto criado");
-  await page.getByLabel("Estado dos projetos").selectOption("DRAFT");
-  await page.getByRole("button", { name: "Filtrar projetos" }).click();
+  await dismissProjectFeedback(page);
+  await filterProjectState(page, "DRAFT");
   await expect(page.getByRole("article")).toHaveCount(1);
   const draft = page.getByRole("article");
   await expect(
     draft.getByRole("heading", { name: "Rascunho ajustável" }),
   ).toBeVisible();
+  await draft.locator(".dz-project-menu").click();
   await draft.getByText("Editar datas do rascunho", { exact: true }).click();
   const initial = await draft
     .getByLabel("Início do rascunho", { exact: true })
@@ -65,9 +77,11 @@ test("onboarding cria projeto, mantém histórico e exige confirmação de encer
   await draft
     .getByRole("button", { name: "Salvar datas", exact: true })
     .click();
-  await expect(draft.getByRole("status")).toContainText(
+  await expect(page.getByRole("status")).toContainText(
     "Datas do rascunho atualizadas",
   );
+  await dismissProjectFeedback(page);
+  await draft.locator(".dz-project-menu").click();
   // Não permitir excluir a meta já existente do período do rascunho.
   await draft
     .getByLabel("Fim previsto do rascunho (opcional)")
@@ -75,8 +89,12 @@ test("onboarding cria projeto, mantém histórico e exige confirmação de encer
   await draft
     .getByRole("button", { name: "Salvar datas", exact: true })
     .click();
-  await expect(draft.getByRole("alert")).toContainText("período deve conter");
+  await expect(
+    page.locator(".record-feedback-dialog").getByRole("alert"),
+  ).toContainText("período deve conter");
+  await dismissProjectFeedback(page, true);
   await page.reload();
+  await draft.locator(".dz-project-menu").click();
   await draft.getByText("Editar datas do rascunho", { exact: true }).click();
   await expect(
     draft.getByLabel("Início do rascunho", { exact: true }),
@@ -87,15 +105,14 @@ test("onboarding cria projeto, mantém histórico e exige confirmação de encer
   await draft
     .getByRole("button", { name: "Ativar projeto", exact: true })
     .click();
+  await dismissProjectFeedback(page);
   await expect(page.getByRole("article")).toHaveCount(0);
-  await page.getByLabel("Estado dos projetos").selectOption("ACTIVE");
-  await page.getByRole("button", { name: "Filtrar projetos" }).click();
+  await filterProjectState(page, "ACTIVE");
   await expect(page.getByRole("article")).toHaveCount(1);
   await expect(
     page.getByText("Editar datas do rascunho", { exact: true }),
   ).toHaveCount(0);
-  await page.getByLabel("Estado dos projetos").selectOption("COMPLETED");
-  await page.getByRole("button", { name: "Filtrar projetos" }).click();
+  await filterProjectState(page, "COMPLETED");
   await expect(page.getByRole("article")).toHaveCount(1);
   await expect(
     page

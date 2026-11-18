@@ -6,6 +6,37 @@ import { requireAccount } from "@/lib/data";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { purgeAccount } from "@/lib/privacy";
 import type { FormResult } from "@/components/forms/action-form";
+import { revalidatePath } from "next/cache";
+import { normalizeProfileName } from "@/lib/profile-values";
+
+export async function saveProfileName(
+  _state: FormResult,
+  form: FormData,
+): Promise<FormResult> {
+  const { client } = await requireAccount();
+  const name = normalizeProfileName(form.get("display_name"));
+  if (name.error)
+    return {
+      error: name.error,
+      message: "",
+      fieldErrors: { display_name: name.error },
+    };
+  const { error } = await client
+    .rpc("save_profile_name", { p_name: name.value })
+    .abortSignal(AbortSignal.timeout(30000));
+  if (error)
+    return {
+      error: "Não foi possível atualizar seu nome. Tente novamente.",
+      message: "",
+    };
+  revalidatePath("/painel", "layout");
+  return {
+    error: "",
+    message: name.value
+      ? "Nome de exibição atualizado."
+      : "Nome de exibição removido.",
+  };
+}
 export async function deleteAccount(
   _state: FormResult,
   form: FormData,

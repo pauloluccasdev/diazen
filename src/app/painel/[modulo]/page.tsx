@@ -1,25 +1,23 @@
-import { MealDeleteDialog } from "@/components/meal-delete-dialog";
-import { ClearOfflineData } from "@/components/offline-snapshot";
+import { EvolutionDiary } from "@/components/evolution/evolution-diary";
+import { evolutionEntries } from "@/lib/evolution-data";
+import { evolutionPeriod, evolutionMetrics } from "@/lib/evolution-metrics";
+import { TrainingDiary } from "@/components/training/training-diary";
+import { trainingEntries, recentTraining } from "@/lib/training-data";
+import { trainingMetrics } from "@/lib/training-metrics";
+import { WaterDiary } from "@/components/hydration/water-diary";
+import { WaterRecordCard } from "@/components/hydration/water-record-card";
+import { ContainerManager } from "@/components/hydration/container-manager";
+import { waterContainers, hydrationEntries } from "@/lib/hydration-data";
+import { hydrationWeek } from "@/lib/hydration-metrics";
+import { FoodDiary } from "@/components/nutrition/food-diary";
+import { foodDayEntries } from "@/lib/food-day-data";
 import { ActivityRecordCard } from "@/components/activity-record-card";
-import { ActivityWeekSummary } from "@/components/activity-week-summary";
-import { weekBounds } from "@/lib/records";
 import { GarminConnection } from "@/components/garmin-connection";
 import { garminConfig } from "@/lib/garmin-config";
 import type { ReactNode } from "react";
 import { dashboardPlan } from "@/lib/dashboard-plan";
-import { ManualMealRecorder } from "@/components/manual-meal-recorder";
-import { PlanMealRecorder } from "@/components/plan-meal-recorder";
 import { ActionDisclosure } from "@/components/action-disclosure";
-import {
-  PencilLine,
-  Trash2,
-  FileUp,
-  FileText,
-  ChevronRight,
-  ChevronDown,
-  History,
-} from "lucide-react";
-import { ReturnLink } from "@/components/return-link";
+import { PencilLine, Trash2, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { projectContext } from "@/lib/data";
@@ -31,6 +29,7 @@ import {
   type Entry,
   type Summary,
   categories,
+  modalities,
   measurements,
   activityModality,
   nutrients,
@@ -38,22 +37,32 @@ import {
 } from "@/lib/records";
 import { ActionForm } from "@/components/forms/action-form";
 import { RecordFields } from "@/components/forms/record-fields";
-import { FoodConveniences } from "@/components/food-conveniences";
-import { ProgressRing } from "@/components/progress-ring";
-import { Droplets } from "lucide-react";
-import { WeightChart } from "@/components/weight-chart";
 import { saveRecord, deleteRecord } from "./actions";
 function RecordPresentation({
   kind,
   row,
   children,
+  editable,
+  initiallyOpen = false,
 }: {
   kind: Module;
   row: Entry;
   children: ReactNode;
+  editable: boolean;
+  initiallyOpen?: boolean;
 }) {
   if (kind === "atividades")
-    return <ActivityRecordCard row={row}>{children}</ActivityRecordCard>;
+    return (
+      <ActivityRecordCard row={row} initiallyOpen={initiallyOpen}>
+        {children}
+      </ActivityRecordCard>
+    );
+  if (kind === "agua")
+    return (
+      <WaterRecordCard row={row} editable={editable}>
+        {children}
+      </WaterRecordCard>
+    );
   if (kind !== "alimentacao") return <>{children}</>;
   const kcal =
     row.kcal == null
@@ -107,6 +116,13 @@ export default async function Records({
     data?: string;
     pagina?: string;
     refeicao_excluida?: string;
+    registrar?: string;
+    refeicao?: string;
+    volume?: string;
+    atividade?: string;
+    acao?: string;
+    modalidade?: string;
+    periodo?: string;
   }>;
 }) {
   const { modulo } = await params;
@@ -118,7 +134,9 @@ export default async function Records({
     Math.max(1, Math.floor(Number(filters.pagina) || 1)),
   );
   const context = await projectContext(filters.projeto),
-    { selected, active, client, user } = context;
+    { selected, active, client, user, projects } = context;
+  const containersPromise =
+    modulo === "agua" ? waterContainers(client) : Promise.resolve([]);
   if (!selected)
     return (
       <section className="welcome">
@@ -127,6 +145,9 @@ export default async function Records({
         <Link className="button-primary" href="/painel/projetos">
           Configurar projeto
         </Link>
+        {modulo === "agua" && (
+          <ContainerManager containers={await containersPromise} />
+        )}
       </section>
     );
   const editable = selected.status === "ACTIVE" && selected.id === active?.id;
@@ -134,79 +155,82 @@ export default async function Records({
   let query = client
     .from(modules[modulo].table)
     .select("*")
-    .eq("project_id", selected.id)
-    .order("logged_on", { ascending: false })
-    .order("id", { ascending: false })
-    .range((page - 1) * 20, page * 20);
+    .eq("project_id", selected.id);
+  query =
+    modulo === "agua"
+      ? query
+          .order("logged_time", { ascending: true, nullsFirst: false })
+          .order("id", { ascending: false })
+      : query
+          .order("logged_on", { ascending: false })
+          .order("id", { ascending: false });
+  query = query.range((page - 1) * 20, page * 20);
   if (daily || modulo === "atividades" || filters.data)
     query = query.eq("logged_on", date);
-  const week = weekBounds(date);
-  const [entries, totals, graph, diet, weekCounts] = await Promise.all([
-    query.returns<Entry[]>(),
+  const [
+    entries,
+    totals,
+    diet,
+    trainingRows,
+    allFoods,
+    containers,
+    waterRows,
+    recentActivities,
+    bodyRows,
+  ] = await Promise.all([
+    modulo === "peso" || modulo === "medidas"
+      ? Promise.resolve({ data: [] as Entry[], error: null })
+      : query.returns<Entry[]>(),
     client.rpc("project_summary", {
       p_project: selected.id,
       p_date: date,
     }),
-    modulo === "peso"
-      ? client
-          .from("weights")
-          .select("*")
-          .eq("project_id", selected.id)
-          .lte("logged_on", date)
-          .order("logged_on", { ascending: false })
-          .limit(30)
-          .returns<Entry[]>()
-      : Promise.resolve({ data: [] as Entry[], error: null }),
     modulo === "alimentacao"
       ? dashboardPlan(client, selected.id, date)
       : Promise.resolve(null),
     modulo === "atividades"
-      ? (async () => {
-          const counts: Record<string, number> = {};
-          for (let offset = 0; ; offset += 1000) {
-            const result = await client
-              .from("activities")
-              .select("logged_on")
-              .eq("project_id", selected.id)
-              .gte("logged_on", week.start)
-              .lte("logged_on", week.end)
-              .order("id")
-              .range(offset, offset + 999);
-            if (result.error)
-              throw Error("Não foi possível carregar a semana de atividades.");
-            for (const row of result.data ?? [])
-              counts[row.logged_on] = (counts[row.logged_on] ?? 0) + 1;
-            if ((result.data?.length ?? 0) < 1000) break;
-          }
-          return counts;
-        })()
-      : Promise.resolve({} as Record<string, number>),
+      ? trainingEntries(client, selected.id, date)
+      : Promise.resolve([] as Entry[]),
+    modulo === "alimentacao"
+      ? foodDayEntries(client, selected.id, date)
+      : Promise.resolve([] as Entry[]),
+    containersPromise,
+    modulo === "agua"
+      ? hydrationEntries(client, selected.id, date)
+      : Promise.resolve([] as Entry[]),
+    modulo === "atividades"
+      ? recentTraining(client, selected.id, date)
+      : Promise.resolve([] as Entry[]),
+    modulo === "peso" || modulo === "medidas"
+      ? evolutionEntries(client, selected.id, date, modulo)
+      : Promise.resolve([] as Entry[]),
   ]);
   if (entries.error) throw new Error("Falha ao carregar registros");
   if (totals.error) throw new Error("Falha ao carregar totais");
-  if (graph.error) throw new Error("Falha no gráfico");
   const rows = (entries.data ?? []).slice(0, 20),
     hasMore = (entries.data?.length ?? 0) > 20;
   const summary = totals.data as Summary;
-  const link = (nextPage: number) =>
-    `/painel/${modulo}?projeto=${selected.id}&pagina=${nextPage}${daily || filters.data ? `&data=${date}` : ""}`;
-  const chart: Entry[] = graph.data ?? [];
   const renderRecord = (row: Entry) => (
     <article
       key={row.id}
       id={modulo === "atividades" ? `atividade-${row.id}` : undefined}
       className={`content-card${modulo === "alimentacao" ? " food-record" : modulo === "atividades" ? " activity-record" : ""}`}
     >
-      <RecordPresentation kind={modulo} row={row}>
+      <RecordPresentation
+        kind={modulo}
+        row={row}
+        editable={editable}
+        initiallyOpen={modulo === "atividades" && filters.atividade === row.id}
+      >
         {modulo !== "atividades" && (
           <p className="eyebrow">
             {formatDate(row.logged_on)}
             {row.category && ` · ${categories[row.category]}`}
           </p>
         )}
-        {modulo !== "alimentacao" && modulo !== "atividades" && (
-          <h3>{entryText(modulo, row)}</h3>
-        )}
+        {modulo !== "alimentacao" &&
+          modulo !== "atividades" &&
+          modulo !== "agua" && <h3>{entryText(modulo, row)}</h3>}
         {row.notes && <p className="intro">{row.notes}</p>}
         {modulo === "alimentacao" && (
           <>
@@ -229,6 +253,16 @@ export default async function Records({
             {modulo !== "peso" && (
               <ActionDisclosure
                 title="Editar registro"
+                id={
+                  modulo === "atividades"
+                    ? `edit-activity-${row.id}`
+                    : undefined
+                }
+                initiallyOpen={
+                  modulo === "atividades" &&
+                  filters.atividade === row.id &&
+                  filters.acao === "editar"
+                }
                 icon={PencilLine}
                 className="record-action"
               >
@@ -248,6 +282,16 @@ export default async function Records({
             )}
             <ActionDisclosure
               title="Excluir registro"
+              id={
+                modulo === "atividades"
+                  ? `delete-activity-${row.id}`
+                  : undefined
+              }
+              initiallyOpen={
+                modulo === "atividades" &&
+                filters.atividade === row.id &&
+                filters.acao === "excluir"
+              }
               icon={Trash2}
               className="record-action destructive-action"
             >
@@ -265,382 +309,89 @@ export default async function Records({
       </RecordPresentation>
     </article>
   );
-  return (
-    <div className={`module-page module-${modulo}`}>
-      <section className="welcome module-welcome">
-        <ReturnLink href={`/painel?projeto=${selected.id}`}>
-          Voltar ao dashboard
-        </ReturnLink>
-        <p className="eyebrow">{selected.name}</p>
-        <h1>
-          {modules[modulo].title}
-          <span className="accent">.</span>
-        </h1>
-        <p className="intro">{modules[modulo].description}</p>
-      </section>
-      {!editable && (
-        <p className="readonly-note">
-          {selected.status === "DRAFT"
-            ? "Rascunhos não recebem registros."
-            : "Histórico somente leitura."}{" "}
-          {active && (
-            <Link href={`/painel/${modulo}?projeto=${active.id}`}>
-              Registrar no projeto ativo “{active.name}” →
-            </Link>
-          )}
-        </p>
-      )}
-      {(modulo === "peso" || modulo === "medidas") && (
-        <nav className="evolution-tabs" aria-label="Evolução corporal">
-          <Link
-            aria-current={modulo === "peso" ? "page" : undefined}
-            href={`/painel/peso?projeto=${selected.id}`}
-          >
-            Peso
-          </Link>
-          <Link
-            aria-current={modulo === "medidas" ? "page" : undefined}
-            href={`/painel/medidas?projeto=${selected.id}`}
-          >
-            Medidas
-          </Link>
-          <Link href={`/painel/fotos?projeto=${selected.id}`}>Fotos</Link>
-        </nav>
-      )}
-      {modulo === "alimentacao" && (
-        <Link
-          className="plan-entry"
-          href={`/painel/plano?projeto=${selected.id}&data=${date}`}
-        >
-          <span className="plan-entry-icon" aria-hidden="true">
-            {diet ? <FileText size={24} /> : <FileUp size={24} />}
-          </span>
-          <span className="plan-entry-content">
-            <strong>Meu plano alimentar</strong>
-            <span>
-              {diet
-                ? "Plano salvo · consulte as refeições ou revise o planejamento."
-                : "Importe seu PDF e confira calorias e nutrientes."}
-            </span>
-          </span>
-          <ChevronRight
-            className="plan-entry-chevron"
-            size={20}
-            aria-hidden="true"
-          />
-        </Link>
-      )}
-      {editable && modulo === "alimentacao" && (
-        <ManualMealRecorder
-          date={date}
-          min={selected.starts_on}
-          max={
-            selected.ends_on && selected.ends_on < today()
-              ? selected.ends_on
-              : today()
-          }
-        />
-      )}
-      {editable && modulo !== "alimentacao" && (
-        <details className="content-card record-create">
-          <summary>
-            {modulo === "peso"
-              ? "Registrar ou atualizar peso"
-              : modulo === "medidas"
-                ? "Registrar medidas"
-                : modulo === "agua"
-                  ? "Adicionar consumo"
-                  : "Registrar atividade"}
-          </summary>
-          <p className="intro">
-            Este registro será salvo no projeto ativo “{active?.name}”.
-          </p>
-          <ActionForm
-            action={saveRecord}
-            submit={
-              modulo === "peso"
-                ? "Salvar peso"
-                : modulo === "medidas"
-                  ? "Salvar medidas"
-                  : "Salvar registro"
-            }
-          >
-            <RecordFields
-              kind={modulo}
-              min={selected.starts_on}
-              max={
-                selected.ends_on && selected.ends_on < today()
-                  ? selected.ends_on
-                  : today()
-              }
-              date={date}
-            />
-          </ActionForm>
-        </details>
-      )}
-      <Link
-        className="button-secondary meal-record-link"
-        href="/painel/historico"
-      >
-        <History size={20} aria-hidden="true" />
-        <span>Consultar histórico geral</span>
-        <ChevronRight size={18} aria-hidden="true" />
-      </Link>
+  if (modulo === "peso" || modulo === "medidas") {
+    const period = evolutionPeriod(filters.periodo);
+    return (
+      <EvolutionDiary
+        kind={modulo}
+        projects={projects}
+        selected={selected}
+        active={active}
+        date={date}
+        period={period}
+        metrics={evolutionMetrics(bodyRows, selected, date, period)}
+        page={page}
+        registrar={filters.registrar}
+      />
+    );
+  }
+  if (modulo === "alimentacao")
+    return (
+      <FoodDiary
+        client={client}
+        projects={projects}
+        selected={selected}
+        active={active}
+        date={date}
+        summary={summary}
+        diet={diet}
+        page={page}
+        rows={rows}
+        allRows={allFoods}
+        hasMore={hasMore}
+        filters={filters}
+        renderRecord={renderRecord}
+      />
+    );
 
-      {modulo === "atividades" && garminConfig(user.id) && <GarminConnection />}
-      {modulo === "alimentacao" && diet && (
-        <section className="planned-meals" aria-label="Refeições do plano">
-          <h2>Suas refeições planejadas</h2>
-          <p className="intro">
-            Data consultada: {formatDate(date)}. Abra uma refeição do plano para
-            registrar o que consumiu ou ajustar as porções. Para incluir outros
-            alimentos, use “Registrar refeição”. Esses ajustes alteram apenas
-            seu diário; o plano da nutricionista fica preservado.
-          </p>
-          {diet.document.meals.map(
-            (meal, index) =>
-              meal.enabled && (
-                <PlanMealRecorder
-                  key={`${diet.id}-${index}-${date}`}
-                  plan={diet.id}
-                  index={index}
-                  meal={meal}
-                  date={date}
-                  min={selected.starts_on}
-                  max={
-                    selected.ends_on && selected.ends_on < today()
-                      ? selected.ends_on
-                      : today()
-                  }
-                  registered={diet.registeredMeals.includes(index)}
-                  actual={diet.mealActuals[index]}
-                  editable={editable}
-                />
-              ),
-          )}
-        </section>
-      )}
-      {modulo === "agua" && (
-        <section className="content-card hydration-summary">
-          <ProgressRing
-            value={summary.water_ml}
-            max={summary.water_goal}
-            label="Progresso da hidratação na data consultada"
-          >
-            <Droplets size={24} aria-hidden="true" />
-            <strong>
-              {summary.water_ml === null
-                ? "Sem registros"
-                : `${number(summary.water_ml / 1000, 2)} L`}
-            </strong>
-            <span>
-              {summary.water_goal === null
-                ? "Sem meta"
-                : `de ${number(summary.water_goal / 1000, 2)} L`}
-            </span>
-          </ProgressRing>
-          <div className="hydration-detail">
-            <h2>
-              {summary.water_ml === null
-                ? "Sem registros"
-                : `${number(summary.water_ml, 0)} ml`}
-            </h2>
-            <p className="intro">
-              {summary.water_goal === null
-                ? "Meta não configurada"
-                : `Meta de ${number(summary.water_goal, 0)} ml em ${formatDate(date)}`}
-            </p>
-            {summary.water_ml !== null && summary.water_goal !== null && (
-              <>
-                <progress
-                  className="water-progress"
-                  value={Math.min(summary.water_ml, summary.water_goal)}
-                  max={summary.water_goal}
-                  aria-label="Progresso da hidratação"
-                />
-                <p>
-                  {number((summary.water_ml / summary.water_goal) * 100, 0)}% da
-                  meta
-                </p>
-              </>
-            )}
-          </div>
-        </section>
-      )}
-      {modulo === "peso" && (
-        <section className="content-card">
-          <h2>
-            {summary.weight === null
-              ? "Sem peso registrado"
-              : `${number(summary.weight, 2)} kg`}
-          </h2>
-          {summary.weight_date && (
-            <p className="intro">
-              Último registro até a data consultada:{" "}
-              {formatDate(summary.weight_date)}
-            </p>
-          )}
-          <WeightChart rows={chart} />
-        </section>
-      )}
-      {modulo === "atividades" && (
-        <ActivityWeekSummary
-          date={date}
-          start={week.start}
-          counts={weekCounts}
-          historyProject={selected.id === active?.id ? undefined : selected.id}
-          total={summary.sessions === null ? null : Number(summary.sessions)}
-          goal={selected.sessions_goal}
-          today={today()}
-        />
-      )}
-      {modulo === "alimentacao" && (
-        <>
-          <section className="content-card">
-            <h2>Totais de {formatDate(date)}</h2>
-            <div className="nutrition-grid">
-              {Object.entries(nutrients).map(([key, label]) => {
-                const k = key as keyof typeof nutrients,
-                  v = summary[k],
-                  missing = Number(summary[`missing_${k}`]);
-                return (
-                  <div key={key}>
-                    <span className="muted">{label}</span>
-                    <strong
-                      className={v === null ? "nutrition-empty" : undefined}
-                    >
-                      {v === null
-                        ? "Não informado"
-                        : `${number(v)} ${key === "kcal" ? "kcal" : "g"}`}
-                    </strong>
-                    {missing > 0 && v !== null && (
-                      <span className="muted">
-                        Subtotal parcial · {missing} sem valor
-                      </span>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-            <p className="intro">
-              {diet?.complete
-                ? "Completo: todas as refeições do plano foram registradas."
-                : Number(summary.food_count) > 0
-                  ? "Parcial: o diário ainda não contém todas as refeições do plano."
-                  : "Sem registros neste dia."}
-            </p>
-            <p className="field-hint">
-              O status é atualizado automaticamente pelos registros. Sem plano
-              salvo, não é possível determinar se todas as refeições foram
-              feitas.
-            </p>
-          </section>
-        </>
-      )}
-      {modulo === "alimentacao" && (
-        <FoodConveniences
-          client={client}
-          project={selected.id}
-          date={date}
-          activeName={active?.name}
-          activeProject={active?.id}
-        />
-      )}
-      {modulo === "alimentacao" && filters.refeicao_excluida === "1" && (
-        <>
-          <ClearOfflineData />
-          <p role="status" className="form-success">
-            Refeição excluída. Todos os alimentos desse grupo foram removidos
-            dos registros da data.
-          </p>
-        </>
-      )}
-      <section
-        id="registros-do-dia"
-        className="records-section"
-        aria-label="Histórico de registros"
-      >
-        <h2>
-          {daily || modulo === "atividades" || filters.data
-            ? "Registros do dia"
-            : "Histórico"}
-        </h2>
-        {modulo === "atividades" && <p className="muted">{formatDate(date)}</p>}
-        {!rows.length && (
-          <p className="intro">
-            {!daily && filters.data
-              ? `Nenhum registro em ${formatDate(date)}. ${modulo === "atividades" ? "Os dias marcados na semana têm atividades no histórico." : "O resumo pode mostrar o último registro anterior a essa data. Consulte outras datas no histórico geral."}`
-              : "Sem registros para esta consulta."}
-          </p>
-        )}
-        {modulo === "alimentacao" && (
-          <p className="intro">
-            {summary.food_count} alimentos neste dia. Abra uma refeição para ver
-            os alimentos. Selecione um alimento para conferir a composição,
-            editar ou excluir.
-          </p>
-        )}
-        {modulo === "alimentacao"
-          ? Object.entries(categories).map(([category, label]) => {
-              const items = rows.filter((row) => row.category === category);
-              if (!items.length) return null;
-              const known = items.filter((row) => row.kcal != null);
-              const kcal = known.reduce(
-                (sum, row) =>
-                  sum +
-                  (Number(row.kcal) * Number(row.amount)) /
-                    Number(row.reference_amount),
-                0,
-              );
-              const partial =
-                known.length !== items.length || hasMore || page > 1;
-              return (
-                <details
-                  key={category}
-                  className="content-card meal-record-group"
-                >
-                  <summary>
-                    <span>
-                      <strong>{label}</strong>
-                      <small>
-                        {items.length}{" "}
-                        {items.length === 1 ? "alimento" : "alimentos"}
-                        {hasMore || page > 1 ? " nesta página" : ""}
-                      </small>
-                    </span>
-                    <span className="food-record-calories">
-                      {known.length ? (
-                        <span className="meal-calorie-value">
-                          {number(kcal)} kcal
-                        </span>
-                      ) : (
-                        "Calorias não informadas"
-                      )}
-                      {partial && known.length > 0 && (
-                        <small>Subtotal parcial</small>
-                      )}
-                    </span>
-                    <ChevronDown size={20} aria-hidden="true" />
-                  </summary>
-                  {editable && (
-                    <MealDeleteDialog
-                      project={selected.id}
-                      date={date}
-                      category={category as keyof typeof categories}
-                    />
-                  )}
-                  <div className="meal-record-items">
-                    {items.map(renderRecord)}
-                  </div>
-                </details>
-              );
-            })
-          : rows.map(renderRecord)}
-      </section>
-      <nav className="panel-nav" aria-label="Paginação">
-        {page > 1 && <Link href={link(page - 1)}>Anteriores</Link>}
-        {hasMore && <Link href={link(page + 1)}>Próximos</Link>}
-      </nav>
-    </div>
-  );
+  if (modulo === "agua") {
+    const volume = Number(filters.volume);
+    return (
+      <WaterDiary
+        projects={projects}
+        selected={selected}
+        active={active}
+        date={date}
+        summary={summary}
+        rows={rows}
+        page={page}
+        hasMore={hasMore}
+        containers={containers}
+        days={hydrationWeek(waterRows, date, context.goals)}
+        registrar={filters.registrar}
+        preset={
+          Number.isInteger(volume) && volume >= 1 && volume <= 5000
+            ? volume
+            : undefined
+        }
+        renderRecord={renderRecord}
+      />
+    );
+  }
+
+  if (modulo === "atividades") {
+    const preset =
+      filters.modalidade && Object.hasOwn(modalities, filters.modalidade)
+        ? (filters.modalidade as Entry["modality"])
+        : undefined;
+    return (
+      <TrainingDiary
+        projects={projects}
+        selected={selected}
+        active={active}
+        date={date}
+        metrics={trainingMetrics(trainingRows, date, today())}
+        recent={recentActivities}
+        rows={rows}
+        page={page}
+        hasMore={hasMore}
+        registrar={filters.registrar}
+        preset={preset}
+        renderRecord={renderRecord}
+        connection={garminConfig(user.id) ? <GarminConnection /> : undefined}
+      />
+    );
+  }
+
+  return null;
 }

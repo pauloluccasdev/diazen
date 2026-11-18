@@ -11,9 +11,76 @@ const user = {
 };
 const encode = (value) =>
   Buffer.from(JSON.stringify(value)).toString("base64url");
-const token = `${encode({ alg: "HS256", typ: "JWT" })}.${encode({ sub: user.id, exp: Math.floor(Date.now() / 1000) + 3600, aud: "authenticated" })}.assinatura-de-teste`;
 
 const users = [
+  {
+    ...user,
+    id: "00000000-0000-4000-8000-000000000065",
+    email: "auth-redesign@example.test",
+  },
+  {
+    ...user,
+    id: "00000000-0000-4000-8000-000000000061",
+    email: "profile-v2@example.test",
+  },
+  {
+    ...user,
+    id: "00000000-0000-4000-8000-000000000062",
+    email: "profile-other-v2@example.test",
+  },
+  {
+    ...user,
+    id: "00000000-0000-4000-8000-000000000063",
+    email: "avatar-api@example.test",
+  },
+  {
+    ...user,
+    id: "00000000-0000-4000-8000-000000000064",
+    email: "avatar-other-api@example.test",
+  },
+  {
+    ...user,
+    id: "00000000-0000-4000-8000-000000000060",
+    email: "projects-v2@example.test",
+  },
+  {
+    ...user,
+    id: "00000000-0000-4000-8000-000000000059",
+    email: "photos-v2@example.test",
+  },
+  {
+    ...user,
+    id: "00000000-0000-4000-8000-000000000058",
+    email: "body-volume@example.test",
+  },
+  {
+    ...user,
+    id: "00000000-0000-4000-8000-000000000057",
+    email: "body-v2@example.test",
+  },
+  {
+    ...user,
+    id: "00000000-0000-4000-8000-000000000056",
+    email: "training-v2@example.test",
+  },
+  {
+    ...user,
+    id: "00000000-0000-4000-8000-000000000055",
+    email: "water-v2@example.test",
+  },
+  {
+    ...user,
+    id: "00000000-0000-4000-8000-000000000054",
+    email: "food-v2@example.test",
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000053",
+    email: "desktop-v2@example.test",
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000052",
+    email: "redesign@example.test",
+  },
   {
     id: "00000000-0000-4000-8000-000000000051",
     email: "phase-plans@example.test",
@@ -111,13 +178,17 @@ const users = [
     email: "acessibilidade@example.test",
   },
 ];
-const tokenFor = (u) =>
-  u.id === user.id
-    ? token
-    : `${encode({ alg: "HS256", typ: "JWT" })}.${encode({ sub: u.id, exp: Math.floor(Date.now() / 1000) + 3600, aud: "authenticated" })}.assinatura-de-teste`;
-const tokens = new Map(users.map((u) => [tokenFor(u), u]));
+const tokens = new Map();
+const tokenFor = (u) => {
+  const issued = `${encode({ alg: "HS256", typ: "JWT" })}.${encode({ sub: u.id, exp: Math.floor(Date.now() / 1000) + 3600, aud: "authenticated" })}.assinatura-de-teste`;
+  tokens.set(issued, u);
+  return issued;
+};
+users.forEach(tokenFor);
 const files = new Map();
 const failPhotoReplies = new Set();
+const failAvatarReplies = new Set();
+const failAvatarUploads = new Set();
 const failReads = new Set();
 const closeOnProjectRead = new Set();
 const emailLinks = new Map();
@@ -133,6 +204,14 @@ createServer(async (request, response) => {
   response.setHeader("Content-Type", "application/json");
   response.setHeader("Cache-Control", "no-store");
   if (request.url === "/health") return response.end("{}");
+  if (request.url?.startsWith("/_test/fail-avatar-reply/")) {
+    failAvatarReplies.add(request.url.split("/").at(-1));
+    return response.end("{}");
+  }
+  if (request.url?.startsWith("/_test/fail-avatar-upload/")) {
+    failAvatarUploads.add(request.url.split("/").at(-1));
+    return response.end("{}");
+  }
   if (request.url?.startsWith("/_test/close-on-project-read/")) {
     closeOnProjectRead.add(request.url.split("/").at(-1));
     return response.end("{}");
@@ -227,6 +306,7 @@ createServer(async (request, response) => {
         uid,
         admin,
         () => failPhotoReplies.delete(uid),
+        () => failAvatarReplies.delete(uid),
       );
       const url = new URL(request.url, "http://localhost");
       if (
@@ -278,6 +358,16 @@ createServer(async (request, response) => {
     if (request.method === "POST" && admin && path) {
       const parts = [];
       for await (const part of request) parts.push(part);
+      if (files.has(path) && request.headers["x-upsert"] !== "true") {
+        response.statusCode = 409;
+        return response.end(
+          JSON.stringify({
+            statusCode: "409",
+            error: "Duplicate",
+            message: "Object already exists",
+          }),
+        );
+      }
       files.set(path, Buffer.concat(parts));
       queue = queue.then(async () => {
         await db.exec("reset role");
@@ -287,6 +377,19 @@ createServer(async (request, response) => {
         );
       });
       await queue;
+      if (
+        path.split("/")[1] === "avatars" &&
+        failAvatarUploads.delete(path.split("/")[0])
+      ) {
+        response.statusCode = 503;
+        return response.end(
+          JSON.stringify({
+            statusCode: "503",
+            error: "TEST_REPLY_LOST",
+            message: "Synthetic upload reply lost",
+          }),
+        );
+      }
       return response.end(
         JSON.stringify({ Key: `body-photos/${path}`, Id: crypto.randomUUID() }),
       );
@@ -358,9 +461,7 @@ createServer(async (request, response) => {
     if (account && credentials.password === "senha-de-teste-123") {
       return response.end(
         JSON.stringify({
-          access_token: [...tokens.entries()].find(
-            ([, u]) => u.id === account.id,
-          )[0],
+          access_token: tokenFor(account),
           refresh_token: "refresh-de-teste",
           token_type: "bearer",
           expires_in: 3600,
@@ -379,9 +480,22 @@ createServer(async (request, response) => {
     const redirect = new URL(request.url, "http://localhost").searchParams.get(
       "redirect_to",
     );
-    const account =
-      users.find((u) => u.email === body.email) ??
-      (request.url.startsWith("/auth/v1/signup") ? user : null);
+    let account = users.find((u) => u.email === body.email) ?? null;
+    if (!account && request.url.startsWith("/auth/v1/signup")) {
+      account = {
+        ...user,
+        id: randomUUID(),
+        email: body.email,
+        user_metadata: body.data ?? {},
+      };
+      users.push(account);
+      const created = account;
+      queue = queue.then(async () => {
+        await db.exec("reset role");
+        await db.query("insert into auth.users(id) values($1)", [created.id]);
+      });
+      await queue;
+    }
     if (body.code_challenge && redirect && account) {
       const ticket = randomUUID();
       emailTickets.set(ticket, {

@@ -1,0 +1,918 @@
+.dz-insights {
+  display: grid;
+  gap: 20px;
+  width: 100%;
+  grid-column: 1/-1;
+}
+.dz-insights .content-card {
+  margin: 0;
+  padding: 18px 22px;
+  min-width: 0;
+  border-radius: 20px;
+  box-shadow: var(--v2-shadow);
+}
+.dz-insights h2 {
+  font-size: 20px;
+  line-height: 1.3;
+  margin: 0 0 12px;
+  letter-spacing: -0.6px;
+}
+.dz-insights .section-heading {
+  gap: 12px;
+  margin-bottom: 12px;
+  align-items: center;
+}
+.dz-insights .section-heading h2 {
+  margin: 0;
+}
+.dz-insights .section-heading > a {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  color: var(--v2-data-text);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.dz-period-form {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: none;
+}
+.dz-period-form select {
+  min-height: 38px;
+  padding: 4px 20px 4px 4px;
+  font-size: 12px;
+  border: 0;
+  background: transparent;
+  width: auto;
+}
+.dz-period-form button {
+  min-height: 38px;
+  color: var(--v2-data-text);
+  font-size: 11px;
+  padding: 4px;
+  background: none;
+}
+.dz-weight-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 122px;
+  gap: 14px;
+  align-items: stretch;
+}
+.dz-time-chart {
+  width: 100%;
+  margin: 0;
+  align-self: center;
+  color: var(--v2-data-stroke);
+}
+.dz-time-chart svg {
+  display: block;
+  width: 100%;
+}
+.dz-time-chart line {
+  stroke: var(--color-border);
+  stroke-width: 0.7px;
+}
+.dz-time-chart text {
+  font-size: 12px;
+  fill: var(--color-text-muted);
+}
+.dz-time-chart polyline {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.3;
+  stroke-linejoin: round;
+}
+.dz-time-chart circle {
+  fill: var(--color-surface);
+  stroke: currentColor;
+  stroke-width: 2;
+}
+.dz-weight-context {
+  background: var(--color-surface-raised);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  padding: 14px 12px;
+  font-size: 12px;
+  gap: 4px;
+}
+.dz-weight-context > strong {
+  font-size: 24px;
+  letter-spacing: -0.6px;
+}
+.dz-weight-context small {
+  color: var(--color-text-muted);
+  font-size: 11px;
+}
+.dz-weight-context small:first-of-type {
+  margin-top: 8px;
+}
+.dz-weight-context b {
+  color: var(--color-text-muted);
+  font-size: 16px;
+}
+.dz-weight-change {
+  color: var(--color-text);
+  font-size: 12px;
+}
+.dz-chart-empty {
+  min-height: 130px;
+  display: flex;
+  align-items: center;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.dz-macro-distribution {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.9fr) minmax(150px, 1.1fr);
+  gap: 0 18px;
+  align-items: center;
+  padding-top: 0;
+}
+.dz-macro-donut {
+  position: relative;
+  width: 100%;
+  max-width: 158px;
+  margin: auto;
+}
+.dz-macro-donut svg {
+  width: 100%;
+  display: block;
+  transform: rotate(-90deg);
+}
+.dz-macro-donut circle {
+  fill: none;
+  stroke-width: 15px;
+}
+.dz-donut-track {
+  stroke: var(--color-border);
+}
+.dz-macro-donut > div {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+.dz-macro-donut strong {
+  font-size: 28px;
+  line-height: 1.2;
+}
+.dz-macro-donut span {
+  font-size: 15px;
+}
+.dz-macro-donut small {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+.dz-donut-segment {
+  stroke: var(--segment);
+}
+.dz-macro-0 {
+  --segment: #ffb800;
+}
+.dz-macro-1 {
+  --segment: #08b8e4;
+}
+.dz-macro-2 {
+  --segment: #a477da;
+}
+.dz-macro-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--segment);
+  flex-shrink: 0;
+}
+.dz-macro-distribution dl {
+  margin: 0;
+}
+.dz-macro-distribution dl > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 12px;
+}
+.dz-macro-distribution dt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dz-macro-distribution dd {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.dz-macro-distribution dd > span {
+  color: var(--color-text-muted);
+  width: 30px;
+  text-align: right;
+}
+.dz-macro-distribution .field-hint {
+  grid-column: 1/-1;
+  margin: 0;
+  font-size: 10px;
+}
+.dz-recent-panel ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.dz-recent-panel li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.dz-recent-panel li:last-child {
+  border: 0;
+}
+.dz-event-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  flex-shrink: 0;
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+.dz-event-icon.is-weight {
+  color: var(--v2-data-text);
+  background: color-mix(in srgb, var(--v2-data) 12%, var(--color-surface));
+}
+.dz-recent-panel li a {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+  font-size: 13px;
+}
+.dz-recent-panel small {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+.dz-recent-panel time {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+.dz-chart-legend {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin: 0 0 20px;
+}
+.dz-chart-legend span {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.dz-chart-legend i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--v2-data);
+}
+.dz-chart-legend span:last-child i {
+  background: #cedce8;
+}
+.dz-week-bars {
+  display: flex;
+  gap: 8px;
+  height: 154px;
+  padding-bottom: 20px;
+  position: relative;
+  background: repeating-linear-gradient(
+    to top,
+    transparent 0,
+    transparent 32px,
+    var(--color-border) 33px,
+    transparent 34px
+  );
+}
+.dz-week-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--color-text-muted);
+  padding-right: 4px;
+}
+.dz-week-day {
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  flex: 1;
+  position: relative;
+}
+.dz-week-pair {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: end;
+  gap: 3px;
+}
+.dz-week-bar {
+  width: 12px;
+  min-width: 0;
+  max-height: 100%;
+  --bar-color: var(--v2-data);
+  background: var(--bar-color);
+  border-radius: 3px 3px 0 0;
+}
+.dz-week-bar.is-previous {
+  --bar-color: #cedce8;
+  background: var(--bar-color);
+}
+.dz-week-bar.is-partial {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--bar-color) 0 3px,
+    var(--color-surface) 3px 4px
+  );
+}
+.dz-week-day > span {
+  position: absolute;
+  bottom: -20px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 10px;
+  color: var(--color-text-muted);
+}
+.dz-week-comparison > .field-hint {
+  font-size: 10px;
+  line-height: 1.5;
+  margin: 12px 0 0;
+}
+.dz-chart-table {
+  margin-top: 10px;
+  font-size: 11px;
+}
+.dz-chart-table summary {
+  padding: 4px 0;
+  min-height: 28px;
+  color: var(--v2-data-text);
+}
+.dz-chart-table table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+}
+.dz-chart-table td,
+.dz-chart-table th {
+  padding: 6px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+}
+.dz-project-identity {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin: 16px 0 18px;
+}
+.dz-project-identity .dz-event-icon {
+  border-radius: 50%;
+  width: 46px;
+  height: 46px;
+}
+.dz-project-identity h3 {
+  font-size: 17px;
+  margin: 0 0 5px;
+}
+.dz-project-identity p {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  margin: 0;
+}
+.dz-project-panel .v2-project-timeline {
+  margin: 0;
+}
+.dz-project-panel .v2-project-timeline > p {
+  font-size: 10px;
+}
+.dz-project-panel progress {
+  height: 14px;
+}
+.dz-project-statistics {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+.dz-project-statistics > div {
+  flex: 1;
+  border: 1px solid var(--color-border);
+  padding: 12px 6px;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+}
+.dz-project-statistics strong {
+  font-size: 17px;
+  white-space: nowrap;
+}
+.dz-project-statistics span {
+  color: var(--color-text-muted);
+  font-size: 10px;
+}
+.dz-plan-disclosure {
+  grid-column: 1/-1;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  padding: 16px 20px;
+}
+.dz-plan-disclosure > summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+  font-weight: 650;
+}
+@media (min-width: 1024px) {
+  .dz-insights {
+    grid-template-columns: repeat(24, minmax(0, 1fr));
+  }
+  .dz-weight-panel {
+    grid-column: span 15;
+  }
+  .dz-macros-panel {
+    grid-column: span 9;
+  }
+  .dz-recent-panel,
+  .dz-week-panel,
+  .dz-project-panel {
+    grid-column: span 8;
+  }
+  .dz-insights:not(:has(.dz-weight-panel)) .dz-macros-panel {
+    grid-column: 1/-1;
+  }
+  .dz-insights:not(:has(.dz-macros-panel)) .dz-weight-panel {
+    grid-column: 1/-1;
+  }
+  .dz-insights:not(:has(.dz-week-panel)) .dz-recent-panel,
+  .dz-insights:not(:has(.dz-week-panel)) .dz-project-panel {
+    grid-column: span 12;
+  }
+}
+@media (min-width: 1024px) and (max-width: 1365px) {
+  .dz-insights .content-card {
+    padding: 18px;
+  }
+  .dz-insights h2 {
+    font-size: 17px;
+  }
+  .dz-macro-distribution {
+    grid-template-columns: 1fr;
+  }
+  .dz-macro-donut {
+    max-width: 125px;
+  }
+  .dz-macro-distribution dl > div {
+    padding: 7px 0;
+  }
+  .dz-weight-content {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .dz-weight-context {
+    display: none;
+  }
+  .dz-recent-panel,
+  .dz-week-panel {
+    grid-column: span 12;
+  }
+  .dz-project-panel {
+    grid-column: 1/-1;
+  }
+}
+@media (max-width: 767px) {
+  .dz-insights .content-card {
+    padding: 18px;
+  }
+  .dz-weight-content {
+    grid-template-columns: 1fr;
+  }
+  .dz-weight-context {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+  .dz-weight-context small:first-of-type {
+    margin: 0;
+  }
+  .dz-macro-distribution {
+    grid-template-columns: minmax(110px, 0.8fr) minmax(140px, 1.2fr);
+    gap: 10px;
+  }
+  .dz-macro-distribution dd {
+    gap: 6px;
+  }
+  .dz-macro-distribution dl > div {
+    font-size: 10px;
+  }
+  .dz-macro-distribution .daily-metric {
+    font-size: 24px;
+  }
+}
+
+.dz-period-form label {
+  display: block;
+  width: auto;
+  margin: 0;
+  flex: 1;
+}
+.dz-period-form button {
+  min-width: 44px;
+  min-height: 44px;
+  flex-shrink: 0;
+}
+.dz-period-form select {
+  min-height: 44px;
+  max-width: 100%;
+}
+@media (max-width: 767px) {
+  .dz-weight-panel .section-heading {
+    flex-wrap: wrap;
+  }
+  .dz-period-form {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .dz-period-form select {
+    width: 100%;
+  }
+}
+
+.metric-atividades .metric-comparison > .progress-ring {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .dz-weight-panel,
+  .dz-macros-panel {
+    min-height: 245px;
+  }
+  .v2-dashboard .metric-card .dz-ring-percent {
+    font-size: 16px;
+    line-height: 1;
+    margin: 0;
+  }
+  .v2-dashboard .metric-atividades .metric-comparison > .progress-ring {
+    display: block;
+  }
+  .v2-dashboard .metric-atividades .metric-comparison > progress {
+    display: none;
+  }
+  .v2-dashboard .metric-atividades .ring-fill {
+    stroke: var(--v2-data-stroke);
+  }
+  .v2-dashboard .metric-card .activity-day-totals {
+    display: none;
+  }
+  .v2-dashboard .metric-alimentacao > .metric-comparison {
+    display: none;
+  }
+  .v2-dashboard .metric-card > p {
+    margin-block: 4px;
+  }
+  .v2-dashboard .metric-card .metric-comparison {
+    margin-top: 5px;
+  }
+  .v2-dashboard .metric-card {
+    padding: 20px 74px 18px 72px;
+    min-height: 122px;
+  }
+  .v2-dashboard .metric-card .icon-box {
+    position: absolute;
+    left: 18px;
+    top: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+  }
+  .v2-dashboard .metric-card .progress-ring {
+    width: 60px;
+    height: 60px;
+    top: 24px;
+    right: 10px;
+  }
+  .v2-dashboard .metric-card .metric-value {
+    padding: 0;
+    font-size: 24px;
+    white-space: nowrap;
+  }
+  .v2-dashboard .metric-card .metric-empty {
+    font-size: 13px;
+    white-space: normal;
+  }
+  .v2-dashboard .metric-peso .weight-chart {
+    display: block;
+    position: absolute;
+    right: 12px;
+    top: 30px;
+    width: 80px;
+    margin: 0;
+  }
+  .v2-dashboard .metric-peso .weight-chart svg {
+    max-height: 46px;
+  }
+  .v2-dashboard .metric-peso .weight-chart text,
+  .v2-dashboard .metric-peso .weight-chart line,
+  .v2-dashboard .metric-peso .weight-chart circle,
+  .v2-dashboard .metric-peso .weight-chart figcaption {
+    display: none;
+  }
+  .v2-dashboard .metric-peso .metric-comparison {
+    margin-right: -55px;
+    font-size: 10px;
+  }
+}
+@media (min-width: 1600px) {
+  .v2-dashboard .metric-card {
+    padding-left: 90px;
+    padding-right: 96px;
+  }
+  .v2-dashboard .metric-card .icon-box {
+    width: 56px;
+    height: 56px;
+    top: 18px;
+  }
+  .v2-dashboard .metric-card .progress-ring {
+    width: 78px;
+    height: 78px;
+    top: 18px;
+    right: 14px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .v2-dashboard .v2-dashboard-toolbar,
+  .v2-dashboard .dashboard-welcome {
+    margin-top: 20px;
+  }
+  .v2-dashboard .metric-atividades > p:not(.metric-value),
+  .v2-dashboard .metric-peso > p:not(.metric-value):not(.metric-comparison) {
+    display: none;
+  }
+  .dz-weight-panel > .section-heading {
+    margin-bottom: 0;
+  }
+  .dz-weight-context {
+    line-height: 16px;
+  }
+  .dz-weight-context > strong {
+    line-height: 1.2;
+  }
+  .dz-weight-context small {
+    line-height: 14px;
+  }
+  .dz-weight-context b {
+    line-height: 20px;
+  }
+  .dz-project-identity {
+    margin: 12px 0 10px;
+  }
+  .dz-project-panel .v2-project-timeline {
+    position: relative;
+  }
+  .dz-project-panel .v2-project-timeline > div {
+    font-size: 10px;
+  }
+  .dz-project-panel .v2-project-timeline > div strong {
+    position: absolute;
+    right: 0;
+    top: -49px;
+    color: var(--v2-data-text);
+    font-size: 21px;
+  }
+  .dz-project-panel .v2-project-timeline > p {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .dz-project-panel .v2-project-timeline progress {
+    margin-block: 6px;
+  }
+  .dz-project-panel .v2-project-timeline progress::-webkit-progress-value {
+    background: var(--v2-data);
+  }
+  .dz-project-panel .v2-project-timeline progress::-moz-progress-bar {
+    background: var(--v2-data);
+  }
+  .dz-project-statistics {
+    margin-top: 12px;
+  }
+  .dz-project-statistics > div {
+    padding-block: 10px;
+  }
+  .dz-week-panel {
+    position: relative;
+  }
+  .dz-week-bars {
+    height: 130px;
+  }
+  .dz-chart-legend {
+    margin-bottom: 12px;
+  }
+  .dz-chart-table {
+    position: absolute;
+    right: 16px;
+    top: 18px;
+    margin: 0;
+  }
+  .dz-chart-table > summary {
+    min-height: 24px;
+    min-width: 24px;
+    display: grid;
+    place-items: center;
+    list-style: none;
+    background: none;
+    padding: 0;
+  }
+  .dz-chart-table > summary::-webkit-details-marker {
+    display: none;
+  }
+  .dz-chart-table[open] {
+    z-index: 10;
+    padding: 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    background: var(--color-surface);
+    box-shadow: var(--v2-shadow);
+  }
+  .dz-chart-table[open] table {
+    width: min(300px, calc(100vw - 48px));
+  }
+}
+@media (min-width: 1024px) {
+  .v2-dashboard .metric-card h2 {
+    font-size: 14px;
+  }
+  .v2-dashboard .metric-card .metric-value {
+    font-size: 26px;
+  }
+  .v2-dashboard .metric-card > p:not(.metric-value) {
+    font-size: 12px;
+    line-height: 18px;
+  }
+  .dz-macro-distribution dl > div {
+    font-size: 14px;
+  }
+  .dz-macro-distribution dd > span {
+    font-size: 12px;
+  }
+  .dz-recent-panel li {
+    padding-block: 7px;
+  }
+  .dz-recent-panel li a {
+    font-size: 14px;
+    line-height: 18px;
+  }
+  .dz-recent-panel small {
+    font-size: 12px;
+    line-height: 18px;
+  }
+  .dz-recent-panel time {
+    font-size: 11px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .v2-header {
+    padding-block: 12px;
+    min-height: 80px;
+  }
+  .v2-dashboard .areas-section {
+    margin-top: 8px;
+  }
+  .v2-dashboard .metric-card {
+    padding-top: 18px;
+    padding-bottom: 16px;
+  }
+  .dz-weight-panel,
+  .dz-macros-panel {
+    padding-block: 16px;
+  }
+  .dz-insights .section-heading:has(> a) {
+    height: 26px;
+  }
+  .dz-recent-panel,
+  .dz-week-panel,
+  .dz-project-panel {
+    min-height: 292px;
+  }
+  .dz-chart-table {
+    top: 8px;
+    right: 8px;
+  }
+  .dz-chart-table > summary {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .v2-dashboard .area-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1280px) and (max-width: 1599px) {
+  .v2-dashboard .metric-card {
+    padding-left: 62px;
+    padding-right: 64px;
+  }
+  .v2-dashboard .metric-card .metric-value {
+    font-size: 24px;
+  }
+  .v2-dashboard .metric-card .icon-box {
+    width: 34px;
+    height: 34px;
+    left: 16px;
+  }
+  .v2-dashboard .metric-card .progress-ring {
+    width: 54px;
+    height: 54px;
+  }
+}
+@media (min-width: 1600px) {
+  .v2-workspace {
+    padding-right: 24px;
+  }
+  .v2-dashboard .area-grid {
+    grid-template-columns:
+      minmax(0, 343fr) minmax(0, 299fr) minmax(0, 319fr)
+      minmax(0, 377fr);
+    gap: 17px;
+  }
+  .dz-insights .dz-weight-panel {
+    margin-right: 6px;
+  }
+  .dz-insights .dz-macros-panel {
+    margin-left: -10px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .v2-dashboard-toolbar {
+    flex-wrap: nowrap;
+    gap: 12px;
+  }
+  .v2-dashboard-toolbar .v2-project-selector {
+    flex: 1 1 240px;
+  }
+  .v2-dashboard-toolbar .dz-date-navigator {
+    flex: 1 1 200px;
+  }
+}
+@media (min-width: 1440px) {
+  .v2-dashboard {
+    grid-template-columns: minmax(0, 1.03fr) minmax(440px, 1fr);
+  }
+}
+@media (min-width: 1600px) {
+  .v2-dashboard-toolbar {
+    gap: 40px;
+  }
+  .v2-dashboard-toolbar .v2-project-selector {
+    flex-basis: 334px;
+  }
+  .v2-dashboard-toolbar .dz-date-navigator {
+    flex-basis: 296px;
+  }
+}
+
+.dz-week-empty {
+  position: absolute;
+  inset: 30px 24px auto 50px;
+  margin: 0;
+  padding: 10px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  line-height: 1.5;
+  text-align: center;
+  z-index: 1;
+}

@@ -1,3 +1,8 @@
+import {
+  openProjectCreate,
+  dismissProjectFeedback,
+} from "./helpers/project-ui";
+import { openManualMealRecorder } from "./helpers/food-diary";
 import { expect, test, type Page } from "@playwright/test";
 import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
@@ -36,12 +41,15 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
   await page.getByRole("button", { name: "Entrar", exact: true }).click();
   await expect(page).toHaveURL(/\/painel$/);
   await page.goto("/painel/projetos");
+  await openProjectCreate(page);
   await page.getByLabel("Nome do projeto", { exact: true }).fill("Diário E2E");
   await page.getByLabel("Meta diária de água (ml)").fill("2000");
   await page
+    .locator("#new-project")
     .getByRole("button", { name: "Criar projeto", exact: true })
     .click();
   await expect(page.getByRole("status")).toContainText("Projeto criado");
+  await dismissProjectFeedback(page);
   await page.goto("/painel/agua");
   await expect(page.locator(".module-page > form.filter-form")).toHaveCount(0);
   await page.locator(".record-create > summary").click();
@@ -54,12 +62,17 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
   await water
     .getByRole("button", { name: "Salvar registro", exact: true })
     .click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Continuar", exact: true })
+    .click();
   await expect(
-    page.getByRole("heading", { name: "300 ml", exact: true, level: 2 }),
+    page.getByRole("heading", { name: "300 ml", exact: true, level: 3 }),
   ).toBeVisible();
   const item = page.getByRole("article", { includeHidden: true }).filter({
     has: page.getByRole("heading", { name: "300 ml", exact: true }),
   });
+  await item.locator(".water-record-menu > summary").click();
   await item.getByText("Editar registro", { exact: true }).click();
   await item.getByLabel("Volume (ml)").fill("450");
   await item
@@ -76,10 +89,19 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
   await weight
     .getByRole("button", { name: "Salvar peso", exact: true })
     .click();
-  await expect(weight.getByRole("status")).toContainText("Peso salvo");
+  await expect(page.getByRole("dialog")).toContainText("Peso salvo");
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Continuar", exact: true })
+    .click();
   await weight.getByLabel("Peso (kg)").fill("89.5");
   await weight
     .getByRole("button", { name: "Salvar peso", exact: true })
+    .click();
+  await expect(page.getByRole("dialog")).toContainText("Peso salvo");
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Continuar", exact: true })
     .click();
   await expect(page.getByRole("article", { includeHidden: true })).toHaveCount(
     1,
@@ -94,6 +116,11 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
   await measure.getByLabel("Cintura (cm)", { exact: true }).fill("90");
   await measure
     .getByRole("button", { name: "Salvar medidas", exact: true })
+    .click();
+  await expect(page.getByRole("dialog")).toContainText("Medidas salvas");
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Continuar", exact: true })
     .click();
   await expect(page.getByRole("article", { includeHidden: true })).toHaveCount(
     1,
@@ -117,16 +144,25 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
     .getByRole("button", { name: "Salvar registro", exact: true })
     .click();
   await expect(activity.getByRole("alert")).toContainText("exigem distância");
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Voltar ao formulário", exact: true })
+    .click();
+  await expect(activity.getByLabel("Duração (minutos)")).toHaveValue("30");
   await activity.getByLabel("Distância (km)").fill("5");
   await activity
     .getByRole("button", { name: "Salvar registro", exact: true })
     .click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Continuar", exact: true })
+    .click();
   await expect(
-    page.getByRole("heading", { name: "1 sessões na semana" }),
+    page.getByRole("heading", { name: "1 sessão na semana" }),
   ).toBeVisible();
   await capture("atividades");
   await page.goto("/painel/alimentacao");
-  await page.locator(".record-create > summary").click();
+  await openManualMealRecorder(page);
   const meal = form(page, "Salvar registro");
   await meal
     .getByLabel("Alimento", { exact: true })
@@ -142,7 +178,7 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
     page.locator(".nutrition-grid").getByText("Não informado", { exact: true }),
   ).toHaveCount(4);
   await expect(
-    page.getByText("Parcial: o diário", { exact: false }),
+    page.getByText("Sem plano para comparar.", { exact: false }),
   ).toBeVisible();
   const savedMeal = page.getByRole("dialog", {
     name: "Registro salvo",
@@ -154,7 +190,9 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
     .click();
   await expect(savedMeal).toHaveCount(0);
   await expect(meal.getByLabel("Alimento", { exact: true })).toHaveValue("");
-  await page.locator(".meal-record-group > summary").click();
+  await page
+    .locator(".meal-record-group[data-recorded=true] > summary")
+    .click();
   await page
     .getByRole("article", { includeHidden: true })
     .locator(".food-record-details > summary")
@@ -175,7 +213,7 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
     page.locator(".nutrition-grid").getByText("0 kcal", { exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByText("Parcial: o diário", { exact: false }),
+    page.getByText("Sem plano para comparar.", { exact: false }),
   ).toBeVisible();
   await expect(page.locator(".food-calendar")).toHaveCount(0);
   await expect(page.locator(".module-page > form.filter-form")).toHaveCount(0);
@@ -253,10 +291,12 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
   await expect(
     page.getByRole("link", { name: "Gerenciar projetos" }),
   ).toBeHidden();
-  await expect(page.locator(".dashboard-hero")).toBeVisible();
+  await expect(page.locator(".v2-project-selector > summary")).toBeVisible();
+  await expect(page.locator(".project-mobile-progress")).toBeVisible();
   await expect(page.locator(".area-card.metric-agua")).toBeVisible();
   await page.setViewportSize({ width: 1280, height: 844 });
-  await expect(page.getByLabel("Data da consulta")).toHaveCount(0);
+  await expect(page.getByLabel("Data da consulta")).toBeHidden();
+  await expect(page.locator(".v2-project-selector > summary")).toBeVisible();
   await page.waitForFunction(
     () => sessionStorage.getItem("diazen-dashboard") !== null,
   );
@@ -290,10 +330,12 @@ test("registros persistem, substituem valores únicos e preservam desconhecidos"
   await expect(
     page.getByRole("link", { name: "Gerenciar projetos" }),
   ).toBeHidden();
-  await expect(page.locator(".dashboard-hero")).toBeVisible();
+  await expect(page.locator(".v2-project-selector > summary")).toBeVisible();
+  await expect(page.locator(".project-mobile-progress")).toBeVisible();
   await expect(page.locator(".area-card.metric-agua")).toBeVisible();
   await page.setViewportSize({ width: 1280, height: 844 });
-  await expect(page.getByLabel("Data da consulta")).toHaveCount(0);
+  await expect(page.getByLabel("Data da consulta")).toBeHidden();
+  await expect(page.locator(".v2-project-selector > summary")).toBeVisible();
   await page.waitForFunction(
     () => sessionStorage.getItem("diazen-dashboard") !== null,
   );

@@ -126,11 +126,9 @@ Com plano salvo, Alimentação exibe as refeições incluídas e permite **Regis
 
 A migração incremental `202610240011_plan_meal_records.sql` adiciona origem do planejamento aos itens e a RPC transacional de registro. Deve ser aplicada antes da atualização da aplicação; preserva os registros existentes e não exige reset. A exportação inclui a origem nos itens; os backups completos preservam a versão e as referências.
 
-
 O dashboard oferece **Histórico geral** (`/painel/historico`) do projeto ativo: calendário mensal aberto, seleção de um dia e resultados em accordion por data, com grupos de refeições, hidratação, atividades, peso, medidas e fotos. A consulta não muda o projeto ativo; fotos abrem na galeria privada. Projetos anteriores continuam disponíveis em Projetos.
 
 A consulta por data fica centralizada no Histórico geral. As telas operacionais mantêm os campos de data para salvar registros retroativos, mas não exibem seletores de consulta nem a faixa de dias da Alimentação. A navegação no calendário mostra logo e “Carregando registros…” enquanto aguarda os dados.
-
 
 Atividades inclui Garmin Personal API exclusivamente para a conta proprietária configurada no servidor. Permite selecionar atividades anteriores para importar e salvar automaticamente as novas, com título, tipo, data, duração, distância e calorias disponíveis. Respeita o projeto ativo, evita duplicações e preserva edições/exclusões do diário. A sincronização ocorre ao abrir o aplicativo e a cada quinze minutos pelo Supabase Cron. Requer a migração incremental 012 e configuração privada; veja [operação, limites e validação Garmin](docs/integracao-garmin.md).
 
@@ -163,3 +161,17 @@ Em **Dashboard → Meus planos**, cadastre referências de hidratação ou ficha
 Salvar um plano não gera consumo nem atividade. Para água, escolha e confirme uma referência dentro das faixas cadastradas para atualizar a meta de hoje em diante. Na ficha, registre a duração ou escolha uma atividade já registrada/importada da data consultada; o vínculo não duplica a sessão. A remoção do vínculo mantém a atividade. Cargas/séries executadas e comparação por exercício serão uma próxima entrega.
 
 Requer a migração incremental `supabase/migrations/202611110018_phase_plans.sql` sobre 017, com backup prévio; já aplicada ao Supabase configurado após backup cifrado verificado, sem criar dados pessoais. Em outras instalações, aplicar antes de publicar esta versão; não reaplicar o bundle. Limpeza de referências excluídas integra `npm run privacy:purge`, e `npm run backup` inclui as imagens privadas. Ver [escopo e aceite](docs/planos-da-fase.md). Validar com `node --test tests/database/phase-plans.test.mjs tests/database/plan-asset-cleanup.test.mjs` e, após build, `npx playwright test tests/phase-plans.spec.ts --project=chromium`.
+
+## Diazen 2.0 — Sprint 1 visual
+
+O redesign aprovado em 16/11/2026 introduz shell protegido com sidebar no desktop, navegação inferior no mobile/tablet e dashboard responsivo: Dark Premium até 1023 px e Light Premium a partir de 1024 px. Essa decisão substitui a ausência de barra inferior do baseline visual 0.1. Os módulos existentes continuam operacionais; somente sua estrutura compartilhada e o dashboard integram esta primeira sprint. Backend, banco, APIs e regras de registro permanecem preservados.
+
+Planejamento, limites e critérios por sprint em [implementation-plan](docs/design/diazen-v2/implementation-plan.md); componentes, verificações, capturas e pendências no [relatório da Sprint 1](docs/design/diazen-v2/sprint-1-report.md). Alimentação (Sprint 2) aguarda aprovação específica. Para verificar somente a nova composição após build: `npx playwright test tests/redesign-dashboard.spec.ts --project=chromium`; a CI também valida WebKit e os fluxos anteriores.
+
+## Diazen 2.0 — discovery de alta fidelidade (17/11/2026)
+
+A nova sequência começa por discovery, sem alterar produção: [auditoria visual/técnica](docs/design/diazen-v2/visual-audit.md), [inventário e lacunas funcionais](docs/design/diazen-v2/functional-gap-analysis.md), [proposta de Design System](docs/design/diazen-v2/design-system.md) e [plano atualizado](docs/design/diazen-v2/implementation-plan.md). Os 13 protótipos foram inspecionados; a opção de desktop claro/escuro integra a proposta. A Sprint 1 anterior é histórica, sem homologação de alta fidelidade. A próxima entrega proposta é Dashboard desktop, exclusivamente após aprovação do proprietário; não iniciar outros módulos automaticamente.
+
+### Diazen 2.0 — recipientes de água
+
+A migração aditiva `202611170019_water_containers.sql` cria recipientes salvos por conta, com RLS, limite de 50, volume de 1–5000 ml e exclusão em cascata. O nome e o volume são copiados para novos lançamentos; alterar ou excluir o cadastro preserva o consumo anterior. A exportação inclui `water_containers`. O cadastro é acessível em `/painel/agua/recipientes`, inclusive sem projeto ativo. Confira o [relatório da Hidratação](docs/design/diazen-v2/phase-4-hydration-report.md) para o estado da entrega, aplicação hospedada e verificações. Nunca reaplique o bundle em um ambiente existente.

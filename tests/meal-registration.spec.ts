@@ -1,3 +1,8 @@
+import {
+  openProjectCreate,
+  dismissProjectFeedback,
+} from "./helpers/project-ui";
+import { openManualMealRecorder } from "./helpers/food-diary";
 import { test, expect } from "@playwright/test";
 import { dietPdf } from "./fixtures/diet-pdf.mjs";
 import AxeBuilder from "@axe-core/playwright";
@@ -15,14 +20,17 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
   await page.getByRole("button", { name: "Entrar", exact: true }).click();
   await expect(page).toHaveURL(/\/painel$/);
   await page.goto("/painel/projetos");
+  await openProjectCreate(page);
   await page
     .getByLabel("Nome do projeto", { exact: true })
     .fill("Refeições QA");
   await page.getByLabel("Meta diária de água (ml)").fill("2000");
   await page
+    .locator("#new-project")
     .getByRole("button", { name: "Criar projeto", exact: true })
     .click();
   await expect(page.getByRole("status")).toContainText("Projeto criado");
+  await dismissProjectFeedback(page);
   await page.goto("/painel/plano");
   await expect(page.getByLabel("Selecionar PDF")).toBeEnabled();
   await page.getByLabel("Selecionar PDF").setInputFiles({
@@ -97,7 +105,7 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
     first.getByRole("button", { name: "Registrar conforme o plano" }),
   ).toHaveCount(0);
   await expect(
-    page.getByText("Parcial: o diário", { exact: false }),
+    page.getByText("Plano parcialmente registrado.", { exact: false }),
   ).toBeVisible();
   const second = page.locator(".planned-meal").nth(1);
   await second.locator(":scope > summary").click();
@@ -111,13 +119,12 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
     3,
   );
   await expect(
-    page.getByText("Completo: todas as refeições do plano foram registradas."),
+    page.getByText("Todas as refeições do plano têm registros."),
   ).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Marcar dia como concluído" }),
   ).toHaveCount(0);
-  const manual = page.locator(".manual-meal-recorder");
-  await manual.locator(":scope > summary").click();
+  const manual = await openManualMealRecorder(page);
   let food = manual.locator(".meal-food-editor").first();
   const searches: string[] = [];
   await page.route("**/api/alimentos/online", async (route) => {
@@ -222,7 +229,7 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
     "calorias pendentes",
   );
   await manual.locator(":scope > summary").click();
-  await manual.locator(":scope > summary").click();
+  await openManualMealRecorder(page);
   await expect(manual.getByLabel("Alimento", { exact: true })).toHaveValue("");
   const exported = await (await page.request.get("/api/exportar")).json();
   expect(
@@ -231,7 +238,10 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
   expect(
     exported.diet_plans[0].document.meals[0].groups[0].choices[0].amount,
   ).toBe(125);
-  await expect(page.locator(".meal-record-group")).toHaveCount(3);
+  await expect(page.locator(".meal-record-group")).toHaveCount(6);
+  await expect(
+    page.locator(".meal-record-group[data-recorded=true]"),
+  ).toHaveCount(3);
   await expect(
     page.locator(".meal-record-group > summary").first(),
   ).toContainText("Café da manhã");
@@ -241,17 +251,15 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
   await expect(
     page.locator(".meal-record-group > summary").first(),
   ).toContainText("247,3 kcal");
-  const firstGroup = await page
-    .locator(".meal-record-group")
-    .nth(0)
-    .boundingBox();
-  const secondGroup = await page
-    .locator(".meal-record-group")
-    .nth(1)
-    .boundingBox();
-  expect(
-    secondGroup!.y - (firstGroup!.y + firstGroup!.height),
-  ).toBeGreaterThanOrEqual(11);
+  await page.setViewportSize({ width: 390, height: 844 });
+  // Measure the visible row wrappers in one frame; scrolling to the form can
+  // otherwise change viewport coordinates between two separate measurements.
+  const gap = await page.locator(".food-meal-row").evaluateAll((rows) => {
+    const first = rows[0].getBoundingClientRect();
+    const second = rows[1].getBoundingClientRect();
+    return second.top - first.bottom;
+  });
+  expect(gap).toBeGreaterThanOrEqual(8);
   await page.locator(".meal-record-group > summary").first().click();
   const record = page.getByRole("article", { includeHidden: true }).first();
   await expect(record.locator(".food-record-details")).not.toHaveAttribute(
@@ -272,6 +280,7 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
+  await page.locator(".meal-delete-trigger:visible").first().hover();
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   await page.screenshot({
     path: "artifacts/meal-registration/food-page-320.png",
@@ -307,14 +316,15 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
     .getByRole("button", { name: "Confirmar exclusão", exact: true })
     .click();
   await expect(
-    page.getByText("Parcial: o diário", { exact: false }),
+    page.getByText("Plano parcialmente registrado.", { exact: false }),
   ).toBeVisible();
-  const dinner = page
-    .locator(".meal-record-group")
-    .filter({ has: page.locator("summary strong", { hasText: "Jantar" }) });
-  await dinner.locator(":scope > summary").click();
+  const dinner = page.getByRole("group", { name: "Jantar", exact: true });
+  await dinner.locator(".meal-record-group > summary").click();
   await dinner
-    .getByRole("button", { name: "Excluir refeição inteira", exact: true })
+    .getByRole("button", {
+      name: "Excluir refeição inteira: Jantar",
+      exact: true,
+    })
     .click();
   const dialog = page.getByRole("dialog", {
     name: "Excluir refeição inteira?",
@@ -329,7 +339,10 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
     4,
   );
   await dinner
-    .getByRole("button", { name: "Excluir refeição inteira", exact: true })
+    .getByRole("button", {
+      name: "Excluir refeição inteira: Jantar",
+      exact: true,
+    })
     .click();
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   await dialog.getByRole("checkbox").check();
@@ -340,7 +353,10 @@ test("plano salvo oferece registro explícito, porções reais, refeição manua
   await expect(page.getByRole("article", { includeHidden: true })).toHaveCount(
     2,
   );
-  await expect(page.locator(".meal-record-group")).toHaveCount(2);
+  await expect(page.locator(".meal-record-group")).toHaveCount(6);
+  await expect(
+    page.locator(".meal-record-group[data-recorded=true]"),
+  ).toHaveCount(2);
   const afterDelete = await (await page.request.get("/api/exportar")).json();
   expect(
     afterDelete.meal_items.some(

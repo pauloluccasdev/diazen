@@ -67,8 +67,11 @@ test("mostrar senhas preserva valores, não envia formulários e funciona por te
     "type",
     "text",
   );
-  await page.goto("/painel/perfil");
-  await page.getByText("Solicitar exclusão da conta", { exact: true }).click();
+  await page.goto("/painel/perfil?secao=conta");
+  await page
+    .locator("summary")
+    .filter({ hasText: /^Solicitar exclusão da conta$/ })
+    .click();
   await page
     .getByLabel("Senha atual", { exact: true })
     .fill("senha-de-teste-123");

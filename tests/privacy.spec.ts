@@ -1,3 +1,7 @@
+import {
+  openProjectCreate,
+  dismissProjectFeedback,
+} from "./helpers/project-ui";
 import { expect, test } from "@playwright/test";
 import sharp from "sharp";
 test("exclusão confirmada bloqueia acesso e remove dados e fotos de histórico", async ({
@@ -14,14 +18,17 @@ test("exclusão confirmada bloqueia acesso e remove dados e fotos de histórico"
   await page.getByRole("button", { name: "Entrar", exact: true }).click();
   await expect(page).toHaveURL(/\/painel$/);
   await page.goto("/painel/projetos");
+  await openProjectCreate(page);
   await page
     .getByLabel("Nome do projeto", { exact: true })
     .fill("Privacidade E2E");
   await page.getByLabel("Meta diária de água (ml)").fill("2000");
   await page
+    .locator("#new-project")
     .getByRole("button", { name: "Criar projeto", exact: true })
     .click();
   await expect(page.getByRole("status")).toContainText("Projeto criado");
+  await dismissProjectFeedback(page);
   const png = await sharp({
     create: { width: 20, height: 30, channels: 3, background: "#FF9F24" },
   })
@@ -48,6 +55,7 @@ test("exclusão confirmada bloqueia acesso e remove dados e fotos de histórico"
   const project = page.getByRole("article").filter({
     has: page.getByRole("heading", { name: "Privacidade E2E", exact: true }),
   });
+  await project.locator(".dz-project-menu").click();
   await project
     .getByLabel("Entendo que o projeto ficará somente leitura.")
     .first()
@@ -56,6 +64,7 @@ test("exclusão confirmada bloqueia acesso e remove dados e fotos de histórico"
     .getByRole("button", { name: "Concluir projeto", exact: true })
     .click();
   await expect(project.getByText("Concluído", { exact: true })).toBeVisible();
+  await dismissProjectFeedback(page);
   const exported = await page.request.get("/api/exportar");
   expect(exported.status()).toBe(200);
   const data = await exported.json();
@@ -66,8 +75,11 @@ test("exclusão confirmada bloqueia acesso e remove dados e fotos de histórico"
   const cookies = (await context.cookies())
     .map((c) => `${c.name}=${c.value}`)
     .join("; ");
-  await page.goto("/painel/perfil");
-  await page.getByText("Solicitar exclusão da conta", { exact: true }).click();
+  await page.goto("/painel/perfil?secao=conta");
+  await page
+    .locator("summary")
+    .filter({ hasText: /^Solicitar exclusão da conta$/ })
+    .click();
   const form = page.locator("form").filter({
     has: page.getByRole("button", {
       name: "Excluir minha conta",

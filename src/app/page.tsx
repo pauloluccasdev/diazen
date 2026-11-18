@@ -1,72 +1,11 @@
-import Link from "next/link";
-import {
-  ArrowRight,
-  FolderPlus,
-  Utensils,
-  Droplets,
-  Dumbbell,
-  ChartNoAxesCombined,
-  ShieldCheck,
-} from "lucide-react";
-
-const areas = [
-  {
-    title: "Alimentação",
-    detail: "Suas refeições, no seu ritmo.",
-    icon: Utensils,
-  },
-  {
-    title: "Hidratação",
-    detail: "Cada copo faz parte do caminho.",
-    icon: Droplets,
-  },
-  {
-    title: "Atividades",
-    detail: "Um espaço para seus movimentos.",
-    icon: Dumbbell,
-  },
-  {
-    title: "Evolução",
-    detail: "Peso, medidas e fotos da sua jornada.",
-    icon: ChartNoAxesCombined,
-  },
-];
+import { FolderPlus, ShieldCheck } from "lucide-react";
+import { AuthShell } from "@/components/auth/auth-shell";
+import { WelcomeExperience } from "@/components/auth/welcome-experience";
 
 export default function Home() {
   return (
-    <div className="opening-page">
-      <section className="opening-hero" aria-labelledby="welcome-title">
-        <div className="opening-content">
-          <h1 id="welcome-title" className="brand opening-brand">
-            dia<span>zen.</span>
-          </h1>
-          <p className="auth-tagline">Sua rotina. Sua evolução.</p>
-          <div className="area-grid opening-areas">
-            {areas.map(({ title, detail, icon: Icon }) => (
-              <article key={title}>
-                <span className="icon-box">
-                  <Icon size={22} strokeWidth={1.7} aria-hidden="true" />
-                </span>
-                <div>
-                  <h2>{title}</h2>
-                  <p>{detail}</p>
-                </div>
-              </article>
-            ))}
-          </div>
-          <div className="opening-actions">
-            <Link className="button-primary" href="/cadastro">
-              Começar minha jornada <ArrowRight size={18} aria-hidden="true" />
-            </Link>
-            <Link className="button-secondary" href="/entrar">
-              Já tenho uma conta
-            </Link>
-            <a className="back-link" href="#primeiros-passos">
-              Conhecer os primeiros passos
-            </a>
-          </div>
-        </div>
-      </section>
+    <AuthShell welcome>
+      <WelcomeExperience />
       <section
         className="getting-started"
         id="primeiros-passos"
@@ -111,6 +50,6 @@ export default function Home() {
         <ShieldCheck size={18} aria-hidden="true" />
         Sua jornada é pessoal. Seus dados também.
       </p>
-    </div>
+    </AuthShell>
   );
 }

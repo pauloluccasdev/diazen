@@ -22,6 +22,8 @@ export async function createDatabase(users) {
 }
 
 const tables = new Set([
+  "profiles",
+  "avatar_cleanup",
   "projects",
   "phase_plans",
   "plan_assets",
@@ -32,6 +34,7 @@ const tables = new Set([
   "daily_checkins",
   "eating_context_events",
   "water_goals",
+  "water_containers",
   "water_entries",
   "weights",
   "measurements",
@@ -51,6 +54,10 @@ const tables = new Set([
   "deletion_ledger",
 ]);
 const commands = new Set([
+  "due_avatar_jobs",
+  "save_profile_name",
+  "set_profile_avatar",
+  "remove_profile_avatar",
   "set_garmin_sleep_sync",
   "garmin_claim_sleep",
   "garmin_store_sleep",
@@ -86,6 +93,7 @@ export async function rest(
   userId,
   admin = false,
   failPhotoReply = () => false,
+  failAvatarReply = () => false,
 ) {
   let payload = null;
   if (request.method !== "GET" && request.method !== "HEAD") {
@@ -107,6 +115,16 @@ export async function rest(
       const args = params
         .map(([key], i) => `${identifier(key)} => $${i + 1}`)
         .join(",");
+      if (table === "due_avatar_jobs") {
+        rows = (
+          await db.query(
+            `select * from public.${identifier(table)}(${args})`,
+            params.map(([, value]) => value),
+          )
+        ).rows;
+        response.end(JSON.stringify(rows));
+        return;
+      }
       if (table === "food_calendar") {
         rows = (
           await db.query(
@@ -135,6 +153,19 @@ export async function rest(
           ),
         )
       ).rows;
+      if (
+        ["set_profile_avatar", "remove_profile_avatar"].includes(table) &&
+        failAvatarReply()
+      ) {
+        response.statusCode = 503;
+        response.end(
+          JSON.stringify({
+            code: "TEST_REPLY_LOST",
+            message: "Synthetic avatar reply lost after commit",
+          }),
+        );
+        return;
+      }
       response.end(JSON.stringify(rows[0]?.result ?? null));
       return;
     }
@@ -157,6 +188,36 @@ export async function rest(
           return `${column} >= $${values.length}`;
         });
         filters.push(`(${expressions.join(" or ")})`);
+        continue;
+      }
+      if (value.startsWith("in.(") && value.endsWith(")")) {
+        const raw = value.slice(4, -1);
+        if (!raw) {
+          filters.push("false");
+          continue;
+        }
+        const parts = [];
+        let token = "",
+          quoted = false,
+          escaped = false;
+        for (const character of raw) {
+          if (escaped) {
+            token += character;
+            escaped = false;
+          } else if (character === "\\" && quoted) escaped = true;
+          else if (character === '"') quoted = !quoted;
+          else if (character === "," && !quoted) {
+            parts.push(token.trim());
+            token = "";
+          } else token += character;
+        }
+        if (quoted || escaped) throw Error("Invalid IN filter");
+        parts.push(token.trim());
+        const placeholders = parts.map((part) => {
+          values.push(part);
+          return `$${values.length}`;
+        });
+        filters.push(`${identifier(key)} in (${placeholders.join(",")})`);
         continue;
       }
       const match = /^(eq|gte|lte|gt|lt|ilike)\.(.*)$/.exec(value);
@@ -190,14 +251,32 @@ export async function rest(
           : projection.split(",").map(identifier).join(",");
       sql = `select ${columns} from public.${identifier(table)}${where}${order ? " order by " + order : ""} limit ${Math.min(limit, 1000)} offset ${offset}`;
     } else if (request.method === "POST") {
-      const pairs = Object.entries(payload);
+      // PostgREST bulk inserts remain one SQL statement: actual constraints,
+      // triggers and RLS apply to every row and failures stay atomic.
+      const records = Array.isArray(payload) ? payload : [payload];
+      if (!records.length || records.length > 2000)
+        throw Error("Unsupported batch size");
+      const pairs = Object.entries(records[0]);
+      const keys = pairs.map(([key]) => key);
+      if (
+        records.some(
+          (record) =>
+            Object.keys(record).length !== keys.length ||
+            keys.some((key) => !Object.hasOwn(record, key)),
+        )
+      )
+        throw Error("Bulk rows must share the same fields");
       values.length = 0;
-      sql = `insert into public.${identifier(table)}(${pairs.map(([k]) => identifier(k)).join(",")}) values(${pairs
-        .map(([, v], i) => {
-          values.push(v);
-          return "$" + (i + 1);
-        })
-        .join(",")})`;
+      const tuples = records.map(
+        (record) =>
+          `(${keys
+            .map((key) => {
+              values.push(record[key]);
+              return "$" + values.length;
+            })
+            .join(",")})`,
+      );
+      sql = `insert into public.${identifier(table)}(${keys.map(identifier).join(",")}) values${tuples.join(",")}`;
       const conflict = url.searchParams.get("on_conflict");
       if (conflict)
         sql += ` on conflict(${conflict.split(",").map(identifier).join(",")}) do update set ${pairs

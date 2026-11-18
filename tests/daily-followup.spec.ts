@@ -1,3 +1,8 @@
+import {
+  openProjectCreate,
+  dismissProjectFeedback,
+} from "./helpers/project-ui";
+import { openManualMealRecorder } from "./helpers/food-diary";
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 test.use({ serviceWorkers: "block" });
@@ -12,6 +17,7 @@ test("fases, check-in opcional, contexto sem consumo e indicadores ocultos prese
   await page.getByRole("button", { name: "Entrar", exact: true }).click();
   await expect(page).toHaveURL(/\/painel$/);
   await page.goto("/painel/projetos");
+  await openProjectCreate(page);
   await page
     .getByLabel("Nome do projeto", { exact: true })
     .fill("Acompanhamento QA");
@@ -23,10 +29,13 @@ test("fases, check-in opcional, contexto sem consumo e indicadores ocultos prese
     return d.toISOString().slice(0, 10);
   };
   await page
+    .locator("#new-project")
     .getByRole("button", { name: "Criar projeto", exact: true })
     .click();
   await expect(page.getByRole("status")).toContainText("Projeto criado");
+  await dismissProjectFeedback(page);
   await page.goto("/painel");
+  await page.locator(".v2-followup > summary").click();
   await page.getByRole("link", { name: "Configurar fases" }).click();
   await page.getByText("Adicionar fase", { exact: true }).click();
   const phase = page.locator("form").filter({
@@ -46,6 +55,7 @@ test("fases, check-in opcional, contexto sem consumo e indicadores ocultos prese
     .getByRole("button", { name: "Continuar", exact: true })
     .click();
   await page.goto("/painel");
+  await page.locator(".v2-followup > summary").click();
   await expect(page.locator(".day-phase")).toContainText("Base e rotina");
   await expect(page.locator(".day-phase")).toContainText("Primeira revisão");
   await page.locator(".day-checkin-link").click();
@@ -110,7 +120,7 @@ test("fases, check-in opcional, contexto sem consumo e indicadores ocultos prese
       .locator(".history-group")
       .filter({ has: page.locator("summary strong", { hasText: "Check-in" }) }),
   ).toContainText("1 registro");
-  await page.goto("/painel/perfil");
+  await page.goto("/painel/perfil?secao=preferencias");
   const settings = page.locator("section").filter({
     has: page.getByRole("heading", {
       name: "O que quero ver no meu dashboard",
@@ -129,8 +139,15 @@ test("fases, check-in opcional, contexto sem consumo e indicadores ocultos prese
     .getByRole("button", { name: "Continuar", exact: true })
     .click();
   await page.goto("/painel");
+  await page.locator(".v2-followup > summary").click();
   await expect(page.locator(".metric-peso")).toHaveCount(0);
   await expect(page.locator(".daily-nutrition")).toHaveCount(0);
+  await expect(
+    page.getByRole("link", { name: "Fotos", exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("link", { name: "Fotos privadas", exact: true }),
+  ).toHaveCount(0);
   await expect(
     page.getByRole("link", { name: "Fotografias privadas", exact: true }),
   ).toHaveCount(0);
@@ -166,7 +183,7 @@ test("fases, check-in opcional, contexto sem consumo e indicadores ocultos prese
   ).toBeDisabled();
   await context.setOffline(false);
   await page.goto("/painel/alimentacao");
-  await page.locator(".manual-meal-recorder > summary").click();
+  await openManualMealRecorder(page);
   const manual = page.locator(".manual-meal-recorder");
   await manual.getByLabel("Alimento", { exact: true }).fill("Arroz branco");
   await manual.getByLabel("Quantidade consumida", { exact: true }).fill("100");

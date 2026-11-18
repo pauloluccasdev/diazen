@@ -1,3 +1,7 @@
+import {
+  openProjectCreate,
+  dismissProjectFeedback,
+} from "./helpers/project-ui";
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import sharp from "sharp";
@@ -22,6 +26,7 @@ test("planos revisados, imagem privada, meta vigente e vínculo de execução n�
   await page.getByRole("button", { name: "Entrar", exact: true }).click();
   await expect(page).toHaveURL(/\/painel$/);
   await page.goto("/painel/projetos");
+  await openProjectCreate(page);
   await page
     .getByLabel("Nome do projeto", { exact: true })
     .fill("Planos da fase QA");
@@ -35,9 +40,11 @@ test("planos revisados, imagem privada, meta vigente e vínculo de execução n�
   };
   await start.fill(shift(-1));
   await page
+    .locator("#new-project")
     .getByRole("button", { name: "Criar projeto", exact: true })
     .click();
   await expect(page.getByRole("status")).toContainText("Projeto criado");
+  await dismissProjectFeedback(page);
   await page.goto("/painel/fases");
   await page.getByText("Adicionar fase", { exact: true }).click();
   await page.getByLabel("Nome da fase", { exact: true }).fill("Base QA");

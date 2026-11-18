@@ -22,16 +22,22 @@ const icons = {
 export function ActivityRecordCard({
   row,
   children,
+  initiallyOpen = false,
 }: {
   row: Entry;
   children: ReactNode;
+  initiallyOpen?: boolean;
 }) {
   const Icon = icons[row.modality ?? "other"];
   const distanceMain =
     ["running", "cycling", "swimming"].includes(row.modality ?? "") &&
     row.distance_km != null;
   return (
-    <details className="activity-record-details">
+    <details
+      id={`activity-details-${row.id}`}
+      open={initiallyOpen}
+      className="activity-record-details"
+    >
       <summary>
         <span className="activity-record-topline">
           <span className="activity-record-type">

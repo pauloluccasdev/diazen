@@ -6,14 +6,22 @@ export function ActionDisclosure({
   icon: Icon,
   children,
   className = "",
+  id,
+  initiallyOpen = false,
 }: {
   title: string;
   icon: LucideIcon;
   children: ReactNode;
   className?: string;
+  id?: string;
+  initiallyOpen?: boolean;
 }) {
   return (
-    <details className={`project-setting ${className}`.trim()}>
+    <details
+      id={id}
+      open={initiallyOpen}
+      className={`project-setting ${className}`.trim()}
+    >
       <summary>
         <span className="project-setting-icon" aria-hidden="true">
           <Icon size={20} />

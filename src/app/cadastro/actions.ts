@@ -2,8 +2,13 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { siteUrl } from "@/lib/site-url";
+import { normalizeProfileName } from "@/lib/profile-values";
 
-export type AccountState = { error: string; message: string };
+export type AccountState = {
+  error: string;
+  message: string;
+  fieldErrors?: Record<string, string>;
+};
 const unavailable = {
   error: "Não foi possível concluir agora. Tente novamente mais tarde.",
   message: "",
@@ -23,6 +28,13 @@ export async function signUp(
   form: FormData,
 ): Promise<AccountState> {
   const email = String(form.get("email") ?? "").trim();
+  const name = normalizeProfileName(form.get("display_name"));
+  if (name.error)
+    return {
+      error: name.error,
+      message: "",
+      fieldErrors: { display_name: name.error },
+    };
   const error = passwordError(form);
   if (!validEmail(email))
     return { error: "Informe um e-mail válido.", message: "" };
@@ -35,7 +47,10 @@ export async function signUp(
     const { data, error: failure } = await supabase.auth.signUp({
       email,
       password: String(form.get("password")),
-      options: { emailRedirectTo: `${origin}/auth/confirmar` },
+      options: {
+        emailRedirectTo: `${origin}/auth/confirmar`,
+        ...(name.value ? { data: { display_name: name.value } } : {}),
+      },
     });
     // Sucesso aparente para conta já existente e para erros do provedor: não enumerar e-mails.
     signedIn = !failure && Boolean(data.session);

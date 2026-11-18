@@ -1,3 +1,7 @@
+import {
+  openProjectCreate,
+  dismissProjectFeedback,
+} from "./helpers/project-ui";
 import { expect, test, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 const form = (page: Page, button: string) =>
@@ -16,14 +20,17 @@ test("alimentos próprios, receitas, favoritos, recentes e cópia preservam o di
   await page.getByRole("button", { name: "Entrar", exact: true }).click();
   await expect(page).toHaveURL(/\/painel$/);
   await page.goto("/painel/projetos");
+  await openProjectCreate(page);
   await page
     .getByLabel("Nome do projeto", { exact: true })
     .fill("Biblioteca E2E");
   await page.getByLabel("Meta diária de água (ml)").fill("2000");
   await page
+    .locator("#new-project")
     .getByRole("button", { name: "Criar projeto", exact: true })
     .click();
   await expect(page.getByRole("status")).toContainText("Projeto criado");
+  await dismissProjectFeedback(page);
   await page.goto("/painel/alimentos");
   await page.getByText("Cadastrar alimento próprio", { exact: true }).click();
   const create = form(page, "Salvar alimento");
@@ -128,7 +135,7 @@ test("alimentos próprios, receitas, favoritos, recentes e cópia preservam o di
     2,
   );
   await expect(
-    page.getByText("Parcial: o diário", { exact: false }),
+    page.getByText("Sem plano para comparar.", { exact: false }),
   ).toBeVisible();
   await page.getByText("Copiar refeição", { exact: true }).click();
   const copy = form(page, "Confirmar cópia da refeição");
@@ -156,7 +163,7 @@ test("alimentos próprios, receitas, favoritos, recentes e cópia preservam o di
     4,
   );
   await expect(
-    page.getByText("Parcial: o diário", { exact: false }),
+    page.getByText("Sem plano para comparar.", { exact: false }),
   ).toBeVisible();
   await page.reload();
   await expect(page.getByRole("article", { includeHidden: true })).toHaveCount(

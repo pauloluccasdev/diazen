@@ -1,0 +1,1072 @@
+.training-diary {
+  --training-cycle: #20b887;
+  --training-swim: #9062e8;
+  --training-other: #a4afc2;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.training-diary > * {
+  margin: 0;
+}
+.training-diary h2 {
+  font-size: 21px;
+  margin: 0 0 16px;
+  letter-spacing: -0.4px;
+}
+.training-diary .content-card {
+  margin: 0;
+  border-radius: 20px;
+}
+.training-day-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  align-items: center;
+  gap: 18px;
+  padding: 16px 18px;
+  min-height: 174px;
+  overflow: hidden;
+  isolation: isolate;
+}
+.training-day-hero::before {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 55%;
+  background: url("/images/strength-editorial-v2.webp") right center/auto 100%
+    no-repeat;
+  opacity: 0.2;
+  z-index: -1;
+  pointer-events: none;
+}
+.training-day-circle {
+  aspect-ratio: 1;
+  max-width: 128px;
+  width: 100%;
+  border: 10px solid var(--color-accent);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 7px;
+  text-align: center;
+  padding: 7px;
+}
+.training-day-circle > svg {
+  color: var(--color-accent);
+}
+.training-day-circle > strong {
+  font-size: 21px;
+  white-space: nowrap;
+}
+.training-day-circle > span {
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+.training-day-hero dl {
+  border-left: 1px solid var(--color-border);
+  padding-left: 15px;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+.training-day-hero dt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  line-height: 1.3;
+  color: var(--color-text-muted);
+}
+.training-day-hero dt svg {
+  color: var(--color-accent);
+  flex-shrink: 0;
+  width: 18px;
+}
+.training-day-hero dd {
+  font-size: 16px;
+  line-height: 1.3;
+  font-weight: 700;
+  margin: 4px 0 0 24px;
+}
+.training-day-hero dd small {
+  display: block;
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--color-text-muted);
+  margin-top: 3px;
+}
+.training-day-hero .training-no-volume {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+.training-stat-grid,
+.training-overview-grid,
+.training-week-breakdown {
+  display: none;
+}
+.training-modalities h2 {
+  font-size: 21px;
+}
+.training-modalities > nav {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 7px;
+}
+.training-modality {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 3px;
+  min-height: 87px;
+  text-align: center;
+  text-decoration: none;
+  color: var(--color-text);
+}
+.training-modality > span {
+  font-size: 10px;
+  line-height: 1.25;
+  overflow-wrap: normal;
+}
+.training-modality > svg:last-child {
+  display: none;
+}
+.training-modality:hover,
+.training-modality:focus-visible {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+.training-modality-strength {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+.training-lower-grid {
+  display: grid;
+  gap: 18px;
+}
+.training-diary .dz-module-heading h1 {
+  font-size: 21px;
+}
+.training-recent header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+.training-recent h2 {
+  margin: 0;
+  font-size: 21px;
+}
+.training-recent header > a {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  color: var(--color-accent);
+  text-decoration: none;
+}
+.training-recent > ul {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+.training-recent li {
+  position: relative;
+  border-radius: 17px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  min-width: 0;
+}
+.training-recent-main {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 14px;
+  text-decoration: none;
+  color: var(--color-text);
+  min-width: 0;
+}
+.training-recent-icon {
+  width: 42px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+.training-recent-name {
+  flex: 1;
+  min-width: 0;
+}
+.training-recent-name strong {
+  font-size: 13px;
+  display: block;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.training-recent-name small {
+  font-size: 10px;
+  display: block;
+  color: var(--color-text-muted);
+  margin-top: 5px;
+  line-height: 1.5;
+}
+.training-recent-values {
+  font-size: 12px;
+  display: grid;
+  gap: 8px;
+  padding-left: 12px;
+  border-left: 1px solid var(--color-border);
+  min-width: 83px;
+}
+.training-recent-values > span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+.training-recent-values svg {
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+.training-recent-chevron {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  width: 17px;
+}
+.training-recent-actions {
+  display: none;
+}
+.training-mobile-register > a {
+  width: 100%;
+  min-height: 56px;
+  border-radius: 18px;
+  justify-content: center;
+  gap: 12px;
+  font-size: 16px;
+}
+.training-create {
+  scroll-margin-top: 15px;
+}
+.training-day-navigation {
+  margin-top: 8px;
+}
+.training-records > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 15px;
+}
+.training-records > header h2 {
+  margin: 0;
+}
+.training-records > header span {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+.training-records > article {
+  scroll-margin-top: 20px;
+}
+.training-plans-link,
+.training-history-link {
+  gap: 12px;
+  justify-content: space-between;
+  text-decoration: none;
+  min-height: 52px;
+}
+.training-connection > details {
+  margin: 0;
+}
+@media (max-width: 359px) {
+  .training-day-hero {
+    gap: 12px;
+    padding: 17px 12px;
+    min-height: 195px;
+  }
+  .training-day-circle {
+    border-width: 8px;
+    gap: 4px;
+  }
+  .training-day-circle > strong {
+    font-size: 18px;
+  }
+  .training-day-circle > span {
+    font-size: 12px;
+  }
+  .training-day-hero dl {
+    padding-left: 10px;
+    gap: 12px;
+  }
+  .training-day-hero dt {
+    font-size: 10px;
+  }
+  .training-day-hero dd {
+    font-size: 16px;
+    margin-left: 0;
+  }
+  .training-day-hero .training-no-volume {
+    font-size: 12px;
+  }
+  .training-modalities > nav {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .training-modality {
+    min-height: 78px;
+    padding: 10px 5px;
+  }
+  .training-modality > span {
+    font-size: 12px;
+  }
+  .training-recent-main {
+    gap: 8px;
+    padding: 12px 10px;
+  }
+  .training-recent-icon {
+    width: 33px;
+    height: 40px;
+  }
+  .training-recent-name strong {
+    font-size: 12px;
+  }
+  .training-recent-values {
+    min-width: 72px;
+    font-size: 10px;
+    padding-left: 8px;
+  }
+  .training-recent h2 {
+    font-size: 19px;
+  }
+  .training-recent header > a {
+    font-size: 11px;
+  }
+}
+@media (min-width: 768px) and (max-width: 1023px) {
+  .training-day-hero {
+    grid-template-columns: 200px 1fr;
+    padding: 25px;
+    gap: 30px;
+  }
+  .training-day-hero dl {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding-left: 25px;
+    gap: 20px;
+  }
+  .training-day-hero dd {
+    margin-left: 0;
+    font-size: 20px;
+  }
+  .training-recent > ul {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .training-modality {
+    flex-direction: row;
+    min-height: 70px;
+  }
+  .training-modality > span {
+    font-size: 13px;
+  }
+}
+@media (min-width: 1024px) {
+  .panel-shell:has(.training-diary) .dz-search-trigger {
+    display: flex;
+  }
+  .panel-shell:has(.training-diary) .dz-desktop-tools {
+    width: 100%;
+  }
+  .panel-shell:has(.training-diary) .dz-search-trigger {
+    max-width: 450px;
+    margin-right: auto;
+  }
+  .training-diary > .dz-module-context {
+    position: static;
+    max-width: none;
+    min-height: 44px;
+    gap: 20px;
+  }
+  .training-diary > .dz-module-context > .v2-project-selector {
+    width: 270px;
+  }
+  .training-diary > .dz-module-heading-wrap {
+    position: relative;
+  }
+  .training-diary .dz-module-heading {
+    padding: 8px 0 18px;
+  }
+  .training-diary .dz-module-heading h1 {
+    font-size: 36px;
+  }
+  .training-diary .dz-module-heading-action {
+    margin-left: auto;
+  }
+  .training-diary .dz-module-heading-action > a {
+    gap: 10px;
+    min-width: 185px;
+  }
+  .training-diary .dz-module-heading-wrap .dz-date-navigator {
+    width: 370px;
+    margin: 0 0 0 auto;
+  }
+  .training-day-hero {
+    display: none;
+  }
+  .training-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .training-stat {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 20px;
+    position: relative;
+    min-width: 0;
+    min-height: 100px;
+  }
+  .training-stat-icon {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+  }
+  .training-stat:nth-child(even) .training-stat-icon {
+    background: var(--dz-data-soft);
+    color: var(--v2-data-text);
+  }
+  .training-stat > div {
+    min-width: 0;
+    padding-right: 30px;
+  }
+  .training-stat strong {
+    font-size: 22px;
+    font-weight: 750;
+    display: block;
+    white-space: nowrap;
+  }
+  .training-stat > div > span {
+    display: block;
+    font-size: 12px;
+    color: var(--color-text-muted);
+    margin-top: 5px;
+    line-height: 1.4;
+  }
+  .training-stat small {
+    font-size: 10px;
+    color: var(--color-text-muted);
+  }
+  .training-delta {
+    position: absolute;
+    right: 10px;
+    top: 15px;
+    border-radius: 12px;
+    padding: 4px 7px;
+    background: var(--dz-data-soft);
+    color: var(--v2-data-text);
+    font-size: 10px;
+  }
+  .training-overview-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1.1fr 0.9fr;
+    gap: 17px;
+    align-items: stretch;
+  }
+  .training-overview-grid > .content-card {
+    padding: 20px;
+    min-width: 0;
+  }
+  .training-overview-grid h2 {
+    font-size: 18px;
+    margin-bottom: 18px;
+  }
+  .training-frequency-chart {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .training-frequency-day {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    align-items: stretch;
+    color: var(--color-text);
+    text-align: center;
+    min-width: 0;
+  }
+  .training-frequency-value {
+    font-size: 11px;
+    margin-bottom: 7px;
+    font-weight: 700;
+  }
+  .training-frequency-track {
+    height: 105px;
+    position: relative;
+    border-bottom: 1px solid var(--color-border);
+    background: repeating-linear-gradient(
+      to top,
+      transparent 0,
+      transparent 34px,
+      var(--color-border) 35px,
+      transparent 36px
+    );
+  }
+  .training-frequency-track > span {
+    position: absolute;
+    bottom: 0;
+    left: 17%;
+    right: 17%;
+    background: var(--v2-data);
+    border-radius: 6px 6px 0 0;
+  }
+  .training-frequency-date {
+    font-size: 10px;
+    line-height: 1.4;
+    max-width: 60px;
+    align-self: center;
+    margin-top: 8px;
+    color: var(--color-text-muted);
+  }
+  .training-frequency-day[aria-current="date"] .training-frequency-date {
+    font-weight: 750;
+    color: var(--color-text);
+  }
+  .training-frequency p {
+    color: var(--color-text-muted);
+    font-size: 10px;
+    line-height: 1.5;
+    margin: 15px 0 0;
+  }
+  .training-distribution > div {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 10px;
+    align-items: center;
+  }
+  .training-donut {
+    position: relative;
+    aspect-ratio: 1;
+  }
+  .training-donut > svg {
+    width: 100%;
+    height: 100%;
+  }
+  .training-donut > span {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .training-donut strong {
+    font-size: 24px;
+  }
+  .training-donut small {
+    font-size: 11px;
+    margin-top: 3px;
+  }
+  .training-distribution ul {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    display: grid;
+    gap: 12px;
+  }
+  .training-distribution li {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 10px;
+    white-space: nowrap;
+  }
+  .training-distribution li > strong {
+    margin-left: auto;
+    font-weight: 500;
+  }
+  .training-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .training-goal h2 {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .training-goal > strong {
+    font-size: 18px;
+    display: block;
+    margin-bottom: 15px;
+  }
+  .training-goal > progress {
+    width: calc(100% - 40px);
+    height: 12px;
+    accent-color: var(--v2-data);
+    vertical-align: middle;
+  }
+  .training-goal > span {
+    font-size: 11px;
+    margin-left: 6px;
+  }
+  .training-goal > p {
+    font-size: 12px;
+    line-height: 1.5;
+    padding: 12px;
+    border-radius: 10px;
+    background: var(--dz-data-soft);
+    margin: 15px 0;
+    color: var(--color-text);
+  }
+  .training-goal > a {
+    font-size: 11px;
+    color: var(--v2-data-text);
+  }
+  .training-modalities h2 {
+    font-size: 19px;
+  }
+  .training-modalities > nav {
+    gap: 10px;
+  }
+  .training-modality {
+    flex-direction: row;
+    min-height: 58px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    gap: 10px;
+    box-shadow: var(--v2-shadow);
+  }
+  .training-modality > span {
+    font-size: 12px;
+    font-weight: 650;
+    text-align: left;
+  }
+  .training-modality > svg {
+    flex-shrink: 0;
+    width: 23px;
+  }
+  .training-modality > svg:last-child {
+    display: block;
+    margin-left: auto;
+    width: 16px;
+    color: var(--color-text-muted);
+  }
+  .training-lower-grid {
+    grid-template-columns: minmax(0, 3fr) minmax(270px, 1fr);
+    gap: 18px;
+    align-items: start;
+  }
+  .training-lower-grid > .training-modalities,
+  .training-lower-grid > .training-recent {
+    grid-column: 1;
+  }
+  .training-lower-grid > .training-week-breakdown {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+  .training-recent header h2 {
+    font-size: 20px;
+  }
+  .training-recent header > a {
+    font-size: 12px;
+    color: var(--color-text);
+  }
+  .training-recent > ul {
+    display: block;
+    border: 1px solid var(--color-border);
+    border-radius: 15px;
+    background: var(--color-surface);
+    box-shadow: var(--v2-shadow);
+    overflow: clip;
+  }
+  .training-recent li {
+    display: flex;
+    align-items: center;
+    border-radius: 0;
+    background: transparent;
+    border: 0;
+  }
+  .training-recent li + li {
+    border-top: 1px solid var(--color-border);
+  }
+  .training-recent-main {
+    flex: 1;
+    min-width: 0;
+    padding: 13px 16px;
+    gap: 14px;
+  }
+  .training-recent-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+  }
+  .training-recent-name {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .training-recent-name strong {
+    font-size: 13px;
+    line-height: 1.2;
+  }
+  .training-recent-name small {
+    font-size: 11px;
+    line-height: 1.3;
+    margin: 0;
+  }
+  .training-recent-values {
+    display: flex;
+    border: 0;
+    gap: 30px;
+    font-size: 12px;
+    min-width: 230px;
+    justify-content: space-between;
+    padding-left: 15px;
+  }
+  .training-recent-values > span {
+    min-width: 90px;
+  }
+  .training-recent-values svg {
+    width: 16px;
+    color: var(--color-text-muted);
+  }
+  .training-recent-values > span:last-child svg {
+    color: var(--color-accent);
+  }
+  .training-recent-chevron {
+    display: none;
+  }
+  .training-recent-actions {
+    display: flex;
+    gap: 8px;
+    padding-right: 14px;
+  }
+  .training-recent-actions > a {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 36px;
+    border-radius: 8px;
+    color: var(--color-text);
+  }
+  .training-recent-actions > a:hover {
+    background: var(--color-surface-raised);
+    color: var(--color-accent);
+  }
+  .training-week-breakdown {
+    display: block;
+    padding: 20px;
+  }
+  .training-week-breakdown h2 {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 18px;
+  }
+  .training-week-breakdown > ul {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+  .training-week-breakdown li {
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr);
+    gap: 6px 10px;
+    align-items: center;
+    padding: 11px 0;
+  }
+  .training-week-breakdown li + li {
+    border-top: 1px solid var(--color-border);
+  }
+  .training-small-icon {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    grid-row: span 2;
+    border-radius: 9px;
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+  }
+  .training-icon-running,
+  .training-icon-swimming {
+    background: var(--dz-data-soft);
+    color: var(--v2-data-text);
+  }
+  .training-icon-cycling {
+    color: var(--color-success);
+    background: var(--dz-success-soft);
+  }
+  .training-week-breakdown strong {
+    font-size: 12px;
+  }
+  .training-week-breakdown li > span:last-child {
+    font-size: 11px;
+    color: var(--color-text-muted);
+  }
+  .training-mobile-register {
+    display: none;
+  }
+  .training-create {
+    max-width: 900px;
+  }
+  .training-day-navigation {
+    margin-top: 10px;
+  }
+  .training-day-navigation .activity-week-summary {
+    padding: 20px;
+    gap: 15px;
+  }
+  .training-records > article {
+    max-width: 1000px;
+  }
+  .training-plans-link {
+    max-width: 1000px;
+  }
+}
+@media (min-width: 1024px) and (max-width: 1399px) {
+  .training-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .training-overview-grid {
+    grid-template-columns: 1.4fr 1fr;
+  }
+  .training-goal {
+    grid-column: 1 / -1;
+  }
+  .training-distribution > div {
+    grid-template-columns: 120px 1fr;
+  }
+  .training-lower-grid {
+    grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr);
+  }
+  .training-modalities > nav {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .training-recent-main {
+    gap: 10px;
+    padding: 12px;
+  }
+  .training-recent-values {
+    min-width: 125px;
+    display: grid;
+    gap: 6px;
+    font-size: 11px;
+    padding: 0;
+  }
+  .training-modality {
+    gap: 6px;
+    padding: 10px 8px;
+  }
+  .training-modality > span {
+    font-size: 11px;
+  }
+}
+.training-diary h2 {
+  font-weight: 700;
+}
+@media (min-width: 1024px) {
+  .panel-shell:has(.training-diary) .v2-header .dz-search-trigger {
+    display: flex;
+    max-width: 475px;
+    margin-right: auto;
+  }
+  .panel-shell:has(.training-diary) .v2-header .dz-desktop-tools {
+    width: 100%;
+  }
+  .panel-shell:has(.training-diary) .v2-sidebar-bottom {
+    padding-bottom: 90px;
+  }
+  .panel-shell:has(.training-diary) .v2-sidebar-bottom > small {
+    display: none;
+  }
+  .training-diary > .dz-module-context {
+    position: fixed;
+    top: auto;
+    bottom: 18px;
+    left: 12px;
+    width: 204px;
+    max-width: 204px;
+    min-height: 0;
+    display: block;
+    z-index: 20;
+  }
+  .training-diary > .dz-module-context > span {
+    display: none;
+  }
+  .training-diary > .dz-module-context > .v2-project-selector {
+    width: 204px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+  }
+  .training-diary > .dz-module-context .v2-project-selector > summary {
+    min-height: 62px;
+    padding: 10px 12px;
+    color: var(--color-text);
+  }
+  .training-diary > .dz-module-context .v2-project-selector small {
+    display: block;
+    font-size: 10px;
+    margin-bottom: 3px;
+  }
+  .training-diary > .dz-module-context .v2-project-selector strong {
+    font-size: 13px;
+    white-space: normal;
+    line-height: 1.3;
+  }
+  .training-diary > .dz-module-context .v2-query-form {
+    top: auto;
+    bottom: calc(100% + 12px);
+    left: 0;
+    width: 360px;
+    max-height: 70vh;
+    overflow: auto;
+  }
+  .training-diary .dz-module-heading {
+    padding: 8px 0 18px;
+  }
+  .training-diary .dz-module-heading h1 {
+    font-size: 40px;
+  }
+  .training-diary .dz-module-heading-action > a {
+    min-width: 220px;
+    font-size: 14px;
+  }
+  .training-diary .dz-module-heading-wrap .dz-date-navigator {
+    position: absolute;
+    right: 248px;
+    top: 14px;
+    width: 230px;
+    margin: 0;
+  }
+  .training-diary .dz-module-heading-wrap .dz-date-navigator > a {
+    display: none;
+  }
+  .training-diary .dz-module-heading-wrap .dz-date-navigator details {
+    flex: 1;
+  }
+  .training-diary .dz-module-heading-wrap .dz-date-navigator summary {
+    font-size: 12px;
+    white-space: nowrap;
+    justify-content: center;
+  }
+  .training-stat {
+    padding: 16px;
+    min-height: 100px;
+  }
+  .training-stat > div {
+    padding-right: 0;
+  }
+  .training-stat strong {
+    font-size: 24px;
+    white-space: normal;
+    line-height: 1.25;
+  }
+  .training-delta {
+    top: 7px;
+    padding: 3px 6px;
+    font-size: 9px;
+  }
+  .training-distribution li {
+    font-size: 12px;
+  }
+  .training-goal > h2 {
+    margin-bottom: 14px;
+  }
+  .training-goal h2 > a {
+    margin-left: auto;
+    color: var(--color-text-muted);
+    display: grid;
+    place-items: center;
+    min-width: 28px;
+    min-height: 28px;
+    border-radius: 8px;
+  }
+  .training-goal > strong {
+    margin-bottom: 12px;
+  }
+  .training-goal > p {
+    margin: 12px 0 0;
+  }
+  .training-goal > progress {
+    appearance: none;
+    border: 0;
+    border-radius: 999px;
+    overflow: hidden;
+    background: var(--color-border);
+  }
+  .training-goal > progress::-webkit-progress-bar {
+    background: var(--color-border);
+    border-radius: 999px;
+  }
+  .training-goal > progress::-webkit-progress-value {
+    background: var(--v2-data);
+    border-radius: 999px;
+  }
+  .training-goal > progress::-moz-progress-bar {
+    background: var(--v2-data);
+    border-radius: 999px;
+  }
+  .training-recent-main {
+    padding: 8px 16px;
+  }
+  .training-recent-name strong {
+    font-size: 14px;
+  }
+  .training-week-breakdown li {
+    grid-template-columns: 32px minmax(70px, 0.9fr) minmax(0, 1.3fr);
+    gap: 8px;
+    padding: 8px 0;
+  }
+  .training-small-icon {
+    grid-row: auto;
+  }
+}
+@media (min-width: 1024px) and (max-width: 1399px) {
+  .training-diary .dz-module-heading-wrap .dz-date-navigator {
+    position: static;
+    margin-left: auto;
+    width: 330px;
+  }
+  .training-diary .dz-module-heading h1 {
+    font-size: 36px;
+  }
+  .training-diary .dz-module-heading-action > a {
+    min-width: 185px;
+  }
+  .training-distribution li {
+    font-size: 11px;
+  }
+  .training-week-breakdown li {
+    grid-template-columns: 30px 1fr;
+  }
+  .training-week-breakdown li > span:last-child {
+    grid-column: 2;
+  }
+  .training-small-icon {
+    grid-row: span 2;
+  }
+}
