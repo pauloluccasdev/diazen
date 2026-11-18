@@ -557,7 +557,7 @@ try {
     await check("RF001 recovery, new password and invalid link", async () => {
       await goto("/recuperar-senha");
       await save(
-        "Enviar instruções",
+        "Enviar link",
         { email: "teste@example.test" },
         "Se houver uma conta",
       );
@@ -582,7 +582,7 @@ try {
       async () => {
         await goto("/recuperar-senha");
         await save(
-          "Enviar instruções",
+          "Enviar link",
           { email: "teste@example.test" },
           "Se houver uma conta",
         );

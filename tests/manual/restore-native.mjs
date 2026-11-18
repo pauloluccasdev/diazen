@@ -59,7 +59,7 @@ const avatarIds = [
   "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
   "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
 ];
-const schema = `create schema auth;create table auth.users(id uuid primary key);create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;grant usage on schema auth,public to authenticated,anon;grant execute on function auth.uid() to authenticated,anon;create schema storage;create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);create table storage.objects(id uuid default gen_random_uuid(),bucket_id text,name text);alter table storage.objects enable row level security;grant usage on schema storage to authenticated,anon;grant select on storage.objects to authenticated,anon;`;
+const schema = `create schema auth;create table auth.users(id uuid primary key,raw_user_meta_data jsonb not null default '{}'::jsonb);create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;grant usage on schema auth,public to authenticated,anon;grant execute on function auth.uid() to authenticated,anon;create schema storage;create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);create table storage.objects(id uuid default gen_random_uuid(),bucket_id text,name text);alter table storage.objects enable row level security;grant usage on schema storage to authenticated,anon;grant select on storage.objects to authenticated,anon;`;
 try {
   command("initdb", [
     "-D",
@@ -91,7 +91,10 @@ try {
     .filter((f) => f.endsWith(".sql"))
     .sort())
     sql(source, readFileSync("supabase/migrations/" + file, "utf8"));
-  sql(source, `insert into auth.users values('${alice}'),('${bob}');`);
+  sql(
+    source,
+    `insert into auth.users(id,raw_user_meta_data) values('${alice}','{"display_name":"Nome inicial A"}'),('${bob}','{"display_name":"Nome inicial B"}');`,
+  );
   const today = sql(
     source,
     "select (now() at time zone 'America/Sao_Paulo')::date::text;",
@@ -218,6 +221,20 @@ try {
   assert.equal(sql(destination, "select count(*) from public.weights;"), "2");
   assert.equal(sql(destination, "select count(*) from public.profiles;"), "2");
   assert.equal(
+    sql(
+      destination,
+      `select raw_user_meta_data->>'display_name' from auth.users where id='${alice}';`,
+    ),
+    "Nome inicial A",
+  );
+  assert.equal(
+    sql(
+      destination,
+      `select raw_user_meta_data->>'display_name' from auth.users where id='${bob}';`,
+    ),
+    "Nome inicial B",
+  );
+  assert.equal(
     sql(destination, "select count(*) from public.avatar_cleanup;"),
     "1",
   );
@@ -280,6 +297,17 @@ try {
   assert.equal(sql(destination, "select count(*) from public.photos;"), "1");
   assert.equal(sql(destination, "select count(*) from storage.objects;"), "3");
   assert.equal(sql(destination, "select count(*) from public.profiles;"), "1");
+  assert.equal(
+    sql(destination, `select count(*) from auth.users where id='${alice}';`),
+    "0",
+  );
+  assert.equal(
+    sql(
+      destination,
+      `select raw_user_meta_data->>'display_name' from auth.users where id='${bob}';`,
+    ),
+    "Nome inicial B",
+  );
   assert.equal(
     sql(destination, "select count(*) from public.avatar_cleanup;"),
     "0",
@@ -377,6 +405,8 @@ try {
     projectsAfterDeletionReplay: 1,
     remainingFilesVerified: files.length + 1,
     profilesRestored: 2,
+    authDisplayNameRestored: true,
+    deletedAuthMetadataAbsent: true,
     profilesAfterDeletionReplay: 1,
     avatarFileVerified: true,
     concurrentProfileUpdates: true,

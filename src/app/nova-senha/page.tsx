@@ -1,3 +1,4 @@
+import { AuthShell } from "@/components/auth/auth-shell";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { AccountForm } from "@/components/account-form";
@@ -11,10 +12,12 @@ export default async function NewPassword() {
   } = await client.auth.getUser();
   if (!user) redirect("/recuperar-senha");
   return (
-    <section className="auth-card">
-      <p className="eyebrow">ACESSO RECUPERADO</p>
+    <AuthShell back="/entrar">
       <h1>Escolha sua nova senha.</h1>
+      <p className="auth-v2-intro">
+        Defina uma senha para continuar com segurança.
+      </p>
       <AccountForm mode="update" configured />
-    </section>
+    </AuthShell>
   );
 }

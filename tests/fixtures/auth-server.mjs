@@ -15,6 +15,11 @@ const encode = (value) =>
 const users = [
   {
     ...user,
+    id: "00000000-0000-4000-8000-000000000065",
+    email: "auth-redesign@example.test",
+  },
+  {
+    ...user,
     id: "00000000-0000-4000-8000-000000000061",
     email: "profile-v2@example.test",
   },
@@ -475,9 +480,22 @@ createServer(async (request, response) => {
     const redirect = new URL(request.url, "http://localhost").searchParams.get(
       "redirect_to",
     );
-    const account =
-      users.find((u) => u.email === body.email) ??
-      (request.url.startsWith("/auth/v1/signup") ? user : null);
+    let account = users.find((u) => u.email === body.email) ?? null;
+    if (!account && request.url.startsWith("/auth/v1/signup")) {
+      account = {
+        ...user,
+        id: randomUUID(),
+        email: body.email,
+        user_metadata: body.data ?? {},
+      };
+      users.push(account);
+      const created = account;
+      queue = queue.then(async () => {
+        await db.exec("reset role");
+        await db.query("insert into auth.users(id) values($1)", [created.id]);
+      });
+      await queue;
+    }
     if (body.code_challenge && redirect && account) {
       const ticket = randomUUID();
       emailTickets.set(ticket, {

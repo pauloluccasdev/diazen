@@ -90,6 +90,11 @@ test("fotos privadas: upload, comparação, exclusão e acesso a histórico", as
     .getByRole("combobox", { name: "Foto 2", exact: true })
     .selectOption(ids[1]);
   await page.getByRole("button", { name: "Comparar", exact: true }).click();
+  await expect(page).toHaveURL(
+    (url) =>
+      url.searchParams.get("a") === ids[0] &&
+      url.searchParams.get("b") === ids[1],
+  );
   await expect(page.locator(".comparison-grid img")).toHaveCount(2);
   const first = page.getByRole("article").first();
   await first.locator(".photo-card-menu>summary").click();
