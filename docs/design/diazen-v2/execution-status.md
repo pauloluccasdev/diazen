@@ -8,11 +8,11 @@ Após o discovery, o proprietário autorizou seguir por todas as fases sem pausa
 
 ## Ampliações aprovadas
 
-Em 17/11/2026, o proprietário aprovou recipientes de água salvos e perfil com nome opcional/avatar privado, conforme §5 B/C da matriz funcional. Execução aditiva nas fases 4 e 9, com RLS e ciclo completo de privacidade. Migração dos recipientes `202611170019` aplicada e verificada; interface da Fase 4 concluída e verificada. Perfil/avatar implementados na Fase 9, com migrações aditivas `202611180020` e `202611180021` aplicadas e verificadas em 18/11; ensaio hospedado com contas sintéticas aprovado. Entrega aguardando CI do ajuste de relógio e integração.
+Em 17/11/2026, o proprietário aprovou recipientes de água salvos e perfil com nome opcional/avatar privado, conforme §5 B/C da matriz funcional. Execução aditiva nas fases 4 e 9, com RLS e ciclo completo de privacidade. Migração dos recipientes `202611170019` aplicada e verificada; interface da Fase 4 concluída e verificada. Perfil/avatar implementados na Fase 9, com migrações aditivas `202611180020` e `202611180021` aplicadas e verificadas em 18/11; ensaio hospedado com contas sintéticas aprovado. CI do ajuste aprovada (44389027871); fase integrada na develop em `de5c92f`.
 
 ## Quadro geral
 
-**9 de 11 fases concluídas (82%).** Percentual por quantidade de fases, não estimativa de horas ou esforço.
+**10 de 11 fases concluídas (91%).** Percentual por quantidade de fases, não estimativa de horas ou esforço.
 
 | Fase | Entrega                         | Estado                |
 | ---- | ------------------------------- | --------------------- |
@@ -25,8 +25,8 @@ Em 17/11/2026, o proprietário aprovou recipientes de água salvos e perfil com 
 | 6    | Evolução corporal               | Concluída — `48af335` |
 | 7    | Fotos de evolução               | Concluída — `a2bca3f` |
 | 8    | Projetos                        | Concluída — `8768673` |
-| 9    | Perfil e configurações          | Em execução           |
-| 10   | Autenticação                    | Pendente              |
+| 9    | Perfil e configurações          | Concluída — `de5c92f` |
+| 10   | Autenticação                    | Em execução           |
 
 ## Fase 1 — verificada
 

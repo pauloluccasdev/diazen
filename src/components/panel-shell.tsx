@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { DesktopThemeContext } from "./shell/theme-context";
+import { saveDesktopTheme } from "@/lib/desktop-theme";
 import { ProfileAvatar } from "./profile/profile-avatar";
 import {
   AccountMenu,
@@ -69,7 +70,7 @@ export function PanelShell({
   const [theme, setTheme] = useState(initialTheme);
   const changeTheme = (next: "light" | "dark") => {
     setTheme(next);
-    document.cookie = `diazen-desktop-theme=${next}; Path=/; Max-Age=31536000; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`;
+    saveDesktopTheme(next);
   };
   const menu = useRef<HTMLDetailsElement>(null);
   useEffect(() => {

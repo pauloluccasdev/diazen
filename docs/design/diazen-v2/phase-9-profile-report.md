@@ -1,6 +1,6 @@
 # Fase 9 — Perfil e configurações
 
-Implementação e validação local em 18/11/2026. Migração remota aplicada e verificada; integração e CI ainda pendentes.
+Implementação e validação local em 18/11/2026. Migração remota aplicada e verificada; CI aprovada e integração na develop concluída em `de5c92f`.
 
 ## Implementação atual
 
@@ -40,7 +40,7 @@ Backup remoto pré-migração gerado em 18/11/2026 às 19:29 UTC: criptografado 
 
 ## Gates pendentes
 
-Publicar a branch, aguardar CI e integrar na develop. Main continua sob responsabilidade do proprietário. Próxima fase: Autenticação, em branch própria a partir da develop integrada.
+CI final aprovada: [execução 44389027871](https://github.com/pauloluccasdev/diazen/actions/runs/44389027871), commit `de5c92f`. Branch integrada e develop enviada ao remoto. Main continua sob responsabilidade do proprietário. Próxima fase: Autenticação, em branch própria a partir dessa develop.
 
 ## Aplicação remota
 
@@ -54,4 +54,8 @@ Migração aditiva `202611180021`, SHA-256 `d0ec0a0ee9c76a2424fe527d262fb4ade7a8
 
 Após a correção: 136 testes de banco aprovados, build/lint/formatação/TypeScript aprovados e quatro cenários direcionados aprovados em cada navegador. Novo ensaio com duas contas sintéticas no Auth/PostgreSQL/Storage reais aprovou leitura privada, negação entre proprietários/anônimo, proteção contra confirmação antiga, limpeza física do arquivo e exclusão completa das contas de QA. Nenhuma informação da conta do proprietário foi consultada.
 
-Preview: health 200, avatar sem sessão 401; a origem da branch inicialmente retornou 403. Corrigida somente `NEXT_PUBLIC_SITE_URL` dessa branch de preview e reconstruído o deployment; POST da origem correta passou a retornar 401 por ausência de sessão, como esperado. Produção e sua proteção não foram alteradas. Commit da correção ainda depende de nova CI antes da integração.
+Preview: health 200, avatar sem sessão 401; a origem da branch inicialmente retornou 403. Corrigida somente `NEXT_PUBLIC_SITE_URL` dessa branch de preview e reconstruído o deployment; POST da origem correta passou a retornar 401 por ausência de sessão, como esperado. Produção e sua proteção não foram alteradas. CI da correção aprovada antes da integração.
+
+## Conferência final no preview
+
+O teste autenticado no preview identificou ausência da conexão Supabase na branch; apenas develop/produção estavam configuradas. Validado que o backend local coincide com o preview já aprovado da develop, foram configuradas somente as três variáveis Supabase da branch e seu deployment reconstruído. Fluxo completo aprovado: upload autenticado, WebP 320 sem EXIF, resposta privada/no-store, outra conta negada, confirmação antiga negada, remoção com limpeza física do Storage. Contas sintéticas completamente purgadas. Credenciais usadas apenas em configuração privada temporária, removida após o teste. Nenhuma configuração de produção foi alterada.

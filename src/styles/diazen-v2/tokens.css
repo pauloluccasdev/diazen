@@ -1,5 +1,6 @@
 /* Semantic theme tokens. Layout breakpoints: tablet 768px, desktop 1024px. */
-.app-shell:has(.panel-shell) {
+.app-shell:has(.panel-shell),
+.app-shell:has(.auth-experience) {
   --v2-surface-light: #fff;
   --v2-surface-dark: #1c1d20;
   --v2-text-light: #151923;
@@ -45,7 +46,8 @@
   --dz-duration: 160ms;
 }
 @media (min-width: 1024px) {
-  .app-shell:has(.panel-shell:not([data-desktop-theme="dark"])) {
+  .app-shell:has(.panel-shell:not([data-desktop-theme="dark"])),
+  .app-shell:has(.auth-experience:not([data-desktop-theme="dark"])) {
     --color-bg: #f1f2f4;
     --color-surface: var(--v2-surface-light);
     --color-surface-raised: #f7f8fa;

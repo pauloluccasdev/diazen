@@ -23,3 +23,7 @@ Composição: prato branco, fundo neutro e enquadramento superior, conforme a li
 ## Hidratação
 
 `hydration-dark-v2.webp` (34.082 bytes, 218×685 px) e `hydration-light-v2.webp` (43.764 bytes, 258×688 px), em `public/images/`, são garrafas editoriais geradas com imagegen em 17/11/2026. Os originais de 480×720 px foram recortados pelas margens transparentes, preservando o objeto e o alpha, e são usados como fundos decorativos nas composições R05/R06. Não representam recipientes cadastrados pelo usuário e não determinam volumes. O cadastro real é independente dessas ilustrações.
+
+## Boas-vindas
+
+`public/images/runner-welcome-v2.webp`, 1000×1500 px, é a imagem editorial de corredor ao pôr do sol preparada com imagegen durante o trabalho do Diazen 2.0 e incorporada na Fase 10. Foi inspecionada antes do uso. A cena e o atleta são fictícios, decorativos, com `alt=""`; não representam atividade, fotografia corporal ou identidade de usuário. A composição usa fotografia à esquerda no desktop e escurecimento atrás do texto no mobile, como R13, sem moldura de aparelho.
