@@ -1,6 +1,6 @@
 # Fase 10 — Autenticação
 
-Em validação em 18/11/2026, na branch `feat/diazen-v2-autenticacao`. A fase ainda não está integrada na develop.
+Concluída em 18/11/2026. Branch `feat/diazen-v2-autenticacao`, integrada por fast-forward e enviada à develop em `03f5845`.
 
 ## Resultado implementado
 
@@ -39,6 +39,8 @@ Conexão já aprovada da develop e URL canônica configuradas somente para a nov
 
 Commit `5ee56d2`, preview READY: login real com e-mail/senha no Supabase, erro preservando campos, identidade da metadata confirmada, remoção do nome persistida, confirmação de senha rejeitada antes de chamar atualização e logout. Nenhuma exceção JavaScript. Conta sintética removida integralmente, sem tocar na conta do proprietário ou enviar e-mails de cadastro/recuperação. Evidência local privada: `artifacts/diazen-v2/auth-hosted-ui-check.json`.
 
-## Pendências para concluir
+## Conclusão e limites
 
-Finalizar revisão transversal dos módulos e CI do commit `5ee56d2`. Integrar somente com essas evidências; main permanece sob responsabilidade do proprietário.
+CI completa aprovada: [código `5ee56d2`](https://github.com/pauloluccasdev/diazen/actions/runs/44401935598) e [auditoria `03f5845`](https://github.com/pauloluccasdev/diazen/actions/runs/44402845118). Revisão transversal concluída na [auditoria final](completion-audit.md), com 13 referências e desktop escuro. Sem pendência de implementação no escopo aprovado. Main permanece sob responsabilidade do proprietário.
+
+A comparação visual é manual, em engines Chromium/WebKit, sem alegação de identidade pixel a pixel ou homologação em aparelho físico. Entrega real de e-mail e restauração do Storage hospedado não são certificadas pelo ensaio local. A próxima etapa do proprietário é revisar a develop e abrir o PR para main; não há próxima sprint automática.

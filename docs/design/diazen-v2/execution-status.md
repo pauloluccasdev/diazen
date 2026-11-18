@@ -12,7 +12,7 @@ Em 17/11/2026, o proprietário aprovou recipientes de água salvos e perfil com 
 
 ## Quadro geral
 
-**10 de 11 fases concluídas (91%).** Percentual por quantidade de fases, não estimativa de horas ou esforço.
+**11 de 11 fases concluídas (100%).** Percentual por quantidade de fases, não estimativa de horas ou esforço.
 
 | Fase | Entrega                         | Estado                |
 | ---- | ------------------------------- | --------------------- |
@@ -26,7 +26,7 @@ Em 17/11/2026, o proprietário aprovou recipientes de água salvos e perfil com 
 | 7    | Fotos de evolução               | Concluída — `a2bca3f` |
 | 8    | Projetos                        | Concluída — `8768673` |
 | 9    | Perfil e configurações          | Concluída — `de5c92f` |
-| 10   | Autenticação                    | Em execução           |
+| 10   | Autenticação                    | Concluída — `03f5845` |
 
 ## Fase 1 — verificada
 
@@ -119,3 +119,14 @@ Manutenção de dependências integrada na develop em `496ee51`, com CI completa
 - [x] Build, tipos, lint, formatação, axe/overflow e capturas finais.
 - [x] CI completa de `8768673` aprovada ([44368845411](https://github.com/pauloluccasdev/diazen/actions/runs/44368845411)); integrada e enviada à develop.
 - [x] Relatório e capturas em [phase-8-projects-report.md](phase-8-projects-report.md).
+
+## Fase 10 — verificada e integrada
+
+- [x] R13: boas-vindas, login, cadastro, recuperação, nova senha e solicitação de exclusão; mobile escuro e desktop claro/escuro.
+- [x] Nome opcional validado, metadata inicial, perfil autoritativo e exportação; sem mudança de schema/sessão/PKCE.
+- [x] 136 testes de banco; Chromium 62 aprovados/1 ignorado; WebKit 62 aprovados/1 ignorado; 26 jornadas agent-browser; build, tipos, lint e formatação aprovados.
+- [x] Restauração nativa com metadata Auth; preview real com conta sintética removida após login/identidade/validação/logout.
+- [x] CI completa do código `5ee56d2` ([44401935598](https://github.com/pauloluccasdev/diazen/actions/runs/44401935598)) e da auditoria `03f5845` ([44402845118](https://github.com/pauloluccasdev/diazen/actions/runs/44402845118)) aprovadas. Integração fast-forward enviada à develop em 18/11/2026.
+- [x] Relatório e capturas em [phase-10-auth-report.md](phase-10-auth-report.md); matriz de encerramento em [completion-audit.md](completion-audit.md).
+
+Todas as fases autorizadas estão entregues na develop. A revisão e o PR final para main pertencem ao proprietário; nenhum merge na main foi realizado. A atualização documental de encerramento não altera o código validado acima.

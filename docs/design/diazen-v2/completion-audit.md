@@ -1,6 +1,6 @@
 # Diazen 2.0 — auditoria de conclusão
 
-**Em andamento.** A matriz abaixo localiza os 63 itens do discovery e seus meios de verificação; não certifica conclusão antes da conferência final, CI e integração. Fases 0–9 integradas; Fase 10 em validação.
+**Concluída em 18/11/2026.** A matriz registra os 63 itens do discovery, incluindo exclusões aprovadas e evidências. Fases 0–10 integradas à develop; sem merge na main.
 
 ## Escopo e entregáveis
 
@@ -84,7 +84,7 @@ Conferidas as assertivas de `desktop-dashboard`, `food-redesign`, `hydration-red
 
 Preview real do mesmo commit READY: login, erro preservando campos, identidade confirmada, remoção de nome persistida, rejeição de confirmação divergente e logout aprovados; nenhuma exceção JavaScript; conta sintética purgada e conta do proprietário intocada. Sem disparo de e-mails externos. Evidência privada `artifacts/diazen-v2/auth-hosted-ui-check.json`.
 
-Conferência visual final de R13: referência composta reaberta e comparada com capturas do login desktop e cadastro mobile; composição, labels flutuantes, ícones e ações preservados, com diferenças obrigatórias de senha/confirmar e exclusão dos provedores sociais. Capturas versionadas em `screenshots/phase-10-auth/`. R03/R05/R07 também reabertas lado a lado com as capturas Chromium da regressão final: alimentação mantém resumo, seis linhas e ações; hidratação mantém grade 3×2, gráfico semanal e recipientes; treinos mantém quatro indicadores, distribuição, meta e histórico. Diferenças numéricas refletem registros sintéticos reais, não valores copiados do mockup. Recursos legados adicionais ficam abaixo do núcleo visual. Comparações locais `artifacts/diazen-v2/final-review-{0,1,2}.png`. R01/R02/R04/R06/R08/R09/R10/R11/R12 reabertas na revisão final (comparações locais `final-review-3.png` a `final-review-11.png` e `final-review-mobile-composites.png`). Conferidas sidebar/header, grids, hero mobile, tabs, galeria/poses, projetos e perfil; mobile mantém alvos acessíveis e rolagem em vez de reduzir fontes para encaixar todos os registros. Desktop dark é extensão solicitada, sem prancha dark fornecida. Hashes das 13 referências conferidos novamente contra o manifesto. Integração/CI permanecem pendentes; isto não certifica a entrega completa.
+Conferência visual final de R13: referência composta reaberta e comparada com capturas do login desktop e cadastro mobile; composição, labels flutuantes, ícones e ações preservados, com diferenças obrigatórias de senha/confirmar e exclusão dos provedores sociais. Capturas versionadas em `screenshots/phase-10-auth/`. R03/R05/R07 também reabertas lado a lado com as capturas Chromium da regressão final: alimentação mantém resumo, seis linhas e ações; hidratação mantém grade 3×2, gráfico semanal e recipientes; treinos mantém quatro indicadores, distribuição, meta e histórico. Diferenças numéricas refletem registros sintéticos reais, não valores copiados do mockup. Recursos legados adicionais ficam abaixo do núcleo visual. Comparações locais `artifacts/diazen-v2/final-review-{0,1,2}.png`. R01/R02/R04/R06/R08/R09/R10/R11/R12 reabertas na revisão final (comparações locais `final-review-3.png` a `final-review-11.png` e `final-review-mobile-composites.png`). Conferidas sidebar/header, grids, hero mobile, tabs, galeria/poses, projetos e perfil; mobile mantém alvos acessíveis e rolagem em vez de reduzir fontes para encaixar todos os registros. Desktop dark é extensão solicitada, sem prancha dark fornecida. Hashes das 13 referências conferidos novamente contra o manifesto. Desktop escuro também conferido transversalmente em `artifacts/diazen-v2/final-review-dark.png`. Código e auditoria aprovados nas CIs abaixo; integração fast-forward enviada à develop.
 
 ## Gates transversais
 
@@ -95,7 +95,7 @@ Conferência visual final de R13: referência composta reaberta e comparada com 
 - [x] Estados vazios, parciais, erro recuperável, pending, foco, teclado e offline; mobile/tablet/desktop claro/escuro sem overflow.
 - [x] Build, lint, formatação, tipos, banco, Chromium, WebKit e agent-browser no código final.
 - [x] Preview autenticado do código final com conta sintética removida ao concluir; sem envio automático de cadastro/recuperação para e-mail externo.
-- [ ] CI final aprovada, branch integrada e develop enviada; sem merge na main.
+- [x] CI final aprovada, branch integrada e develop enviada; sem merge na main. Código `5ee56d2`: [44401935598](https://github.com/pauloluccasdev/diazen/actions/runs/44401935598); auditoria `03f5845`: [44402845118](https://github.com/pauloluccasdev/diazen/actions/runs/44402845118).
 
 ## Evidências de integridade e Design System
 
