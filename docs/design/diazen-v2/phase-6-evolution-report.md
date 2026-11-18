@@ -35,6 +35,7 @@ Novos `evolution-data.ts`, `evolution-metrics.ts` e `components/evolution/`. Reu
 - WebKit: duas jornadas finais aprovadas em 38,9 s, além da regressão do cartão de atividades/registro de peso. Filtros, calendário por teclado/Escape, registro/reset, edição/exclusão, metas/faixas opcionais, ausência de composição, exportação e consultas somente leitura exercitados.
 - Histórico longo real no PostgreSQL da fixture: 1.005 pesos e 1.005 medidas em datas distintas, gráfico completo, paginação até a última página e exportação sem truncamento. O teste de curva também verifica espaçamento proporcional entre datas irregulares, em vez de pontos equidistantes por índice.
 - Axe/overflow em 320/390/768/1366/1672, desktop claro/escuro, medidas e rascunho vazio. Capturas sem molduras externas e somente com usuários sintéticos.
+- Capturas finais aguardam a saída do carregamento, fontes prontas e cabeçalho no viewport. As duas jornadas Chromium passaram novamente (21,7 s); estado vazio e nome longo foram inspecionados na tela pronta.
 - Validação final do cabeçalho compartilhado: Evolução (duas jornadas) e Alimentação aprovadas em Chromium (3/3, 23,6 s); inclui nome de projeto de 98 caracteres sem espaços em 320 px.
 - 26 jornadas agent-browser aprovadas: autorização, registros/edição/exclusão, offline, segunda conta, paginação, exportação e exclusão de conta. O roteiro fecha o novo modal de peso/medidas antes de registrar novamente e verifica o reset. CI completa pendente; a fase permanece em execução até concluir as verificações.
 

@@ -117,23 +117,36 @@ test("evolução v2: períodos reais, metas opcionais, edição e medidas sem co
   const before = await (await page.request.get("/api/exportar")).json();
   const folder = `artifacts/diazen-v2/body-fiel/${info.project.name}`;
   await mkdir(folder, { recursive: true });
+  async function capture(name: string) {
+    await expect(page.locator(".app-loading")).toBeHidden();
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+      window.scrollTo({ top: 0, behavior: "instant" });
+    });
+    await expect(
+      page.getByRole("heading", {
+        name: "Evolução corporal",
+        level: 1,
+        exact: true,
+      }),
+    ).toBeInViewport();
+    await page.screenshot({
+      path: `${folder}/${name}`,
+      animations: "disabled",
+    });
+  }
+
   for (const theme of ["light", "dark"]) {
     await page.setViewportSize({ width: 1672, height: 941 });
     if (theme === "dark")
       await page
         .getByRole("button", { name: "Ativar modo escuro no desktop" })
         .click();
-    await page.screenshot({
-      path: `${folder}/${theme}-1672.png`,
-      animations: "disabled",
-    });
+    await capture(`${theme}-1672.png`);
   }
   for (const width of [320, 390, 768, 1366, 1672]) {
     await page.setViewportSize({ width, height: width < 768 ? 844 : 941 });
-    await page.screenshot({
-      path: `${folder}/viewport-${width}.png`,
-      animations: "disabled",
-    });
+    await capture(`viewport-${width}.png`);
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth,
@@ -247,10 +260,7 @@ test("evolução v2: períodos reais, metas opcionais, edição e medidas sem co
   await expect(
     page.locator(".body-measurement-card").filter({ hasText: "Quadril" }),
   ).toHaveCount(0);
-  await page.screenshot({
-    path: `${folder}/measurements-1672.png`,
-    animations: "disabled",
-  });
+  await capture(`measurements-1672.png`);
   const waistRow = page.locator(".body-history article").filter({
     has: page.getByRole("heading", { name: "Cintura · 92 cm", exact: true }),
   });
@@ -297,6 +307,7 @@ test("evolução v2: períodos reais, metas opcionais, edição e medidas sem co
   expect(longName.ok()).toBe(true);
   await page.goto(url);
   await page.setViewportSize({ width: 320, height: 844 });
+  await expect(page.locator(".app-loading")).toBeHidden();
   await expect(page.locator(".dz-module-project")).toContainText(
     "Projeto".repeat(14),
   );
@@ -305,10 +316,7 @@ test("evolução v2: períodos reais, metas opcionais, edição e medidas sem co
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
-  await page.screenshot({
-    path: `${folder}/long-name-320.png`,
-    animations: "disabled",
-  });
+  await capture(`long-name-320.png`);
   const close = await page.request.patch(
     `http://127.0.0.1:54329/rest/v1/projects?id=eq.${project}`,
     { headers, data: { status: "COMPLETED" } },
@@ -332,10 +340,7 @@ test("evolução v2: períodos reais, metas opcionais, edição e medidas sem co
   await expect(page.locator(".body-history article")).toHaveCount(0);
   await expect(page.locator(".body-create")).toHaveCount(0);
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.screenshot({
-    path: `${folder}/empty-draft-390.png`,
-    animations: "disabled",
-  });
+  await capture(`empty-draft-390.png`);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
