@@ -54,6 +54,7 @@ const tables = new Set([
   "deletion_ledger",
 ]);
 const commands = new Set([
+  "due_avatar_jobs",
   "save_profile_name",
   "set_profile_avatar",
   "remove_profile_avatar",
@@ -114,6 +115,16 @@ export async function rest(
       const args = params
         .map(([key], i) => `${identifier(key)} => $${i + 1}`)
         .join(",");
+      if (table === "due_avatar_jobs") {
+        rows = (
+          await db.query(
+            `select * from public.${identifier(table)}(${args})`,
+            params.map(([, value]) => value),
+          )
+        ).rows;
+        response.end(JSON.stringify(rows));
+        return;
+      }
       if (table === "food_calendar") {
         rows = (
           await db.query(

@@ -22,12 +22,27 @@ function client({
   outage = false,
   removeError = false,
   onRead,
+  serverNow = () => Date.now(),
 } = {}) {
   const removed = [];
   return {
     jobs,
     profiles,
     removed,
+    async rpc(name, { p_user_id, p_limit }) {
+      assert.equal(name, "due_avatar_jobs");
+      return {
+        data: jobs
+          .filter(
+            (entry) =>
+              (!p_user_id || entry.user_id === p_user_id) &&
+              Date.parse(entry.available_after) <= serverNow(),
+          )
+          .slice(0, p_limit)
+          .map((entry) => ({ ...entry })),
+        error: null,
+      };
+    },
     storage: {
       from: () => ({
         remove: async (paths) => {
@@ -113,6 +128,15 @@ test("limpeza preserva avatar atual e aguarda uploads ainda em andamento", async
   assert.equal(await cleanAvatarJobs(admin, owner), 1);
   assert.deepEqual(admin.removed, []);
   assert.equal(admin.jobs.length, 1);
+  assert.equal(admin.jobs[0].avatar_id, b);
+});
+test("limpeza usa o relógio do banco mesmo quando a aplicação está atrasada", async () => {
+  const admin = client({
+    jobs: [job(owner, a, 1000), job(owner, b, 15 * 60 * 1000)],
+    serverNow: () => Date.now() + 3000,
+  });
+  assert.equal(await cleanAvatarJobs(admin, owner), 1);
+  assert.deepEqual(admin.removed, [path(owner, a)]);
   assert.equal(admin.jobs[0].avatar_id, b);
 });
 test("arquivo antigo é removido e fila usa proprietário junto com UUID", async () => {

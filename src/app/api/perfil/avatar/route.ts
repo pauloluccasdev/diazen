@@ -93,7 +93,6 @@ export async function POST(request: Request) {
   const { error: queueError } = await admin.from("avatar_cleanup").insert({
     user_id: userId,
     avatar_id: id,
-    available_after: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
   });
   if (queueError)
     return reply("Não foi possível preparar o envio. Tente novamente.", 503);

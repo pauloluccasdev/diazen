@@ -676,3 +676,7 @@ O proprietário aprovou explicitamente as duas ampliações propostas no diagnó
 - **Apresentação:** diretório mobile e coluna de identidade/painéis desktop conforme R12. Tema desktop compartilha estado e cookie com o cabeçalho; mobile permanece escuro. Metas são referências existentes, com datas, sem prescrição automática. Campos não aprovados do mockup não são simulados.
 - **Preservação:** reusar preferências, senha, exportação e exclusão reautenticada; não duplicar credenciais nem alterar associação dos registros operacionais aos projetos. Apenas migração aditiva 020, sem reexecução de migrações antigas ou reset do histórico.
 - **Requisitos:** RF-019/020, RNF-002/004/010/011 e invariantes de privacidade, autorização, offline e dados ausentes. Evidências e gates em `docs/design/diazen-v2/phase-9-profile-report.md`.
+
+### Complemento — Relógio da fila de avatar
+
+Ensaio hospedado com contas sintéticas identificou desvio entre os relógios da aplicação e do PostgreSQL. A migração aditiva 021 centraliza no banco o prazo de novos uploads e a seleção administrativa de trabalhos disponíveis. A RPC é restrita a `service_role`, com filtro opcional de proprietário e limite máximo de 100. Nenhum prazo de registro existente foi reescrito; a 020 permanece imutável. Testes incluem aplicação atrasada, atraso seguro, proteção do avatar atual, permissões e exclusão real dos arquivos/contas sintéticas. Proposta e evidências no plano/relatório da Fase 9.

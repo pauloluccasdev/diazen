@@ -208,15 +208,10 @@ export async function cleanAvatarJobs(
 ) {
   let count = 0;
   while (count < maxJobs) {
-    let query = admin
-      .from("avatar_cleanup")
-      .select("*")
-      .lte("available_after", new Date().toISOString())
-      .order("available_after")
-      .order("created_at")
-      .limit(Math.min(50, maxJobs - count));
-    if (userId) query = query.eq("user_id", userId);
-    const { data, error } = await query;
+    const { data, error } = await admin.rpc("due_avatar_jobs", {
+      p_user_id: userId ?? null,
+      p_limit: Math.min(50, maxJobs - count),
+    });
     if (error) throw Error("Falha ao consultar limpeza de avatar");
     if (!data?.length) break;
     for (const job of data) {

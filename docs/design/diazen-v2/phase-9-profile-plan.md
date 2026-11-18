@@ -41,3 +41,11 @@ Aplicar ao Supabase real somente depois de validação local e ensaio de restaur
 ## Execução da proposta
 
 Em 18/11/2026, após testes de banco/API/UI, suítes completas Chromium e WebKit, 26 jornadas agent-browser, restauração nativa e backup criptografado verificado, a migração 020 foi aplicada e conferida por metadados. Detalhes no relatório da Fase 9. A seção anterior registra a proposta original, anterior à execução.
+
+## Proposta de correção incremental — relógio da fila
+
+O ensaio posterior com duas contas sintéticas no Supabase real confirmou RLS/Storage privados e expôs diferença de aproximadamente três segundos entre o relógio local e o PostgreSQL. A fila usa `now()` do banco na remoção, mas a seleção de trabalhos comparava com o relógio da aplicação. Assim, uma limpeza imediatamente após a remoção podia não selecionar o trabalho recém-criado. As duas contas do ensaio foram removidas integralmente.
+
+Antes de alterar o código ou executar novo SQL, fica proposta a migração aditiva 021: comando de leitura `due_avatar_jobs`, executável somente por `service_role`, selecionando trabalhos disponíveis com `now()` do próprio PostgreSQL e limite máximo de 100; proprietário opcional preserva o escopo da limpeza disparada pela API. Alterar somente o default de disponibilidade de novos uploads para quinze minutos no banco, retirando o cálculo do relógio da aplicação. O trigger de substituição/remoção continua usando disponibilidade imediata explícita. Nenhum registro existente, grant de usuário, dado pessoal ou bucket é alterado; a 020 já aplicada permanece imutável.
+
+Esta correção faz parte do ciclo de privacidade já aprovado. Verificar a RPC administrativa e negação a clientes, atraso seguro dos uploads, seleção imediata mesmo com relógio da aplicação atrasado, fila/revisão, APIs, regressões e repetição do ensaio real antes da integração. Aplicação remota incremental depois das validações locais e backup verificado, com novo hash/histórico e conferência de permissões.

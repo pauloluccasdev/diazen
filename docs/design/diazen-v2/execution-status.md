@@ -8,7 +8,7 @@ Após o discovery, o proprietário autorizou seguir por todas as fases sem pausa
 
 ## Ampliações aprovadas
 
-Em 17/11/2026, o proprietário aprovou recipientes de água salvos e perfil com nome opcional/avatar privado, conforme §5 B/C da matriz funcional. Execução aditiva nas fases 4 e 9, com RLS e ciclo completo de privacidade. Migração dos recipientes `202611170019` aplicada e verificada; interface da Fase 4 concluída e verificada. Perfil/avatar implementados na Fase 9, com migração aditiva `202611180020` aplicada e verificada em 18/11; entrega aguardando CI e integração.
+Em 17/11/2026, o proprietário aprovou recipientes de água salvos e perfil com nome opcional/avatar privado, conforme §5 B/C da matriz funcional. Execução aditiva nas fases 4 e 9, com RLS e ciclo completo de privacidade. Migração dos recipientes `202611170019` aplicada e verificada; interface da Fase 4 concluída e verificada. Perfil/avatar implementados na Fase 9, com migrações aditivas `202611180020` e `202611180021` aplicadas e verificadas em 18/11; ensaio hospedado com contas sintéticas aprovado. Entrega aguardando CI do ajuste de relógio e integração.
 
 ## Quadro geral
 

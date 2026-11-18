@@ -45,3 +45,13 @@ Publicar a branch, aguardar CI e integrar na develop. Main continua sob responsa
 ## Aplicação remota
 
 Migração `202611180020` aplicada incrementalmente após os gates locais e backup, hash SHA-256 `7032f2457ac1561752b3a067f252b5a86099a8fa4a27063629290c5438b57deb`. Vinte verificações de metadados aprovadas: RLS, grants mínimos, caminhos gerados, fila administrativa privada, policy de leitura do avatar, triggers e cascades. Nenhum registro existente foi modificado; não houve leitura de registros pessoais para verificar a aplicação. O histórico anterior foi preservado, inclusive as versões antigas ausentes do ledger.
+
+## Verificação hospedada e correção do relógio
+
+Depois da primeira CI aprovada (`83a97a6`, execução 44383547391), o ensaio no Supabase real encontrou diferença de aproximadamente três segundos entre o relógio da aplicação e o banco: o filtro local podia adiar a limpeza recém-enfileirada. As contas sintéticas foram purgadas mesmo no ensaio que falhou. A proposta de correção foi registrada no plano antes das alterações.
+
+Migração aditiva `202611180021`, SHA-256 `d0ec0a0ee9c76a2424fe527d262fb4ade7a8f584d27ec724c9028729d5d740d6`: disponibilidade de uploads e leitura de trabalhos vencidos agora usam o PostgreSQL. RPC de leitura somente para `service_role`; RLS e bucket privado preservados. Sete verificações remotas de metadados aprovadas; nenhum registro existente foi alterado. Novo backup criptografado, verificação independente e restauração nativa aprovados antes da aplicação.
+
+Após a correção: 136 testes de banco aprovados, build/lint/formatação/TypeScript aprovados e quatro cenários direcionados aprovados em cada navegador. Novo ensaio com duas contas sintéticas no Auth/PostgreSQL/Storage reais aprovou leitura privada, negação entre proprietários/anônimo, proteção contra confirmação antiga, limpeza física do arquivo e exclusão completa das contas de QA. Nenhuma informação da conta do proprietário foi consultada.
+
+Preview: health 200, avatar sem sessão 401; a origem da branch inicialmente retornou 403. Corrigida somente `NEXT_PUBLIC_SITE_URL` dessa branch de preview e reconstruído o deployment; POST da origem correta passou a retornar 401 por ausência de sessão, como esperado. Produção e sua proteção não foram alteradas. Commit da correção ainda depende de nova CI antes da integração.
